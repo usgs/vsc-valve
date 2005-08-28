@@ -4,17 +4,13 @@ import gov.usgs.valve3.result.Valve3Plot;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 abstract public class Plotter
 {
-//	protected DataSource dataSource;
-//	
-//	public void setDataSource(DataSource ds)
-//	{
-//		dataSource = ds;
-//	}
-	
 	protected String vdxClient;
 	protected String vdxSource;
 	
@@ -28,5 +24,5 @@ abstract public class Plotter
 		vdxSource = s;
 	}
 	
-	abstract public void plot(Valve3Plot plot, PlotComponent component);
+	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception;
 }
