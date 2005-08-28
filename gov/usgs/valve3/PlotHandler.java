@@ -2,6 +2,7 @@ package gov.usgs.valve3;
 
 import gov.usgs.util.Util;
 import gov.usgs.valve3.data.DataHandler;
+import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
 
 import java.io.File;
@@ -15,6 +16,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class PlotHandler implements HttpHandler
@@ -33,15 +37,18 @@ public class PlotHandler implements HttpHandler
 			return null;
 		
 		PlotComponent component = new PlotComponent(source);
-		
-		Map<String, String[]> parameters = request.getParameterMap();
-		//for (Iterator it = parameters.keySet().iterator(); it.hasNext(); )
-		for (String key : parameters.keySet())
+
+		// Not using generics because HttpServletRequest is Java 1.4
+		Map parameters = request.getParameterMap();
+		for (Object k : parameters.keySet())
 		{
-			//String key = (String)it.next();
+			String key = (String)k;
 			if (key.endsWith("." + i))
 			{
-				String value = parameters.get(key)[0];
+				String[] values = (String[])parameters.get(key);
+				if (values == null || values.length <= 0)
+					continue;
+				String value = values[0];
 				key = key.substring(0, key.indexOf('.'));
 				component.put(key, value);
 			}
@@ -51,16 +58,21 @@ public class PlotHandler implements HttpHandler
 	
 	protected List<PlotComponent> parseRequest(HttpServletRequest request)
 	{
-		int n = Util.stringToInt(request.getParameter("n"), 1);
+		int n = Util.stringToInt(request.getParameter("n"), -1);
+		if (n == -1)
+			return null;
+		
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
 		for (int i = 0; i < n; i++)
 		{
 			PlotComponent component = createComponent(request, i);
-			int x = Util.stringToInt(request.getParameter("x." + i), 0);
-			int y = Util.stringToInt(request.getParameter("y." + i), 0);
-			int w = Util.stringToInt(request.getParameter("w." + i), 0);
-			int h = Util.stringToInt(request.getParameter("h." + i), 0);
+			if (component == null)
+				continue;
+			int x = Util.stringToInt(request.getParameter("x." + i), 75);
+			int y = Util.stringToInt(request.getParameter("y." + i), 19);
+			int w = Util.stringToInt(request.getParameter("w." + i), 610);
+			int h = Util.stringToInt(request.getParameter("h." + i), 140);
 			component.setBoxX(x);
 			component.setBoxY(y);
 			component.setBoxWidth(w);
@@ -72,15 +84,25 @@ public class PlotHandler implements HttpHandler
 	
 	public Object handle(HttpServletRequest request)
 	{
-		Valve3Plot plot = new Valve3Plot(request);
 		List<PlotComponent> components = parseRequest(request);
-//		for (Iterator it = components.iterator(); it.hasNext(); )
+		if (components == null || components.size() <= 0)
+			return null;
+		
+		Valve3Plot plot = new Valve3Plot(request);
 		for (PlotComponent component : components)
 		{
-//			PlotComponent component = (PlotComponent)it.next();
 			Plotter plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 			if (plotter != null)
-				plotter.plot(plot, component);
+			{
+				try
+				{
+					plotter.plot(plot, component);
+				}
+				catch (Valve3Exception e)
+				{
+					return new ErrorMessage(e.getMessage());
+				}
+			}
 		}
 		Valve3.getInstance().getResultDeleter().addResult(plot);
 		return plot;
