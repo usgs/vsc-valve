@@ -7,6 +7,9 @@ import java.util.Map;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class DataSourceDescriptor
@@ -17,9 +20,6 @@ public class DataSourceDescriptor
 	private String plotterClassName; 
 	
 	private Map<String, Object> params;
-	
-//	private DataSource dataSource;
-	private Plotter plotter;
 	
 	public DataSourceDescriptor(String n, String c, String s, String pc, Map<String, Object> p)
 	{
@@ -51,49 +51,23 @@ public class DataSourceDescriptor
 		return params;
 	}
 
-	/*
-	private void instantiateDataSource()
-	{
-		try
-		{
-			dataSource = (DataSource)Class.forName(dataClassName).newInstance();
-			Class.forName(dataClassName).getMethod("initialize", new Class[] { HashMap.class }).invoke(dataSource, new Object[] { params });
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-	public DataSource getDataSource()
-	{
-		if (dataSource == null && dataClassName != null)
-			instantiateDataSource();
-		
-		return dataSource;
-	}
-	*/
-	
-	private void instantiatePlotter()
-	{
-//		getDataSource();
-		
-		try
-		{
-			plotter = (Plotter)Class.forName(plotterClassName).newInstance();
-			Class.forName(plotterClassName).getMethod("setVDXClient", new Class[] { String.class }).invoke(plotter, new Object[] { vdxClientName });
-			Class.forName(plotterClassName).getMethod("setVDXSource", new Class[] { String.class }).invoke(plotter, new Object[] { vdxSource });
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-	
 	public Plotter getPlotter()
 	{
-		if (plotter == null && plotterClassName != null)
-			instantiatePlotter();
+		if (plotterClassName == null)
+			return null;
 		
-		return plotter;
+		try
+		{
+			Plotter plotter = (Plotter)Class.forName(plotterClassName).newInstance();
+			plotter.setVDXClient(vdxClientName);
+			plotter.setVDXSource(vdxSource);
+			return plotter;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		
+		return null;
 	}
 }
