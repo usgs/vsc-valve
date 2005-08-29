@@ -1,10 +1,10 @@
 package gov.usgs.valve3.result;
 
 import gov.usgs.plot.Plot;
-import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
 
 import java.awt.Color;
 import java.io.File;
@@ -15,12 +15,32 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class Valve3Plot extends Result
 {
-	public static final int OUTPUT_XML = 1;
-	public static final int OUTPUT_PNG = 2;
+	public enum OutputType 
+	{ 
+		XML, PNG, HTML;
+		
+		public static OutputType fromString(String s)
+		{
+			if (s == null)
+				return null;
+			
+			if (s.equals("xml"))
+				return XML;
+			else if (s.equals("png"))
+				return PNG;
+			else if (s.equals("html"))
+				return HTML;
+			else
+				return null;
+		}
+	}
 	
 	public static final int DEFAULT_WIDTH = 1000;
 	public static final int DEFAULT_HEIGHT = 250;
@@ -28,7 +48,7 @@ public class Valve3Plot extends Result
 	protected Plot plot;
 	protected String filename;
 	protected String title;
-	protected int outputType;
+	protected OutputType outputType;
 	
 	protected int width;
 	protected int height;
@@ -37,22 +57,36 @@ public class Valve3Plot extends Result
 	
 	protected List<PlotComponent> components;
 	
-	public Valve3Plot(HttpServletRequest request)
+	public Valve3Plot(HttpServletRequest request) throws Valve3Exception
 	{
+		String w = request.getParameter("w");
+		String h = request.getParameter("h");
+		
+		width = -1;
+		if (w == null)
+			width = DEFAULT_WIDTH;
+		else
+			try { width = Integer.parseInt(w); } catch (Exception e) {}
+		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH)
+			throw new Valve3Exception("Illegal width.");
+
+		height = -1;
+		if (h == null)
+			height = DEFAULT_HEIGHT;
+		else
+			try { height = Integer.parseInt(h); } catch (Exception e) {}
+		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT)
+			throw new Valve3Exception("Illegal height.");
+		
+		outputType = OutputType.fromString(request.getParameter("o"));
+		if (outputType == null)
+			throw new Valve3Exception("Illegal output type.");
+
 		title = "Valve Plot";
 		url = request.getQueryString();
 		components = new ArrayList<PlotComponent>(2);
-		plot = new Plot();
 		
-		width = Util.stringToInt(request.getParameter("w"), DEFAULT_WIDTH);
-		height = Util.stringToInt(request.getParameter("h"), DEFAULT_HEIGHT);
-		
-		String ot = request.getParameter("o");
-		outputType = OUTPUT_XML;
-		if (ot != null && ot.equals("png"))
-			outputType = OUTPUT_PNG;
-		
-		plot.setSize(width, height);
+		plot = new Plot(width, height);
 	}
 	
 	public int getWidth()
@@ -75,7 +109,7 @@ public class Valve3Plot extends Result
 		height = h;
 	}
 	
-	public int getOutputType()
+	public OutputType getOutputType()
 	{
 		return outputType;
 	}
