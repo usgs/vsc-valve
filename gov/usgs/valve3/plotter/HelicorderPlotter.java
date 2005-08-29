@@ -1,11 +1,11 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.heli.HelicorderData;
@@ -17,14 +17,23 @@ import java.util.HashMap;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class HelicorderPlotter extends Plotter
 {
+	private static final double MAX_HELICORDER_TIME = 31 * 86400;
+	private HelicorderData data;
+	private HelicorderSettings settings;
+	private PlotComponent component;
+	private Valve3Plot v3Plot;
+	
 	public HelicorderPlotter()
 	{}
 	
-	public HelicorderData getHelicorderData(HelicorderSettings settings)
+	public void getData()
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
@@ -34,50 +43,61 @@ public class HelicorderPlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		HelicorderData hd = (HelicorderData)client.getData(params);
+		data = (HelicorderData)client.getData(params);
 		pool.checkin(client);
-
-		return hd;
 	}
 	
-	public HelicorderSettings getHelicorderSettings(PlotComponent component)
+	public void getInputs() throws Valve3Exception
 	{
-		HelicorderSettings settings = new HelicorderSettings();
+		settings = new HelicorderSettings();
 		settings.channel = component.get("ch");
+		if (settings.channel == null || settings.channel.indexOf(";") != -1)
+			throw new Valve3Exception("Illegal channel name.");
 		
-		double end = component.getEndTime();
-		double start = component.getStartTime(end);
-		if (Double.isNaN(start) || Double.isNaN(end))
-		{
-			double now = CurrentTime.nowJ2K();
-			start = now - 43200;
-			end = now;
-		}
+		// TODO: move time checking to static method in Plotter
+		settings.endTime = component.getEndTime();
+		if (Double.isNaN(settings.endTime))
+			throw new Valve3Exception("Illegal end time.");
+		settings.startTime = component.getStartTime(settings.endTime);
+		if (Double.isNaN(settings.startTime))
+			throw new Valve3Exception("Illegal start time.");
 		
-		settings.startTime = start;
-		settings.endTime = end;
-		settings.showClip = component.get("sc").equals("T");
-		settings.timeChunk = Integer.parseInt(component.get("tc")) * 60;
-		settings.minimumAxis = component.get("min") != null;
+		if (settings.endTime - settings.startTime >= MAX_HELICORDER_TIME)
+			throw new Valve3Exception("Illegal duration.");
+		
+		settings.showClip = false;
+		String clip = component.get("sc");
+		if (clip != null && clip.toUpperCase().equals("T"))
+			settings.showClip = true;
+
+		settings.timeChunk = -1;
+		try { settings.timeChunk = Integer.parseInt(component.get("tc")) * 60; } catch (Exception e) {}
+		if (settings.timeChunk <= 0)
+			throw new Valve3Exception("Illegal time chunk.");
+		
+		settings.minimumAxis = false;
+		String min = component.get("min");
+		if (min != null && min.toUpperCase().equals("T"))
+			settings.minimumAxis = true;
 		
 		settings.left = component.getBoxX();
 		settings.top = component.getBoxY();
 		settings.width = component.getBoxWidth();
 		settings.height = component.getBoxHeight();
 		
-		settings.timeZoneAbbr = "AKDT";
-		settings.timeZoneOffset = -8;
-		
-		return settings;
+//		settings.timeZoneAbbr = "AKDT";
+//		settings.timeZoneOffset = -8;
 	}
 	
-	public void plot(Valve3Plot v3Plot, PlotComponent component)
+	public void plot(Valve3Plot p, PlotComponent c) throws Valve3Exception
 	{
-		HelicorderSettings heliSettings = getHelicorderSettings(component);
-		HelicorderData heliData = getHelicorderData(heliSettings);
+		v3Plot = p;
+		component = c;
+		getInputs();
+		getData();
 		HelicorderRenderer heliRenderer = new HelicorderRenderer();
-		heliRenderer.setData(heliData);
-		heliSettings.applySettings(heliRenderer, heliData);
+		heliRenderer.setData(data);
+		settings.applySettings(heliRenderer, data);
 		
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
@@ -87,7 +107,7 @@ public class HelicorderPlotter extends Plotter
 		component.setTranslation(heliRenderer.getTranslationInfo(false));
 		component.setTranslationType("heli");
 		v3Plot.addComponent(component);
-		String ch = heliSettings.channel.replace('$', ' ').replace('_', ' ');
+		String ch = settings.channel.replace('$', ' ').replace('_', ' ');
 		v3Plot.setTitle("Helicorder: " + ch);
 	}
 }
