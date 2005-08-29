@@ -1,5 +1,10 @@
 package gov.usgs.valve3;
 
+/**
+ * 
+ * $Log: not supported by cvs2svn $
+ * @author Dan Cervelli
+ */
 public class Valve3Exception extends Exception
 {
 	private static final long serialVersionUID = 1L;
@@ -7,6 +12,5 @@ public class Valve3Exception extends Exception
 	public Valve3Exception(String m)
 	{
 		super(m);
-		System.out.println("Valve3Exception: " + m);
 	}
 }
