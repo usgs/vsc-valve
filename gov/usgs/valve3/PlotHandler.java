@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/28 19:00:20  dcervelli
+ * Eliminated warning.  Added support for plotting exceptions and notifying clients about them.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -23,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class PlotHandler implements HttpHandler
 {
+	public static final int MAX_PLOT_WIDTH = 6000;
+	public static final int MAX_PLOT_HEIGHT = 6000;
 	private DataHandler dataHandler;
 	
 	public PlotHandler(DataHandler dh)
@@ -30,11 +35,11 @@ public class PlotHandler implements HttpHandler
 		dataHandler = dh;
 	}
 	
-	protected PlotComponent createComponent(HttpServletRequest request, int i)
+	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
 	{
 		String source = request.getParameter("src." + i);
 		if (source == null)
-			return null;
+			throw new Valve3Exception("Illegal src value.");
 		
 		PlotComponent component = new PlotComponent(source);
 
@@ -56,11 +61,11 @@ public class PlotHandler implements HttpHandler
 		return component;
 	}
 	
-	protected List<PlotComponent> parseRequest(HttpServletRequest request)
+	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
 		int n = Util.stringToInt(request.getParameter("n"), -1);
 		if (n == -1)
-			return null;
+			throw new Valve3Exception("Illegal n value.");
 		
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
@@ -73,6 +78,14 @@ public class PlotHandler implements HttpHandler
 			int y = Util.stringToInt(request.getParameter("y." + i), 19);
 			int w = Util.stringToInt(request.getParameter("w." + i), 610);
 			int h = Util.stringToInt(request.getParameter("h." + i), 140);
+			if (x < 0 || x > w)
+				throw new Valve3Exception("Illegal x value.");
+			if (y < 0 || y > h)
+				throw new Valve3Exception("Illegal y value.");
+			if (w <= 0 || w > MAX_PLOT_WIDTH)
+				throw new Valve3Exception("Illegal width.");
+			if (h <= 0 || h > MAX_PLOT_HEIGHT)
+				throw new Valve3Exception("Illegal height.");
 			component.setBoxX(x);
 			component.setBoxY(y);
 			component.setBoxWidth(w);
@@ -84,28 +97,26 @@ public class PlotHandler implements HttpHandler
 	
 	public Object handle(HttpServletRequest request)
 	{
-		List<PlotComponent> components = parseRequest(request);
-		if (components == null || components.size() <= 0)
-			return null;
-		
-		Valve3Plot plot = new Valve3Plot(request);
-		for (PlotComponent component : components)
+		try
 		{
-			Plotter plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
-			if (plotter != null)
+			List<PlotComponent> components = parseRequest(request);
+			if (components == null || components.size() <= 0)
+				return null;
+			
+			Valve3Plot plot = new Valve3Plot(request);
+			for (PlotComponent component : components)
 			{
-				try
-				{
+				Plotter plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
+				if (plotter != null)
 					plotter.plot(plot, component);
-				}
-				catch (Valve3Exception e)
-				{
-					return new ErrorMessage(e.getMessage());
-				}
 			}
+			Valve3.getInstance().getResultDeleter().addResult(plot);
+			return plot;
 		}
-		Valve3.getInstance().getResultDeleter().addResult(plot);
-		return plot;
+		catch (Valve3Exception e)
+		{
+			return new ErrorMessage(e.getMessage());
+		}
 	}
 	
 	public static String getRandomFilename()
