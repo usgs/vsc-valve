@@ -1,18 +1,24 @@
 
 package gov.usgs.valve3;
 
-import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.GeoImageSet;
+import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Log;
 import gov.usgs.valve3.data.DataHandler;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class Valve3 implements ServletContextListener
@@ -35,10 +41,15 @@ public class Valve3 implements ServletContextListener
 	private GeoLabelSet labelSet;
 	
 	private ResultDeleter resultDeleter;
+
+	private Logger logger;
 	
 	public Valve3()
 	{
 		instance = this;
+		logger = Log.getLogger("gov.usgs.valve3");
+		Log.getLogger("gov.usgs.util").setLevel(Level.INFO);
+		Log.getLogger("gov.usgs.net").setLevel(Level.SEVERE);
 		resultDeleter = new ResultDeleter();
 		resultDeleter.start();
 	}
@@ -47,8 +58,11 @@ public class Valve3 implements ServletContextListener
 	{
 		ConfigFile config = new ConfigFile(applicationPath + File.separator + CONFIG_PATH + File.separator + CONFIG_FILE);
 		administrator = config.getString("admin.name");
+		logger.config("admin.name: " + administrator);
 		administratorEmail = config.getString("admin.email");
+		logger.config("admin.email: " + administratorEmail);
 		installationTitle = config.getString("title");
+		logger.config("title: " + installationTitle);
 		
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
@@ -126,9 +140,8 @@ public class Valve3 implements ServletContextListener
 	
 	public void contextInitialized(ServletContextEvent sce)
 	{
-		System.out.println("Valve " + VERSION + ", " + BUILD_DATE + " initialization");
+		logger.info("Valve " + VERSION + ", " + BUILD_DATE + " initialization");
 		applicationPath = sce.getServletContext().getRealPath("");
-		System.out.println("Application path: " + applicationPath);
 		processConfigFile();
 	}
 
