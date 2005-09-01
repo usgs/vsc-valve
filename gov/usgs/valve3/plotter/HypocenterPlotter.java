@@ -45,6 +45,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/28 19:02:00  dcervelli
+ * Totally refactored (now uses JDK1.5 enums, gets histogram data from HypocenterList, etc.).
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -152,10 +155,10 @@ public class HypocenterPlotter extends Plotter
 		mr.createGraticule(8, true);
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 50);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
-		trans[4] = origin.x;
-		trans[5] = origin.y;
-		trans[6] = 0;
-		trans[7] = 0;
+		trans[4] = startTime;
+		trans[5] = endTime;
+		trans[6] = origin.x;
+		trans[7] = origin.y;
 		component.setTranslation(trans);
 		component.setTranslationType("map");
 		return mr;
