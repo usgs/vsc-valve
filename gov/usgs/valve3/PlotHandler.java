@@ -2,6 +2,8 @@ package gov.usgs.valve3;
 
 import gov.usgs.util.Util;
 import gov.usgs.valve3.data.DataHandler;
+import gov.usgs.valve3.data.DataSourceDescriptor;
+import gov.usgs.valve3.plotter.ChannelMapPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
 
@@ -16,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/29 22:52:54  dcervelli
+ * Input validation.
+ *
  * Revision 1.2  2005/08/28 19:00:20  dcervelli
  * Eliminated warning.  Added support for plotting exceptions and notifying clients about them.
  *
@@ -106,7 +111,22 @@ public class PlotHandler implements HttpHandler
 			Valve3Plot plot = new Valve3Plot(request);
 			for (PlotComponent component : components)
 			{
-				Plotter plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
+				String source = component.getSource();
+				Plotter plotter = null;
+				if (source.equals("channel_map"))
+				{
+					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					if (dsd == null)
+						throw new Valve3Exception("Unknown data source.");
+					
+					plotter = new ChannelMapPlotter();
+					plotter.setVDXClient(dsd.getVDXClientName());
+					plotter.setVDXSource(dsd.getVDXSource());
+				}
+				else
+				{
+					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
+				}
 				if (plotter != null)
 					plotter.plot(plot, component);
 			}
