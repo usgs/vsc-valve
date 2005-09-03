@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: plot.js,v 1.2 2005-09-03 21:47:28 dcervelli Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -101,45 +101,26 @@ function handlePlot(xml)
 			document.getElementById("endTime").value = buildTimeString(img.translation[5]);
 		});
 	
-	/*	
-	addListener(imgs[2], 'click',
+	addListener(imgs[3], 'click',
 		function()
 		{
 			var xmlSerializer = new XMLSerializer();
 			var markup = xmlSerializer.serializeToString(img.xml);
-			alert(markup);
+			var w = window.open('','xmlwin');
+			markup = markup.replace(/</gm, "&lt;").replace(/>/gm, "&gt;");
+			w.document.writeln(
+						'<html><head><title>XML</title></head>'
+						+'<body onLoad="self.focus();"><pre>'
+						+ markup
+						+'</pre></body></html>');
+			w.document.close();
 		});
-		*/
 	
 	var ip = document.getElementById('contentInsertionPoint')
 	ip.insertBefore(t, ip.firstChild);
 		
 	count++;
 }
-
-/*
-function getStandardSize(index)
-{
-	var size = document.getElementById("outputSize").selectedIndex;
-	var ss = "";
-	switch(size)
-	{
-		case 0: // tiny
-			ss = "&w=300&h=100&x." + index + "=35&y." + index + "=9&w." + index + "=230&h." + index + "=70";
-			break;
-		case 1: // small
-			ss = "&w=760&h=200&x." + index + "=75&y." + index + "=19&w." + index + "=610&h." + index + "=140";
-			break;
-		case 3: // large
-			ss = "&w=1200&h=350&x." + index + "=75&y." + index + "=19&w." + index + "=1050&h." + index + "=288";
-			break;
-		case 2: // medium
-		default:
-			ss = "&w=1000&h=250&x." + index + "=75&y." + index + "=19&w." + index + "=850&h." + index + "=188";
-	}
-	return ss;
-}
-*/
 
 var POPUP_SIZE_INDEX = 4;
 var STANDARD_SIZES = new Array(
