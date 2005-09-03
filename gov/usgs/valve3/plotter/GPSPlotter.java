@@ -11,11 +11,11 @@ import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.gps.Benchmark;
@@ -28,10 +28,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -40,53 +41,111 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 /**
  * TODO: un-hardcode stid 
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class GPSPlotter extends Plotter
 {
-	private static final String[] LEGENDS = new String[] {"East", "North", "Up", "Length"};
-	private List<Benchmark> benchmarks;
+	private enum PlotType
+	{
+		TIME_SERIES, VELOCITY_MAP, DISPLACEMENT_MAP;
+		
+		public static PlotType fromString(String s)
+		{
+			if (s == null)
+				return null;
+			
+			if (s.equals("ts"))
+				return TIME_SERIES;
+			else if (s.equals("vel"))
+				return VELOCITY_MAP;
+			else if (s.equals("dis"))
+				return DISPLACEMENT_MAP;
+			else 
+				return null;
+		}
+	}
 	
+	private static final String[] LEGENDS = new String[] {"East", "North", "Up", "Length"};
+	private static Map<String, Benchmark> benchmarks = new HashMap<String, Benchmark>();
+	
+	private Valve3Plot v3Plot;
+	private PlotComponent component;
+	private double startTime;
+	private double endTime;
+	private PlotType plotType;
+	private boolean scaleErrors;
+	private String benchmarkIDs;
+	private String baselineID;
+	private GPSData baselineData;
+	private Map<String, GPSData> stationDataMap;
+//	
 	public GPSPlotter()
 	{}
 	
-	private void plotTimeSeries(Valve3Plot v3Plot, PlotComponent component, double st, double et)
+	public void getInputs() throws Valve3Exception
 	{
-		HashMap<String, String> params = new HashMap<String, String>();
-		String benchmark = component.get("bm");
-		params.put("source", vdxSource);
-		params.put("bm", benchmark);
-		params.put("action", "data");
-		params.put("st", Double.toString(st));
-		params.put("et", Double.toString(et));
-		params.put("stid", Integer.toString(7));
+		endTime = component.getEndTime();
+		if (Double.isNaN(endTime))
+			throw new Valve3Exception("Illegal end time.");
+		startTime = component.getStartTime(endTime);
+		if (Double.isNaN(startTime))
+			throw new Valve3Exception("Illegal start time.");
 		
+		benchmarkIDs = component.get("bm");
+		if (benchmarkIDs == null)
+			throw new Valve3Exception("Illegal benchmarks.");
+		
+		baselineID = component.get("bl");
+		if (baselineID.equals("[none]"))
+			baselineID = null;
+		
+		plotType = PlotType.fromString(component.get("type"));
+		if (plotType == null)
+			throw new Valve3Exception("Illegal plot type.");
+	}
+	
+	public void getData()
+	{
+		stationDataMap = new HashMap<String, GPSData>();
+		String[] bms = benchmarkIDs.split(",");
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("action", "data");
+		params.put("st", Double.toString(startTime));
+		params.put("et", Double.toString(endTime));
+		params.put("stid", Integer.toString(7));
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		if (client == null)
-			return;
-		GPSData data = (GPSData)client.getData(params);
-		
-		String baseline = component.get("bl");
-		GPSData baselineData = null;
-		if (baseline != null && baseline.length() > 0 && !baseline.equals("[none]"))
+		for (String bm : bms)
 		{
-			params.put("bm", baseline);
+			params.put("bm", bm);
+			GPSData data = (GPSData)client.getData(params);
+			stationDataMap.put(bm, data);
+		}
+		
+		if (baselineID != null)
+		{
+			params.put("bm", baselineID);
 			baselineData = (GPSData)client.getData(params);
-//			baselineData = (GPSData)dataSource.getData(params);
-//			if (baselineData != null)
-//				data.applyBaseline(baselineData);
-//			else
-//				baseline = null;
 		}
 		pool.checkin(client);
-		
+	}
+	
+	private void plotTimeSeries()
+	{
 		boolean ce = component.get("east").equals("T");
 		boolean cn = component.get("north").equals("T");
 		boolean cu = component.get("up").equals("T");
 		boolean cl = component.get("len").equals("T");
 		boolean[] comps = new boolean[] { ce, cn, cu, cl };
+		
+		Set<String> keys = stationDataMap.keySet();
+		GPSData data = stationDataMap.get(keys.iterator().next());
 		
 		double[][] dd = data.toTimeSeries(baselineData);
 		Data d = new Data(dd);
@@ -123,7 +182,7 @@ public class GPSPlotter extends Plotter
 				double minY = lsq[0] * nd.getMinTime() + lsq[1];
 				double maxY = lsq[0] * nd.getMaxTime() + lsq[1];
 				double dy = Math.max(0.05, (maxY - minY));
-				dr.setExtents(st, et, minY - dy, maxY + dy);
+				dr.setExtents(startTime, endTime, minY - dy, maxY + dy);
 //				dr.setExtents(st, et, -0.1, 0.1);
 				dr.createDefaultAxis(8, 4, false, false);
 				dr.createDefaultPointRenderers();
@@ -143,22 +202,24 @@ public class GPSPlotter extends Plotter
 			}
 		}
 		
-		v3Plot.setTitle("GPS: " + benchmark + (baseline == null ? "" : "-" + baseline));
+		v3Plot.setTitle("GPS");//: " + benchmark + (baseline == null ? "" : "-" + baseline));
 	}
 	
-	private GeoRange getBoundingBox(Point2D.Double[] pts)
+	private GeoRange getBoundingBox(Collection<Point2D.Double> pts)
 	{
-		if (pts == null || pts.length <= 0)
+		if (pts == null || pts.size() <= 0)
 			return null;
 				
 		Rectangle2D.Double rect = null;
-		for (int i = 0; i < pts.length; i++)
-			if (pts[i] != null)
+		for (Point2D.Double pt : pts)
+		{
+			if (pt != null)
 			{
 				if (rect == null)
-					rect = new Rectangle2D.Double(pts[i].x, pts[i].y, 0, 0);
-				rect.add(pts[i]);
+					rect = new Rectangle2D.Double(pt.x, pt.y, 0, 0);
+				rect.add(pt);
 			}
+		}
 
 		double nw = rect.width * 1.3;
 		double nh = rect.height * 1.3;
@@ -179,53 +240,21 @@ public class GPSPlotter extends Plotter
 		return gr;
 	}
 	
-	private void plotVelocities(Valve3Plot v3Plot, PlotComponent component, double st, double et)
+	private void plotVelocityMap()
 	{
-		String benchmark = component.get("bm");
-		String[] bms = benchmark.split(",");
-		if (bms.length <= 0)
-			return;
-		
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("source", vdxSource);
-		params.put("action", "data");
-		params.put("st", Double.toString(st));
-		params.put("et", Double.toString(et));
-		params.put("stid", Integer.toString(7));
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		if (client == null)
-			return;
-		
-		String baseline = component.get("bl");
-		GPSData baselineData = null;
-		if (baseline != null)
+		Map<String, Point2D.Double> locs = new HashMap<String, Point2D.Double>();
+		for (String key : stationDataMap.keySet())
 		{
-			params.put("bm", baseline);
-//			baselineData = (GPSData)dataSource.getData(params);
-			baselineData = (GPSData)client.getData(params);
-		}
-		pool.checkin(client);
-		
-		Point2D.Double[] locs = new Point2D.Double[bms.length];
-		GPSData[] allData = new GPSData[bms.length];
-		for (int i = 0; i < bms.length; i++)
-		{
-			System.out.println("data: " + bms[i]);
-			params.put("bm", bms[i]);
-			GPSData data = (GPSData)client.getData(params);
+			GPSData data = stationDataMap.get(key);
 			if (data != null)
 			{
 				if (baselineData != null)
 					data.applyBaseline(baselineData);
-				allData[i] = data;
-				int j = Collections.binarySearch(benchmarks, bms[i]);
-				if (j >= 0)
-					locs[i] = benchmarks.get(j).getLonLat();
+				locs.put(key, benchmarks.get(key).getLonLat());
 			}
 		}
 		
-		GeoRange range = getBoundingBox(locs);
+		GeoRange range = getBoundingBox(locs.values());
 		System.out.println(range);
 		
 		Plot plot = v3Plot.getPlot();
@@ -267,19 +296,23 @@ public class GPSPlotter extends Plotter
 		System.out.println("scaleErrors: " + scaleErrors);
 		
 		double maxMag = -1E300;
-		List<Renderer> vrs = new ArrayList<Renderer>(allData.length);
-		for (int i = 0; i < allData.length; i++)
+		List<Renderer> vrs = new ArrayList<Renderer>();
+		//for (int i = 0; i < allData.length; i++)
+		for (String key : stationDataMap.keySet())
 		{
-			if (allData[i] == null || allData[i].observations() == 0)
+			GPSData stn = stationDataMap.get(key);
+			if (stn == null || stn.observations() == 0)
 				continue;
-			GPSData stn = allData[i];
+			Point2D.Double loc = locs.get(key);
+			if (loc == null)
+				continue;
 			DoubleMatrix2D g = null;
 			g = stn.createVelocityKernel();
 			DoubleMatrix2D m = GPS.solveWeightedLeastSquares(g, stn.getXYZ(), stn.getCovariance());
-			System.out.println("Origin: " + locs[i].x + " " + locs[i].y);
-			DoubleMatrix2D t = GPS.createENUTransform(locs[i].x, locs[i].y);
+			System.out.println("Origin: " + loc.x + " " + loc.y);
+			DoubleMatrix2D t = GPS.createENUTransform(loc.x, loc.y);
 			DoubleMatrix2D e = GPS.getErrorParameters(g, stn.getCovariance());
-			DoubleMatrix2D t2 = GPS.createFullENUTransform(locs[i].x, locs[i].y, 2);
+			DoubleMatrix2D t2 = GPS.createFullENUTransform(loc.x, loc.y, 2);
 			e = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t2, e), t2.viewDice());
 			DoubleMatrix2D v = m.viewPart(0, 0, 3, 1);
 	
@@ -313,7 +346,7 @@ public class GPSPlotter extends Plotter
 			
 			EllipseVectorRenderer2 vr = new EllipseVectorRenderer2();
 			vr.frameRenderer = mr;
-			Point2D.Double ppt = proj.forward(locs[i]);
+			Point2D.Double ppt = proj.forward(loc);
 			vr.x = ppt.x;
 			vr.y = ppt.y;
 			vr.u = vt.getQuick(0, 0);
@@ -362,41 +395,41 @@ public class GPSPlotter extends Plotter
 		v3Plot.setTitle("GPS Velocities");
 	}
 	
-	
-	public void plot(Valve3Plot v3Plot, PlotComponent component)
+	private static void getBenchmarks(String source, String client)
 	{
-		Map<String, String> params = new HashMap<String, String>();
-		if (benchmarks == null)
+		synchronized (benchmarks)
 		{
-			params.put("source", vdxSource);
-			params.put("action", "bms");
-			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-			VDXClient client = pool.checkout();
-			List<String> bms = (List<String>)client.getData(params);
-			pool.checkin(client);
-			benchmarks = Benchmark.fromStringsToList(bms);
+			if (benchmarks.size() == 0)
+			{
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("source", source);
+				params.put("action", "bms");
+				Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
+				VDXClient cl = pool.checkout();
+				List<String> bms = (List<String>)cl.getData(params);
+				pool.checkin(cl);
+				benchmarks = Benchmark.fromStringsToMap(bms);
+			}
 		}
-		//		HashMap params = new HashMap();
-//		if (benchmarks == null)
-//		{
-//			params.put("type", "bms");
-//			benchmarks = (List)dataSource.getData(params);
-//		}
-//		params.clear();
-		double end = component.getEndTime();
-		double start = component.getStartTime(end);
-		if (Double.isNaN(start) || Double.isNaN(end))
-		{
-			double now = CurrentTime.nowJ2K();
-			start = now - 43200;
-			end = now;
-		}
+	}
+	
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
+	{
+		v3Plot = v3p;
+		component = comp;
+		getBenchmarks(vdxSource, vdxClient);
+		getInputs();
+		getData();
 		
-		String plotType = component.get("type");
-		if (plotType.equals("ts"))
-			plotTimeSeries(v3Plot, component, start, end);
-		else if (plotType.equals("vel"))
-			plotVelocities(v3Plot, component, start, end);
+		switch (plotType)
+		{
+			case TIME_SERIES:
+				plotTimeSeries();
+				break;
+			case VELOCITY_MAP:
+				plotVelocityMap();
+				break;
+		}
 		
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
