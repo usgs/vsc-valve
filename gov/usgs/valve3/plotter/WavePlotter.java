@@ -26,6 +26,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/03 19:02:09  dcervelli
+ * Changes for Butterworth.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -66,6 +69,8 @@ public class WavePlotter extends Plotter
 	private double maxHz;
 	private double minFreq;
 	private double maxFreq;
+	private boolean logPower;
+	private boolean logFreq;
 	
 	public WavePlotter()
 	{}
@@ -144,8 +149,8 @@ public class WavePlotter extends Plotter
 		maxHz = -1;
 		try
 		{
-			minHz = Double.parseDouble(component.get("fminHz"));
-			maxHz = Double.parseDouble(component.get("fmaxHz"));
+			minHz = Double.parseDouble(component.get("fminhz"));
+			maxHz = Double.parseDouble(component.get("fmaxhz"));
 		}
 		catch (Exception e) {}
 		
@@ -157,6 +162,16 @@ public class WavePlotter extends Plotter
 			maxFreq = Double.parseDouble(component.get("spmaxf"));
 		}
 		catch (Exception e) {}
+		
+		logPower = false;
+		String lp = component.get("splp");
+		if (lp != null && lp.toUpperCase().equals("T"))
+			logPower = true;
+		
+		logFreq = false;
+		String lf = component.get("splf");
+		if (lf != null && lf.toUpperCase().equals("T"))
+			logFreq = true;
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM)
 		{
@@ -187,28 +202,48 @@ public class WavePlotter extends Plotter
 	{
 		double[][] data = wave.fft();
 		data = FFT.halve(data);
-		boolean logFreq = false;
-		FFT.toPowerFreq(data, wave.getSamplingRate(), logFreq);
-		double maxPower = -1E300;
+		FFT.toPowerFreq(data, wave.getSamplingRate(), logPower, logFreq);
+		if (logFreq)
+		{
+			if (minFreq == 0)
+				minFreq = data[3][0];
+			else
+				minFreq = Math.log(minFreq) / FFT.LOG10;
+			maxFreq = Math.log(maxFreq) / FFT.LOG10;
+		}
+		double maxp = -1E300;
+		double minp = 1E300;
 		for (int i = 2; i < data.length; i++)
 		{
-			if (data[i][0] >= minFreq && data[i][0] <= maxFreq && data[i][1] > maxPower)
+			if (data[i][0] >= minFreq && data[i][0] <= maxFreq)
 			{
-				maxPower = data[i][1];
+				if (data[i][1] > maxp)
+					maxp = data[i][1];
+				if (data[i][1] < minp)
+					minp = data[i][1];
 			}
 		}
+		
 		Data d = new Data(data);
 		DataRenderer dr = new DataRenderer(d);
-		dr.setUnit("frequency");
 		dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 
-		dr.setExtents(minFreq, maxFreq, 0.0, logFreq ? maxPower : maxPower / 2);
-//		dr.createDefaultAxis(plot.getDefaultXTicks(), plot.getDefaultYTicks(), false, true);
-		dr.createDefaultAxis(8, 8, false, true);
+		if (logPower)
+			maxp = Math.pow(10, maxp);
+		
+		if (logPower)
+			maxp = Math.log(maxp) / Math.log(10);
+		dr.setExtents(minFreq, maxFreq, 0, maxp);
+		dr.createDefaultAxis(8, 8, false, false);
+		if (logFreq)
+			dr.createDefaultLogXAxis(5);	
+		if (logPower)
+			dr.createDefaultLogYAxis(2);
+			
 		dr.createDefaultLineRenderers();
-//		dr.createDefaultLegendRenderer(new String[] {legendString});
 		dr.getAxis().setLeftLabelAsText("Power");
 		dr.getAxis().setBottomLabelAsText("Frequency (Hz)");
+		
 		component.setTranslation(dr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("xy");
 		v3Plot.getPlot().addRenderer(dr); 	
@@ -220,6 +255,7 @@ public class WavePlotter extends Plotter
 		//plot.setFrameRendererLocation(sr);
 		sr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		sr.setOverlap(0);
+		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime);
 		sr.setViewEndTime(endTime);
 		sr.setMinFreq(minFreq);
