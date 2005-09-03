@@ -1,0 +1,9 @@
+#
+# CVO Filter File
+#
+# $Id: filters.txt,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+
+USA (Lower 48):-125,-65,25,50
+Western Washington:-124.5,-119.5,45.5,49.25
+Western Oregon:-124.5,-119.5,41.75,46.25
+Mount St Helens:-122.35,-122,46.1,46.3

@@ -1,0 +1,26 @@
+#
+# AVO Label File
+#
+# $Id: labels.txt,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+
+Mount Rainier	-121.75917	46.85306
+Mount Adams	-121.48944	46.20278
+Mount Baker	-121.81194	48.7775
+Glacier Peak	-121.11278	48.11139
+Mount St Helens	-122.19111	46.19778
+
+Mount Hood	-121.69444	45.37361
+Mount Jefferson	-121.79778	44.67444
+South Sister	-121.76806	44.10361
+North Sister	-121.77139	44.16639
+Middle Sister	-121.78278	44.14833
+Mount McLoughlin	-122.31417	42.445
+Mount Thielsen	-122.06583	43.15306
+Broken Top	-121.69861	44.08306
+Mount Bachelor	-121.68722	43.97944
+Mount Mazama	-122.08333	42.91667
+Newberry Volcano	-121.23333	43.72222
+
+Mount Shasta	-122.195009	41.4093201
+Lassen Peak	-121.5049807	40.4876594
+Medicine Lake	-121.5988838	41.5815468

@@ -1,0 +1,54 @@
+<!-- $Id: gpsmenu.html,v 1.1 2005-09-03 19:18:35 dcervelli Exp $ -->
+
+<div id="gpsBox">
+
+	<form id="gpsForm">
+	<div class="box w100 fl">
+		<h1>Benchmarks</h1>
+		<p><select class="w100p" multiple="multiple" size="16" name="selector:bm">
+		</select></p>
+	</div>
+	
+	<div class="w160 fl">
+		<div class="box">
+			<h1>Baseline Benchmark</h1>
+			<p><input type="text" value="[none]" id="baseline" name="bl"></p>
+			<p><input type="button" value="Set Baseline" id="baselineButton"></p>
+		</div>
+			
+		<div class="box">
+			<h1>Output Type</h1>
+			<p><input type="radio" name="type" value="ts" id="ts:paneSelector_options_0" checked="checked"> <label for="ts">Time Series</label></p>
+			<p><input type="radio" name="type" value="vel" id="vel:paneSelector_options_1"> <label for="vel">Velocity Field</label></p>
+			<!-- 
+			<p><input type="radio" name="type" value="dis" id="dis:paneSelector_options_2"> <label for="dis">Displacement Field</label></p>
+			-->
+		</div>
+	</div>
+	
+	<div class="box w320 fl">
+		<h1 id="collapse_options">Options</h1>
+		<div id="collapseTarget_options">
+			<div id="pane_options_0-">
+				<p><b>Time Series Options</b></p>
+				<p><input type="checkbox" id="e" name="east" checked="checked"> <label for="e">East</label></p>
+				<p><input type="checkbox" id="n" name="north" checked="checked"> <label for="n">North</label></p>
+				<p><input type="checkbox" id="u" name="up" checked="checked"> <label for="u">Up</label></p>
+				<p><input type="checkbox" id="l" name="len"> <label for="l">Length</label></p>
+			</div>
+			<div id="pane_options_1">
+				<p><b>Velocity Options</b></p>
+				<p><input type="checkbox" id="se" name="se" checked="checked"> <label for="se">Scale Errors</label></p>
+				<!-- 
+				<p><input type="checkbox" id="h" name="horiz" checked="checked"> <label for="h">Horizontal</label></p>
+				<p><input type="checkbox" id="v" name="vert"> <label for="v">Vertical</label></p> 
+				-->
+			</div>
+			<div id="pane_options_2">
+				<p><b>Displacement Options</b></p>
+			</div>
+		</div>
+	</div>
+	
+	</form>
+</div>

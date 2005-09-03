@@ -1,0 +1,6 @@
+#
+# Valve3 Example Labels File
+#
+# $Id: labels.txt,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+
+Mount Rainier	-121.75917	46.85306
