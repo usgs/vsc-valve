@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.2  2005/09/03 21:13:58  dcervelli
+Fixed classpath.
+
 Revision 1.1  2005/08/26 20:41:31  dcervelli
 Initial avosouth commit.
 
@@ -18,7 +21,7 @@ Initial commit.
 	<description>USGS Valve Source Build File</description>
 
 	<property name="source" location="."/>
-	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/lib/data.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/VDX.jar"/>
+	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/lib/data.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/VDX.jar;../USGS/lib/Net.jar"/>
 	<property name="jarfile" value="valve3.jar"/>
 
 	<target name="help">
