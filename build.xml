@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.1  2005/08/26 20:41:31  dcervelli
+Initial avosouth commit.
+
 Revision 1.3  2005/04/07 04:06:38  cervelli
 Moved buildversion script to jar task and delete Version.class when done.
 
@@ -15,7 +18,7 @@ Initial commit.
 	<description>USGS Valve Source Build File</description>
 
 	<property name="source" location="."/>
-	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/lib/data.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar"/>
+	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/lib/data.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/VDX.jar"/>
 	<property name="jarfile" value="valve3.jar"/>
 
 	<target name="help">
@@ -47,8 +50,18 @@ jar -- generates new ${jarfile}
 	</target>
 	
 	<target name="deploy" depends="jar">
-		<copy todir="c:\webapps\valve3\WEB-INF\lib">
-			<fileset dir="${source}/../USGS/lib" excludes="**usgs.jar" />
+		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+		
+		<copy todir="c:\source\Valve3Web\web\WEB-INF\lib">
+			<fileset dir="../USGS/contrib">
+				<include name="colt.jar" />
+				<include name="jai_codec.jar" />
+				<include name="jai_core.jar" />
+				<include name="mlibwrapper_jai.jar" />
+			</fileset>
+			<fileset dir="../USGS/lib">
+				<include name="usgs.jar" />
+			</fileset>
 		</copy>
 	</target>
 
