@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/29 22:54:28  dcervelli
+ * Refactored for enums.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -175,7 +178,7 @@ public class Valve3Plot extends Result
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)
 			sb.append(pc.toXML());
-		sb.append("\t</plot>\n");
+		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
 	}
 }
