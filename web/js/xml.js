@@ -1,4 +1,4 @@
-// $Id: xml.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: xml.js,v 1.2 2005-09-04 21:22:55 dcervelli Exp $
 
 var numLoading = 0;
 function loadXML(title, url, func)
@@ -90,4 +90,23 @@ function getXMLField(xml, tag, index)
 	if (!index)
 		index = 0;
 	return xml.getElementsByTagName(tag)[index].firstChild.data;
+}
+
+function xmlToHTML(doc, tree)
+{
+	if (tree)
+	{
+		if (tree.tagName)
+			doc.write("&lt;" + tree.tagName + "&gt;");
+		
+		if (tree.childNodes.length > 1)
+			doc.write("<br>");
+		if (tree.data)
+			doc.write(tree.data);
+		for (var i = 0; i < tree.childNodes.length; i++)
+			xmlToHTML(doc, tree.childNodes[i]);
+	
+		if (tree.tagName)
+			doc.write("&lt;/" + tree.tagName + "&gt;<br>");
+	} 
 }
