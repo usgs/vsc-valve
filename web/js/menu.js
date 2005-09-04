@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: menu.js,v 1.2 2005-09-04 21:21:53 dcervelli Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -127,7 +127,6 @@ function loadDataSources()
 	loadXML("main menu", url);
 }
 
-//function populateSelectors(id, formId, selectId)
 function populateSelectors(menu)
 {
 	var f = document.getElementById(menu.id + '_' + menu.formName);
@@ -384,14 +383,15 @@ Menu.prototype.filterChanged = function()
 		var wesn = getGeoFilter();
 		var f = this.getForm();
 		var sel = f[this.selector];
-		sel.options.length = 0;
+		while (sel.hasChildNodes())
+			sel.removeChild(sel.firstChild);
 		for (var i = 0; i < f.options.length; i++)
 		{
 			var pt = f.options[i].value.split(":");
 			if (wesn == null || (wesn[0] < pt[1] * 1 && wesn[1] > pt[1] * 1 &&
 				wesn[2] < pt[2] * 1 && wesn[3] > pt[2] * 1))
 			{
-				sel.options[sel.options.length] = f.options[i];
+				sel.appendChild(f.options[i]);
 			}
 		}
 		if (sel.options.length == 0)

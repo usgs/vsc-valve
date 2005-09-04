@@ -1,4 +1,4 @@
-// $Id: event.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: event.js,v 1.2 2005-09-04 21:21:37 dcervelli Exp $
 
 var isIE = !window.opera && navigator.userAgent.indexOf('MSIE') != -1;
 
@@ -74,8 +74,8 @@ function getMouseXY(e)
 		mouse.y = e.clientY;
 		if (isIE)
 		{
-			mouse.x += document.body.scrollLeft;
-			mouse.y += document.body.scrollTop;
+			mouse.x += document.documentElement.scrollLeft;
+			mouse.y += document.documentElement.scrollTop;
 		}
 	}
 	return mouse;
@@ -94,8 +94,8 @@ function getElementXY(e, targ)
 	while ((el = el.offsetParent));
 	if (isIE)
 	{
-		sX = e.x - sX + document.body.scrollLeft;
-		sY = e.y - sY + document.body.scrollTop;
+		sX = e.x - sX + document.documentElement.scrollLeft;
+		sY = e.y - sY + document.documentElement.scrollTop;
 	}
 	else
 	{
@@ -103,6 +103,7 @@ function getElementXY(e, targ)
 		sY = e.clientY - sY + window.pageYOffset;
 	}
 	return new Array(sX, sY);
+	
 }
 
 function getScroll()

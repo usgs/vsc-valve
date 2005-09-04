@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.2 2005-09-03 21:47:28 dcervelli Exp $
+// $Id: plot.js,v 1.3 2005-09-04 21:22:09 dcervelli Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -104,15 +104,8 @@ function handlePlot(xml)
 	addListener(imgs[3], 'click',
 		function()
 		{
-			var xmlSerializer = new XMLSerializer();
-			var markup = xmlSerializer.serializeToString(img.xml);
-			var w = window.open('','xmlwin');
-			markup = markup.replace(/</gm, "&lt;").replace(/>/gm, "&gt;");
-			w.document.writeln(
-						'<html><head><title>XML</title></head>'
-						+'<body onLoad="self.focus();"><pre>'
-						+ markup
-						+'</pre></body></html>');
+			var w = window.open('', 'xmlwin', 'menubar=0,toolbar=0,status=0,resizable=1,width=600,height=400,scrollbars=1');
+			xmlToHTML(w.document, img.xml);
 			w.document.close();
 		});
 	
@@ -201,7 +194,7 @@ function PlotRequest(popup)
 							}
 						}
 						else
-							comp[name] = getSelected(elt);
+							comp[name] = getSelected(elt, true);
 					}
 					else if (elt.type == "checkbox")
 						comp[elt.name] = elt.checked ? "T" : "F";
