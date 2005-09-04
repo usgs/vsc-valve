@@ -1,10 +1,7 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.math.Butterworth;
-import gov.usgs.math.FFT;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.Data;
-import gov.usgs.plot.DataRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
@@ -17,6 +14,7 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.wave.SliceWave;
 import gov.usgs.vdx.data.wave.Wave;
 import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
+import gov.usgs.vdx.data.wave.plot.SpectraRenderer;
 import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
@@ -26,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/03 21:50:44  dcervelli
+ * Fixed logPower/logFreq.
+ *
  * Revision 1.2  2005/09/03 19:02:09  dcervelli
  * Changes for Butterworth.
  *
@@ -200,59 +201,23 @@ public class WavePlotter extends Plotter
 	
 	private void plotSpectra()
 	{
-		double[][] data = wave.fft();
-		data = FFT.halve(data);
-		FFT.toPowerFreq(data, wave.getSamplingRate(), logPower, logFreq);
-		if (logFreq)
-		{
-			if (minFreq == 0)
-				minFreq = data[3][0];
-			else
-				minFreq = Math.log(minFreq) / FFT.LOG10;
-			maxFreq = Math.log(maxFreq) / FFT.LOG10;
-		}
-		double maxp = -1E300;
-		double minp = 1E300;
-		for (int i = 2; i < data.length; i++)
-		{
-			if (data[i][0] >= minFreq && data[i][0] <= maxFreq)
-			{
-				if (data[i][1] > maxp)
-					maxp = data[i][1];
-				if (data[i][1] < minp)
-					minp = data[i][1];
-			}
-		}
-		
-		Data d = new Data(data);
-		DataRenderer dr = new DataRenderer(d);
-		dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-
-		if (logPower)
-			maxp = Math.pow(10, maxp);
-		
-		if (logPower)
-			maxp = Math.log(maxp) / Math.log(10);
-		dr.setExtents(minFreq, maxFreq, 0, maxp);
-		dr.createDefaultAxis(8, 8, false, false);
-		if (logFreq)
-			dr.createDefaultLogXAxis(5);	
-		if (logPower)
-			dr.createDefaultLogYAxis(2);
-			
-		dr.createDefaultLineRenderers();
-		dr.getAxis().setLeftLabelAsText("Power");
-		dr.getAxis().setBottomLabelAsText("Frequency (Hz)");
-		
-		component.setTranslation(dr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("xy");
-		v3Plot.getPlot().addRenderer(dr); 	
+		SpectraRenderer sr = new SpectraRenderer();
+		sr.setWave(wave);
+		sr.setAutoScale(true);
+		sr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		sr.setLogPower(logPower);
+		sr.setLogFreq(logFreq);
+		sr.setMinFreq(minFreq);
+		sr.setMaxFreq(maxFreq);
+		sr.update(0);
+		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+		component.setTranslationType("ty");
+		v3Plot.getPlot().addRenderer(sr);
 	}
 	
 	private void plotSpectrogram()
 	{
 		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
-		//plot.setFrameRendererLocation(sr);
 		sr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		sr.setOverlap(0);
 		sr.setLogPower(logPower);
