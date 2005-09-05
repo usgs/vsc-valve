@@ -18,11 +18,16 @@ import gov.usgs.vdx.client.VDXClient;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/09/02 22:37:24  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class ChannelMapPlotter extends Plotter
@@ -59,12 +64,18 @@ public class ChannelMapPlotter extends Plotter
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		List<String> selectors = (List<String>)client.getData(params);
+		Set<String> used = new HashSet<String>();
 		labels = new GeoLabelSet();
 		for (String sel : selectors)
 		{
 			String[] ss = sel.split(":");
-			GeoLabel gl = new GeoLabel(ss[3], Double.parseDouble(ss[1]), Double.parseDouble(ss[2]));
-			labels.add(gl);
+			String s = ss[3].split(" ")[0];
+			if (!used.contains(s))
+			{
+				GeoLabel gl = new GeoLabel(s, Double.parseDouble(ss[1]), Double.parseDouble(ss[2]));
+				labels.add(gl);
+				used.add(s);
+			}
 		}
 		pool.checkin(client);
 	}
