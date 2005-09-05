@@ -9,6 +9,9 @@ import java.util.TimeZone;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class PlotComponent
@@ -120,6 +123,7 @@ public class PlotComponent
 			return parseTime(st, end);
 	}
 	
+	// TODO: does this allow startTime > endTime?
 	public double getEndTime()
 	{
 		String et = params.get("et");
@@ -176,7 +180,7 @@ public class PlotComponent
 					sb.append(",");
 			}
 		}
-		sb.append("\t\t\t</translation>\n");
+		sb.append("</translation>\n");
 		if (params != null)
 		{
 //			for (Iterator it = params.keySet().iterator(); it.hasNext(); )
