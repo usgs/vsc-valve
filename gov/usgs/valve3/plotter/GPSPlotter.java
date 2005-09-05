@@ -7,6 +7,7 @@ import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
+import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
@@ -25,10 +26,8 @@ import gov.usgs.vdx.data.gps.GPSData;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: un-hardcode stid 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/03 19:02:58  dcervelli
+ * Interim checkin for CurrentTime.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -71,7 +73,7 @@ public class GPSPlotter extends Plotter
 	}
 	
 	private static final String[] LEGENDS = new String[] {"East", "North", "Up", "Length"};
-	private static Map<String, Benchmark> benchmarks = new HashMap<String, Benchmark>();
+	private static Map<String, Map<String, Benchmark>> benchmarksMap = new HashMap<String, Map<String, Benchmark>>();
 	
 	private Valve3Plot v3Plot;
 	private PlotComponent component;
@@ -107,6 +109,9 @@ public class GPSPlotter extends Plotter
 		plotType = PlotType.fromString(component.get("type"));
 		if (plotType == null)
 			throw new Valve3Exception("Illegal plot type.");
+		
+		String se = component.get("se");
+		scaleErrors = (se != null && se.equals("T"));
 	}
 	
 	public void getData()
@@ -181,7 +186,8 @@ public class GPSPlotter extends Plotter
 				double[] lsq = nd.leastSquares(1);
 				double minY = lsq[0] * nd.getMinTime() + lsq[1];
 				double maxY = lsq[0] * nd.getMaxTime() + lsq[1];
-				double dy = Math.max(0.05, (maxY - minY));
+//				double dy = Math.max(0.02, (maxY - minY) * 1.2);
+				double dy = Math.max(0.02, Math.abs((maxY - minY) * 1.8));
 				dr.setExtents(startTime, endTime, minY - dy, maxY + dy);
 //				dr.setExtents(st, et, -0.1, 0.1);
 				dr.createDefaultAxis(8, 4, false, false);
@@ -205,44 +211,11 @@ public class GPSPlotter extends Plotter
 		v3Plot.setTitle("GPS");//: " + benchmark + (baseline == null ? "" : "-" + baseline));
 	}
 	
-	private GeoRange getBoundingBox(Collection<Point2D.Double> pts)
-	{
-		if (pts == null || pts.size() <= 0)
-			return null;
-				
-		Rectangle2D.Double rect = null;
-		for (Point2D.Double pt : pts)
-		{
-			if (pt != null)
-			{
-				if (rect == null)
-					rect = new Rectangle2D.Double(pt.x, pt.y, 0, 0);
-				rect.add(pt);
-			}
-		}
-
-		double nw = rect.width * 1.3;
-		double nh = rect.height * 1.3;
-		rect.x -= (nw - rect.width) / 2;
-		rect.y -= (nh - rect.height) / 2;
-		rect.width = nw;
-		rect.height = nh;
-		
-		if (rect.width == 0 || rect.height == 0)
-		{
-			rect.x -= 0.15;
-			rect.y -= 0.15;
-			rect.width = 0.3;
-			rect.height = 0.3;
-		}
-		
-		GeoRange gr = new GeoRange(rect);
-		return gr;
-	}
-	
 	private void plotVelocityMap()
 	{
-		Map<String, Point2D.Double> locs = new HashMap<String, Point2D.Double>();
+//		Map<String, Point2D.Double> locs = new HashMap<String, Point2D.Double>();
+		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
+		Map<String, Benchmark> benchmarks = benchmarksMap.get(vdxSource);
 		for (String key : stationDataMap.keySet())
 		{
 			GPSData data = stationDataMap.get(key);
@@ -250,11 +223,11 @@ public class GPSPlotter extends Plotter
 			{
 				if (baselineData != null)
 					data.applyBaseline(baselineData);
-				locs.put(key, benchmarks.get(key).getLonLat());
+				locs.add(benchmarks.get(key).getLonLat());
 			}
 		}
 		
-		GeoRange range = getBoundingBox(locs.values());
+		GeoRange range = GeoRange.getBoundingBox(locs);
 		System.out.println(range);
 		
 		Plot plot = v3Plot.getPlot();
@@ -268,7 +241,8 @@ public class GPSPlotter extends Plotter
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
 		
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
-		mr.setGeoLabelSet(labels.getSubset(range));
+		labels = labels.getSubset(range);
+		mr.setGeoLabelSet(labels);
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
@@ -287,32 +261,32 @@ public class GPSPlotter extends Plotter
 		v3Plot.addComponent(component);
 		plot.addRenderer(mr);
 
-		String se = component.get("se");
-		boolean scaleErrors = (se != null && se.equals("T"));
 //		String vs = component.get("vert");
 //		boolean vertical = (vs != null && vs.equals("T"));
 //		String hs = component.get("horiz");
 //		boolean horizontal = (hs != null && hs.equals("T"));
-		System.out.println("scaleErrors: " + scaleErrors);
 		
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
+		
 		//for (int i = 0; i < allData.length; i++)
 		for (String key : stationDataMap.keySet())
 		{
+			Benchmark bm = benchmarks.get(key);
+//			Point2D.Double loc = locs.get(key);
+//			if ()
+			labels.add(new GeoLabel(bm.getCode(), bm.getLon(), bm.getLat()));
 			GPSData stn = stationDataMap.get(key);
-			if (stn == null || stn.observations() == 0)
+//			stn.output();
+			if (stn == null || stn.observations() <= 1)
 				continue;
-			Point2D.Double loc = locs.get(key);
-			if (loc == null)
-				continue;
+			
 			DoubleMatrix2D g = null;
 			g = stn.createVelocityKernel();
 			DoubleMatrix2D m = GPS.solveWeightedLeastSquares(g, stn.getXYZ(), stn.getCovariance());
-			System.out.println("Origin: " + loc.x + " " + loc.y);
-			DoubleMatrix2D t = GPS.createENUTransform(loc.x, loc.y);
+			DoubleMatrix2D t = GPS.createENUTransform(bm.getLon(), bm.getLat());
 			DoubleMatrix2D e = GPS.getErrorParameters(g, stn.getCovariance());
-			DoubleMatrix2D t2 = GPS.createFullENUTransform(loc.x, loc.y, 2);
+			DoubleMatrix2D t2 = GPS.createFullENUTransform(bm.getLon(), bm.getLat(), 2);
 			e = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t2, e), t2.viewDice());
 			DoubleMatrix2D v = m.viewPart(0, 0, 3, 1);
 	
@@ -343,10 +317,10 @@ public class GPSPlotter extends Plotter
 			double phi = Math.atan2(evecs.getQuick(0, 0), evecs.getQuick(1, 0));
 			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
 			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
-			
+			System.out.printf("w: %f h: %f\n", w, h);
 			EllipseVectorRenderer2 vr = new EllipseVectorRenderer2();
 			vr.frameRenderer = mr;
-			Point2D.Double ppt = proj.forward(loc);
+			Point2D.Double ppt = proj.forward(bm.getLonLat());
 			vr.x = ppt.x;
 			vr.y = ppt.y;
 			vr.u = vt.getQuick(0, 0);
@@ -397,9 +371,11 @@ public class GPSPlotter extends Plotter
 	
 	private static void getBenchmarks(String source, String client)
 	{
-		synchronized (benchmarks)
+		synchronized (benchmarksMap)
 		{
-			if (benchmarks.size() == 0)
+			Map<String, Benchmark> benchmarks = benchmarksMap.get(source);
+			
+			if (benchmarks == null)
 			{
 				Map<String, String> params = new HashMap<String, String>();
 				params.put("source", source);
@@ -409,6 +385,7 @@ public class GPSPlotter extends Plotter
 				List<String> bms = (List<String>)cl.getData(params);
 				pool.checkin(cl);
 				benchmarks = Benchmark.fromStringsToMap(bms);
+				benchmarksMap.put(source, benchmarks);
 			}
 		}
 	}
