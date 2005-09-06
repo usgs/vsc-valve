@@ -42,6 +42,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: un-hardcode stid 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/05 00:40:46  dcervelli
+ * Fixed benchmarks map so more than one GPSPlotter could exist.
+ *
  * Revision 1.2  2005/09/03 19:02:58  dcervelli
  * Interim checkin for CurrentTime.
  *
@@ -114,7 +117,7 @@ public class GPSPlotter extends Plotter
 		scaleErrors = (se != null && se.equals("T"));
 	}
 	
-	public void getData()
+	public void getData() throws Valve3Exception
 	{
 		stationDataMap = new HashMap<String, GPSData>();
 		String[] bms = benchmarkIDs.split(",");
@@ -126,17 +129,26 @@ public class GPSPlotter extends Plotter
 		params.put("stid", Integer.toString(7));
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
+		boolean gotData = false;
 		for (String bm : bms)
 		{
 			params.put("bm", bm);
 			GPSData data = (GPSData)client.getData(params);
-			stationDataMap.put(bm, data);
+			if (data != null && data.observations() > 0)
+			{
+				gotData = true;
+				stationDataMap.put(bm, data);
+			}
 		}
+		if (!gotData)
+			throw new Valve3Exception("No data for any stations.");
 		
 		if (baselineID != null)
 		{
 			params.put("bm", baselineID);
 			baselineData = (GPSData)client.getData(params);
+			if (baselineData == null || baselineData.observations() == 0)
+				throw new Valve3Exception("No baseline data.");
 		}
 		pool.checkin(client);
 	}
