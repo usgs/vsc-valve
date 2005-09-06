@@ -1,10 +1,15 @@
-// $Id: plot.js,v 1.3 2005-09-04 21:22:09 dcervelli Exp $
+// $Id: plot.js,v 1.4 2005-09-06 20:18:15 dcervelli Exp $
 
 function createPopupPlot(xml, px, py)
 {		
 	px = px * 1;
 	py = py * 1;
 	var title = getXMLField(xml, "title");
+	if (title == null)
+	{
+		alert("There was an error loading this popup.");
+		return;
+	}
 	var src = getXMLField(xml, "file");
 	var width = getXMLField(xml, "width") * 1;
 	var height = getXMLField(xml, "height") * 1;
