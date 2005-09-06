@@ -1,4 +1,4 @@
-// $Id: gpsmenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: gpsmenu.js,v 1.2 2005-09-06 20:19:31 dcervelli Exp $
 
 create_gpsmenu = function(menu)
 {
@@ -11,6 +11,16 @@ create_gpsmenu = function(menu)
 	menu.presubmit = function(pr, pc)
 	{
 		var f = this.getForm();
+		var baseline = f.bl;
+		if (baseline.value != '[none]');
+		{
+			for (var i = 0; i < f.options.length; i++)
+			{
+				var s = f.options[i].value.split(":");
+				if (s[3] == baseline.value)
+					pc.bl = s[0];
+			}
+		}
 		var comp = getTF(f.east) + getTF(f.north) + getTF(f.up) + getTF(f.len);
 		if (comp == "FFFF")
 		{
@@ -39,6 +49,13 @@ create_gpsmenu = function(menu)
 			{
 				if (bm.selectedIndex != -1)
 					f.bl.value = bm[bm.selectedIndex].text;
+			}, false);
+			
+		addListener(document.getElementById(this.id + '_clearButton'), 'click', 
+			function()
+			{
+				if (bm.selectedIndex != -1)
+					f.bl.value = "[none]";
 			}, false);
 	}
 }
