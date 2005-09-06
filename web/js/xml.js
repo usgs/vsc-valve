@@ -1,4 +1,4 @@
-// $Id: xml.js,v 1.2 2005-09-04 21:22:55 dcervelli Exp $
+// $Id: xml.js,v 1.3 2005-09-06 20:18:31 dcervelli Exp $
 
 var numLoading = 0;
 function loadXML(title, url, func)
@@ -89,7 +89,11 @@ function getXMLField(xml, tag, index)
 {
 	if (!index)
 		index = 0;
-	return xml.getElementsByTagName(tag)[index].firstChild.data;
+	var elt = xml.getElementsByTagName(tag)[index];
+	if (elt)
+		return elt.firstChild.data;
+	else
+		return null;
 }
 
 function xmlToHTML(doc, tree)
