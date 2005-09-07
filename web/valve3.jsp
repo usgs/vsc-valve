@@ -1,5 +1,8 @@
 <%--  
 $Log: not supported by cvs2svn $
+Revision 1.1  2005/09/03 19:18:35  dcervelli
+Initial commit.
+
 --%>
 
 <%@ page import="gov.usgs.valve3.*" %>
@@ -48,6 +51,9 @@ $Log: not supported by cvs2svn $
 			case HTML:
 				%>
 <html>
+<head>
+<title><%= plot.getTitle() %></title>
+</head>
 <body>
 <img src="<%= plot.getFilename() %>">
 </body>
