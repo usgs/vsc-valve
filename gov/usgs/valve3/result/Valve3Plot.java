@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/03 21:51:07  dcervelli
+ * Removed new line.
+ *
  * Revision 1.2  2005/08/29 22:54:28  dcervelli
  * Refactored for enums.
  *
@@ -153,6 +156,11 @@ public class Valve3Plot extends Result
 	public void addComponent(PlotComponent comp)
 	{
 		components.add(comp);
+	}
+
+	public String getTitle()
+	{
+		return title;
 	}
 	
 	public void setTitle(String t)
