@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/02 22:37:54  dcervelli
+ * Support for ChannelMapPlotter.
+ *
  * Revision 1.3  2005/08/29 22:52:54  dcervelli
  * Input validation.
  *
@@ -83,9 +86,9 @@ public class PlotHandler implements HttpHandler
 			int y = Util.stringToInt(request.getParameter("y." + i), 19);
 			int w = Util.stringToInt(request.getParameter("w." + i), 610);
 			int h = Util.stringToInt(request.getParameter("h." + i), 140);
-			if (x < 0 || x > w)
+			if (x < 0)
 				throw new Valve3Exception("Illegal x value.");
-			if (y < 0 || y > h)
+			if (y < 0)
 				throw new Valve3Exception("Illegal y value.");
 			if (w <= 0 || w > MAX_PLOT_WIDTH)
 				throw new Valve3Exception("Illegal width.");
