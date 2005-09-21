@@ -1,4 +1,4 @@
-// $Id: event.js,v 1.2 2005-09-04 21:21:37 dcervelli Exp $
+// $Id: event.js,v 1.3 2005-09-21 18:11:51 dcervelli Exp $
 
 var isIE = !window.opera && navigator.userAgent.indexOf('MSIE') != -1;
 
@@ -103,7 +103,6 @@ function getElementXY(e, targ)
 		sY = e.clientY - sY + window.pageYOffset;
 	}
 	return new Array(sX, sY);
-	
 }
 
 function getScroll()
