@@ -1,4 +1,4 @@
-<!-- $Id: tiltmenu.html,v 1.1 2005-09-06 21:34:48 dcervelli Exp $ -->
+<!-- $Id: tiltmenu.html,v 1.2 2005-09-24 17:51:38 dcervelli Exp $ -->
 
 <div id="tiltBox">
 
@@ -8,6 +8,22 @@
 		<h1>Channels</h1>
 		<p><select class="w100p" multiple="multiple" size="16" name="selector:ch">
 		</select></p>
+	</div>
+	
+	<div class="box w200 fl">
+		<h1>Options</h1>
+		<p><b>Time Series Options</b></p>
+		<p><input type="checkbox" id="e" name="e"> <label for="e">East</label></p>
+		<p><input type="checkbox" id="n" name="n"> <label for="n">North</label></p>
+		<hr>
+		<p><input type="checkbox" id="r" name="r" checked="checked"> <label for="r">Radial</label></p>
+		<p><input type="checkbox" id="t" name="t" checked="checked"> <label for="t">Tangential</label></p>
+		<!-- <p><input type="checkbox" id="m" name="m"> <label for="m">Magnitude</label></p> -->
+		<br>
+		<p><input type="radio" name="az" id="opt" checked="checked"> <label for="opt">Optimal</label>
+		<input type="radio" name="az" id="nom"> <label for="nom">Nominal</label></p>
+		<p><input type="radio" name="az" id="az"> <label for="az">Azimuth:</label>
+		<input type="text" size="4" name="azval" id="azval"></p>
 	</div>
 	
 	</form>
