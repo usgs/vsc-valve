@@ -2,6 +2,7 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.util.CodeTimer;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
@@ -10,15 +11,26 @@ import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.tilt.TiltData;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
 
+import cern.colt.matrix.DoubleMatrix2D;
+
 /**
  * 
+ * TODO: tilt vectors.
+ * TODO: validate.
+ * TODO: rotations.
+ * TODO: legend.
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/09/06 20:10:24  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class TiltPlotter extends Plotter
@@ -57,13 +69,26 @@ public class TiltPlotter extends Plotter
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
 
-		td.add(1, -td.mean(1));
-		td.add(2, -td.mean(2));
+		CodeTimer ct = new CodeTimer("tilt");
+		double az = td.getOptimalAzimuth();
+		ct.mark("getOptimal");
+		DoubleMatrix2D mm = td.getAllData(az);
+		ct.mark("getAllData");
 		
-		double max = Math.max(td.max(1), td.max(2));
-		double min = Math.min(td.min(1), td.min(2));
+		GenericDataMatrix dm = new GenericDataMatrix(mm);
+		ct.stop();
 		
-		MatrixRenderer mr = new MatrixRenderer(td.getData());
+		dm.add(1, -dm.mean(1));
+		dm.add(2, -dm.mean(2));
+		
+		double max = Math.max(dm.max(1), dm.max(2));
+		double min = Math.min(dm.min(1), dm.min(2));
+		
+		MatrixRenderer mr = new MatrixRenderer(dm.getData());
+		mr.setVisible(2, false);
+		mr.setVisible(3, false);
+		mr.setVisible(4, false);
+		mr.setVisible(5, false);
 		mr.setUnit("tilt");
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 //		mr.setExtents(start, end, td.min(2), td.max(2));
