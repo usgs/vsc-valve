@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.2 2005-09-04 21:21:53 dcervelli Exp $
+// $Id: menu.js,v 1.3 2005-10-04 23:41:34 dcervelli Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -363,6 +363,11 @@ Menu.prototype.submit = function()
 	if (this.selector)
 	{
 		var sel = f[this.selector];
+		if (sel.selectedIndex == -1)
+		{
+			alert("You must select a channel.");
+			return;
+		}
 		if (sel.selectedIndex >= 0 && sel[sel.selectedIndex].text.indexOf('[') != -1)
 		{
 			alert("Illegal channel.");
