@@ -45,6 +45,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/01 00:30:38  dcervelli
+ * Reordered translations.
+ *
  * Revision 1.2  2005/08/28 19:02:00  dcervelli
  * Totally refactored (now uses JDK1.5 enums, gets histogram data from HypocenterList, etc.).
  *
@@ -181,12 +184,16 @@ public class HypocenterPlotter extends Plotter
 				base.createDefaultAxis();
 				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
 				component.setTranslationType("xy");
+				base.getAxis().setBottomLabelAsText("Longitude");
+				base.getAxis().setLeftLabelAsText("Depth (km)");
 				break;
 			case LAT_DEPTH:
 				base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
 				base.createDefaultAxis();
 				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
 				component.setTranslationType("xy");
+				base.getAxis().setBottomLabelAsText("Latitude");
+				base.getAxis().setLeftLabelAsText("Depth (km)");
 				break;
 			case DEPTH_TIME:
 				base.setExtents(startTime, endTime, -maxDepth, -minDepth);
@@ -194,6 +201,8 @@ public class HypocenterPlotter extends Plotter
 				base.setXAxisToTime(8);
 				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
 				component.setTranslationType("ty");
+				base.getAxis().setBottomLabelAsText("Time");
+				base.getAxis().setLeftLabelAsText("Depth (km)");
 				break;
 		}
 		
