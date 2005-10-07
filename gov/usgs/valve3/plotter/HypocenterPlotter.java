@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/10/07 17:10:10  dcervelli
+ * Added top label with number of earthquakes and date range.
+ *
  * Revision 1.5  2005/10/07 16:47:09  dcervelli
  * Added lon/lat label, time/depth scale.
  *
@@ -274,6 +277,7 @@ public class HypocenterPlotter extends Plotter
 		hr.setMaxX(endTime);
 		hr.createDefaultAxis(8, 8, false, true);
 		hr.setXAxisToTime(8);
+		hr.getAxis().setTopLabelAsText(getTopLabel());
 		hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		hr.getAxis().setBottomLabelAsText("Time");
 		plot.addRenderer(hr);
@@ -307,9 +311,11 @@ public class HypocenterPlotter extends Plotter
 			AxisRenderer ar = new AxisRenderer(dr);
 			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
 			dr.setAxis(ar);
+			
 			hr.addRenderer(dr);
 			hr.getAxis().setRightLabelAsText(rightAxis.toString());
 		}
+		
 		plot.writePNG(v3Plot.getLocalFilename());
 		component.setTranslation(hr.getDefaultTranslation(plot.getHeight()));
 		component.setTranslationType("ty");
