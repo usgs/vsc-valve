@@ -17,6 +17,9 @@ import java.util.HashMap;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/29 22:54:04  dcervelli
+ * Totally refactored; input validation.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -51,7 +54,7 @@ public class HelicorderPlotter extends Plotter
 	{
 		settings = new HelicorderSettings();
 		settings.channel = component.get("ch");
-		if (settings.channel == null || settings.channel.indexOf(";") != -1)
+		if (settings.channel == null || settings.channel.length() == 0 || settings.channel.indexOf(";") != -1)
 			throw new Valve3Exception("Illegal channel name.");
 		
 		// TODO: move time checking to static method in Plotter
@@ -84,9 +87,6 @@ public class HelicorderPlotter extends Plotter
 		settings.top = component.getBoxY();
 		settings.width = component.getBoxWidth();
 		settings.height = component.getBoxHeight();
-		
-//		settings.timeZoneAbbr = "AKDT";
-//		settings.timeZoneOffset = -8;
 	}
 	
 	public void plot(Valve3Plot p, PlotComponent c) throws Valve3Exception
