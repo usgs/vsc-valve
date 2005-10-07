@@ -33,6 +33,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 import cern.colt.matrix.DoubleMatrix2D;
@@ -45,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/10/07 16:47:09  dcervelli
+ * Added lon/lat label, time/depth scale.
+ *
  * Revision 1.4  2005/10/05 00:07:02  dcervelli
  * Added axis labels to lon/depth, lat/depth, depth/time plots.
  *
@@ -134,9 +139,12 @@ public class HypocenterPlotter extends Plotter
 	private BinSize bin;
 	private RightAxis rightAxis;
 	private HypocenterList hypos;
+	private DateFormat dateFormat;
 	
 	public HypocenterPlotter()
-	{}
+	{
+		dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	}
 
 	private BasicFrameRenderer plotMapView(Plot plot)
 	{
@@ -171,6 +179,29 @@ public class HypocenterPlotter extends Plotter
 		return mr;
 	}
 	
+	private String getTopLabel()
+	{
+		StringBuilder top = new StringBuilder(100);
+		top.append(hypos.size());
+		if (hypos.size() == 1)
+		{
+			top.append(" earthquake on ");
+			top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).getTime())));
+		}
+		else
+		{
+			top.append(" earthquakes");
+			if (hypos.size() > 1)
+			{
+				top.append(" between ");
+				top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).getTime())));
+				top.append(" and ");
+				top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(hypos.size() - 1).getTime())));
+			}
+		}
+		return top.toString();
+	}
+	
 	private void plotMap()
 	{
 		Plot plot = v3Plot.getPlot();
@@ -186,7 +217,6 @@ public class HypocenterPlotter extends Plotter
 				base.getAxis().setBottomLabelAsText("Longitude");
 				base.getAxis().setLeftLabelAsText("Latitude");
 				((MapRenderer)base).createScaleRenderer();
-				//scale = ((MapRenderer)base).getScale() / 1000;
 				break;
 			case LON_DEPTH:
 				base.setExtents(range.getWest(), range.getEast(), -maxDepth, -minDepth);
@@ -214,6 +244,8 @@ public class HypocenterPlotter extends Plotter
 				base.getAxis().setLeftLabelAsText("Depth (km)");
 				break;
 		}
+
+		base.getAxis().setTopLabelAsText(getTopLabel());
 		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
 		hr.setColorOption(color);
@@ -223,7 +255,8 @@ public class HypocenterPlotter extends Plotter
 //		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
 		plot.addRenderer(base);
 		plot.addRenderer(hr);
-	
+
+		
 		plot.writePNG(v3Plot.getLocalFilename());
 		v3Plot.addComponent(component);
 		v3Plot.setTitle("Earthquake Map");
