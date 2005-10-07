@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/04 18:13:47  dcervelli
+ * Uses new SpectraRenderer.
+ *
  * Revision 1.3  2005/09/03 21:50:44  dcervelli
  * Fixed logPower/logFreq.
  *
@@ -230,7 +233,7 @@ public class WavePlotter extends Plotter
 		sr.update(0);
 		sr.createDefaultAxis(8, 8, false, false);
 		sr.setXAxisToTime(8);
-		sr.getAxis().setLeftLabelAsText("Power");
+		sr.getAxis().setLeftLabelAsText("Frequency (Hz)");
 		sr.getAxis().setBottomLabelAsText("Time");// (Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(time1 + Valve.getTimeZoneAdj())) +
 //				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(time2 + Valve.getTimeZoneAdj())) + ")");
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
