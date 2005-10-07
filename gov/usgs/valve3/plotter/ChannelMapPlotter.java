@@ -25,6 +25,9 @@ import java.util.Set;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/05 00:40:10  dcervelli
+ * Strips channels down to the first space and only plots unique labels.
+ *
  * Revision 1.1  2005/09/02 22:37:24  dcervelli
  * Initial commit.
  *
@@ -98,7 +101,8 @@ public class ChannelMapPlotter extends Plotter
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, true);
-		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 50);
+		mr.createScaleRenderer();
+		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = 0;
 		trans[5] = 0;
@@ -106,6 +110,10 @@ public class ChannelMapPlotter extends Plotter
 		trans[7] = origin.y;
 		component.setTranslation(trans);
 		component.setTranslationType("map");
+		
+		mr.createEmptyAxis();
+		mr.getAxis().setBottomLabelAsText("Longitude");
+		mr.getAxis().setLeftLabelAsText("Latitude");
 		
 		plot.addRenderer(mr);
 		plot.writePNG(v3Plot.getLocalFilename());

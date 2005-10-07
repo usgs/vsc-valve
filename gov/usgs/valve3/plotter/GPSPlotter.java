@@ -40,8 +40,12 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 /**
  * TODO: un-hardcode stid 
+ * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/06 20:09:45  dcervelli
+ * Added some data integrity checks.
+ *
  * Revision 1.3  2005/09/05 00:40:46  dcervelli
  * Fixed benchmarks map so more than one GPSPlotter could exist.
  *
@@ -262,7 +266,8 @@ public class GPSPlotter extends Plotter
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, true);
-		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 50);
+		mr.createScaleRenderer();
+		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = range.getWest();
 		trans[5] = range.getEast();
@@ -271,6 +276,9 @@ public class GPSPlotter extends Plotter
 		component.setTranslation(trans);
 		component.setTranslationType("map");
 		v3Plot.addComponent(component);
+		mr.createEmptyAxis();
+		mr.getAxis().setBottomLabelAsText("Longitude");
+		mr.getAxis().setLeftLabelAsText("Latitude");
 		plot.addRenderer(mr);
 
 //		String vs = component.get("vert");
