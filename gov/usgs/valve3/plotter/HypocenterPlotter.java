@@ -45,6 +45,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/10/05 00:07:02  dcervelli
+ * Added axis labels to lon/depth, lat/depth, depth/time plots.
+ *
  * Revision 1.3  2005/09/01 00:30:38  dcervelli
  * Reordered translations.
  *
@@ -145,7 +148,8 @@ public class HypocenterPlotter extends Plotter
 		hypos.project(proj);
 		
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
+		int mh = Integer.parseInt(component.get("mh"));
+		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), mh);
 		
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		mr.setGeoLabelSet(labels.getSubset(range));
@@ -156,7 +160,7 @@ public class HypocenterPlotter extends Plotter
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, true);
-		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 50);
+		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = startTime;
 		trans[5] = endTime;
@@ -178,6 +182,11 @@ public class HypocenterPlotter extends Plotter
 		{
 			case MAP_VIEW:
 				base = plotMapView(plot);
+				base.createEmptyAxis();
+				base.getAxis().setBottomLabelAsText("Longitude");
+				base.getAxis().setLeftLabelAsText("Latitude");
+				((MapRenderer)base).createScaleRenderer();
+				//scale = ((MapRenderer)base).getScale() / 1000;
 				break;
 			case LON_DEPTH:
 				base.setExtents(range.getWest(), range.getEast(), -maxDepth, -minDepth);
@@ -210,11 +219,12 @@ public class HypocenterPlotter extends Plotter
 		hr.setColorOption(color);
 		if (color == ColorOption.TIME)
 			hr.setColorTime(startTime, endTime);
-		
+		hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY() + base.getGraphHeight());
+//		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
 		plot.addRenderer(base);
 		plot.addRenderer(hr);
+	
 		plot.writePNG(v3Plot.getLocalFilename());
-		
 		v3Plot.addComponent(component);
 		v3Plot.setTitle("Earthquake Map");
 	}
