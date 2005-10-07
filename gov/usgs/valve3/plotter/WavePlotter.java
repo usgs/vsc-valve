@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/10/07 16:55:18  dcervelli
+ * Fixed y-axis label on spectrogram.
+ *
  * Revision 1.4  2005/09/04 18:13:47  dcervelli
  * Uses new SpectraRenderer.
  *
@@ -75,6 +78,8 @@ public class WavePlotter extends Plotter
 	private double maxFreq;
 	private boolean logPower;
 	private boolean logFreq;
+	
+	private static final double MAX_DATA_REQUEST = 86400;
 	
 	public WavePlotter()
 	{}
@@ -139,6 +144,9 @@ public class WavePlotter extends Plotter
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 
+		if (endTime - startTime > MAX_DATA_REQUEST)
+			throw new Valve3Exception("Maximum waveform request is 24 hours.");
+		
 		plotType = PlotType.fromString(component.get("type"));
 		if (plotType == null)
 			throw new Valve3Exception("Illegal plot type.");
