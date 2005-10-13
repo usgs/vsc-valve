@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class DataHandler implements HttpHandler
@@ -59,7 +62,8 @@ public class DataHandler implements HttpHandler
 		{
 			System.out.println("Data source: " + source);
 			ConfigFile sub = config.getSubConfig(source);
-			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub.getConfig());
+			ConfigFile plotterSub = sub.getSubConfig("plotter");
+			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub.getConfig(), plotterSub);
 			dataSources.put(source, dsd);
 		}
 	}
