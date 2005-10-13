@@ -43,6 +43,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/10/07 16:46:10  dcervelli
+ * Added lon/lat labels.
+ *
  * Revision 1.4  2005/09/06 20:09:45  dcervelli
  * Added some data integrity checks.
  *
@@ -130,7 +133,7 @@ public class GPSPlotter extends Plotter
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		params.put("stid", Integer.toString(7));
+		params.put("stid", plotterConfig.getString("solutionType"));
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		boolean gotData = false;
