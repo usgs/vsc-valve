@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.4  2005/09/20 20:45:23  dcervelli
+Fixed case in classpath.
+
 Revision 1.3  2005/09/03 21:15:09  dcervelli
 Fixed classpath.
 
@@ -51,7 +54,6 @@ jar -- generates new ${jarfile}
 		</ant>
 		<mkdir dir="${source}/../USGS/lib"/>
 		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>
-		<jar destfile="C:\webapps\valve3\WEB-INF\lib\${jarfile}" basedir="${source}" includes="**/*.class"/>
 		<delete file="../Valve3/gov/usgs/valve3/Version.class"/>
 	</target>
 	
