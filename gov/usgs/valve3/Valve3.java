@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/29 22:53:09  dcervelli
+ * Logging.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -23,8 +26,8 @@ import javax.servlet.ServletContextListener;
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String VERSION = "3.0.0-a0";
-	public static final String BUILD_DATE = "2005-08-25";
+	public static final String VERSION = "3.0.1";
+	public static final String BUILD_DATE = "2005-10-13";
 	
 	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
