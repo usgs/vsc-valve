@@ -1,5 +1,8 @@
 <%--  
 $Log: not supported by cvs2svn $
+Revision 1.2  2005/09/07 00:06:16  dcervelli
+Added title to HTML output.
+
 Revision 1.1  2005/09/03 19:18:35  dcervelli
 Initial commit.
 
@@ -10,6 +13,10 @@ Initial commit.
 <%@ page import="java.io.*" %>
 
 <%
+	response.setHeader("Cache-Control", "no-cache");
+	response.setHeader("Pragma", "no-cache");
+	response.setDateHeader("Expires", 0);
+	
 	ActionHandler handler = Valve3.getInstance().getActionHandler();
 	Object result = handler.handle(request);
 	
@@ -29,9 +36,6 @@ Initial commit.
 		switch(plot.getOutputType())
 		{
 			case XML:
-				response.setHeader("Cache-Control", "no-cache");
-				response.setHeader("Pragma", "no-cache");
-				response.setDateHeader("Expires", 0);
 				response.setContentType("text/xml");
 				out.println(plot.toXML());
 				break;
