@@ -1,10 +1,11 @@
 package gov.usgs.valve3.result;
 
-import java.util.Iterator;
-
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class List extends Result
@@ -18,9 +19,9 @@ public class List extends Result
 	
 	public String toXML()
 	{
-		StringBuffer sb = new StringBuffer();
-		for (Iterator it = list.iterator(); it.hasNext(); )
-			sb.append("<list-item>" + it.next().toString() + "</list-item>");
+		StringBuilder sb = new StringBuilder();
+		for (Object o : list)
+			sb.append("<list-item>" + o.toString() + "</list-item>");
 		
 		return toXML("list", sb.toString());
 	}
