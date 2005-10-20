@@ -5,6 +5,7 @@ import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.HttpHandler;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.vdx.client.VDXClient;
 
 import java.io.File;
@@ -18,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/13 20:35:13  dcervelli
+ * Changes for plotterConfig.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -97,13 +101,32 @@ public class DataHandler implements HttpHandler
 		System.out.println(source);
 		DataSourceDescriptor dsd = dataSources.get(source);
 		if (dsd == null)
-			return null;
+			return null;  // TODO: throw Valve3Exception
 		
 		String action = request.getParameter("da"); // da == data action
 		if (action == null)
-			return null;
+			return null;  // TODO: throw Valve3Exception
 		
-		if (action.equals("selectors"))
+		// TODO: refactor out cut/paste job
+		if (action.equals("genericMenu"))
+		{
+			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("source", dsd.getVDXSource());
+			params.put("action", "genericMenu");
+			
+			VDXClient client = pool.checkout();
+			GenericMenu result = null;
+			if (client != null)
+			{
+				List<String> ls = (List<String>)client.getData(params);
+				if (ls != null)
+					result = new GenericMenu(ls);
+			}
+			pool.checkin(client);
+			return result;
+		}
+		else if (action.equals("selectors"))
 		{
 			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
 			Map<String, String> params = new HashMap<String, String>();
@@ -113,14 +136,14 @@ public class DataHandler implements HttpHandler
 			// selectors: <unique id>:lon:lat:code:name
 			// TODO: get Results back instead of Lists
 			VDXClient client = pool.checkout();
+			gov.usgs.valve3.result.List result = null;
 			if (client != null)
 			{
-				List<String> result = (List<String>)client.getData(params);
-				pool.checkin(client);
-				return new gov.usgs.valve3.result.List(result);
+				List<String> ls = (List<String>)client.getData(params);
+				result = new gov.usgs.valve3.result.List(ls);
 			}
-			
-			return null;
+			pool.checkin(client);
+			return result;
 		}
 		
 		return null;
