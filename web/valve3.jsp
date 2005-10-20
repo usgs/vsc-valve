@@ -1,5 +1,8 @@
 <%--  
 $Log: not supported by cvs2svn $
+Revision 1.3  2005/10/14 21:35:50  dcervelli
+Moved anti-cache stuff so everything should not be cached.
+
 Revision 1.2  2005/09/07 00:06:16  dcervelli
 Added title to HTML output.
 
@@ -66,23 +69,11 @@ Initial commit.
 				break;
 		}
 	}
-	else if (result instanceof Menu)
+	else if (result instanceof Result)
 	{
-		Menu menu = (Menu)result;
+		Result res = (Result)result;
 		response.setContentType("text/xml");
-		out.println(menu.toXML());
-	}
-	else if (result instanceof List)
-	{
-		List list= (List)result;
-		response.setContentType("text/xml");
-		out.println(list.toXML());
-	}
-	else if (result instanceof ErrorMessage)
-	{
-		ErrorMessage error = (ErrorMessage)result;
-		response.setContentType("text/xml");
-		out.println(error.toXML());
+		out.println(res.toXML());
 	}
 %>
 
