@@ -3,6 +3,9 @@ package gov.usgs.valve3.result;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 abstract public class Result
@@ -34,4 +37,6 @@ abstract public class Result
 		sb.append("</valve3result>\n");
 		return sb.toString();
 	}
+	
+	abstract public String toXML();
 }
