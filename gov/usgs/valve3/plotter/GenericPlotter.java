@@ -1,7 +1,9 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
@@ -20,11 +22,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/10/20 05:10:09  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class GenericPlotter extends Plotter
@@ -36,28 +40,25 @@ public class GenericPlotter extends Plotter
 	private GenericDataMatrix data;
 	private String channel;
 	private GenericMenu menu;
-	private Map<String, List<String>> columns;
+	
+	private String leftUnit;
+	private List<GenericColumn> leftColumns;
+	private String rightUnit;
+	private List<GenericColumn> rightColumns;
 
 	public GenericPlotter()
-	{
-		columns = new HashMap<String, List<String>>();
-	}
+	{}
 	
 	private void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		
 		params.put("source", vdxSource);
-		params.put("action", "genericMenu");
-		menu = new GenericMenu((List<String>)client.getData(params));
-		
 		params.put("action", "data");
 		params.put("cid", channel);
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		
 		data = (GenericDataMatrix)client.getData(params);
 		pool.checkin(client);
 		
@@ -84,59 +85,131 @@ public class GenericPlotter extends Plotter
 			boolean display = Util.stringToBoolean(component.get(col.name));
 			if (display)
 			{
-				List<String> cols = columns.get(col.unit);
-				if (cols == null)
+				if (leftUnit != null && leftUnit.equals(col.unit))
+					leftColumns.add(col);
+				else if (rightUnit != null && rightUnit.equals(col.unit))
+					rightColumns.add(col);
+				else if (leftUnit == null)
 				{
-					cols = new ArrayList<String>();
-					cols.add(col.name);
-					columns.put(col.unit, cols);
+					leftUnit = col.unit;
+					leftColumns = new ArrayList<GenericColumn>();
+					leftColumns.add(col);
 				}
+				else if (rightUnit == null)
+				{
+					rightUnit = col.unit;
+					rightColumns = new ArrayList<GenericColumn>();
+					rightColumns.add(col);
+				}
+				else
+					throw new Valve3Exception("Too many different units.");
+			}
+		}
+		
+		if (leftUnit == null && rightUnit == null)
+			throw new Valve3Exception("Nothing to plot.");
+		
+		if (rightUnit != null)
+		{
+			int minRight = Integer.MAX_VALUE;
+			for (GenericColumn col : rightColumns)
+				minRight = Math.min(minRight, col.index);
+			
+			int minLeft = Integer.MAX_VALUE;
+			for (GenericColumn col : leftColumns)
+				minLeft = Math.min(minLeft, col.index);
+			
+			if (minLeft > minRight)
+			{
+				String tempUnit = leftUnit;
+				List<GenericColumn> tempColumns = leftColumns;
+				leftUnit = rightUnit;
+				leftColumns = rightColumns;
+				rightUnit = tempUnit;
+				rightColumns = tempColumns;
 			}
 		}
 	}
 	
-	public void plotData()
+	private MatrixRenderer getLeftMatrixRenderer()
 	{
-//		double az = td.getOptimalAzimuth();
-//		ct.mark("getOptimal");
-
-//		DoubleMatrix2D mm = data.getTiltData().getAllData(0);
-		
-//		GenericDataMatrix dm = new GenericDataMatrix(mm);
-		
-//		dm.add(1, -dm.mean(1));
-//		dm.add(2, -dm.mean(2));
-		
-//		double max = Math.max(data.max(1), data.max(2));
-//		double min = Math.min(data.min(1), data.min(2));
-		double max = 2500;
-		double min = -2500;
-		
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
-		//mr.setVisible(0, true);
-//		mr.setVisible(0, showEast);
-//		mr.setVisible(1, showNorth);
-//		mr.setVisible(2, showRadial);
-//		mr.setVisible(3, showTangential);
-//		mr.setVisible(4, showMagnitude);
-//		mr.setVisible(5, false);
-//		mr.setUnit("tilt");
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-//		mr.setExtents(start, end, td.min(2), td.max(2));
-		mr.setExtents(startTime, endTime, min, max);
+		
+		double max = -1E300;
+		double min = 1E300;
+		
+		mr.setAllVisible(false);
+		for (GenericColumn col : leftColumns)
+		{
+			mr.setVisible(col.index - 1, true);
+			max = Math.max(max, data.max(col.index));
+			min = Math.min(min, data.min(col.index));
+		}
+		
+		mr.setExtents(startTime, endTime, min, max);		
 		mr.createDefaultAxis(8, 8, false, true);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText("Left");
-		mr.getAxis().setBottomLabelAsText("Time");//(Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMinTime())) +
-//				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMaxTime())) + ")");
-		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")");
+		mr.getAxis().setBottomLabelAsText("Time");
+		return mr;
+	}
+	
+	private MatrixRenderer getRightMatrixRenderer()
+	{
+		if (rightUnit == null)
+			return null;
+		
+		MatrixRenderer mr = new MatrixRenderer(data.getData());
+		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		
+		double max = -1E300;
+		double min = 1E300;
+		
+		mr.setAllVisible(false);
+		for (GenericColumn col : rightColumns)
+		{
+			mr.setVisible(col.index - 1, true);
+			max = Math.max(max, data.max(col.index));
+			min = Math.min(min, data.min(col.index));
+		}
+		
+		mr.setExtents(startTime, endTime, min, max);
+		AxisRenderer ar = new AxisRenderer(mr);
+		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		mr.setAxis(ar);
+		mr.createDefaultLineRenderers();
+//		Renderer[] r = mr.getLineRenderers();
+//		((ShapeRenderer)r[0]).color = Color.red;
+		
+		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")");
+		return mr;
+	}
+	
+	public void plotData()
+	{
+		MatrixRenderer leftMR = getLeftMatrixRenderer();
+		MatrixRenderer rightMR = getRightMatrixRenderer();
+		v3Plot.getPlot().addRenderer(leftMR);
+		if (rightMR != null)
+			v3Plot.getPlot().addRenderer(rightMR);
+		
+		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(mr);
 	}
 	
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
+		HashMap<String, String> params = new HashMap<String, String>();
+		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client = pool.checkout();
+		
+		params.put("source", vdxSource);
+		params.put("action", "genericMenu");
+		menu = new GenericMenu((List<String>)client.getData(params));
+		pool.checkin(client);
+		
 		v3Plot = v3p;
 		component = comp;
 		getInputs();
@@ -147,11 +220,6 @@ public class GenericPlotter extends Plotter
 		
 		plotData();
 
-//		plot.addRenderer(getLeftAxis());
-//		MatrixRenderer rmr = getRightAxis();
-//		if (rmr != null)
-//			plot.addRenderer(getRightAxis());
-		
 		v3Plot.addComponent(component);
 		v3Plot.setTitle(menu.title);
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
