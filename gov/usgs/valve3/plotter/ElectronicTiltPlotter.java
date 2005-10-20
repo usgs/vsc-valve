@@ -24,9 +24,15 @@ import java.util.HashMap;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
+/**
+ * 
+ * $Log: not supported by cvs2svn $
+ * @author Dan Cervelli
+ */
 public class ElectronicTiltPlotter extends Plotter
 {
 	private static final char MICRO = (char)0xb5;
+	private static final char DEGREES = (char)0xb0;
 	
 	private enum RightAxis 
 	{
@@ -151,7 +157,7 @@ public class ElectronicTiltPlotter extends Plotter
 		{
 			case TEMPERATURE:
 				rightData = data.getThermalData().getData();
-				label = "Temperature (C)";
+				label = "Temperature (" + DEGREES + "C)";
 				unit = "degrees c";
 				break;
 			case VOLTAGE:
