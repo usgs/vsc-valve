@@ -10,6 +10,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/26 17:59:15  tparker
+ * Add timezone for Bug #68
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -31,7 +34,7 @@ public class Menu extends Result
 		sb.append("\t\t<title>" + Valve3.getInstance().getInstallationTitle() + "</title>\n");
 		sb.append("\t\t<administrator><![CDATA[" + Valve3.getInstance().getAdministrator() + "]]></administrator>\n");
 		sb.append("\t\t<administrator-email><![CDATA[" + Valve3.getInstance().getAdministratorEmail() + "]]></administrator-email>\n");
-		sb.append("\t\t<timeZoneAbbr><![CDATA[" + Valve3.getInstance().getTimeZoneAbbr() + "]]></timeZoneAbbr>\n");
+		sb.append("\t\t<timeZoneAbbr>" + Valve3.getInstance().getTimeZoneAbbr() + "</timeZoneAbbr>\n");
 		sb.append("\t\t<version>" + Valve3.VERSION + ", " + Valve3.BUILD_DATE + "</version>\n");
 		sb.append("\t\t<sections>\n");
 		
