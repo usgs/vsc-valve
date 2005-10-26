@@ -17,6 +17,9 @@ import java.util.HashMap;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/07 16:46:32  dcervelli
+ * Added 0-length channel check.
+ *
  * Revision 1.2  2005/08/29 22:54:04  dcervelli
  * Totally refactored; input validation.
  *
@@ -41,8 +44,8 @@ public class HelicorderPlotter extends Plotter
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("selector", settings.channel);
-		params.put("st", Double.toString(settings.startTime));
-		params.put("et", Double.toString(settings.endTime));
+		params.put("st", Double.toString(settings.startTime + (Valve3.getInstance().getTimeZone() * 60 * 60)));
+		params.put("et", Double.toString(settings.endTime + (Valve3.getInstance().getTimeZone() * 60 * 60)));
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
