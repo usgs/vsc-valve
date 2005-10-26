@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/10/26 17:59:15  tparker
+ * Add timezone for Bug #68
+ *
  * Revision 1.4  2005/10/14 21:08:04  dcervelli
  * Version bump.
  *
@@ -77,7 +80,9 @@ public class Valve3 implements ServletContextListener
 		String tz = config.getString("timeZone");
 		if (tz != null) 
 			timeZone = Integer.parseInt(tz);
+		logger.config("timeZone: " + timeZone);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
+		logger.config("timeZoneAbbr: " + timeZoneAbbr);
 		
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
