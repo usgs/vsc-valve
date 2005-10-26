@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/10/14 21:08:04  dcervelli
+ * Version bump.
+ *
  * Revision 1.3  2005/10/13 20:34:56  dcervelli
  * Version bump.
  *
@@ -42,6 +45,8 @@ public class Valve3 implements ServletContextListener
 	private String administrator = "Administrator";
 	private String administratorEmail = "admin@usgs.gov";
 	private String installationTitle = "Valve Installation";
+	private int timeZone = 0;
+	private String timeZoneAbbr = "GMT";
 	
 	private GeoImageSet imageSet;
 	private GeoLabelSet labelSet;
@@ -69,6 +74,10 @@ public class Valve3 implements ServletContextListener
 		logger.config("admin.email: " + administratorEmail);
 		installationTitle = config.getString("title");
 		logger.config("title: " + installationTitle);
+		String tz = config.getString("timeZone");
+		if (tz != null) 
+			timeZone = Integer.parseInt(tz);
+		timeZoneAbbr = config.getString("timeZoneAbbr");
 		
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
@@ -132,6 +141,16 @@ public class Valve3 implements ServletContextListener
 	public String getInstallationTitle()
 	{
 		return installationTitle;
+	}
+	
+	public String getTimeZoneAbbr()
+	{
+		return timeZoneAbbr;
+	}
+	
+	public int getTimeZone()
+	{
+		return timeZone;
 	}
 	
 	public GeoImageSet getGeoImageSet()
