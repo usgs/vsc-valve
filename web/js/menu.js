@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.3 2005-10-04 23:41:34 dcervelli Exp $
+// $Id: menu.js,v 1.4 2005-10-26 18:01:15 tparker Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -91,6 +91,7 @@ function handleMenu(xml)
 	document.title = inst;
 	
 	document.getElementById('appTitle').appendChild(document.createTextNode(inst));
+	document.getElementById('timeZoneAbbr').appendChild(document.createTextNode(getXMLField(xml, "timeZoneAbbr"));
 	setAdmin(getXMLField(xml, "administrator"), getXMLField(xml, "administrator-email"));
 	document.getElementById('version').appendChild(document.createTextNode("Valve " + getXMLField(xml, "version")));
 }
