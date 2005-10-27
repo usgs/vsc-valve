@@ -19,6 +19,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class RSAMPlotter extends Plotter
@@ -57,6 +60,7 @@ public class RSAMPlotter extends Plotter
 		plot.setBackgroundColor(Color.white);
 		
 		Data d = new Data(rd.getData().toArray());
+		d.setTimeZone(Valve3.getInstance().getTimeZoneOffset());
 		
 		double dmax = d.getMax(1);
 		double mean = d.getMean(1);
