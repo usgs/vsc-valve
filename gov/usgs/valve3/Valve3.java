@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/10/26 18:18:15  tparker
+ * Add logging related to Bug #68
+ *
  * Revision 1.5  2005/10/26 17:59:15  tparker
  * Add timezone for Bug #68
  *
@@ -153,7 +156,7 @@ public class Valve3 implements ServletContextListener
 		return timeZoneAbbr;
 	}
 	
-	public int getTimeZone()
+	public int getTimeZoneOffset()
 	{
 		return timeZone;
 	}

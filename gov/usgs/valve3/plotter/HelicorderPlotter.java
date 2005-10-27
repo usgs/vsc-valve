@@ -17,6 +17,9 @@ import java.util.HashMap;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/10/26 23:14:09  tparker
+ * bug #68
+ *
  * Revision 1.3  2005/10/07 16:46:32  dcervelli
  * Added 0-length channel check.
  *
@@ -44,8 +47,8 @@ public class HelicorderPlotter extends Plotter
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("selector", settings.channel);
-		params.put("st", Double.toString(settings.startTime + (Valve3.getInstance().getTimeZone() * 60 * 60)));
-		params.put("et", Double.toString(settings.endTime + (Valve3.getInstance().getTimeZone() * 60 * 60)));
+		params.put("st", Double.toString(settings.startTime));
+		params.put("et", Double.toString(settings.endTime));
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
@@ -100,8 +103,9 @@ public class HelicorderPlotter extends Plotter
 		getData();
 		HelicorderRenderer heliRenderer = new HelicorderRenderer();
 		heliRenderer.setData(data);
+		settings.timeZoneAbbr = Valve3.getInstance().getTimeZoneAbbr();
+		settings.timeZoneOffset = Valve3.getInstance().getTimeZoneOffset();
 		settings.applySettings(heliRenderer, data);
-		
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
 		plot.addRenderer(heliRenderer);
