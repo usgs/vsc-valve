@@ -19,6 +19,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/27 21:35:26  tparker
+ * Add timezone per bug #68
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -59,8 +62,13 @@ public class RSAMPlotter extends Plotter
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
 		
-		Data d = new Data(rd.getData().toArray());
-		d.setTimeZone(Valve3.getInstance().getTimeZoneOffset());
+		double[][] dd = rd.getData().toArray();
+        for (int i = 0; i < dd.length; i++)
+        	dd[i][0] +=  Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+
+        start += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+        end += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		Data d = new Data(dd);
 		
 		double dmax = d.getMax(1);
 		double mean = d.getMean(1);
@@ -76,7 +84,7 @@ public class RSAMPlotter extends Plotter
 		dr.createDefaultLegendRenderer(new String[] {ch + " RSAM"});
 		dr.setXAxisToTime(8);
 		dr.getAxis().setLeftLabelAsText("RSAM");
-		dr.getAxis().setBottomLabelAsText("Time");//(Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMinTime())) +
+		dr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");//(Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMinTime())) +
 //				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMaxTime())) + ")");
 		plot.addRenderer(dr);
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
