@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/10/07 19:43:21  dcervelli
+ * Capped data requests at 24 hours.
+ *
  * Revision 1.5  2005/10/07 16:55:18  dcervelli
  * Fixed y-axis label on spectrogram.
  *
@@ -95,6 +98,7 @@ public class WavePlotter extends Plotter
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		Wave w = (Wave)client.getData(params);
+		w.setStartTime(startTime + Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 		pool.checkin(client);
 		
 		if (w == null)
@@ -128,6 +132,8 @@ public class WavePlotter extends Plotter
 		
 		wave = new SliceWave(w);
 		wave.setSlice(startTime, endTime);
+		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
 	
 	public void getInputs() throws Valve3Exception
@@ -205,6 +211,7 @@ public class WavePlotter extends Plotter
 		wr.setMinY(wave.min() - bias);
 		wr.setMaxY(wave.max() - bias);
 		wr.update();
+		wr.getAxis().setBottomLeftLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
 		component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(wr);
@@ -242,7 +249,7 @@ public class WavePlotter extends Plotter
 		sr.createDefaultAxis(8, 8, false, false);
 		sr.setXAxisToTime(8);
 		sr.getAxis().setLeftLabelAsText("Frequency (Hz)");
-		sr.getAxis().setBottomLabelAsText("Time");// (Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(time1 + Valve.getTimeZoneAdj())) +
+		sr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");// (Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(time1 + Valve.getTimeZoneAdj())) +
 //				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(time2 + Valve.getTimeZoneAdj())) + ")");
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
