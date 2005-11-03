@@ -1,4 +1,4 @@
-// $Id: time.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: time.js,v 1.2 2005-11-03 20:18:54 tparker Exp $
 
 function getTimes(maxDiff)
 {
@@ -186,7 +186,9 @@ function validateDate(textField, start)
 	
 function buildTimeString(tIn)
 {
-	var t = Math.round(1000*tIn) + 946728000000;// - (timeZoneAdj * 1000);//+ 36000000;
+	//var t = Math.round(1000*tIn) + 946728000000;// - (document.getElementById('timeZoneOffset') * 60 * 60 * 1000);//+ 36000000;	
+	var t = Math.round(1000*tIn) + 946728000000 + (document.getElementById('timeZoneOffset').value * 60 * 60 * 1000);//+ 36000000;	
+	
 	var time = new Date(t);
 	var mo = (time.getUTCMonth() + 1 < 10 ? "0" + (time.getUTCMonth() + 1) : (time.getUTCMonth() + 1));
 	var da = (time.getUTCDate() < 10 ? "0" + time.getUTCDate() : time.getUTCDate());
