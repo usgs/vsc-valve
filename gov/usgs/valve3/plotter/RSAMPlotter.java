@@ -19,6 +19,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/11/01 00:59:49  tparker
+ * Add timezone per bug#68
+ *
  * Revision 1.2  2005/10/27 21:35:26  tparker
  * Add timezone per bug #68
  *
