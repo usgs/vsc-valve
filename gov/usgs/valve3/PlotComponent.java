@@ -9,6 +9,9 @@ import java.util.TimeZone;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/11/03 18:46:22  tparker
+ * Convert input times for bug #68
+ *
  * Revision 1.2  2005/09/05 00:39:31  dcervelli
  * Got rid of unnecessary tabs.
  *
@@ -123,7 +126,7 @@ public class PlotComponent
 		if (st == null)
 			return Double.NaN;
 		else 
-			return parseTime(st, end)- (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
+			return parseTime(st, end);
 	}
 	
 	// TODO: does this allow startTime > endTime?
@@ -133,7 +136,7 @@ public class PlotComponent
 		if (et == null)
 			return Double.NaN;
 		else
-			return parseTime(et, Double.NaN)- (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
+			return parseTime(et, Double.NaN);
 	}
 	
 	/** Parses the time.
@@ -159,7 +162,7 @@ public class PlotComponent
 					return end - ((double)ms/1000);
 			}
 			else if (t.length() == 17)
-				return Util.dateToJ2K(dateIn.parse(t));
+				return Util.dateToJ2K(dateIn.parse(t)) - (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 				//return  Util.dateToJ2K(dateIn.parse(t)) - (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);// - Valve3.getTimeZoneAdj();
 		}
 		catch (Exception e)
