@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/20 05:11:10  dcervelli
+ * Support for generic menus.
+ *
  * Revision 1.2  2005/10/13 20:35:13  dcervelli
  * Changes for plotterConfig.
  *
@@ -30,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DataHandler implements HttpHandler
 {
 	private static final String CONFIG_FILE = "data.config";
+	private static final int DEFAULT_VDX_CLIENT_TIMEOUT = 60000;
 	
 	protected Map<String, DataSourceDescriptor> dataSources;
 	protected Map<String, Pool<VDXClient>> vdxClients;
@@ -56,6 +60,8 @@ public class DataHandler implements HttpHandler
 			for (int i = 0; i < num; i++)
 			{
 				VDXClient client = new VDXClient(sub.getString("host"), Integer.parseInt(sub.getString("port")));
+				int timeout = Util.stringToInt(sub.getString("timeout"), DEFAULT_VDX_CLIENT_TIMEOUT);
+				client.setTimeout(timeout);
 				pool.checkin(client);
 			}
 			vdxClients.put(vdx, pool);
