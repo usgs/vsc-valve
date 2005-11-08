@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/20 17:26:45  dcervelli
+ * More development.
+ *
  * Revision 1.1  2005/10/20 05:10:09  dcervelli
  * Initial commit.
  *
@@ -64,6 +67,9 @@ public class GenericPlotter extends Plotter
 		
 		if (data == null || data.rows() == 0)
 			throw new Valve3Exception("No data.");
+		data.adjustTime(Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
+		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
 	
 	private void getInputs() throws Valve3Exception
