@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/10/07 17:14:30  dcervelli
+ * Added top label with number of earthquakes and date range to counts plot.
+ *
  * Revision 1.6  2005/10/07 17:10:10  dcervelli
  * Added top label with number of earthquakes and date range.
  *
@@ -278,7 +281,7 @@ public class HypocenterPlotter extends Plotter
 		hr.createDefaultAxis(8, 8, false, true);
 		hr.setXAxisToTime(8);
 		hr.getAxis().setTopLabelAsText(getTopLabel());
-		hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
+		hr.getAxis().setLeftLabelAsText("Located Earthquakes per " + bin);
 		hr.getAxis().setBottomLabelAsText("Time");
 		plot.addRenderer(hr);
 		
