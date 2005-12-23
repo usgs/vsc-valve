@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.6 2005-11-03 20:18:54 tparker Exp $
+// $Id: menu.js,v 1.7 2005-12-23 19:20:39 tparker Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -273,6 +273,7 @@ function timeShortcutClick(event)
 		var sc = target.firstChild.nodeValue;
 		var re = sc.match(t);
 		document.getElementById("startTime").value = re[1];
+		document.getElementById('endTime').value = 'Now';
 		toggleTimeShortcutPanel();
 	}
 }
