@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2005/12/22 01:18:26  tparker
+ * Changed X-Axis label on histogram
+ *
  * Revision 1.7  2005/10/07 17:14:30  dcervelli
  * Added top label with number of earthquakes and date range to counts plot.
  *
@@ -383,6 +386,9 @@ public class HypocenterPlotter extends Plotter
 				bin = BinSize.fromString(bs);
 				if (bin == null)
 					throw new Valve3Exception("Illegal bin size option.");
+				
+				if ((endTime - startTime)/bin.toSeconds() > 1000)
+					throw new Valve3Exception("Bin size too small.");
 				
 				rightAxis = RightAxis.fromString(component.get("cntsAxis"));
 				if (rightAxis == null)
