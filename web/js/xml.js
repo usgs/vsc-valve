@@ -1,4 +1,4 @@
-// $Id: xml.js,v 1.3 2005-09-06 20:18:31 dcervelli Exp $
+// $Id: xml.js,v 1.4 2005-12-23 19:24:59 tparker Exp $
 
 var numLoading = 0;
 function loadXML(title, url, func)
@@ -112,5 +112,21 @@ function xmlToHTML(doc, tree)
 	
 		if (tree.tagName)
 			doc.write("&lt;/" + tree.tagName + "&gt;<br>");
+	} 
+}
+
+function xmlToURL(doc, tree)
+{
+	if (tree)
+	{
+		if (tree.tagName == "url")
+			return tree.childNodes[0].data;
+		
+		for (var i = 0; i < tree.childNodes.length; i++)
+		{
+			var url = xmlToURL(doc, tree.childNodes[i]);
+			if (url.length != "undefined")
+				return url;
+		}
 	} 
 }
