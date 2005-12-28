@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/11/08 23:31:09  tparker
+ * Adjust for timzone bug #68
+ *
  * Revision 1.2  2005/10/20 17:26:45  dcervelli
  * More development.
  *
@@ -231,4 +234,24 @@ public class GenericPlotter extends Plotter
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
+	
+	public String toCSV(PlotComponent comp) throws Valve3Exception
+	{
+		
+		HashMap<String, String> params = new HashMap<String, String>();
+		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client = pool.checkout();
+		
+		params.put("source", vdxSource);
+		params.put("action", "genericMenu");
+		menu = new GenericMenu((List<String>)client.getData(params));
+		pool.checkin(client);
+		
+		component = comp;
+		getInputs();
+		getData();
+		
+		return data.getData().toString();
+	}
+
 }

@@ -6,6 +6,7 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.heli.HelicorderData;
@@ -14,9 +15,13 @@ import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/10/27 00:16:04  tparker
+ * Bug #68
+ *
  * Revision 1.4  2005/10/26 23:14:09  tparker
  * bug #68
  *
@@ -117,4 +122,12 @@ public class HelicorderPlotter extends Plotter
 		String ch = settings.channel.replace('$', ' ').replace('_', ' ');
 		v3Plot.setTitle("Helicorder: " + ch);
 	}
+	
+	public String toCSV(PlotComponent c) throws Valve3Exception
+	{
+		getInputs();
+		getData();
+		return data.toCSV();
+	}
+
 }

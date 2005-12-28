@@ -8,6 +8,8 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.rsam.RSAMData;
@@ -19,6 +21,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/11/03 20:26:16  tparker
+ * commit due to repository weirdness. no functional changes
+ *
  * Revision 1.3  2005/11/01 00:59:49  tparker
  * Add timezone per bug#68
  *
@@ -32,6 +37,8 @@ import java.util.HashMap;
  */
 public class RSAMPlotter extends Plotter
 {
+	
+	
 	public RSAMPlotter()
 	{}
 		
@@ -97,4 +104,48 @@ public class RSAMPlotter extends Plotter
 		
 		v3Plot.setTitle("RSAM: " + ch);
 	}
+	
+	public String toCSV(PlotComponent component) throws Valve3Exception
+	{
+		double end = component.getEndTime();
+		double start = component.getStartTime(end);
+		if (Double.isNaN(start) || Double.isNaN(end))
+		{
+			// return an error
+			throw new Valve3Exception("Bad start or end time.");
+		}
+		
+		String channel = component.get("ch");
+		String ch = channel.replace('$', ' ').replace('_', ' ');
+		double period = Double.parseDouble(component.get("period"));
+		
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("selector", channel);
+		params.put("period", Double.toString(period));
+		params.put("st", Double.toString(start));
+		params.put("et", Double.toString(end));
+
+		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client = pool.checkout();
+		RSAMData rd = (RSAMData)client.getData(params);
+		pool.checkin(client);
+		
+		double[][] dd = rd.getData().toArray();
+        for (int i = 0; i < dd.length; i++)
+        	dd[i][0] +=  Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+
+        start += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+        end += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		Data d = new Data(dd);
+		
+		double dmax = d.getMax(1);
+		double mean = d.getMean(1);
+		
+		double max = Math.min(2 * mean, dmax);
+		
+		return d.toCSV();
+	
+	}
+
 }

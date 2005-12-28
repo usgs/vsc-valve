@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/11/02 20:30:35  tparker
+ * set local timezone per bug #68
+ *
  * Revision 1.6  2005/10/07 19:43:21  dcervelli
  * Capped data requests at 24 hours.
  *
@@ -284,4 +287,13 @@ public class WavePlotter extends Plotter
 		String ch = channel.replace('$', ' ').replace('_', ' ');
 		v3Plot.setTitle("Wave: " + ch);
 	}
+	
+	public String toCSV(PlotComponent comp) throws Valve3Exception
+	{
+		component = comp;
+		getInputs();
+		getData();
+		return wave.toCSV();
+	}
+
 }
