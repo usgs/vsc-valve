@@ -1,26 +1,38 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.Data;
 import gov.usgs.plot.DataRenderer;
+import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.Renderer;
+import gov.usgs.plot.ShapeRenderer;
+import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.rsam.RSAMData;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
 
+import cern.colt.matrix.DoubleMatrix2D;
+
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/12/28 02:13:31  tparker
+ * Add toCSV method to support raw data export
+ *
  * Revision 1.4  2005/11/03 20:26:16  tparker
  * commit due to repository weirdness. no functional changes
  *
@@ -38,64 +50,59 @@ import java.util.HashMap;
 public class RSAMPlotter extends Plotter
 {
 	
-	
+	private enum PlotType 
+	{
+		VALUES, COUNTS;
+		
+		public static PlotType fromString(String s)
+		{
+			if (s == null)
+				return null;
+			
+			if (s.equals("values"))
+				return VALUES;
+			else if (s.equals("cnts"))
+				return COUNTS;
+			else 
+				return null;
+		}
+	}
+
+	private Valve3Plot v3Plot;
+	private PlotComponent component;
+	private double startTime;
+	private double endTime;
+	private String channel;
+	private String ch;
+	private double period;
+	private double threshold;
+	private double ratio;
+	private double maxEventLength;
+	private BinSize bin;
+	private RSAMData rd;
+	private Data d;
+	private double dmax;
+	private double mean;
+	private double max;
+	private PlotType type;
+
 	public RSAMPlotter()
 	{}
-		
-	public void plot(Valve3Plot v3Plot, PlotComponent component)
-	{
-		v3Plot.setFilename(PlotHandler.getRandomFilename());
-		double end = component.getEndTime();
-		double start = component.getStartTime(end);
-		if (Double.isNaN(start) || Double.isNaN(end))
-		{
-			// return an error
-			return;
-		}
-		
-		String channel = component.get("ch");
-		String ch = channel.replace('$', ' ').replace('_', ' ');
-		double period = Double.parseDouble(component.get("period"));
-		
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("source", vdxSource);
-		params.put("selector", channel);
-		params.put("period", Double.toString(period));
-		params.put("st", Double.toString(start));
-		params.put("et", Double.toString(end));
-
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		RSAMData rd = (RSAMData)client.getData(params);
-		pool.checkin(client);
-		
-		Plot plot = v3Plot.getPlot();
-		plot.setBackgroundColor(Color.white);
-		
-		double[][] dd = rd.getData().toArray();
-        for (int i = 0; i < dd.length; i++)
-        	dd[i][0] +=  Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-
-        start += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-        end += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		Data d = new Data(dd);
-		
-		double dmax = d.getMax(1);
-		double mean = d.getMean(1);
-		
-		double max = Math.min(2 * mean, dmax);
 	
+	private void plotValues()
+	{	
+		Plot plot = v3Plot.getPlot();
+		
 		DataRenderer dr = new DataRenderer(d);
 		dr.setUnit("rsam");
 		dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		dr.setExtents(start, end, d.getMinData(), max);
+		dr.setExtents(startTime, endTime, d.getMinData(), max);
 		dr.createDefaultAxis(8, 8, false, true);
 		dr.createDefaultLineRenderers();
 		dr.createDefaultLegendRenderer(new String[] {ch + " RSAM"});
 		dr.setXAxisToTime(8);
 		dr.getAxis().setLeftLabelAsText("RSAM");
-		dr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");//(Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMinTime())) +
-//				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(d.getMaxTime())) + ")");
+		dr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
 		plot.addRenderer(dr);
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 		component.setTranslation(dr.getDefaultTranslation(plot.getHeight()));
@@ -105,47 +112,166 @@ public class RSAMPlotter extends Plotter
 		v3Plot.setTitle("RSAM: " + ch);
 	}
 	
-	public String toCSV(PlotComponent component) throws Valve3Exception
-	{
-		double end = component.getEndTime();
-		double start = component.getStartTime(end);
-		if (Double.isNaN(start) || Double.isNaN(end))
+	private void plotEvents()
+	{	
+		Plot plot = v3Plot.getPlot();
+		
+		rd.countEvents(threshold, ratio, maxEventLength);
+		
+		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
+		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		hr.setUnit("events per time");
+		hr.setDefaultExtents();
+		hr.setMinX(startTime);
+		hr.setMaxX(endTime);
+		hr.createDefaultAxis(8, 8, false, true);
+		hr.setXAxisToTime(8);
+		hr.getAxis().setLeftLabelAsText("Events per " + bin);
+		hr.getAxis().setBottomLabelAsText("Time");
+		plot.addRenderer(hr);
+		
+		DoubleMatrix2D data = null;
+		
+		data = rd.getCumulativeCounts();
+		if (data != null && data.rows() > 0)
 		{
-			// return an error
-			throw new Valve3Exception("Bad start or end time.");
+			
+			Data countData = new Data(data.toArray());
+			DataRenderer dr = new DataRenderer(countData);
+			dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+			dr.createDefaultLineRenderers();
+			
+			Renderer[] r = dr.getLineRenderers();
+			((ShapeRenderer)r[0]).color = Color.red;
+			((ShapeRenderer)r[0]).stroke = new BasicStroke(2.0f);
+			double cmin = countData.getData()[0][1];
+			double cmax = countData.getData()[data.rows() - 1][1];		
+			dr.setExtents(startTime, endTime, cmin, cmax+1);
+			AxisRenderer ar = new AxisRenderer(dr);
+			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+			dr.setAxis(ar);
+			
+			hr.addRenderer(dr);
+			hr.getAxis().setRightLabelAsText("Cumulative Counts");
+			System.out.println("CC" + cmin + " :: " + cmax);
 		}
 		
-		String channel = component.get("ch");
-		String ch = channel.replace('$', ' ').replace('_', ' ');
-		double period = Double.parseDouble(component.get("period"));
+		plot.writePNG(v3Plot.getLocalFilename());
+		component.setTranslation(hr.getDefaultTranslation(plot.getHeight()));
+		component.setTranslationType("ty");
+		v3Plot.addComponent(component);
 		
+		v3Plot.setTitle("RSAM Events " + ch);
+	}
+	
+	private void getInputs() throws Valve3Exception
+	{
+		endTime = component.getEndTime();
+		if (Double.isNaN(endTime))
+				throw new Valve3Exception("Illegal end time.");
+		startTime = component.getStartTime(endTime);
+		if (Double.isNaN(startTime))
+			throw new Valve3Exception("Illegal start time.");
+
+		channel = component.get("ch");
+		ch = channel.replace('$', ' ').replace('_', ' ');
+		
+		type = PlotType.fromString(component.get("type"));
+		if (type == null)
+			throw new Valve3Exception("Illegal plot type.");
+		
+		switch(type)
+		{
+		case VALUES:
+			period = Double.parseDouble(component.get("period"));
+			if (period == 0)
+				throw new Valve3Exception("Illegal period.");
+				
+			break;
+		case COUNTS:
+			period = Double.parseDouble(component.get("period"));
+			if (period == 0)
+				throw new Valve3Exception("Illegal period.");
+			threshold = Double.parseDouble(component.get("threshold"));
+			if (threshold == 0)
+				throw new Valve3Exception("Illegal threshold.");
+			
+			ratio = Double.parseDouble(component.get("ratio"));
+			if (ratio == 0)
+				throw new Valve3Exception("Illegal ratio.");
+			
+			maxEventLength = Double.parseDouble(component.get("maxEventLength"));
+
+			String bs = Util.stringToString(component.get("cntsBin"), "day");
+			bin = BinSize.fromString(bs);
+			if (bin == null)
+				throw new Valve3Exception("Illegal bin size option.");
+			if ((endTime - startTime)/bin.toSeconds() > 1000)
+				throw new Valve3Exception("Bin size too small.");
+
+			break;
+		}
+	}
+	
+	private void getData() throws Valve3Exception
+	{
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("selector", channel);
 		params.put("period", Double.toString(period));
-		params.put("st", Double.toString(start));
-		params.put("et", Double.toString(end));
+		params.put("st", Double.toString(startTime));
+		params.put("et", Double.toString(endTime));
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		RSAMData rd = (RSAMData)client.getData(params);
+		if (client == null)
+			return;
+		rd = (RSAMData)client.getData(params);
 		pool.checkin(client);
+		//System.out.println("data.toStringShort() = " + rd.getData().toStringShort());
+		if (rd == null)
+			throw new Valve3Exception("No data");
 		
-		double[][] dd = rd.getData().toArray();
-        for (int i = 0; i < dd.length; i++)
-        	dd[i][0] +=  Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+        startTime += TZOffset;
+        endTime += TZOffset;
+        rd.adjustTime(TZOffset);
+        
+        d = new Data(rd.getData().toArray());
+		dmax = d.getMax(1);
+		mean = d.getMean(1);
+		max = Math.min(2 * mean, dmax);
+	}
+	
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
+	{
+		v3Plot = v3p;
+		component = comp;
+		getInputs();
+		getData();
 
-        start += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-        end += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		Data d = new Data(dd);
+		v3Plot.setFilename(PlotHandler.getRandomFilename());
+
+		Plot plot = v3Plot.getPlot();
+		plot.setBackgroundColor(Color.white);
 		
-		double dmax = d.getMax(1);
-		double mean = d.getMean(1);
-		
-		double max = Math.min(2 * mean, dmax);
+		switch(type)
+		{
+			case VALUES:
+				plotValues();
+				break;
+			case COUNTS:
+				plotEvents();
+				break;
+		}
+	}
+	
+	public String toCSV(PlotComponent component) throws Valve3Exception
+	{
+		getInputs();
+		getData();
 		
 		return d.toCSV();
-	
 	}
 
 }
