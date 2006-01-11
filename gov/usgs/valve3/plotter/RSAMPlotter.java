@@ -30,6 +30,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/01/10 20:53:15  tparker
+ * Add RSAM event counts
+ *
  * Revision 1.5  2005/12/28 02:13:31  tparker
  * Add toCSV method to support raw data export
  *
@@ -153,7 +156,6 @@ public class RSAMPlotter extends Plotter
 			
 			hr.addRenderer(dr);
 			hr.getAxis().setRightLabelAsText("Cumulative Counts");
-			System.out.println("CC" + cmin + " :: " + cmax);
 		}
 		
 		plot.writePNG(v3Plot.getLocalFilename());
@@ -161,7 +163,7 @@ public class RSAMPlotter extends Plotter
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		
-		v3Plot.setTitle("RSAM Events " + ch);
+		v3Plot.setTitle("RSAM Events: " + ch);
 	}
 	
 	private void getInputs() throws Valve3Exception
@@ -183,13 +185,13 @@ public class RSAMPlotter extends Plotter
 		switch(type)
 		{
 		case VALUES:
-			period = Double.parseDouble(component.get("period"));
+			period = Double.parseDouble(component.get("valuesPeriod"));
 			if (period == 0)
 				throw new Valve3Exception("Illegal period.");
 				
 			break;
 		case COUNTS:
-			period = Double.parseDouble(component.get("period"));
+			period = Double.parseDouble(component.get("countsPeriod"));
 			if (period == 0)
 				throw new Valve3Exception("Illegal period.");
 			threshold = Double.parseDouble(component.get("threshold"));
