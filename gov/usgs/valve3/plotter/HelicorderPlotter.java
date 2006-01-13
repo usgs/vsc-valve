@@ -19,6 +19,9 @@ import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/12/28 02:13:23  tparker
+ * Add toCSV method to support raw data export
+ *
  * Revision 1.5  2005/10/27 00:16:04  tparker
  * Bug #68
  *
@@ -83,6 +86,8 @@ public class HelicorderPlotter extends Plotter
 		String clip = component.get("sc");
 		if (clip != null && clip.toUpperCase().equals("T"))
 			settings.showClip = true;
+		
+		settings.barMult = Float.parseFloat(component.get("barMult"));
 
 		settings.timeChunk = -1;
 		try { settings.timeChunk = Integer.parseInt(component.get("tc")) * 60; } catch (Exception e) {}
