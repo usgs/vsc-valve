@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/01/27 22:18:33  tparker
+ * Add configure options for wave plotter
+ *
  * Revision 1.9  2006/01/27 20:56:28  tparker
  * Add configure options for wave plotter
  *
@@ -93,6 +96,7 @@ public class WavePlotter extends Plotter
 	private int labels;
 	private int yLabel;
 	private int xLabel;
+	private String color;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -223,6 +227,13 @@ public class WavePlotter extends Plotter
 		}
 		catch (Exception e) {}
 		
+		color = "A";
+		try
+		{
+			color = component.get("color");
+		}
+		catch (Exception e) {}
+
 	}
 	
 	private void plotWaveform()
@@ -232,7 +243,7 @@ public class WavePlotter extends Plotter
 		wr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		wr.setWave(wave);
 		wr.setViewTimes(startTime, endTime);
-		if (component.get("color").equals("M"))
+		if (color.equals("M"))
 			wr.setColor(Color.BLACK);
 		
 		double bias = 0;
