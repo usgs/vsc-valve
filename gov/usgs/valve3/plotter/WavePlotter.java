@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2005/12/28 02:13:39  tparker
+ * Add toCSV method to support raw data export
+ *
  * Revision 1.7  2005/11/02 20:30:35  tparker
  * set local timezone per bug #68
  *
@@ -208,13 +211,24 @@ public class WavePlotter extends Plotter
 		wr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		wr.setWave(wave);
 		wr.setViewTimes(startTime, endTime);
+		if (component.get("color").equals("M"))
+			wr.setColor(Color.BLACK);
+		
 		double bias = 0;
 		if (removeBias)
 			bias = wave.mean();
 		wr.setMinY(wave.min() - bias);
 		wr.setMaxY(wave.max() - bias);
-		wr.update();
-		wr.getAxis().setBottomLeftLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		
+		if (component.get("labels") != null && component.get("labels").equals("0"))
+		{
+			wr.setDisplayLabels(false);
+			wr.update();
+		} else {			
+			wr.update();
+			wr.getAxis().setBottomLeftLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		}
+
 		component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(wr);
