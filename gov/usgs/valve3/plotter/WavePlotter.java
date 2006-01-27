@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/01/27 20:56:28  tparker
+ * Add configure options for wave plotter
+ *
  * Revision 1.8  2005/12/28 02:13:39  tparker
  * Add toCSV method to support raw data export
  *
@@ -87,6 +90,9 @@ public class WavePlotter extends Plotter
 	private double maxFreq;
 	private boolean logPower;
 	private boolean logFreq;
+	private int labels;
+	private int yLabel;
+	private int xLabel;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -202,6 +208,21 @@ public class WavePlotter extends Plotter
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
 				throw new Valve3Exception("Illegal minimum/maximum frequencies.");
 		}
+		
+		yLabel = 1;
+		try
+		{
+			yLabel = Integer.parseInt(component.get("yLabel"));
+		}
+		catch (Exception e) {}
+		
+		xLabel = 1;
+		try
+		{
+			xLabel = Integer.parseInt(component.get("xLabel"));
+		}
+		catch (Exception e) {}
+		
 	}
 	
 	private void plotWaveform()
@@ -220,7 +241,7 @@ public class WavePlotter extends Plotter
 		wr.setMinY(wave.min() - bias);
 		wr.setMaxY(wave.max() - bias);
 		
-		if (component.get("labels") != null && component.get("labels").equals("0"))
+		if (labels == 0)
 		{
 			wr.setDisplayLabels(false);
 			wr.update();
@@ -244,7 +265,7 @@ public class WavePlotter extends Plotter
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
-		sr.update(0);
+		
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(sr);
@@ -260,14 +281,36 @@ public class WavePlotter extends Plotter
 		sr.setViewEndTime(endTime);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
+		sr.setYLabel(yLabel);
+		sr.setXLabel(xLabel);
 		//sr.setFftSize();
 		//sr.setTimeZoneOffset(Valve.getTimeZoneAdj());
 		sr.update(0);
-		sr.createDefaultAxis(8, 8, false, false);
-		sr.setXAxisToTime(8);
-		sr.getAxis().setLeftLabelAsText("Frequency (Hz)");
-		sr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");// (Data from " + Valve.DATE_FORMAT.format(Util.j2KToDate(time1 + Valve.getTimeZoneAdj())) +
-//				" to " + Valve.DATE_FORMAT.format(Util.j2KToDate(time2 + Valve.getTimeZoneAdj())) + ")");
+		
+		int yTick = 0;
+		String yString = "";
+		if (yLabel == 1) {
+			yTick = 8;
+			yString = "Frequency (Hz)";
+			
+		} else if (yLabel == 2) {
+			yTick = 5;
+			yString = channel.substring(0, channel.indexOf("$"));
+		}
+		
+		int xTick = 0;
+		String xString = "";
+		if (xLabel == 1) {
+			xTick = 8;
+			xString = "Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")";
+			
+		}
+		
+		sr.createDefaultAxis(xTick, yTick, false, false);
+		sr.getAxis().setLeftLabelAsText(yString);
+		sr.setXAxisToTime(xTick);
+		sr.getAxis().setBottomLabelAsText(xString);
+
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(sr);
