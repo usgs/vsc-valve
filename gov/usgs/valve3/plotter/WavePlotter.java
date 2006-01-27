@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/01/27 22:35:33  tparker
+ * set default color
+ *
  * Revision 1.10  2006/01/27 22:18:33  tparker
  * Add configure options for wave plotter
  *
@@ -227,13 +230,9 @@ public class WavePlotter extends Plotter
 		}
 		catch (Exception e) {}
 		
-		color = "A";
-		try
-		{
-			color = component.get("color");
-		}
-		catch (Exception e) {}
-
+		color = component.get("color");
+		if (color == null)
+			color = "A";
 	}
 	
 	private void plotWaveform()
