@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/01/27 22:39:53  tparker
+ * set default color
+ *
  * Revision 1.11  2006/01/27 22:35:33  tparker
  * set default color
  *
@@ -275,6 +278,7 @@ public class WavePlotter extends Plotter
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
+		sr.update(0);
 		
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
