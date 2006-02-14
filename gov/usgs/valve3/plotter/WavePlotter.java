@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/01/27 22:54:11  tparker
+ * undo unintentional change to spectra
+ *
  * Revision 1.12  2006/01/27 22:39:53  tparker
  * set default color
  *
@@ -120,11 +123,12 @@ public class WavePlotter extends Plotter
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		Wave w = (Wave)client.getData(params);
-		w.setStartTime(startTime + Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 		pool.checkin(client);
 		
 		if (w == null)
 			throw new Valve3Exception("No data available for " + channel + ".");
+		
+		w.setStartTime(startTime + Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 		
 		if (filterType != null)
 		{
