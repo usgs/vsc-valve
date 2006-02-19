@@ -1,4 +1,4 @@
-// $Id: xml.js,v 1.4 2005-12-23 19:24:59 tparker Exp $
+// $Id: xml.js,v 1.5 2006-02-19 00:08:26 dcervelli Exp $
 
 var numLoading = 0;
 function loadXML(title, url, func)
@@ -69,7 +69,7 @@ function addURLLoading()
 {
 	numLoading++;
 	var throbber = document.getElementById('throbber');
-	if (throbber.src.indexOf('.png' != -1))
+	if (throbber && throbber.src.indexOf('.png' != -1))
 	{
 		throbber.src = "images/throbber_anim.gif";			
 	}
@@ -81,7 +81,8 @@ function removeURLLoading(url)
 	if (numLoading <= 0)
 	{
 		var throbber = document.getElementById('throbber');
-		throbber.src = "images/throbber_still.png";			
+		if (throbber)
+			throbber.src = "images/throbber_still.png";			
 	}
 }
 
