@@ -1,4 +1,4 @@
-// $Id: xlat.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: xlat.js,v 1.2 2006-02-19 00:04:02 dcervelli Exp $
 
 var lastTimeClick = 0;
 
@@ -95,6 +95,37 @@ function translate_map(event)
 
 function translate_none(event)
 {}
+
+function forwardTransverseMercator(ox, oy, lon, lat)
+{
+	var a=6378137;
+	var esq=0.00669438;
+	var epsq=esq/(1-esq);
+	var scale=0.9996;
+	var phiO=oy * 0.017453292519943295769236907684886;
+	var lambdaO=ox * 0.017453292519943295769236907684886;
+	var MO = a * (
+	  (1 - esq/4 - 3*esq*esq/64 - 5*esq*esq*esq/256)*phiO -
+	  (3*esq/8 + 3*esq*esq/32 + 45*esq*esq*esq/1024)*Math.sin(2*phiO) +
+	  (15*esq*esq/256 + 45*esq*esq*esq/1024)*Math.sin(4*phiO) -
+	  (35*esq*esq*esq/3072)*Math.sin(6*phiO)
+	  );
+    var phi = lat * 0.017453292519943295769236907684886;
+    var lambda = lon * 0.017453292519943295769236907684886;
+    var N = a / Math.pow(1 - esq * Math.sin(phi) * Math.sin(phi), 0.5);
+    var T = Math.tan(phi) * Math.tan(phi);
+    var C = epsq * Math.cos(phi) * Math.cos(phi);
+    var A = (lambda - lambdaO) * Math.cos(phi);
+    var M = a * (
+	    (1 - esq/4 - 3*esq*esq/64 - 5*esq*esq*esq/256)*phi -
+	    (3*esq/8 + 3*esq*esq/32 + 45*esq*esq*esq/1024)*Math.sin(2*phi) +
+	    (15*esq*esq/256 + 45*esq*esq*esq/1024)*Math.sin(4*phi) -
+	    (35*esq*esq*esq/3072)*Math.sin(6*phi)
+	    );
+    var x = scale*N*(A+(1-T+C)*A*A*A/6+(5-18*T+T*T+72*C-58*epsq)*A*A*A*A*A/120);
+    var y = scale*(M - MO + N*Math.tan(phi)*(A*A/2+(5-T+9*C+4*C*C)*A*A*A*A/24+(61-58*T+T*T+600*C-330*epsq)*A*A*A*A*A*A/720));
+	return new Array(x, y);
+}
 
 function inverseTransverseMercator(ox, oy, x, y)
 {
