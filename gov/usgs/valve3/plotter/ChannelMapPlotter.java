@@ -25,6 +25,9 @@ import java.util.Set;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/07 16:45:53  dcervelli
+ * Added lon/lat labels.
+ *
  * Revision 1.2  2005/09/05 00:40:10  dcervelli
  * Strips channels down to the first space and only plots unique labels.
  *
@@ -103,6 +106,7 @@ public class ChannelMapPlotter extends Plotter
 		mr.createGraticule(8, true);
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
+		v3Plot.setHeight(mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = 0;
 		trans[5] = 0;
