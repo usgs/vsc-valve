@@ -1,4 +1,4 @@
-// $Id: xlat.js,v 1.2 2006-02-19 00:04:02 dcervelli Exp $
+// $Id: xlat.js,v 1.3 2006-02-20 03:47:09 dcervelli Exp $
 
 var lastTimeClick = 0;
 
@@ -66,7 +66,7 @@ function translate_heli(event)
 	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gx, gy);
 }	
 
-function translate_map(event)
+function translate_map(event, func)
 {
 	var ev = getEvent(event);
 	var target = getTarget(ev);
@@ -90,7 +90,10 @@ function translate_map(event)
 	while (ll[0] <= -180)
 		ll[0] += 360;
 		
-	currentMenu.acceptMapClick(target, mxy.x, mxy.y, ll[0], ll[1]);
+	if (func)
+		func(target, mxy.x, mxy.y, ll[0], ll[1]);
+	else if (currentMenu)
+		currentMenu.acceptMapClick(target, mxy.x, mxy.y, ll[0], ll[1]);
 }
 
 function translate_none(event)
