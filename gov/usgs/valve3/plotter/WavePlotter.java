@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/03/14 00:41:05  tparker
+ * Fix missing label bug
+ *
  * Revision 1.14  2006/02/14 18:04:42  tparker
  * Check for null wave data prior to setting it's time.
  *
@@ -231,20 +234,14 @@ public class WavePlotter extends Plotter
 		{
 			yLabel = Integer.parseInt(component.get("yLabel"));
 		}
-		catch (Exception e) 
-		{
-			yLabel = 1;
-		}
+		catch (Exception e){}
 		
 		xLabel = 1;
 		try
 		{
 			xLabel = Integer.parseInt(component.get("xLabel"));
 		}
-		catch (Exception e) 
-		{
-			xLabel = 1;
-		}
+		catch (Exception e){}
 		
 		color = component.get("color");
 		if (color == null)
@@ -267,7 +264,7 @@ public class WavePlotter extends Plotter
 		wr.setMinY(wave.min() - bias);
 		wr.setMaxY(wave.max() - bias);
 		
-		if (labels == 0)
+		if (labels == 1)
 		{
 			wr.setDisplayLabels(false);
 			wr.update();
