@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/02/14 18:04:42  tparker
+ * Check for null wave data prior to setting it's time.
+ *
  * Revision 1.13  2006/01/27 22:54:11  tparker
  * undo unintentional change to spectra
  *
@@ -228,14 +231,20 @@ public class WavePlotter extends Plotter
 		{
 			yLabel = Integer.parseInt(component.get("yLabel"));
 		}
-		catch (Exception e) {}
+		catch (Exception e) 
+		{
+			yLabel = 1;
+		}
 		
 		xLabel = 1;
 		try
 		{
 			xLabel = Integer.parseInt(component.get("xLabel"));
 		}
-		catch (Exception e) {}
+		catch (Exception e) 
+		{
+			xLabel = 1;
+		}
 		
 		color = component.get("color");
 		if (color == null)
