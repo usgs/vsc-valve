@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/09 18:17:49  dcervelli
+ * ConfigFile changes to DataSourceDescriptor.
+ *
  * Revision 1.2  2006/04/09 18:09:19  dcervelli
  * ConfigFile changes.
  *
@@ -26,10 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 public class MenuHandler implements HttpHandler
 {
 	private Map<String, Section> sections;
+	private Map<String, MenuItem> items;
 	
 	public MenuHandler(DataHandler dh)
 	{
 		sections = new HashMap<String, Section>();
+		items = new HashMap<String, MenuItem>();
 		
 		ConfigFile config = dh.getConfig();
 		List<String> ss = config.getList("section");
@@ -54,6 +59,7 @@ public class MenuHandler implements HttpHandler
 					int sortOrder = Integer.parseInt(cf.getString("sortOrder"));
 					MenuItem item = new MenuItem(dsd.getName(), name, "", menu, sortOrder);
 					section.addMenuItem(item);
+					items.put(item.menuId, item);
 				}
 			}
 		}
@@ -68,6 +74,11 @@ public class MenuHandler implements HttpHandler
 			list.add(section);
 		
 		return list;
+	}
+	
+	public MenuItem getItem(String id)
+	{
+		return items.get(id);
 	}
 	
 	public Object handle(HttpServletRequest request)
