@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/11/04 18:57:36  dcervelli
+ * Added configurable VDX timeout.
+ *
  * Revision 1.3  2005/10/20 05:11:10  dcervelli
  * Support for generic menus.
  *
@@ -125,7 +128,7 @@ public class DataHandler implements HttpHandler
 			GenericMenu result = null;
 			if (client != null)
 			{
-				List<String> ls = (List<String>)client.getData(params);
+				List<String> ls = client.getTextData(params);
 				if (ls != null)
 					result = new GenericMenu(ls);
 			}
@@ -145,7 +148,7 @@ public class DataHandler implements HttpHandler
 			gov.usgs.valve3.result.List result = null;
 			if (client != null)
 			{
-				List<String> ls = (List<String>)client.getData(params);
+				List<String> ls = client.getTextData(params);
 				result = new gov.usgs.valve3.result.List(ls);
 			}
 			pool.checkin(client);
