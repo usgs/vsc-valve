@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:41:31  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class MenuHandler implements HttpHandler
@@ -34,20 +37,18 @@ public class MenuHandler implements HttpHandler
 		}
 		
 		List<DataSourceDescriptor> sources = dh.getDataSources();
-//		for (Iterator it = sources.iterator(); it.hasNext(); )
 		for (DataSourceDescriptor dsd : sources)
 		{
-//			DataSourceDescriptor dsd = (DataSourceDescriptor)it.next();
-			Map<String, Object> params = dsd.getParams();
-			String sec = (String)params.get("section");
+			ConfigFile cf = new ConfigFile(dsd.getParams());
+			String sec = cf.getString("section");
 			if (sec != null)
 			{
 				Section section = sections.get(sec);
 				if (section != null)
 				{
-					String menu = (String)params.get("menu");
-					String name = (String)params.get("name");
-					int sortOrder = Integer.parseInt((String)params.get("sortOrder"));
+					String menu = cf.getString("menu");
+					String name = cf.getString("name");
+					int sortOrder = Integer.parseInt(cf.getString("sortOrder"));
 					MenuItem item = new MenuItem(dsd.getName(), name, "", menu, sortOrder);
 					section.addMenuItem(item);
 				}
@@ -60,11 +61,9 @@ public class MenuHandler implements HttpHandler
 	public List<Section> getSections()
 	{
 		ArrayList<Section> list = new ArrayList<Section>();
-		//for (Iterator it = sections.values().iterator(); it.hasNext(); )
 		for (Section section : sections.values())
 			list.add(section);
 		
-		//Collections.sort(list);
 		return list;
 	}
 	
