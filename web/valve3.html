@@ -28,18 +28,28 @@
 			addListener(document.getElementById('submit'), 'click', doSubmit, false);
 			addListener(document.getElementById('deleteAll'), 'click', deleteAll, false);
 			addListener(document.getElementById('nowLink'), 'click', function() { document.getElementById('endTime').value = 'Now'; }, false);
-			
+
 			var b = document.getElementById("channelMapButton");
+			b.disabled = true;
+			
+			addListener(document.getElementById('geoFilter'), 'change', 
+				function()
+				{
+					var wesn = getGeoFilter();
+					b.disabled = wesn == null;
+				});
+			
 			addListener(b, 'click',
 				function()
 				{
-					if (!currentMenu || !currentMenu.allowChannelMap)
-						return;
+					var menu = "";
+					if (currentMenu && currentMenu.allowChannelMap)
+						menu = currentMenu.id;
 					
 					var pr = new PlotRequest();
-					var pc = pr.createComponent(currentMenu.id, 0, 1);
+					var pc = pr.createComponent(menu, 0, 1);
 					pc.src = "channel_map";
-					pc.subsrc = currentMenu.id;
+					pc.subsrc = menu;
 					var wesn = getGeoFilter();
 					if (wesn == null)
 					{
@@ -76,15 +86,18 @@
 		</div>
 
 		<div id="uiPanel">
+			<!-- TODO: rework the data panel to use boxes -->
 			<div id="dataPanel" class="dataPanel">
 				<img class="fl" src="images/folders.gif"><h2>Data Sources</h2>
 				<ul class="menu">
 				</ul>
-				<h1 class="filter">Geographic Filter</h1>				
-				<select id="geoFilter" class="w100p">
-					<option value="[none]">[none]</option>
-				</select>
-				<input type="button" value="Draw Map" id="channelMapButton">
+				<div class="box" style="margin: 0px 0px 4px 0px">
+					<h1 class="filter">Geographic Filter</h1>				
+					<select id="geoFilter" class="w100p">
+						<option value="[none]">[none]</option>
+					</select>
+					<div class="center"><input type="button" value="Draw Map" id="channelMapButton"></div>
+				</div>
 			</div>
 			
 			<div id="openPanel" class="openPanel">
