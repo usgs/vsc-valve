@@ -30,6 +30,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/01/11 00:39:13  tparker
+ * fix period bug
+ *
  * Revision 1.6  2006/01/10 20:53:15  tparker
  * Add RSAM event counts
  *
@@ -228,7 +231,7 @@ public class RSAMPlotter extends Plotter
 		VDXClient client = pool.checkout();
 		if (client == null)
 			return;
-		rd = (RSAMData)client.getData(params);
+		rd = (RSAMData)client.getBinaryData(params);
 		pool.checkin(client);
 		//System.out.println("data.toStringShort() = " + rd.getData().toStringShort());
 		if (rd == null)

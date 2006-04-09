@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/03/14 00:58:39  tparker
+ * revisit previous label fix
+ *
  * Revision 1.15  2006/03/14 00:41:05  tparker
  * Fix missing label bug
  *
@@ -128,7 +131,7 @@ public class WavePlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		Wave w = (Wave)client.getData(params);
+		Wave w = (Wave)client.getBinaryData(params);
 		pool.checkin(client);
 		
 		if (w == null)

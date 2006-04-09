@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/12/28 02:14:23  tparker
+ * Add toCSV method to support raw data export
+ *
  * Revision 1.3  2005/11/08 23:31:09  tparker
  * Adjust for timzone bug #68
  *
@@ -65,7 +68,7 @@ public class GenericPlotter extends Plotter
 		params.put("cid", channel);
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		data = (GenericDataMatrix)client.getData(params);
+		data = (GenericDataMatrix)client.getBinaryData(params);
 		pool.checkin(client);
 		
 		if (data == null || data.rows() == 0)
@@ -216,7 +219,7 @@ public class GenericPlotter extends Plotter
 		
 		params.put("source", vdxSource);
 		params.put("action", "genericMenu");
-		menu = new GenericMenu((List<String>)client.getData(params));
+		menu = new GenericMenu(client.getTextData(params));
 		pool.checkin(client);
 		
 		v3Plot = v3p;
@@ -244,7 +247,7 @@ public class GenericPlotter extends Plotter
 		
 		params.put("source", vdxSource);
 		params.put("action", "genericMenu");
-		menu = new GenericMenu((List<String>)client.getData(params));
+		menu = new GenericMenu(client.getTextData(params));
 		pool.checkin(client);
 		
 		component = comp;

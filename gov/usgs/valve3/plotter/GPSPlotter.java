@@ -43,6 +43,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/10/13 20:35:39  dcervelli
+ * Now gets stid from plotterConfig.
+ *
  * Revision 1.5  2005/10/07 16:46:10  dcervelli
  * Added lon/lat labels.
  *
@@ -140,7 +143,7 @@ public class GPSPlotter extends Plotter
 		for (String bm : bms)
 		{
 			params.put("bm", bm);
-			GPSData data = (GPSData)client.getData(params);
+			GPSData data = (GPSData)client.getBinaryData(params);
 			if (data != null && data.observations() > 0)
 			{
 				gotData = true;
@@ -153,7 +156,7 @@ public class GPSPlotter extends Plotter
 		if (baselineID != null)
 		{
 			params.put("bm", baselineID);
-			baselineData = (GPSData)client.getData(params);
+			baselineData = (GPSData)client.getBinaryData(params);
 			if (baselineData == null || baselineData.observations() == 0)
 				throw new Valve3Exception("No baseline data.");
 		}
@@ -405,7 +408,7 @@ public class GPSPlotter extends Plotter
 				params.put("action", "bms");
 				Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
 				VDXClient cl = pool.checkout();
-				List<String> bms = (List<String>)cl.getData(params);
+				List<String> bms = cl.getTextData(params);
 				pool.checkin(cl);
 				benchmarks = Benchmark.fromStringsToMap(bms);
 				benchmarksMap.put(source, benchmarks);

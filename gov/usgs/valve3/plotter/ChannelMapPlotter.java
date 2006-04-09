@@ -25,6 +25,9 @@ import java.util.Set;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/02/19 00:34:36  dcervelli
+ * Now sets the graph height data properly.
+ *
  * Revision 1.3  2005/10/07 16:45:53  dcervelli
  * Added lon/lat labels.
  *
@@ -69,7 +72,7 @@ public class ChannelMapPlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		List<String> selectors = (List<String>)client.getData(params);
+		List<String> selectors = client.getTextData(params);
 		Set<String> used = new HashSet<String>();
 		labels = new GeoLabelSet();
 		for (String sel : selectors)

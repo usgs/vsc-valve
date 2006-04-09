@@ -6,7 +6,6 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.heli.HelicorderData;
@@ -15,10 +14,12 @@ import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 
 import java.awt.Color;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/01/13 20:35:51  tparker
+ * Add barMult control per bug #50.
+ *
  * Revision 1.6  2005/12/28 02:13:23  tparker
  * Add toCSV method to support raw data export
  *
@@ -60,7 +61,7 @@ public class HelicorderPlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		data = (HelicorderData)client.getData(params);
+		data = (HelicorderData)client.getBinaryData(params);
 		pool.checkin(client);
 	}
 	

@@ -27,6 +27,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/20 05:10:42  dcervelli
+ * Added degrees symbol.
+ *
  * @author Dan Cervelli
  */
 public class ElectronicTiltPlotter extends Plotter
@@ -62,7 +65,7 @@ public class ElectronicTiltPlotter extends Plotter
 	private boolean showRadial = false;
 	private boolean showTangential = false;
 	private boolean showMagnitude = false;
-	private double azimuth = 0;
+//	private double azimuth = 0;
 	
 	public ElectronicTiltPlotter()
 	{}
@@ -87,7 +90,7 @@ public class ElectronicTiltPlotter extends Plotter
 		showRadial = Util.stringToBoolean(component.get("r"));
 		showTangential = Util.stringToBoolean(component.get("t"));
 		showMagnitude = Util.stringToBoolean(component.get("m"));
-		azimuth = Util.stringToDouble(component.get("az"), 0);
+//		azimuth = Util.stringToDouble(component.get("az"), 0);
 	}
 
 	private void getData() throws Valve3Exception
@@ -101,7 +104,7 @@ public class ElectronicTiltPlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		data = (ElectronicTiltData)client.getData(params);
+		data = (ElectronicTiltData)client.getBinaryData(params);
 		pool.checkin(client);
 		
 		if (data == null || data.getTiltData().rows() == 0)

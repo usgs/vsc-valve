@@ -28,6 +28,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: legend.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/24 17:57:22  dcervelli
+ * Working on implementing various tilt features.
+ *
  * Revision 1.1  2005/09/06 20:10:24  dcervelli
  * Initial commit.
  *
@@ -60,7 +63,7 @@ public class TiltPlotter extends Plotter
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		TiltData td = (TiltData)client.getData(params);
+		TiltData td = (TiltData)client.getBinaryData(params);
 		pool.checkin(client);
 		
 		if (td == null || td.rows() == 0)

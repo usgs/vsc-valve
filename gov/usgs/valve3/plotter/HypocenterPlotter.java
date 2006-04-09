@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2005/12/23 00:51:41  tparker
+ * avoid labeling issues described in bug id #86
+ *
  * Revision 1.8  2005/12/22 01:18:26  tparker
  * Changed X-Axis label on histogram
  *
@@ -416,7 +419,7 @@ public class HypocenterPlotter extends Plotter
 		VDXClient client = pool.checkout();
 		if (client == null)
 			return;
-		hypos = (HypocenterList)client.getData(params);
+		hypos = (HypocenterList)client.getBinaryData(params);
 		pool.checkin(client);
 		// allow empty lists
 		if (hypos == null)
