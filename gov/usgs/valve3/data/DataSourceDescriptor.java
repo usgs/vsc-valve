@@ -3,11 +3,12 @@ package gov.usgs.valve3.data;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.valve3.Plotter;
 
-import java.util.Map;
-
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/13 20:35:22  dcervelli
+ * Changes for plotterConfig.
+ *
  * Revision 1.2  2005/08/28 18:59:25  dcervelli
  * Cleaned up.
  *
@@ -23,18 +24,15 @@ public class DataSourceDescriptor
 	private String vdxSource;
 	private String plotterClassName; 
 	
-	private Map<String, Object> params;
-	private ConfigFile plotterConfig;
+	private ConfigFile config;
 	
-	public DataSourceDescriptor(String n, String c, String s, String pc, Map<String, Object> p, ConfigFile cf)
+	public DataSourceDescriptor(String n, String c, String s, String pc, ConfigFile cf)
 	{
 		name = n;
 		vdxClientName = c;
 		vdxSource = s;
 		plotterClassName = pc;
-		plotterConfig = cf;
-		
-		params = p;
+		config = cf;
 	}
 	
 	public String getName()
@@ -52,11 +50,11 @@ public class DataSourceDescriptor
 		return vdxSource;
 	}
 	
-	public Map<String, Object> getParams()
+	public ConfigFile getConfig()
 	{
-		return params;
+		return config;
 	}
-
+	
 	public Plotter getPlotter()
 	{
 		if (plotterClassName == null)
@@ -67,7 +65,7 @@ public class DataSourceDescriptor
 			Plotter plotter = (Plotter)Class.forName(plotterClassName).newInstance();
 			plotter.setVDXClient(vdxClientName);
 			plotter.setVDXSource(vdxSource);
-			plotter.setPlotterConfig(plotterConfig);
+			plotter.setPlotterConfig(config.getSubConfig("plotter"));
 			return plotter;
 		}
 		catch (Exception ex)
