@@ -92,7 +92,7 @@ div.dataPanel
 	padding: 4px;
 	font-family: tahoma;
 	font-size: 11px;
-	margin-bottom: 5px;
+	padding-bottom: 0px;
 }
 
 div.openPanel
