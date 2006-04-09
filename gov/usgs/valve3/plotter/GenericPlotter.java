@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.4  2005/12/28 02:14:23  tparker
  * Add toCSV method to support raw data export
  *
@@ -233,7 +236,7 @@ public class GenericPlotter extends Plotter
 		plotData();
 
 		v3Plot.addComponent(component);
-		v3Plot.setTitle(menu.title);
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
