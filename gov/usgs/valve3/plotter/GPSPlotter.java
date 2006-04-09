@@ -43,6 +43,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.6  2005/10/13 20:35:39  dcervelli
  * Now gets stid from plotterConfig.
  *
@@ -172,7 +175,10 @@ public class GPSPlotter extends Plotter
 		boolean[] comps = new boolean[] { ce, cn, cu, cl };
 		
 		Set<String> keys = stationDataMap.keySet();
-		GPSData data = stationDataMap.get(keys.iterator().next());
+		String id = keys.iterator().next();
+		Map<String, Benchmark> benchmarks = benchmarksMap.get(vdxSource);
+		Benchmark bm = benchmarks.get(id);
+		GPSData data = stationDataMap.get(id);
 		
 		double[][] dd = data.toTimeSeries(baselineData);
 		Data d = new Data(dd);
@@ -230,7 +236,11 @@ public class GPSPlotter extends Plotter
 			}
 		}
 		
-		v3Plot.setTitle("GPS");//: " + benchmark + (baseline == null ? "" : "-" + baseline));
+		String bs = "";
+		if (baselineData != null)
+			bs = "-" + benchmarks.get(baselineID).getCode();
+		
+		v3Plot.setTitle(String.format("GPS: %s%s", bm.getCode(), bs));
 	}
 	
 	private void plotVelocityMap()
