@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/09 18:09:19  dcervelli
+ * ConfigFile changes.
+ *
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
  * Initial avosouth commit.
  *
@@ -39,7 +42,7 @@ public class MenuHandler implements HttpHandler
 		List<DataSourceDescriptor> sources = dh.getDataSources();
 		for (DataSourceDescriptor dsd : sources)
 		{
-			ConfigFile cf = new ConfigFile(dsd.getParams());
+			ConfigFile cf = dsd.getConfig();
 			String sec = cf.getString("section");
 			if (sec != null)
 			{
