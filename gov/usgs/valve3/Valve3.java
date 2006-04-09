@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/10/27 00:16:35  tparker
+ * Bug #68
+ *
  * Revision 1.6  2005/10/26 18:18:15  tparker
  * Add logging related to Bug #68
  *
@@ -38,8 +41,8 @@ import javax.servlet.ServletContextListener;
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String VERSION = "3.0.2";
-	public static final String BUILD_DATE = "2005-10-14";
+	public static final String VERSION = "3.1.0";
+	public static final String BUILD_DATE = "2006-04-09";
 	
 	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
@@ -47,6 +50,7 @@ public class Valve3 implements ServletContextListener
 	
 	private ActionHandler actionHandler;
 	private DataHandler dataHandler;
+	private MenuHandler menuHandler;
 	private String applicationPath;
 	private String administrator = "Administrator";
 	private String administratorEmail = "admin@usgs.gov";
@@ -104,6 +108,14 @@ public class Valve3 implements ServletContextListener
 		return instance;
 	}
 	
+	public MenuHandler getMenuHandler()
+	{
+		if (menuHandler == null)
+			menuHandler = new MenuHandler(getDataHandler());
+		
+		return menuHandler;
+	}
+	
 	public DataHandler getDataHandler()
 	{
 		if (dataHandler == null)
@@ -120,7 +132,8 @@ public class Valve3 implements ServletContextListener
 			DataHandler dh = getDataHandler();
 			actionHandler.getHandlers().put("data", dh);
 			actionHandler.getHandlers().put("plot", new PlotHandler(dh));
-			actionHandler.getHandlers().put("menu", new MenuHandler(dh));
+			MenuHandler mh = getMenuHandler();
+			actionHandler.getHandlers().put("menu", mh);
 		}
 		
 		return actionHandler;
