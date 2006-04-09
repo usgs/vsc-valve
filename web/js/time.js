@@ -1,4 +1,4 @@
-// $Id: time.js,v 1.2 2005-11-03 20:18:54 tparker Exp $
+// $Id: time.js,v 1.3 2006-04-09 21:54:14 dcervelli Exp $
 
 function getTimes(maxDiff)
 {
@@ -28,6 +28,7 @@ function getTimes(maxDiff)
 function getStartTime()
 {
 	var st = document.getElementById('startTime'); 
+	st.value = st.value.replace(/[\[\]\'\"]/g, "");
 	var d = st.value;
 	var errMsg = "Error on start time.";
 	if (d.charAt(0) == '-')
@@ -72,6 +73,7 @@ function getStartTime()
 function getEndTime()
 {
 	var et = document.getElementById('endTime');
+	et.value = et.value.replace(/[\[\]\'\"]/g, "");
 	if (!validateDate(et, false))
 	{
 		alert("Error on end time.");
