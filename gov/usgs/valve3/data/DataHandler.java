@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/09 18:09:44  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.4  2005/11/04 18:57:36  dcervelli
  * Added configurable VDX timeout.
  *
@@ -75,8 +78,7 @@ public class DataHandler implements HttpHandler
 		{
 			System.out.println("Data source: " + source);
 			ConfigFile sub = config.getSubConfig(source);
-			ConfigFile plotterSub = sub.getSubConfig("plotter");
-			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub.getConfig(), plotterSub);
+			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub);
 			dataSources.put(source, dsd);
 		}
 	}
