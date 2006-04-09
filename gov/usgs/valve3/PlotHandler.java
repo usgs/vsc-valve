@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/13 17:54:44  dcervelli
+ * Fixed bugs from x > w and y > h.
+ *
  * Revision 1.4  2005/09/02 22:37:54  dcervelli
  * Support for ChannelMapPlotter.
  *
@@ -118,13 +121,13 @@ public class PlotHandler implements HttpHandler
 				Plotter plotter = null;
 				if (source.equals("channel_map"))
 				{
-					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					if (dsd == null)
-						throw new Valve3Exception("Unknown data source.");
-					
 					plotter = new ChannelMapPlotter();
-					plotter.setVDXClient(dsd.getVDXClientName());
-					plotter.setVDXSource(dsd.getVDXSource());
+					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					if (dsd != null)
+					{
+						plotter.setVDXClient(dsd.getVDXClientName());
+						plotter.setVDXSource(dsd.getVDXSource());
+					}
 				}
 				else
 				{
