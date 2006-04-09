@@ -25,6 +25,9 @@ import java.util.Set;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.4  2006/02/19 00:34:36  dcervelli
  * Now sets the graph height data properly.
  *
@@ -66,6 +69,9 @@ public class ChannelMapPlotter extends Plotter
 	
 	private void getData()
 	{
+		if (vdxSource == null || vdxClient == null)
+			return; 
+		
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("action", "selectors");
@@ -99,7 +105,8 @@ public class ChannelMapPlotter extends Plotter
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
 		
-		mr.setGeoLabelSet(labels.getSubset(range));
+		if (labels != null)
+			mr.setGeoLabelSet(labels.getSubset(range));
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
@@ -126,12 +133,16 @@ public class ChannelMapPlotter extends Plotter
 		plot.writePNG(v3Plot.getLocalFilename());
 		
 		v3Plot.addComponent(component);
-		v3Plot.setTitle("Channel Map");
+		v3Plot.setTitle("Map");
+		if (vdxSource != null)
+		{
+			String n = Valve3.getInstance().getMenuHandler().getItem(vdxSource).name;
+			v3Plot.setTitle("Map: " + n);
+		}
 	}
 
 	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception
 	{
-		System.out.println("Channel Map Plotter");
 		v3Plot = plot;
 		component = comp;
 		getInputs();
