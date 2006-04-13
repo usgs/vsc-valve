@@ -30,6 +30,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.7  2006/01/11 00:39:13  tparker
  * fix period bug
  *
@@ -86,24 +89,42 @@ public class RSAMPlotter extends Plotter
 	private double maxEventLength;
 	private BinSize bin;
 	private RSAMData rd;
-	private Data d;
-	private double dmax;
-	private double mean;
-	private double max;
+	private Data data;
 	private PlotType type;
 
 	public RSAMPlotter()
 	{}
 	
-	private void plotValues()
+	private void plotValues() throws Valve3Exception
 	{	
 		Plot plot = v3Plot.getPlot();
 		
-		DataRenderer dr = new DataRenderer(d);
+		DataRenderer dr = new DataRenderer(data);
 		dr.setUnit("rsam");
 		dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		dr.setExtents(startTime, endTime, d.getMinData(), max);
-		dr.createDefaultAxis(8, 8, false, true);
+		
+		double dmax = data.getMax(1);
+		double dmin = data.getMinData();
+		double yMin, yMax;
+		boolean allowExpand = true;
+		if (component.isAutoScale("ys"))
+		{
+			double mean = data.getMean(1);
+			yMin = dmin;
+			yMax = Math.min(3 * mean, dmax);
+		}
+		else
+		{
+			double[] d = component.getYScale("ys", dmin, dmax);
+			yMin = d[0];
+			yMax = d[1];
+			allowExpand = false;
+		}
+		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
+			throw new Valve3Exception("Illegal axis values.");
+		dr.setExtents(startTime, endTime, yMin, yMax);
+		
+		dr.createDefaultAxis(8, 8, false, allowExpand);
 		dr.createDefaultLineRenderers();
 		dr.createDefaultLegendRenderer(new String[] {ch + " RSAM"});
 		dr.setXAxisToTime(8);
@@ -242,10 +263,7 @@ public class RSAMPlotter extends Plotter
         endTime += TZOffset;
         rd.adjustTime(TZOffset);
         
-        d = new Data(rd.getData().toArray());
-		dmax = d.getMax(1);
-		mean = d.getMean(1);
-		max = Math.min(2 * mean, dmax);
+        data = new Data(rd.getData().toArray());
 	}
 	
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
@@ -276,7 +294,7 @@ public class RSAMPlotter extends Plotter
 		getInputs();
 		getData();
 		
-		return d.toCSV();
+		return data.toCSV();
 	}
 
 }

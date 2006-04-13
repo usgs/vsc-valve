@@ -9,6 +9,9 @@ import java.util.TimeZone;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/11/03 19:40:27  tparker
+ * Correct time adj for bug #68
+ *
  * Revision 1.3  2005/11/03 18:46:22  tparker
  * Convert input times for bug #68
  *
@@ -68,6 +71,35 @@ public class PlotComponent
 	public String get(String key)
 	{
 		return params.get(key);
+	}
+	
+	public boolean isAutoScale(String pre)
+	{
+		String ysMin = params.get(pre + "Min");
+		String ysMax = params.get(pre + "Max");
+		return ysMin == null || ysMax == null || ysMin.toLowerCase().startsWith("a") || ysMax.toLowerCase().startsWith("a");
+	}
+	
+	public double[] getYScale(String pre, double min, double max)
+	{
+		double[] d = new double[2];
+		String ysMin = params.get(pre + "Min");
+		if (ysMin == null)
+			d[0] = min;
+		else if (ysMin.toLowerCase().equals("min"))
+			d[0] = min;
+		else
+			d[0] = Util.stringToDouble(ysMin, Double.NaN);
+		
+		String ysMax = params.get(pre + "Max");
+		if (ysMax == null)
+			d[1] = max;
+		else if (ysMax.toLowerCase().equals("max"))
+			d[1] = max;
+		else
+			d[1] = Util.stringToDouble(ysMax, Double.NaN);
+
+		return d;
 	}
 	
 	public void setTranslationType(String t)

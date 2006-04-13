@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.16  2006/03/14 00:58:39  tparker
  * revisit previous label fix
  *
@@ -144,24 +147,24 @@ public class WavePlotter extends Plotter
 			Butterworth bw = new Butterworth();
 			switch(filterType)
 			{
-			case LOWPASS:
-				if (maxHz <= 0)
-					throw new Valve3Exception("Illegal max hertz value.");
-				bw.set(FilterType.LOWPASS, 4, w.getSamplingRate(), maxHz, 0);
-				w.filter(bw, true);
-				break;
-			case HIGHPASS:
-				if (minHz <= 0)
-					throw new Valve3Exception("Illegal minimum hertz value.");
-				bw.set(FilterType.HIGHPASS, 4, w.getSamplingRate(), minHz, 0);
-				w.filter(bw, true);
-				break;
-			case BANDPASS:
-				if (minHz <= 0 || maxHz <= 0 || minHz > maxHz)
-					throw new Valve3Exception("Illegal minimum/maximum hertz values.");
-				bw.set(FilterType.BANDPASS, 4, w.getSamplingRate(), minHz, maxHz);
-				w.filter(bw, true);
-				break;
+				case LOWPASS:
+					if (maxHz <= 0)
+						throw new Valve3Exception("Illegal max hertz value.");
+					bw.set(FilterType.LOWPASS, 4, w.getSamplingRate(), maxHz, 0);
+					w.filter(bw, true);
+					break;
+				case HIGHPASS:
+					if (minHz <= 0)
+						throw new Valve3Exception("Illegal minimum hertz value.");
+					bw.set(FilterType.HIGHPASS, 4, w.getSamplingRate(), minHz, 0);
+					w.filter(bw, true);
+					break;
+				case BANDPASS:
+					if (minHz <= 0 || maxHz <= 0 || minHz > maxHz)
+						throw new Valve3Exception("Illegal minimum/maximum hertz values.");
+					bw.set(FilterType.BANDPASS, 4, w.getSamplingRate(), minHz, maxHz);
+					w.filter(bw, true);
+					break;
 			}
 		}
 		
@@ -251,7 +254,7 @@ public class WavePlotter extends Plotter
 			color = "A";
 	}
 	
-	private void plotWaveform()
+	private void plotWaveform() throws Valve3Exception
 	{
 		SliceWaveRenderer wr = new SliceWaveRenderer();
 		wr.setRemoveBias(removeBias);
@@ -264,14 +267,33 @@ public class WavePlotter extends Plotter
 		double bias = 0;
 		if (removeBias)
 			bias = wave.mean();
-		wr.setMinY(wave.min() - bias);
-		wr.setMaxY(wave.max() - bias);
+		
+		double max = wave.max() - bias;
+		double min = wave.min() - bias;
+		if (component.isAutoScale("ys"))
+		{
+			wr.setMinY(min);
+			wr.setMaxY(max);
+		}
+		else
+		{
+			double[] ys = component.getYScale("ys", min, max);
+			double yMin = ys[0];
+			double yMax = ys[1];
+			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
+				throw new Valve3Exception("Illegal axis values.");
+
+			wr.setMinY(yMin);
+			wr.setMaxY(yMax);
+		}
 		
 		if (labels == 1)
 		{
 			wr.setDisplayLabels(false);
 			wr.update();
-		} else {			
+		} 
+		else 
+		{			
 			wr.update();
 			wr.getAxis().setBottomLeftLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
 		}
@@ -316,21 +338,24 @@ public class WavePlotter extends Plotter
 		
 		int yTick = 0;
 		String yString = "";
-		if (yLabel == 1) {
+		if (yLabel == 1) 
+		{
 			yTick = 8;
 			yString = "Frequency (Hz)";
 			
-		} else if (yLabel == 2) {
+		}
+		else if (yLabel == 2) 
+		{
 			yTick = 5;
 			yString = channel.substring(0, channel.indexOf("$"));
 		}
 		
 		int xTick = 0;
 		String xString = "";
-		if (xLabel == 1) {
+		if (xLabel == 1) 
+		{
 			xTick = 8;
 			xString = "Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")";
-			
 		}
 		
 		sr.createDefaultAxis(xTick, yTick, false, false);

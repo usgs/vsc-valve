@@ -27,6 +27,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.2  2005/10/20 05:10:42  dcervelli
  * Added degrees symbol.
  *
@@ -111,7 +114,7 @@ public class ElectronicTiltPlotter extends Plotter
 			throw new Valve3Exception("No data.");
 	}
 	
-	private MatrixRenderer getLeftAxis()
+	private MatrixRenderer getLeftAxis() throws Valve3Exception
 	{
 //		double az = td.getOptimalAzimuth();
 //		ct.mark("getOptimal");
@@ -125,6 +128,22 @@ public class ElectronicTiltPlotter extends Plotter
 		
 		double max = Math.max(dm.max(1), dm.max(2));
 		double min = Math.min(dm.min(1), dm.min(2));
+		double yMin, yMax;
+		boolean allowExpand = true;
+		if (component.isAutoScale("ysL"))
+		{
+			yMin = min;
+			yMax = max;
+		}
+		else
+		{
+			double[] ys = component.getYScale("ysL", min, max);
+			yMin = ys[0];
+			yMax = ys[1];
+			allowExpand = false;
+		}
+		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
+			throw new Valve3Exception("Illegal axis values.");
 		
 		MatrixRenderer mr = new MatrixRenderer(dm.getData());
 		mr.setVisible(0, showEast);
@@ -136,8 +155,8 @@ public class ElectronicTiltPlotter extends Plotter
 		mr.setUnit("tilt");
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 //		mr.setExtents(start, end, td.min(2), td.max(2));
-		mr.setExtents(startTime, endTime, min, max);
-		mr.createDefaultAxis(8, 8, false, true);
+		mr.setExtents(startTime, endTime, yMin, yMax);
+		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
 		mr.getAxis().setLeftLabelAsText("Tilt (" + MICRO + "R)");
@@ -148,7 +167,7 @@ public class ElectronicTiltPlotter extends Plotter
 		return mr;
 	}
 	
-	private MatrixRenderer getRightAxis()
+	private MatrixRenderer getRightAxis() throws Valve3Exception
 	{
 		if (rightAxis == RightAxis.NONE)
 			return null;
@@ -174,18 +193,32 @@ public class ElectronicTiltPlotter extends Plotter
 		
 		double max = dm.max(1);
 		double min = dm.min(1);
-		if (max - min < 0.2)
+		double yMin, yMax;
+		if (component.isAutoScale("ysR"))
 		{
-			max += 0.1;
-			min -= 0.1;
+			yMin = min;
+			yMax = max;
+			if (max - min < 0.2)
+			{
+				yMax += 0.1;
+				yMin -= 0.1;
+			}
 		}
+		else
+		{
+			double[] ys = component.getYScale("ysR", min, max);
+			yMin = ys[0];
+			yMax = ys[1];
+		}
+		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
+			throw new Valve3Exception("Illegal axis values.");
 		
 		MatrixRenderer mr = new MatrixRenderer(dm.getData());
 		mr.setUnit(unit);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		mr.setExtents(startTime, endTime, min, max);
+		mr.setExtents(startTime, endTime, yMin, yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, false), null);
 		mr.setAxis(ar);
 		mr.createDefaultLineRenderers();
 		Renderer[] r = mr.getLineRenderers();
