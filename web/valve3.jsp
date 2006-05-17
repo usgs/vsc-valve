@@ -1,5 +1,8 @@
 <%--  
 $Log: not supported by cvs2svn $
+Revision 1.4  2005/10/20 23:15:59  dcervelli
+Changes for new GenericMenu.
+
 Revision 1.3  2005/10/14 21:35:50  dcervelli
 Moved anti-cache stuff so everything should not be cached.
 
@@ -16,6 +19,7 @@ Initial commit.
 <%@ page import="java.io.*" %>
 
 <%
+	System.out.println("Valve3");
 	response.setHeader("Cache-Control", "no-cache");
 	response.setHeader("Pragma", "no-cache");
 	response.setDateHeader("Expires", 0);
@@ -75,5 +79,11 @@ Initial commit.
 		response.setContentType("text/xml");
 		out.println(res.toXML());
 	}
+	else if (result instanceof String)
+	{
+		response.setHeader("Content-disposition", "attachment; filename=valve3.csv");
+		out.println(result);
+	}
+	
 %>
 
