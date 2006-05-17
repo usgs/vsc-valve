@@ -13,10 +13,15 @@ import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
 import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 
 import java.awt.Color;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.7  2006/01/13 20:35:51  tparker
  * Add barMult control per bug #50.
  *
@@ -131,9 +136,11 @@ public class HelicorderPlotter extends Plotter
 	
 	public String toCSV(PlotComponent c) throws Valve3Exception
 	{
+		component = c;
 		getInputs();
 		getData();
-		return data.toCSV();
+
+        return data.toCSV();
 	}
 
 }
