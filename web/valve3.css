@@ -14,6 +14,13 @@ body
 	display: none;
 }
 
+#dataTemplate
+{
+	display: none;
+	height: 0px;
+	width: 0px;
+}
+
 div#container
 {
 	width: 100%;
