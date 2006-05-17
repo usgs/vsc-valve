@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.4 2005-09-06 20:18:15 dcervelli Exp $
+// $Id: plot.js,v 1.5 2006-05-17 22:15:57 tparker Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -10,9 +10,12 @@ function createPopupPlot(xml, px, py)
 		alert("There was an error loading this popup.");
 		return;
 	}
+	
+	alert(getXMLField(xml, "file")); //TOMP
+	
 	var src = getXMLField(xml, "file");
 	var width = getXMLField(xml, "width") * 1;
-	var height = getXMLField(xml, "height") * 1;
+	var height  = getXMLField(xml, "height") * 1;
 	
 	var popup = createPopup(px, py);
 	var header = popup.getElementsByTagName('h1')[0];
@@ -113,8 +116,46 @@ function handlePlot(xml)
 			xmlToHTML(w.document, img.xml);
 			w.document.close();
 		});
+		
+	addListener(imgs[4], 'click',
+		function()
+		{
+			var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+			var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
+			
+			loadXML("rawRata", url, function(req)
+			{ 
+				var doc = req.responseXML;
+				if (doc != null)
+				{
+					var result = doc.getElementsByTagName("valve3result")[0];
+					if (result != null)
+					{
+						type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+						if (type == 'error')
+							alert(doc.getElementsByTagName("message")[0].firstChild.data);
+						else if (type == 'rawData')
+						{
+							var p = document.getElementById('dataTemplate').cloneNode(true);
+							var d = document.getElementById('dataFrame');
+							p.style.display = 'none';
+							p.id = "popup" + popupCount;
+							popupCount++;
+							p.style.top = 0;
+							p.style.left = 0;
+							d.src=doc.getElementsByTagName("url")[0].firstChild.data;
+							var b = document.getElementById('popupInsertionPoint');				
+							
+							b.appendChild(p);
+							//p.style.display = 'none';
+							return p;
+						}
+					}
+				}
+			});
+		}, true);
 	
-	var ip = document.getElementById('contentInsertionPoint')
+	var ip = document.getElementById('contentInsertionPoint');
 	ip.insertBefore(t, ip.firstChild);
 		
 	count++;
