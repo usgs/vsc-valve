@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/09 21:03:54  dcervelli
+ * Added hook to MenuHandler.
+ *
  * Revision 1.7  2005/10/27 00:16:35  tparker
  * Bug #68
  *
@@ -131,6 +134,7 @@ public class Valve3 implements ServletContextListener
 			actionHandler = new ActionHandler("a");
 			DataHandler dh = getDataHandler();
 			actionHandler.getHandlers().put("data", dh);
+			actionHandler.getHandlers().put("rawData", new RawDataHandler(dh));
 			actionHandler.getHandlers().put("plot", new PlotHandler(dh));
 			MenuHandler mh = getMenuHandler();
 			actionHandler.getHandlers().put("menu", mh);
