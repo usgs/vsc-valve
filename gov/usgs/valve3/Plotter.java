@@ -5,6 +5,9 @@ import gov.usgs.valve3.result.Valve3Plot;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/13 20:34:32  dcervelli
+ * Added plotterConfig.
+ *
  * Revision 1.2  2005/08/28 19:00:46  dcervelli
  * plot() now throws exceptions.
  *
@@ -35,5 +38,10 @@ abstract public class Plotter
 		plotterConfig = cf;
 	}
 	
+	public String toCSV(PlotComponent comp) throws Valve3Exception
+	{
+		throw new Valve3Exception("Data export not available for this data source.");
+	}
+
 	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception;
 }
