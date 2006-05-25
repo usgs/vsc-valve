@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.5 2006-05-17 22:15:57 tparker Exp $
+// $Id: plot.js,v 1.6 2006-05-25 17:01:33 tparker Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -10,8 +10,6 @@ function createPopupPlot(xml, px, py)
 		alert("There was an error loading this popup.");
 		return;
 	}
-	
-	alert(getXMLField(xml, "file")); //TOMP
 	
 	var src = getXMLField(xml, "file");
 	var width = getXMLField(xml, "width") * 1;
@@ -37,6 +35,7 @@ function createPopupPlot(xml, px, py)
 }
 
 var count = 0;
+var dataCount = 0;
 function handlePlot(xml)
 {
 	var title = getXMLField(xml, "title");
@@ -123,7 +122,7 @@ function handlePlot(xml)
 			var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 			var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
 			
-			loadXML("rawRata", url, function(req)
+			loadXML("rawData", url, function(req)
 			{ 
 				var doc = req.responseXML;
 				if (doc != null)
@@ -138,22 +137,18 @@ function handlePlot(xml)
 						{
 							var p = document.getElementById('dataTemplate').cloneNode(true);
 							var d = document.getElementById('dataFrame');
-							p.style.display = 'none';
-							p.id = "popup" + popupCount;
-							popupCount++;
-							p.style.top = 0;
-							p.style.left = 0;
+							p.id = "data" + dataCount;
+							dataCount++;
 							d.src=doc.getElementsByTagName("url")[0].firstChild.data;
 							var b = document.getElementById('popupInsertionPoint');				
 							
 							b.appendChild(p);
-							//p.style.display = 'none';
 							return p;
 						}
 					}
 				}
 			});
-		}, true);
+		}, false);
 	
 	var ip = document.getElementById('contentInsertionPoint');
 	ip.insertBefore(t, ip.firstChild);
