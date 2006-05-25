@@ -14,7 +14,7 @@ body
 	display: none;
 }
 
-#dataTemplate
+#dataTemplate, #dataFrame
 {
 	display: none;
 	height: 0px;
