@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/04/09 18:19:36  dcervelli
+ * VDX type safety changes.
+ *
  * Revision 1.9  2005/12/23 00:51:41  tparker
  * avoid labeling issues described in bug id #86
  *
@@ -448,4 +451,13 @@ public class HypocenterPlotter extends Plotter
 		}
 	}
 	
+	public String toCSV(PlotComponent c) throws Valve3Exception
+	{
+		component = c;
+		getInputs();
+		getData();
+		
+		return hypos.toCSV();
+	}
+
 }
