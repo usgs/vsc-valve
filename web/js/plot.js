@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.6 2006-05-25 17:01:33 tparker Exp $
+// $Id: plot.js,v 1.7 2006-07-19 23:59:46 tparker Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -135,15 +135,8 @@ function handlePlot(xml)
 							alert(doc.getElementsByTagName("message")[0].firstChild.data);
 						else if (type == 'rawData')
 						{
-							var p = document.getElementById('dataTemplate').cloneNode(true);
 							var d = document.getElementById('dataFrame');
-							p.id = "data" + dataCount;
-							dataCount++;
-							d.src=doc.getElementsByTagName("url")[0].firstChild.data;
-							var b = document.getElementById('popupInsertionPoint');				
-							
-							b.appendChild(p);
-							return p;
+							d.src = doc.getElementsByTagName("url")[0].firstChild.data;
 						}
 					}
 				}
