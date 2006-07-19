@@ -26,6 +26,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/05/17 21:56:11  tparker
+ * initial commit
+ *
  * Revision 1.5  2005/09/13 17:54:44  dcervelli
  * Fixed bugs from x > w and y > h.
  *
@@ -149,7 +152,12 @@ public class RawDataHandler implements HttpHandler
 				SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
 				df.setTimeZone(TimeZone.getTimeZone("GMT"));
 				if (fn == null)
-					fn = component.get("ch").replace('$','_') + "-" + df.format(Util.j2KToDate(component.getEndTime()));
+				{
+					if (component.get("ch") != null)
+						fn = component.get("ch").replace('$','_') + "-" + df.format(Util.j2KToDate(component.getEndTime()));
+					else
+						fn = component.get("src") + "-" + df.format(Util.j2KToDate(component.getEndTime()));
+				}
 				else
 					fn += "-" + component.getSource().replace('$', '_') + "-" + df.format(Util.j2KToDate(component.getEndTime()));
 					
