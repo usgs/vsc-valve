@@ -26,6 +26,9 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/19 16:12:55  tparker
+ * Set filename for non-seismic data streams
+ *
  * Revision 1.1  2006/05/17 21:56:11  tparker
  * initial commit
  *
@@ -165,10 +168,11 @@ public class RawDataHandler implements HttpHandler
 			
 			fn += ".csv";
 			String zipName = getRandomFilename();
+			String zipFilePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + zipName;
 			try
 			{
 				//ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn + ".zip")));
-		        FileOutputStream out = new FileOutputStream(Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + zipName);
+		        FileOutputStream out = new FileOutputStream(zipFilePath);
 		        ZipOutputStream zout = new ZipOutputStream(new BufferedOutputStream(out));
 		        zout.putNextEntry(new ZipEntry(fn));
 		        zout.write(sb.toString().getBytes());
@@ -180,9 +184,10 @@ public class RawDataHandler implements HttpHandler
 			}
 
 			Pattern p = Pattern.compile(request.getContextPath());
-			String url = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + zipName;
-			RawData rd = new RawData(url);
+			String zipFileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + zipName;
+			RawData rd = new RawData(zipFileURL, zipFilePath);
 			
+			Valve3.getInstance().getResultDeleter().addResult(rd);
 			return rd;
 		}
 		catch (Valve3Exception e)
