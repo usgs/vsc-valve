@@ -11,8 +11,8 @@ import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/06/09 00:48:56  tparker
+ * Add toCSV for data export
+ *
  * Revision 1.10  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *

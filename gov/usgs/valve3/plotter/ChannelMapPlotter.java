@@ -4,8 +4,8 @@ import gov.usgs.plot.Plot;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
@@ -25,6 +25,9 @@ import java.util.Set;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/09 21:05:28  dcervelli
+ * Allows maps without a data source and different titling.
+ *
  * Revision 1.5  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *

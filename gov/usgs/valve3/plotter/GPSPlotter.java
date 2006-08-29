@@ -9,8 +9,8 @@ import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
@@ -43,6 +43,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/09 21:24:51  dcervelli
+ * GPS time series plot titles include stations.
+ *
  * Revision 1.7  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *
