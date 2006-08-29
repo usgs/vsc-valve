@@ -1,4 +1,4 @@
-// $Id: ui.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: ui.js,v 1.2 2006-08-29 00:01:43 tparker Exp $
 
 function toggleUI()
 {
@@ -60,7 +60,8 @@ function getSelected(array, text)
 				list[count++] = array[i].value;
 		}
 	}
-	return list;
+	return list.join("^");
+	//return list;
 }
 
 function getTF(cb)

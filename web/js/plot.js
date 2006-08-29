@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.7 2006-07-19 23:59:46 tparker Exp $
+// $Id: plot.js,v 1.8 2006-08-29 00:01:23 tparker Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -216,8 +216,8 @@ function PlotRequest(popup)
 						else if (elt.name.indexOf("selector:") != -1)
 						{
 							name = elt.name.substring(9);
-							var val = "" + getSelected(elt);
-							var vals = val.split(',');
+							var val = getSelected(elt);
+							var vals = val.split('^');
 							comp[name] = "";
 							for (var j = 0; j < vals.length; j++)
 							{
@@ -225,11 +225,25 @@ function PlotRequest(popup)
 								if (comp[name])
 									comp[name] += ',';
 								comp[name] += ss[0];
+								
+								// grab data types for nwis
+								if (ss[5])
+									comp["dataTypes"] = ss[5].replace(/=/g, ":");
 							}
 						}
 						else
 							comp[name] = getSelected(elt, true);
 					}
+					else if (elt.name.indexOf("dataType") != -1)
+					{
+						if (elt.checked)
+						{
+							if (comp["selectedTypes"] == null)
+								comp["selectedTypes"] = elt.value;
+							else
+								comp["selectedTypes"] += ":" + elt.value;
+						}
+					}					
 					else if (elt.type == "checkbox")
 						comp[elt.name] = elt.checked ? "T" : "F";
 					else if (elt.type == "text")
