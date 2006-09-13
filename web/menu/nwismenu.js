@@ -20,12 +20,17 @@ create_nwismenu = function(menu)
 		
 		var noChecked = 0;
 		var selectedTypes = "";
-		
-		for (var i = 0; i<f.dataType.length; i++)
+		var cb = document.getElementsByName("dataType");
+		if (cb == null)
+			var l = 0;
+		else
+			var l = cb.length;
+					
+		for (var i = 0; i<l; i++)
 		{
-			if (f.dataType[i].checked)
+			if (f.elements['dataType'][i].checked)
 			{
-				selectedTypes += f.dataType[i].value + ":";
+				selectedTypes += f.elements['dataType'][i].value + ":";
 				noChecked++;
 			}
 		}
@@ -71,6 +76,7 @@ update_nwis_dataTypes = function(event)
 		var checkBox = document.createElement("input");
 		checkBox.type = "checkbox";
 		checkBox.name = "dataType";
+		checkBox.id = "dataType";
 		checkBox.value = thisType[0];
 		p = document.createElement("p");
 		p.appendChild(checkBox);
