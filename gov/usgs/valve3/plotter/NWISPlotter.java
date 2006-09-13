@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/09/13 23:12:58  tparker
+ * Station name in NWIS title
+ *
  * Revision 1.1  2006/08/29 00:03:17  tparker
  * Initial NWIS commit
  *
@@ -172,9 +175,8 @@ public class NWISPlotter extends Plotter
 		mr.createDefaultAxis(8, 8, false, true);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
-		ShapeRenderer[] r = mr.getLineRenderers();
-		r[0].color = Color.blue;
-		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description);
+
+		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
 	}
@@ -206,7 +208,7 @@ public class NWISPlotter extends Plotter
 		ShapeRenderer[] r = mr.getLineRenderers();
 		r[1].color = Color.red;
 
-		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description);
+		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
 		return mr;
 	}
 	
