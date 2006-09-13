@@ -26,6 +26,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/29 00:03:17  tparker
+ * Initial NWIS commit
+ *
  *
  * @author Tom Parker
  */
@@ -169,6 +172,8 @@ public class NWISPlotter extends Plotter
 		mr.createDefaultAxis(8, 8, false, true);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
+		ShapeRenderer[] r = mr.getLineRenderers();
+		r[0].color = Color.blue;
 		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description);
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
@@ -222,16 +227,17 @@ public class NWISPlotter extends Plotter
 				
 		v3Plot = v3p;
 		component = comp;
-		getInputs();		
+		getInputs();
 		getData();
-				
+
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
 		
 		plotData();
 
 		v3Plot.addComponent(component);
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
+		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("selectedStation"));
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
