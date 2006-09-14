@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/09/14 18:09:13  tparker
+ * NWIS plot cumulative percip
+ *
  * Revision 1.4  2006/09/14 00:04:33  tparker
  * Fix NWIS toCSV
  *
@@ -176,13 +179,12 @@ public class NWISPlotter extends Plotter
 		for (GenericColumn col : leftColumns)
 		{
 			mr.setVisible(col.index, true);
+			if (col.name.equals("45"))
+				data.sum(col.index+1);
+
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
 			
-			if (col.name.equals("45"))
-				data.sum(col.index+1);
-			else
-				System.out.println("not percip " + col.name);
 			
 		}
 		
@@ -211,13 +213,13 @@ public class NWISPlotter extends Plotter
 		for (GenericColumn col : rightColumns)
 		{
 			mr.setVisible(col.index, true);
+
+			if (col.name.equals("45"))
+				data.sum(col.index+1);
+
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
 			
-			if (col.name.equals("45"))
-				data.sum(col.index+1);
-			else
-				System.out.println("not percip " + col.name);
 
 		}
 
