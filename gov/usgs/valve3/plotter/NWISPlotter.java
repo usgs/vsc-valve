@@ -6,6 +6,7 @@ import gov.usgs.plot.Plot;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
@@ -23,9 +24,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import cern.colt.matrix.DoubleMatrix2D;
+
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/09/13 23:32:48  tparker
+ * NWIS labels match line color
+ *
  * Revision 1.2  2006/09/13 23:12:58  tparker
  * Station name in NWIS title
  *
@@ -247,20 +253,29 @@ public class NWISPlotter extends Plotter
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
 		
-		HashMap<String, String> params = new HashMap<String, String>();
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		
-		params.put("source", vdxSource);
-		params.put("action", "genericMenu");
-		menu = new GenericMenu(client.getTextData(params));
-		pool.checkin(client);
+//		HashMap<String, String> params = new HashMap<String, String>();
+//		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+//		VDXClient client = pool.checkout();
+//		
+//		params.put("source", vdxSource);
+//		params.put("action", "genericMenu");
+//		menu = new GenericMenu(client.getTextData(params));
+//		pool.checkin(client);
 		
 		component = comp;
 		getInputs();
 		getData();
-		
-		return data.getData().toString();
+		DoubleMatrix2D d = data.getData();
+		StringBuffer sb = new StringBuffer();
+		for (int i=0; i<d.rows(); i++)
+		{
+			sb.append(Util.j2KToDateString(d.get(i, 0)) + ",");
+			for (int j=1; j<d.columns(); j++)
+				sb.append(d.get(i,j) + ",");
+			sb.append("\n");
+		}
+			
+		return sb.toString();
 	}
 
 }
