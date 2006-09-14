@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/09/14 00:04:33  tparker
+ * Fix NWIS toCSV
+ *
  * Revision 1.3  2006/09/13 23:32:48  tparker
  * NWIS labels match line color
  *
@@ -112,7 +115,7 @@ public class NWISPlotter extends Plotter
 			if (!sel)
 				continue;		
 			
-			String columnSpec = c++ + ":" + description + ":" + description + ":" + description + ":T";
+			String columnSpec = c++ + ":" + type + ":" + description + ":" + description + ":T";
 			
 			GenericColumn col = new GenericColumn(columnSpec);
 			
@@ -175,6 +178,12 @@ public class NWISPlotter extends Plotter
 			mr.setVisible(col.index, true);
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
+			
+			if (col.name.equals("45"))
+				data.sum(col.index+1);
+			else
+				System.out.println("not percip " + col.name);
+			
 		}
 		
 		mr.setExtents(startTime, endTime, min, max);		
@@ -204,8 +213,14 @@ public class NWISPlotter extends Plotter
 			mr.setVisible(col.index, true);
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
+			
+			if (col.name.equals("45"))
+				data.sum(col.index+1);
+			else
+				System.out.println("not percip " + col.name);
+
 		}
-		
+
 		mr.setExtents(startTime, endTime, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
