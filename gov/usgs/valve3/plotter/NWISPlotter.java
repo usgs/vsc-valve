@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/09/14 20:57:38  tparker
+ * process data before finding extents.
+ *
  * Revision 1.5  2006/09/14 18:09:13  tparker
  * NWIS plot cumulative percip
  *
@@ -184,7 +187,8 @@ public class NWISPlotter extends Plotter
 
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
-			
+			max += Math.abs(max - min) * .1;
+			min -= Math.abs(max - min) * .1;
 			
 		}
 		
