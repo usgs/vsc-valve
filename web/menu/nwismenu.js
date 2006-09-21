@@ -26,15 +26,22 @@ create_nwismenu = function(menu)
 		else
 			var l = cb.length;
 					
-		for (var i = 0; i<l; i++)
+		if (l == 1)
 		{
-			if (f.elements['dataType'][i].checked)
-			{
-				selectedTypes += f.elements['dataType'][i].value + ":";
+			if (f.elements['dataType'].checked)
 				noChecked++;
+		} 
+		else 
+		{
+			for (var i = 0; i<l; i++)
+			{
+				if (f.elements['dataType'][i].checked)
+				{
+					selectedTypes += f.elements['dataType'][i].value + ":";
+					noChecked++;
+				}
 			}
 		}
-		
 		if (noChecked < 1)
 		{
 			alert("You must select at least one component.");
