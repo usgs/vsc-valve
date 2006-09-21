@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/09/20 23:31:00  tparker
+ * Add a bit of space to y-axis
+ *
  * Revision 1.6  2006/09/14 20:57:38  tparker
  * process data before finding extents.
  *
@@ -223,6 +226,8 @@ public class NWISPlotter extends Plotter
 
 			max = Math.max(max, data.max(col.index + 1));
 			min = Math.min(min, data.min(col.index + 1));
+			max += Math.abs(max - min) * .1;
+			min -= Math.abs(max - min) * .1;
 			
 
 		}
