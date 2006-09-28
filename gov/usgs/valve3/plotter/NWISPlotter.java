@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/09/21 18:44:15  tparker
+ * add a bit of space to the right y-axis
+ *
  * Revision 1.7  2006/09/20 23:31:00  tparker
  * Add a bit of space to y-axis
  *
@@ -99,14 +102,14 @@ public class NWISPlotter extends Plotter
 		
 		channel = component.get("ch");
 		if (channel == null || channel.length() <= 0)
-			throw new Valve3Exception("Illegal channel.");
+			throw new Valve3Exception("Illegal channel found in plotter.");
 		
 		endTime = component.getEndTime();
 		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
+			throw new Valve3Exception("Illegal end time found in plotter.");
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time.");
+			throw new Valve3Exception("Illegal start time found in plotter.");
 		
 		String[] types = component.get("dataTypes").split("\\$");
 		String[] selectedTypes = component.get("selectedTypes").split(":");
