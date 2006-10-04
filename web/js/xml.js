@@ -1,4 +1,4 @@
-// $Id: xml.js,v 1.5 2006-02-19 00:08:26 dcervelli Exp $
+// $Id: xml.js,v 1.6 2006-10-04 16:38:06 tparker Exp $
 
 var numLoading = 0;
 function loadXML(title, url, func)
@@ -35,7 +35,8 @@ function loadXML(title, url, func)
 			}
 		}
 	}
-		
+	
+	url = url.replace(/#/, "%23");
 	req.open("GET", url, true);
 	req.send(null);
 }
