@@ -87,7 +87,7 @@ update_nwis_dataTypes = function(event)
 		checkBox.value = thisType[0];
 		p = document.createElement("p");
 		p.appendChild(checkBox);
-		p.appendChild(document.createTextNode(thisType[1]));
+		p.appendChild(document.createTextNode(" " + thisType[1]));
 		typesBox.appendChild(p);
 	}
 }
