@@ -29,6 +29,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/09/28 17:58:19  tparker
+ * more descriptive error messages
+ *
  * Revision 1.8  2006/09/21 18:44:15  tparker
  * add a bit of space to the right y-axis
  *
@@ -274,7 +277,7 @@ public class NWISPlotter extends Plotter
 
 		v3Plot.addComponent(component);
 		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("selectedStation"));
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
