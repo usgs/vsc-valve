@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/04/13 22:33:10  dcervelli
+ * Scale options.
+ *
  * Revision 1.17  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *
@@ -341,7 +344,7 @@ public class WavePlotter extends Plotter
 		if (yLabel == 1) 
 		{
 			yTick = 8;
-			yString = "Frequency (Hz)";
+			//yString = "Frequency (Hz)";
 			
 		}
 		else if (yLabel == 2) 
