@@ -3,6 +3,8 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.Renderer;
+import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
@@ -26,6 +28,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/09 21:29:30  dcervelli
+ * Uses title from menu.
+ *
  * Revision 1.5  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *
@@ -146,39 +151,51 @@ public class GenericPlotter extends Plotter
 		}
 	}
 	
-	private MatrixRenderer getLeftMatrixRenderer()
+	private MatrixRenderer getLeftMatrixRenderer() throws Valve3Exception
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
-		
+		boolean allowExpand = true;
+			
 		mr.setAllVisible(false);
 		for (GenericColumn col : leftColumns)
 		{
 			mr.setVisible(col.index - 1, true);
-			max = Math.max(max, data.max(col.index));
-			min = Math.min(min, data.min(col.index));
+			if (component.isAutoScale("ysL"))
+			{
+				max = Math.max(max, data.max(col.index));
+				min = Math.min(min, data.min(col.index));
+			}
+			else
+			{
+				double[] ys = component.getYScale("ysL", min, max);
+				min = ys[0];
+				max = ys[1];
+				allowExpand = false;
+				if (Double.isNaN(min) || Double.isNaN(max) || min > max)
+					throw new Valve3Exception("Illegal axis values.");
+			}
 		}
 		
-		mr.setExtents(startTime, endTime, min, max);		
-		mr.createDefaultAxis(8, 8, false, true);
+		mr.setExtents(startTime, endTime, min, max);	
+		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")");
+		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")", Color.BLUE);
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
 	}
 	
-	private MatrixRenderer getRightMatrixRenderer()
+	private MatrixRenderer getRightMatrixRenderer() throws Valve3Exception
 	{
 		if (rightUnit == null)
 			return null;
 		
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		
 		double max = -1E300;
 		double min = 1E300;
 		
@@ -186,23 +203,41 @@ public class GenericPlotter extends Plotter
 		for (GenericColumn col : rightColumns)
 		{
 			mr.setVisible(col.index - 1, true);
-			max = Math.max(max, data.max(col.index));
-			min = Math.min(min, data.min(col.index));
+			if (component.isAutoScale("ysR"))
+			{
+				max = Math.max(max, data.max(col.index));
+				min = Math.min(min, data.min(col.index));
+			}
+			else
+			{
+				double[] ys = component.getYScale("ysR", min, max);
+				min = ys[0];
+				max = ys[1];
+				if (Double.isNaN(min) || Double.isNaN(max) || min > max)
+					throw new Valve3Exception("Illegal axis values.");
+			}
 		}
+		
+		
+		
+		
+		
+		
 		
 		mr.setExtents(startTime, endTime, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
 		mr.setAxis(ar);
-		mr.createDefaultLineRenderers();
-//		Renderer[] r = mr.getLineRenderers();
-//		((ShapeRenderer)r[0]).color = Color.red;
+		mr.createDefaultLineRenderers(1);
+		ShapeRenderer[] r = mr.getLineRenderers();
 		
-		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")");
+		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")", r[r.length-1].color);
+		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+		component.setTranslationType("ty");
 		return mr;
 	}
 	
-	public void plotData()
+	public void plotData() throws Valve3Exception
 	{
 		MatrixRenderer leftMR = getLeftMatrixRenderer();
 		MatrixRenderer rightMR = getRightMatrixRenderer();
