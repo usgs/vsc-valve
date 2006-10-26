@@ -28,6 +28,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/10/25 22:28:53  tparker
+ * y-axis scaling
+ *
  * Revision 1.6  2006/04/09 21:29:30  dcervelli
  * Uses title from menu.
  *
@@ -292,7 +295,7 @@ public class GenericPlotter extends Plotter
 		getInputs();
 		getData();
 		
-		return data.getData().toString();
+		return data.toCSV();
 	}
 
 }
