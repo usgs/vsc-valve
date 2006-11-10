@@ -27,6 +27,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/04/13 22:33:19  dcervelli
+ * Scale options.
+ *
  * Revision 1.3  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
  *
@@ -250,4 +253,15 @@ public class ElectronicTiltPlotter extends Plotter
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
+	
+
+	public String toCSV(PlotComponent c) throws Valve3Exception
+	{
+		component = c;
+		getInputs();
+		getData();
+
+        return data.toCSV();
+	}
+
 }
