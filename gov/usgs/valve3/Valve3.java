@@ -16,6 +16,9 @@ import javax.servlet.ServletContextListener;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/05/17 21:57:00  tparker
+ * Add handler for raw data
+ *
  * Revision 1.8  2006/04/09 21:03:54  dcervelli
  * Added hook to MenuHandler.
  *
@@ -44,8 +47,8 @@ import javax.servlet.ServletContextListener;
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String VERSION = "3.1.0";
-	public static final String BUILD_DATE = "2006-04-09";
+	public static final String VERSION = "3.2.0";
+	public static final String BUILD_DATE = "2006-11-09";
 	
 	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
