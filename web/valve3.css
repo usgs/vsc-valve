@@ -246,6 +246,7 @@ a#nowLink
 
 img.button
 {
+	border: 0px;
 	float: right;
 }
 
