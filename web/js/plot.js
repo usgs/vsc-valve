@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.9 2006-09-13 23:13:06 tparker Exp $
+// $Id: plot.js,v 1.10 2007-01-30 21:00:31 dcervelli Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -44,12 +44,14 @@ function handlePlot(xml)
 	var height = getXMLField(xml, "height");
 	var translationType = getXMLField(xml, "translation-type");
 	var translation = getXMLField(xml, "translation");
+	var url = getXMLField(xml, "url");
 	
 	var t = document.getElementById('contentTemplate').cloneNode(true);
 	t.id = "content" + count;
 	t.style.width = (width * 1) + "px";
 	var header = t.getElementsByTagName('h1')[0];
 	header.firstChild.nodeValue = title;
+	var links = t.getElementsByTagName('a');
 	var imgs = t.getElementsByTagName('img');
 	var img = imgs[imgs.length - 1];
 	var minImg = imgs[1];
@@ -73,6 +75,7 @@ function handlePlot(xml)
 			eval('translate_' + translationType + '(event)');
 		}, false);
 		
+	// close
 	addListener(imgs[0], 'click', 
 		function()
 		{
@@ -80,6 +83,7 @@ function handlePlot(xml)
 			count--;
 		}, false);
 	
+	// minimize
 	addListener(imgs[1], 'click', 
 		function()
 		{
@@ -101,6 +105,7 @@ function handlePlot(xml)
 			}
 		}, false);
 	
+	// clock
 	addListener(imgs[2], 'click',
 		function()
 		{
@@ -108,6 +113,7 @@ function handlePlot(xml)
 			document.getElementById("endTime").value = buildTimeString(img.translation[5]);
 		});
 	
+	// xml
 	addListener(imgs[3], 'click',
 		function()
 		{
@@ -116,6 +122,7 @@ function handlePlot(xml)
 			w.document.close();
 		});
 		
+	// raw data
 	addListener(imgs[4], 'click',
 		function()
 		{
@@ -142,6 +149,12 @@ function handlePlot(xml)
 				}
 			});
 		}, false);
+		
+	// setup direct link
+	url = url.replace("o=xml", "o=png");
+	var newURL = "valve3.jsp?" + url.substring(1);
+	links[0].setAttribute('href', newURL);
+
 	
 	var ip = document.getElementById('contentInsertionPoint');
 	ip.insertBefore(t, ip.firstChild);
