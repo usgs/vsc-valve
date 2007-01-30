@@ -47,6 +47,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * TODO: implement arbitrary cross-sections.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/08/29 21:03:22  dcervelli
+ * Changed GeoRange import.
+ *
  * Revision 1.11  2006/06/09 00:48:56  tparker
  * Add toCSV for data export
  *
@@ -396,7 +399,7 @@ public class HypocenterPlotter extends Plotter
 				if (bin == null)
 					throw new Valve3Exception("Illegal bin size option.");
 				
-				if ((endTime - startTime)/bin.toSeconds() > 1000)
+				if ((endTime - startTime)/bin.toSeconds() > 10000)
 					throw new Valve3Exception("Bin size too small.");
 				
 				rightAxis = RightAxis.fromString(component.get("cntsAxis"));
