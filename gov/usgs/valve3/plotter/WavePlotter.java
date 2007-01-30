@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/10/11 00:47:43  tparker
+ * suppressed double y-axis label
+ *
  * Revision 1.18  2006/04/13 22:33:10  dcervelli
  * Scale options.
  *
@@ -319,7 +322,7 @@ public class WavePlotter extends Plotter
 		sr.update(0);
 		
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
+		component.setTranslationType("xy");
 		v3Plot.getPlot().addRenderer(sr);
 	}
 	
