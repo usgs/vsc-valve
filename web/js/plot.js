@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.10 2007-01-30 21:00:31 dcervelli Exp $
+// $Id: plot.js,v 1.11 2007-01-30 21:53:03 dcervelli Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -66,8 +66,17 @@ function handlePlot(xml)
 		img.translation[i] = img.translation[i] * 1;
 	
 	addListener(img, 'mouseover', function() { enableRedLine(); }, false);
-	addListener(img, 'mousemove', function(event) { moveRedLine(event); }, false);
-	addListener(img, 'mouseout', function() { disableRedLine(); }, false);
+	addListener(img, 'mouseout', function() { disableRedLine(); window.status=""; }, false);
+	addListener(img, 'mousemove', 
+		function(event) 
+		{ 
+			moveRedLine(event); 
+			var gxy = eval('getTranslation_' + translationType + '(event)');
+			if (gxy)
+			{
+				window.status = gxy[2];
+			}
+		}, false);
 	
 	addListener(img, 'click', 
 		function(event)
