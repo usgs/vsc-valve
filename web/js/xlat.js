@@ -1,13 +1,40 @@
-// $Id: xlat.js,v 1.3 2006-02-20 03:47:09 dcervelli Exp $
+// $Id: xlat.js,v 1.4 2007-01-30 21:53:32 dcervelli Exp $
 
 var lastTimeClick = 0;
+
+function timeToString(t)
+{
+	t = (1000 * (t + 946728000));
+	var time = new Date(t);
+	var mo = (time.getUTCMonth() + 1 < 10 ? "0" + (time.getUTCMonth() + 1) : (time.getUTCMonth() + 1));
+	var da = (time.getUTCDate() < 10 ? "0" + time.getUTCDate() : time.getUTCDate());
+	var hr = (time.getUTCHours() < 10 ? "0" + time.getUTCHours() : time.getUTCHours());
+	var mi = (time.getUTCMinutes() < 10 ? "0" + time.getUTCMinutes() : time.getUTCMinutes());
+	var sc = (time.getUTCSeconds() < 10 ? "0" + time.getUTCSeconds() : time.getUTCSeconds());
+	var ms = time.getUTCMilliseconds();
+	if (ms < 10)
+		ms = "00" + ms;
+	else if (ms < 100)
+		ms = "0" + ms;
+
+	var ds = time.getUTCFullYear() + "-" + mo + "-" + da + " " + hr + ":" + mi + ":" + sc + "." + ms;	
+	return ds;
+}
 
 function translate_ty(event)
 {
 	var ev = getEvent(event);
+	var mxy = getMouseXY(ev);
+	var gxy = getTranslation_ty(event);
+	var target = getTarget(ev);
+	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
+}
+
+function getTranslation_ty(event)
+{
+	var ev = getEvent(event);
 	var target = getTarget(ev);
 	var xy = getElementXY(ev, target);
-	var mxy = getMouseXY(ev);
 	var t = target.translation;
 
 	var sx = xy[0];
@@ -16,27 +43,44 @@ function translate_ty(event)
 	gx = sx * t[0] + t[1] * 1;
 	gy = sy * t[2] + t[3] * 1;
 	
-	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gx, gy);
+	var result = new Array(3);
+	result[0] = gx;
+	result[1] = gy;
+	var ry = parseInt(gy * 1000) / 1000;
+	result[2] = timeToString(gx) + ", Y: " + ry;
+	return result;
 }
 
 function translate_xy(event)
 {
 	var ev = getEvent(event);
-	var target = getTarget(ev);
-	var xy = getElementXY(ev, target);
 	var mxy = getMouseXY(ev);
-	var t = target.translation;
-
-	var sx = xy[0];
-	var sy = xy[1];
-	sy = target.height - sy;
-	gx = sx * t[0] + t[1] * 1;
-	gy = sy * t[2] + t[3] * 1;
+	var gxy = getTranslation_xy(event);
+	var target = getTarget(ev);
 	
-	currentMenu.acceptXYClick(target, mxy.x, mxy.y, gx, gy);
+	currentMenu.acceptXYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
+}
+
+function getTranslation_xy(event)
+{
+	var gxy = getTranslation_ty(event);
+	var rx = parseInt(gxy[0] * 1000) / 1000;
+	var ry = parseInt(gxy[1] * 1000) / 1000;
+	gxy[2] = "X: " + rx + ", Y: " + ry;
+	return gxy;
 }
 
 function translate_heli(event)
+{
+	var gxy = getTranslation_heli(event);
+	var ev = getEvent(event);
+	var target = getTarget(ev);
+	var mxy = getMouseXY(ev);
+	
+	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
+}	
+
+function getTranslation_heli(event)
 {
 	var ev = getEvent(event);
 	var target = getTarget(ev);
@@ -61,12 +105,27 @@ function translate_heli(event)
 		gx += row * t[6];
 		gy = row;
 	}
-	var mxy = getMouseXY(ev);
-	
-	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gx, gy);
-}	
+	var result = new Array(3);
+	result[0] = gx;
+	result[1] = gy;
+	result[2] = timeToString(gx);
+	return result;
+}
 
 function translate_map(event, func)
+{
+	var ev = getEvent(event);
+	var target = getTarget(ev);
+	var mxy = getMouseXY(ev);
+
+	var ll = getTranslation_map(event);
+	if (func)
+		func(target, mxy.x, mxy.y, ll[0], ll[1]);
+	else if (currentMenu)
+		currentMenu.acceptMapClick(target, mxy.x, mxy.y, ll[0], ll[1]);
+}
+
+function getTranslation_map(event)
 {
 	var ev = getEvent(event);
 	var target = getTarget(ev);
@@ -74,12 +133,13 @@ function translate_map(event, func)
 	var mxy = getMouseXY(ev);
 	var t = target.translation;
 
-	var sx = xy[0];
-	var sy = xy[1];
+	var sx = xy[0] + 1;
+	var sy = xy[1] + 1;
 	sy = target.height - sy;
 	gx = sx * t[0] + t[1] * 1;
 	gy = sy * t[2] + t[3] * 1;
-	/*var ox = (t[4] * 1 + t[5] * 1) / 2;
+	/*
+	var ox = (t[4] * 1 + t[5] * 1) / 2;
 	var oy = (t[6] * 1 + t[7] * 1) / 2;
 	*/
 	var ll = inverseTransverseMercator(t[6] * 1, t[7] * 1, gx, gy)
@@ -89,14 +149,14 @@ function translate_map(event, func)
 		ll[0] -= 360;
 	while (ll[0] <= -180)
 		ll[0] += 360;
-		
-	if (func)
-		func(target, mxy.x, mxy.y, ll[0], ll[1]);
-	else if (currentMenu)
-		currentMenu.acceptMapClick(target, mxy.x, mxy.y, ll[0], ll[1]);
+	
+	ll[2] = ll[0] + ", " + ll[1];
+	return ll;	
 }
 
 function translate_none(event)
+{}
+function getTranslation_none(event)
 {}
 
 function forwardTransverseMercator(ox, oy, lon, lat)
