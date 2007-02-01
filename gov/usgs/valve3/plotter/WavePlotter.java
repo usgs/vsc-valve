@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2007/01/30 21:53:56  dcervelli
+ * Changed spectra translation type from ty to xy.
+ *
  * Revision 1.19  2006/10/11 00:47:43  tparker
  * suppressed double y-axis label
  *
@@ -254,6 +257,13 @@ public class WavePlotter extends Plotter
 			xLabel = Integer.parseInt(component.get("xLabel"));
 		}
 		catch (Exception e){}
+
+		labels = 0;
+		try
+		{
+			labels = Integer.parseInt(component.get("labels"));
+		}
+		catch (Exception e){}
 		
 		color = component.get("color");
 		if (color == null)
@@ -295,7 +305,8 @@ public class WavePlotter extends Plotter
 		
 		if (labels == 1)
 		{
-			wr.setDisplayLabels(false);
+			//wr.setDisplayLabels(false);
+			wr.setYLabel("");
 			wr.update();
 		} 
 		else 
@@ -347,6 +358,7 @@ public class WavePlotter extends Plotter
 		if (yLabel == 1) 
 		{
 			yTick = 8;
+			yString = "";
 			//yString = "Frequency (Hz)";
 			
 		}
@@ -354,6 +366,8 @@ public class WavePlotter extends Plotter
 		{
 			yTick = 5;
 			yString = channel.substring(0, channel.indexOf("$"));
+			sr.setYAxisLabel("");
+			sr.update(0);
 		}
 		
 		int xTick = 0;
