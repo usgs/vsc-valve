@@ -30,6 +30,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/05/17 22:15:31  tparker
+ * Add toCSV for raw data
+ *
  * Revision 1.9  2006/04/13 22:33:19  dcervelli
  * Scale options.
  *
@@ -259,7 +262,7 @@ public class RSAMPlotter extends Plotter
 		pool.checkin(client);
 		//System.out.println("data.toStringShort() = " + rd.getData().toStringShort());
 		if (rd == null)
-			throw new Valve3Exception("No data");
+			throw new Valve3Exception("RSAMPlotter: No data");
 		
 		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
         startTime += TZOffset;
