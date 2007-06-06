@@ -18,6 +18,7 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
+import gov.usgs.vdx.data.rsam.EWRSAMData;
 import gov.usgs.vdx.data.rsam.RSAMData;
 
 import java.awt.BasicStroke;
@@ -30,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2007/04/18 21:54:55  tparker
+ * Tweak error text
+ *
  * Revision 1.10  2006/05/17 22:15:31  tparker
  * Add toCSV for raw data
  *
@@ -149,9 +153,11 @@ public class RSAMPlotter extends Plotter
 	{	
 		Plot plot = v3Plot.getPlot();
 		
-		rd.countEvents(threshold, ratio, maxEventLength);
 		
-		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
+		HistogramRenderer hr;
+		if (threshold > -1)
+			rd.countEvents(threshold, ratio, maxEventLength);
+		hr = new HistogramRenderer(rd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setUnit("events per time");
 		hr.setDefaultExtents();
@@ -166,6 +172,58 @@ public class RSAMPlotter extends Plotter
 		DoubleMatrix2D data = null;
 		
 		data = rd.getCumulativeCounts();
+		if (data != null && data.rows() > 0)
+		{
+			
+			Data countData = new Data(data.toArray());
+			DataRenderer dr = new DataRenderer(countData);
+			dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+			dr.createDefaultLineRenderers();
+			
+			Renderer[] r = dr.getLineRenderers();
+			((ShapeRenderer)r[0]).color = Color.red;
+			((ShapeRenderer)r[0]).stroke = new BasicStroke(2.0f);
+			double cmin = countData.getData()[0][1];
+			double cmax = countData.getData()[data.rows() - 1][1];		
+			dr.setExtents(startTime, endTime, cmin, cmax+1);
+			AxisRenderer ar = new AxisRenderer(dr);
+			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+			dr.setAxis(ar);
+			
+			hr.addRenderer(dr);
+			hr.getAxis().setRightLabelAsText("Cumulative Counts");
+		}
+		
+		plot.writePNG(v3Plot.getLocalFilename());
+		component.setTranslation(hr.getDefaultTranslation(plot.getHeight()));
+		component.setTranslationType("ty");
+		v3Plot.addComponent(component);
+		
+		v3Plot.setTitle("RSAM Events: " + ch);
+	}
+
+	private void plotEWEvents()
+	{	
+		Plot plot = v3Plot.getPlot();
+		EWRSAMData erd = (EWRSAMData)rd;
+		
+		HistogramRenderer hr;
+		System.out.println("EWRSAM on the way...");
+		hr = new HistogramRenderer(erd.getCountsHistogram(bin));
+		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		hr.setUnit("events per time");
+		hr.setDefaultExtents();
+		hr.setMinX(startTime);
+		hr.setMaxX(endTime);
+		hr.createDefaultAxis(8, 8, false, true);
+		hr.setXAxisToTime(8);
+		hr.getAxis().setLeftLabelAsText("Events per " + bin);
+		hr.getAxis().setBottomLabelAsText("Time");
+		plot.addRenderer(hr);
+		
+		DoubleMatrix2D data = null;
+		
+		data = erd.getCumulativeCounts();
 		if (data != null && data.rows() > 0)
 		{
 			
@@ -224,16 +282,25 @@ public class RSAMPlotter extends Plotter
 			period = Double.parseDouble(component.get("countsPeriod"));
 			if (period == 0)
 				throw new Valve3Exception("Illegal period.");
-			threshold = Double.parseDouble(component.get("threshold"));
-			if (threshold == 0)
-				throw new Valve3Exception("Illegal threshold.");
 			
-			ratio = Double.parseDouble(component.get("ratio"));
-			if (ratio == 0)
-				throw new Valve3Exception("Illegal ratio.");
+			if (component.get("threshold") != null)
+			{
+				threshold = Double.parseDouble(component.get("threshold"));
+				if (threshold == 0)
+					throw new Valve3Exception("Illegal threshold.");
+			}
 			
-			maxEventLength = Double.parseDouble(component.get("maxEventLength"));
-
+			if (component.get("ratio") != null)
+			{
+				ratio = Double.parseDouble(component.get("ratio"));
+				if (ratio == 0)
+					throw new Valve3Exception("Illegal ratio.");
+			}
+			
+			if (component.get("maxEventLength") != null)
+			{
+				maxEventLength = Double.parseDouble(component.get("maxEventLength"));
+			}
 			String bs = Util.stringToString(component.get("cntsBin"), "day");
 			bin = BinSize.fromString(bs);
 			if (bin == null)
@@ -258,9 +325,21 @@ public class RSAMPlotter extends Plotter
 		VDXClient client = pool.checkout();
 		if (client == null)
 			return;
-		rd = (RSAMData)client.getBinaryData(params);
+		
+		Object o = client.getBinaryData(params);
+		if (o instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
+		{
+			rd = (EWRSAMData)o;
+			EWRSAMData erd = (EWRSAMData)o;
+			System.out.println("found " + erd.getCumulativeCounts().size() + " events");
+		}
+		else
+			rd = (RSAMData)o;
 		pool.checkin(client);
 		//System.out.println("data.toStringShort() = " + rd.getData().toStringShort());
+
+		if (rd instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
+
 		if (rd == null)
 			throw new Valve3Exception("RSAMPlotter: No data");
 		
@@ -290,7 +369,10 @@ public class RSAMPlotter extends Plotter
 				plotValues();
 				break;
 			case COUNTS:
-				plotEvents();
+				if (rd instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
+					plotEWEvents();
+				else
+					plotEvents();
 				break;
 		}
 	}
