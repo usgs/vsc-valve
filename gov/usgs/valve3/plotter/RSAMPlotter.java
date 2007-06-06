@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2007/06/06 20:21:40  tparker
+ * EWRSAM rewrite
+ *
  * Revision 1.11  2007/04/18 21:54:55  tparker
  * Tweak error text
  *
@@ -208,7 +211,6 @@ public class RSAMPlotter extends Plotter
 		EWRSAMData erd = (EWRSAMData)rd;
 		
 		HistogramRenderer hr;
-		System.out.println("EWRSAM on the way...");
 		hr = new HistogramRenderer(erd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setUnit("events per time");
@@ -326,19 +328,8 @@ public class RSAMPlotter extends Plotter
 		if (client == null)
 			return;
 		
-		Object o = client.getBinaryData(params);
-		if (o instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
-		{
-			rd = (EWRSAMData)o;
-			EWRSAMData erd = (EWRSAMData)o;
-			System.out.println("found " + erd.getCumulativeCounts().size() + " events");
-		}
-		else
-			rd = (RSAMData)o;
+		rd = (RSAMData)client.getBinaryData(params);
 		pool.checkin(client);
-		//System.out.println("data.toStringShort() = " + rd.getData().toStringShort());
-
-		if (rd instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
 
 		if (rd == null)
 			throw new Valve3Exception("RSAMPlotter: No data");
