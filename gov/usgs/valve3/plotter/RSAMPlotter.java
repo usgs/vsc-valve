@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2007/06/07 09:07:05  tparker
+ * Add space to plot title
+ *
  * Revision 1.14  2007/06/07 08:59:35  tparker
  * Fix plot title again
  *
@@ -208,60 +211,9 @@ public class RSAMPlotter extends Plotter
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		
-		v3Plot.setTitle("RSAM Events: " + ch);
-		
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + component.get("selectedStation"));		
 	}
 
-	private void plotEWEvents(PlotComponent comp)
-	{	
-		Plot plot = v3Plot.getPlot();
-		EWRSAMData erd = (EWRSAMData)rd;
-		
-		HistogramRenderer hr;
-		hr = new HistogramRenderer(erd.getCountsHistogram(bin));
-		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		hr.setUnit("events per time");
-		hr.setDefaultExtents();
-		hr.setMinX(startTime);
-		hr.setMaxX(endTime);
-		hr.createDefaultAxis(8, 8, false, true);
-		hr.setXAxisToTime(8);
-		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time");
-		plot.addRenderer(hr);
-		
-		DoubleMatrix2D data = null;
-		
-		data = erd.getCumulativeCounts();
-		if (data != null && data.rows() > 0)
-		{
-			
-			Data countData = new Data(data.toArray());
-			DataRenderer dr = new DataRenderer(countData);
-			dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-			dr.createDefaultLineRenderers();
-			
-			Renderer[] r = dr.getLineRenderers();
-			((ShapeRenderer)r[0]).color = Color.red;
-			((ShapeRenderer)r[0]).stroke = new BasicStroke(2.0f);
-			double cmin = countData.getData()[0][1];
-			double cmax = countData.getData()[data.rows() - 1][1];		
-			dr.setExtents(startTime, endTime, cmin, cmax+1);
-			AxisRenderer ar = new AxisRenderer(dr);
-			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
-			dr.setAxis(ar);
-			
-			hr.addRenderer(dr);
-			hr.getAxis().setRightLabelAsText("Cumulative Counts");
-		}
-		
-		plot.writePNG(v3Plot.getLocalFilename());
-		component.setTranslation(hr.getDefaultTranslation(plot.getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.addComponent(component);
-		
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
-	}
 	
 	private void getInputs() throws Valve3Exception
 	{
@@ -367,9 +319,6 @@ public class RSAMPlotter extends Plotter
 				plotValues();
 				break;
 			case COUNTS:
-				if (rd instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
-					plotEWEvents(comp);
-				else
 					plotEvents();
 				break;
 		}
