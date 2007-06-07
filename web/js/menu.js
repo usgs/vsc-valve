@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.7 2005-12-23 19:20:39 tparker Exp $
+// $Id: menu.js,v 1.8 2007-06-07 00:20:37 tparker Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -147,7 +147,7 @@ function populateSelectors(menu)
 				var opt = document.createElement('option');
 				//opt.value = ss[0];
 				opt.value = val;
-				opt.appendChild(document.createTextNode(ss[3]));
+				opt.appendChild(document.createTextNode(ss[3].replace(/\$/g,' ')));
 				select.appendChild(opt);
 				opts[i] = opt;
 			}
