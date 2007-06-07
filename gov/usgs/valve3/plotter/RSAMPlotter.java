@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2007/06/07 08:59:35  tparker
+ * Fix plot title again
+ *
  * Revision 1.13  2007/06/06 22:45:36  tparker
  * cleanup
  *
@@ -257,7 +260,7 @@ public class RSAMPlotter extends Plotter
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("selectedStation"));
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
 	}
 	
 	private void getInputs() throws Valve3Exception
