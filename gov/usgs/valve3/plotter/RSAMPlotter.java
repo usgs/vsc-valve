@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2007/06/06 22:45:36  tparker
+ * cleanup
+ *
  * Revision 1.12  2007/06/06 20:21:40  tparker
  * EWRSAM rewrite
  *
@@ -203,9 +206,10 @@ public class RSAMPlotter extends Plotter
 		v3Plot.addComponent(component);
 		
 		v3Plot.setTitle("RSAM Events: " + ch);
+		
 	}
 
-	private void plotEWEvents()
+	private void plotEWEvents(PlotComponent comp)
 	{	
 		Plot plot = v3Plot.getPlot();
 		EWRSAMData erd = (EWRSAMData)rd;
@@ -253,7 +257,7 @@ public class RSAMPlotter extends Plotter
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		
-		v3Plot.setTitle("RSAM Events: " + ch);
+		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("selectedStation"));
 	}
 	
 	private void getInputs() throws Valve3Exception
@@ -361,7 +365,7 @@ public class RSAMPlotter extends Plotter
 				break;
 			case COUNTS:
 				if (rd instanceof gov.usgs.vdx.data.rsam.EWRSAMData)
-					plotEWEvents();
+					plotEWEvents(comp);
 				else
 					plotEvents();
 				break;
