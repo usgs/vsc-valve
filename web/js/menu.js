@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.9 2007-06-07 08:19:14 tparker Exp $
+// $Id: menu.js,v 1.10 2007-06-07 08:58:50 tparker Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -145,8 +145,12 @@ function populateSelectors(menu)
 				var val = ch[i].firstChild.nodeValue;
 				var ss = val.split(':');
 				var opt = document.createElement('option');
-				opt.value = ss[3];
-				//opt.value = val;
+				
+				// Flipping this back will break NWIS. Don't do it.
+				// set title like NWIS
+				//opt.value = ss[3];
+				opt.value = val;
+				
 				opt.appendChild(document.createTextNode(ss[3].replace(/\$/g,' ')));
 				select.appendChild(opt);
 				opts[i] = opt;
