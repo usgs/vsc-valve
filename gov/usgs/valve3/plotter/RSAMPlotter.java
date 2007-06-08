@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2007/06/07 19:11:44  tparker
+ * Tidy event plotting
+ *
  * Revision 1.15  2007/06/07 09:07:05  tparker
  * Add space to plot title
  *
@@ -167,7 +170,7 @@ public class RSAMPlotter extends Plotter
 		
 		
 		HistogramRenderer hr;
-		if (threshold > -1)
+		if (threshold > 0)
 			rd.countEvents(threshold, ratio, maxEventLength);
 		hr = new HistogramRenderer(rd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -240,9 +243,14 @@ public class RSAMPlotter extends Plotter
 				
 			break;
 		case COUNTS:
-			period = Double.parseDouble(component.get("countsPeriod"));
-			if (period == 0)
-				throw new Valve3Exception("Illegal period.");
+			if (component.get("countsPeriod") != null)
+			{
+				period = Double.parseDouble(component.get("countsPeriod"));
+				if (period == 0)
+					throw new Valve3Exception("Illegal period.");
+			}
+			else
+				period = 600;
 			
 			if (component.get("threshold") != null)
 			{
