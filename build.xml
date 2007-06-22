@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.1  2005/09/03 19:18:35  dcervelli
+Initial commit.
+
 -->
 
 <project name="USGS VHP Valve3 Web" default="help" basedir=".">
@@ -47,9 +50,7 @@ Available targets:
 				<include name="usgs.jar" />
 			</fileset>
 		</copy>
-	</target>
-	
-	<target name="zip" depends="bin-dist">
+
 		<tar destfile="valve3-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
 		<zip destfile="valve3-bin.zip" basedir="${bin-dir}" />	
 	</target>
