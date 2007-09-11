@@ -1,4 +1,4 @@
-// $Id: menu.js,v 1.10 2007-06-07 08:58:50 tparker Exp $
+// $Id: menu.js,v 1.11 2007-09-11 18:47:49 tparker Exp $
 
 var lastDiv = null;
 var currentMenu = null;
@@ -133,6 +133,9 @@ function populateSelectors(menu)
 {
 	var f = document.getElementById(menu.id + '_' + menu.formName);
 	var select = f.elements[menu.selector];
+	if (menu.secondSelector != undefined)
+		var secondSelect = f.elements[menu.secondSelector];
+	
 	var url = "valve3.jsp?a=data&src=" + menu.id + "&da=selectors";
 	loadXML(menu.id + " selectors", url, 
 		function(req)
@@ -154,6 +157,20 @@ function populateSelectors(menu)
 				opt.appendChild(document.createTextNode(ss[3].replace(/\$/g,' ')));
 				select.appendChild(opt);
 				opts[i] = opt;
+
+				if (secondSelect != undefined) 
+				{
+					var val = ch[i].firstChild.nodeValue;
+					var ss = val.split(':');
+					var opt = document.createElement('option');
+					
+					opt.value = val;
+					
+					opt.appendChild(document.createTextNode(ss[3].replace(/\$/g,' ')));
+					select.appendChild(opt);
+								
+					secondSelect.appendChild(opt);
+				}
 			}
 			f.options = opts;
 			menu.filterChanged();

@@ -1,0 +1,45 @@
+<!-- $Id: ratsammenu.html,v 1.1 2007-09-11 18:46:00 tparker Exp $ -->
+
+<div id="ratsamBox">
+
+	<form id="ratsamForm">
+	
+	<div class="box w140 fl">
+		<h1>First Channel</h1>
+		<p><select class="w100p" size="16" name="first_selector:ch">
+		</select></p>
+	</div>
+	
+	<div class="box w140 fl">
+		<h1>Second Channel</h1>
+		<p><select class="w100p" size="16" name="second_selector:ch">
+		</select></p>
+	</div>
+	
+	<div class="box w180 fl hide">
+		<h1>Output Type</h1>
+		<p><input type="radio" name="type" id="mv:paneSelector_options_0" checked="checked" value="values"> <label for="mv">Values</label></p>
+		<p><input type="radio" name="type" id="cnts:paneSelector_options_1" value="cnts"> <label for="cnts">Event Counts</label></p>
+	</div>
+	
+	<div class="box w180 fl">
+		<h1 id="collapse_options">Options</h1>
+		<div id="collapseTarget_options">
+			<div id="pane_options_0-">
+				<p>Period:
+				<select name="valuesPeriod">
+					<option>1</option>
+					<option>10</option>
+					<option>30</option>
+					<option selected="selected">60</option>
+					<option>300</option>
+					<option>600</option>
+					<option>3600</option>
+				</select>
+				seconds</p>
+				<p>Scale: <input type="text" size="4" id="ysMin" value="Auto" name="ysMin"> <input type="text" size="4" id="ysMax" value="Auto" name="ysMax"></p>
+			</div>
+	</div>
+	
+	</form>
+</div>

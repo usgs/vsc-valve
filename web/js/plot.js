@@ -1,4 +1,4 @@
-// $Id: plot.js,v 1.11 2007-01-30 21:53:03 dcervelli Exp $
+// $Id: plot.js,v 1.12 2007-09-11 18:47:10 tparker Exp $
 
 function createPopupPlot(xml, px, py)
 {		
@@ -237,18 +237,19 @@ function PlotRequest(popup)
 						}
 						else if (elt.name.indexOf("selector:") != -1)
 						{
-							name = elt.name.substring(9);
+							name = elt.name.substring(elt.name.indexOf(":") + 1);
 							var val = getSelected(elt);
 							var vals = val.split('^');
 							comp["selectedStation"] = elt.options[elt.selectedIndex].text;
-							comp[name] = "";
+							if (!comp[name])
+								comp[name] = "";
+							
 							for (var j = 0; j < vals.length; j++)
 							{
 								var ss = vals[j].split(':');
 								if (comp[name])
 									comp[name] += ',';
 								comp[name] += ss[0];
-								
 								// grab data types for nwis
 								if (ss[5])
 									comp["dataTypes"] = ss[5].replace(/=/g, ":");
@@ -280,7 +281,6 @@ function PlotRequest(popup)
 				}
 			}
 		}
-		
 		return comp;
 	}
 
