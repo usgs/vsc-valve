@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2007/06/08 05:11:55  tparker
+ * Hide period details from EWRSAM events
+ *
  * Revision 1.16  2007/06/07 19:11:44  tparker
  * Tidy event plotting
  *
@@ -116,9 +119,12 @@ public class RSAMPlotter extends Plotter
 	private RSAMData rd;
 	private Data data;
 	private PlotType type;
+	protected String label;
 
 	public RSAMPlotter()
-	{}
+	{
+		label = "RSAM";
+	}
 	
 	private void plotValues() throws Valve3Exception
 	{	
@@ -151,9 +157,9 @@ public class RSAMPlotter extends Plotter
 		
 		dr.createDefaultAxis(8, 8, false, allowExpand);
 		dr.createDefaultLineRenderers();
-		dr.createDefaultLegendRenderer(new String[] {ch + " RSAM"});
+		dr.createDefaultLegendRenderer(new String[] {ch + " " + label});
 		dr.setXAxisToTime(8);
-		dr.getAxis().setLeftLabelAsText("RSAM");
+		dr.getAxis().setLeftLabelAsText(label);
 		dr.getAxis().setBottomLabelAsText("Time(" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
 		plot.addRenderer(dr);
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
@@ -161,7 +167,7 @@ public class RSAMPlotter extends Plotter
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		
-		v3Plot.setTitle("RSAM: " + ch);
+		v3Plot.setTitle(label + ": " + ch);
 	}
 	
 	private void plotEvents()
