@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2007/09/11 18:44:27  tparker
+ * Initial RatSAM commit
+ *
  * Revision 1.17  2007/06/08 05:11:55  tparker
  * Hide period details from EWRSAM events
  *
@@ -110,7 +113,7 @@ public class RSAMPlotter extends Plotter
 	private double startTime;
 	private double endTime;
 	private String channel;
-	private String ch;
+	protected String ch;
 	private double period;
 	private double threshold;
 	private double ratio;
@@ -126,7 +129,7 @@ public class RSAMPlotter extends Plotter
 		label = "RSAM";
 	}
 	
-	private void plotValues() throws Valve3Exception
+	protected void plotValues() throws Valve3Exception
 	{	
 		Plot plot = v3Plot.getPlot();
 		
@@ -234,7 +237,7 @@ public class RSAMPlotter extends Plotter
 			throw new Valve3Exception("Illegal start time.");
 
 		channel = component.get("ch");
-		ch = channel.replace('$', ' ').replace('_', ' ');
+		ch = channel.replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
 		type = PlotType.fromString(component.get("type"));
 		if (type == null)
