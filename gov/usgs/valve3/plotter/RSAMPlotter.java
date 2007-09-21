@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2007/09/11 19:11:18  tparker
+ * Add chanel name char translation
+ *
  * Revision 1.18  2007/09/11 18:44:27  tparker
  * Initial RatSAM commit
  *
@@ -336,7 +339,7 @@ public class RSAMPlotter extends Plotter
 				plotValues();
 				break;
 			case COUNTS:
-					plotEvents();
+				plotEvents();
 				break;
 		}
 	}
@@ -347,7 +350,13 @@ public class RSAMPlotter extends Plotter
 		getInputs();
 		getData();
 		
-		return data.toCSV();
+		if (type == PlotType.VALUES)
+		{
+			return data.toCSV();
+		} else {
+			rd.countEvents(threshold, ratio, maxEventLength);
+			return rd.getCountsCSV();
+		}
 	}
 
 }
