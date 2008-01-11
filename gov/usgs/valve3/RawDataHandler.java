@@ -26,28 +26,16 @@ import javax.servlet.http.HttpServletRequest;
  * A request represents exactly one image plot.
 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/24 17:02:09  tparker
+ * cleanup old data files
+ *
  * Revision 1.2  2006/07/19 16:12:55  tparker
  * Set filename for non-seismic data streams
  *
  * Revision 1.1  2006/05/17 21:56:11  tparker
  * initial commit
  *
- * Revision 1.5  2005/09/13 17:54:44  dcervelli
- * Fixed bugs from x > w and y > h.
- *
- * Revision 1.4  2005/09/02 22:37:54  dcervelli
- * Support for ChannelMapPlotter.
- *
- * Revision 1.3  2005/08/29 22:52:54  dcervelli
- * Input validation.
- *
- * Revision 1.2  2005/08/28 19:00:20  dcervelli
- * Eliminated warning.  Added support for plotting exceptions and notifying clients about them.
- *
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
- *
- * @author Dan Cervelli
+ * @author Tom Parker
  */
 public class RawDataHandler implements HttpHandler
 {
@@ -129,7 +117,7 @@ public class RawDataHandler implements HttpHandler
 			if (components == null || components.size() <= 0)
 				return null;
 			
-			String fn = null;
+			String fn = "";
 			StringBuffer sb = new StringBuffer();
 			for (PlotComponent component : components)
 			{
@@ -154,29 +142,26 @@ public class RawDataHandler implements HttpHandler
 				
 				SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
 				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				if (fn == null)
-				{
-					if (component.get("ch") != null)
-						fn = component.get("ch").replace('$','_') + "-" + df.format(Util.j2KToDate(component.getEndTime()));
-					else
-						fn = component.get("src") + "-" + df.format(Util.j2KToDate(component.getEndTime()));
-				}
+				
+				if (fn.length() > 0)
+					fn += "-";
+				
+				if (component.get("ch") != null)
+					fn = component.get("ch").replace('$','_');
 				else
-					fn += "-" + component.getSource().replace('$', '_') + "-" + df.format(Util.j2KToDate(component.getEndTime()));
+					fn = component.get("src");
 					
+				fn += "-" + df.format(Util.j2KToDate(component.getStartTime(component.getEndTime()) ));
+				fn += "-" + df.format(Util.j2KToDate(component.getEndTime()));
 			}
 			
 			fn += ".csv";
-			String zipName = getRandomFilename();
-			String zipFilePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + zipName;
+			String filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
 			try
 			{
-				//ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn + ".zip")));
-		        FileOutputStream out = new FileOutputStream(zipFilePath);
-		        ZipOutputStream zout = new ZipOutputStream(new BufferedOutputStream(out));
-		        zout.putNextEntry(new ZipEntry(fn));
-		        zout.write(sb.toString().getBytes());
-		        zout.close();
+		        FileOutputStream out = new FileOutputStream(filePath);
+		        out.write(sb.toString().getBytes());
+		        out.close();
 			}
 			catch (IOException e)
 			{
@@ -184,8 +169,8 @@ public class RawDataHandler implements HttpHandler
 			}
 
 			Pattern p = Pattern.compile(request.getContextPath());
-			String zipFileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + zipName;
-			RawData rd = new RawData(zipFileURL, zipFilePath);
+			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + fn;
+			RawData rd = new RawData(fileURL, filePath);
 			
 			Valve3.getInstance().getResultDeleter().addResult(rd);
 			return rd;
@@ -197,10 +182,4 @@ public class RawDataHandler implements HttpHandler
 		
 		
 	}
-	
-	public static String getRandomFilename()
-	{
-		return "tmp" + Math.round(Math.random() * 100000) + ".zip"; 
-	}
-
 }
