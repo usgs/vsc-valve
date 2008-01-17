@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2008/01/17 18:32:12  cervelli
+ * Made Y axis tight (i.e, minimum = minimum data value, maximum = maximum data value).  Also added a commented stub for removing the mean.
+ *
  * Revision 1.20  2007/09/21 19:34:21  tparker
  * Add event count data export
  *
@@ -118,6 +121,7 @@ public class RSAMPlotter extends Plotter
 	private PlotComponent component;
 	private double startTime;
 	private double endTime;
+	private boolean removeBias;
 	private String channel;
 	protected String ch;
 	private double period;
@@ -147,7 +151,8 @@ public class RSAMPlotter extends Plotter
 		double dmin = data.getMinData();
 
 //		Remove the mean from the first column (this needs to be user controlled)
-//		data.unbias(1);
+		if (removeBias)
+			data.unbias(1);
 		
 		double yMin, yMax;
 		boolean allowExpand = true;
@@ -250,6 +255,11 @@ public class RSAMPlotter extends Plotter
 
 		channel = component.get("ch");
 		ch = channel.replace('$', ' ').replace('_', ' ').replace(',', '/');
+	
+		removeBias = false;
+		String bias = component.get("rb");
+		if (bias != null && bias.toUpperCase().equals("T"))
+			removeBias = true;
 		
 		type = PlotType.fromString(component.get("type"));
 		if (type == null)
