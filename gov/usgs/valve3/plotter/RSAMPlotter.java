@@ -31,6 +31,9 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2007/09/21 19:34:21  tparker
+ * Add event count data export
+ *
  * Revision 1.19  2007/09/11 19:11:18  tparker
  * Add chanel name char translation
  *
@@ -142,13 +145,19 @@ public class RSAMPlotter extends Plotter
 		
 		double dmax = data.getMax(1);
 		double dmin = data.getMinData();
+
+//		Remove the mean from the first column (this needs to be user controlled)
+//		data.unbias(1);
+		
 		double yMin, yMax;
 		boolean allowExpand = true;
 		if (component.isAutoScale("ys"))
 		{
-			double mean = data.getMean(1);
-			yMin = dmin;
-			yMax = Math.min(3 * mean, dmax);
+//			double mean = data.getMean(1);
+//			yMin = dmin;
+//			yMax = Math.min(3 * mean, dmax);
+			yMin = data.getMin(1);
+			yMax = data.getMax(1);
 		}
 		else
 		{
