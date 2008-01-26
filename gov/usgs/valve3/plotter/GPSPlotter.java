@@ -43,6 +43,9 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: check map sizes against client max height.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/29 21:03:22  dcervelli
+ * Changed GeoRange import.
+ *
  * Revision 1.8  2006/04/09 21:24:51  dcervelli
  * GPS time series plot titles include stations.
  *
@@ -170,7 +173,7 @@ public class GPSPlotter extends Plotter
 	}
 	
 	private void plotTimeSeries()
-	{
+	{			
 		boolean ce = component.get("east").equals("T");
 		boolean cn = component.get("north").equals("T");
 		boolean cu = component.get("up").equals("T");
@@ -190,7 +193,11 @@ public class GPSPlotter extends Plotter
 		d.add(1, -dp.x);
 		d.add(2, -dp.y);
 		d.add(3, -dp.z);
-		d.add(4, -dp.len);
+		d.add(4, -dp.len);	
+		
+		String bs = "";
+		if (baselineData != null)
+			bs = "-" + benchmarks.get(baselineID).getCode();
 
 		int compCount = 0;
 		for (int i = 0; i < comps.length; i++)
@@ -223,7 +230,7 @@ public class GPSPlotter extends Plotter
 //				dr.setExtents(st, et, -0.1, 0.1);
 				dr.createDefaultAxis(8, 4, false, false);
 				dr.createDefaultPointRenderers();
-				dr.createDefaultLegendRenderer(new String[] { LEGENDS[i] });
+				dr.createDefaultLegendRenderer(new String[] { String.format("%s%s ", bm.getCode(), bs) + LEGENDS[i] });
 				dr.setXAxisToTime(8);
 				dr.getAxis().setLeftLabelAsText("Meters");
 				dr.getAxis().setBottomLabelAsText("Time");
@@ -238,10 +245,6 @@ public class GPSPlotter extends Plotter
 				v3Plot.addComponent(pc);
 			}
 		}
-		
-		String bs = "";
-		if (baselineData != null)
-			bs = "-" + benchmarks.get(baselineID).getCode();
 		
 		v3Plot.setTitle(String.format("GPS: %s%s", bm.getCode(), bs));
 	}
