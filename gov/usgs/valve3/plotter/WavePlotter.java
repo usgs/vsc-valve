@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2008/04/11 22:06:08  tparker
+ * time wave plots on data rather than inputs
+ *
  * Revision 1.22  2008/04/11 21:57:09  tparker
  * time wave plots on data rather than inputs
  *
@@ -282,8 +285,7 @@ public class WavePlotter extends Plotter
 		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		wr.setWave(wave);
-		//wr.setViewTimes(startTime, endTime);
-		wr.setViewTimes(wave.getStartTime(),  wave.getEndTime());
+		wr.setViewTimes(startTime, endTime);
 		if (color.equals("M"))
 			wr.setColor(Color.BLACK);
 		
