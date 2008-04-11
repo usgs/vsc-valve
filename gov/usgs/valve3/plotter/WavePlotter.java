@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2008/04/11 21:57:09  tparker
+ * time wave plots on data rather than inputs
+ *
  * Revision 1.21  2007/02/01 20:26:21  tparker
  * correct axis labeling
  *
@@ -152,7 +155,7 @@ public class WavePlotter extends Plotter
 		if (w == null)
 			throw new Valve3Exception("No data available for " + channel + ".");
 		
-		w.setStartTime(startTime + Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
+		w.setStartTime(w.getStartTime() + Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 		
 		if (filterType != null)
 		{
@@ -181,7 +184,7 @@ public class WavePlotter extends Plotter
 		}
 		
 		wave = new SliceWave(w);
-		wave.setSlice(startTime, endTime);
+		wave.setSlice(w.getStartTime(), w.getEndTime());
 		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
