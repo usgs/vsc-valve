@@ -24,6 +24,9 @@ import java.util.HashMap;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2007/02/01 20:26:21  tparker
+ * correct axis labeling
+ *
  * Revision 1.20  2007/01/30 21:53:56  dcervelli
  * Changed spectra translation type from ty to xy.
  *
@@ -276,7 +279,8 @@ public class WavePlotter extends Plotter
 		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		wr.setWave(wave);
-		wr.setViewTimes(startTime, endTime);
+		//wr.setViewTimes(startTime, endTime);
+		wr.setViewTimes(wave.getStartTime(),  wave.getEndTime());
 		if (color.equals("M"))
 			wr.setColor(Color.BLACK);
 		
