@@ -30,69 +30,6 @@ import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.21  2008/01/17 18:32:12  cervelli
- * Made Y axis tight (i.e, minimum = minimum data value, maximum = maximum data value).  Also added a commented stub for removing the mean.
- *
- * Revision 1.20  2007/09/21 19:34:21  tparker
- * Add event count data export
- *
- * Revision 1.19  2007/09/11 19:11:18  tparker
- * Add chanel name char translation
- *
- * Revision 1.18  2007/09/11 18:44:27  tparker
- * Initial RatSAM commit
- *
- * Revision 1.17  2007/06/08 05:11:55  tparker
- * Hide period details from EWRSAM events
- *
- * Revision 1.16  2007/06/07 19:11:44  tparker
- * Tidy event plotting
- *
- * Revision 1.15  2007/06/07 09:07:05  tparker
- * Add space to plot title
- *
- * Revision 1.14  2007/06/07 08:59:35  tparker
- * Fix plot title again
- *
- * Revision 1.13  2007/06/06 22:45:36  tparker
- * cleanup
- *
- * Revision 1.12  2007/06/06 20:21:40  tparker
- * EWRSAM rewrite
- *
- * Revision 1.11  2007/04/18 21:54:55  tparker
- * Tweak error text
- *
- * Revision 1.10  2006/05/17 22:15:31  tparker
- * Add toCSV for raw data
- *
- * Revision 1.9  2006/04/13 22:33:19  dcervelli
- * Scale options.
- *
- * Revision 1.8  2006/04/09 18:19:36  dcervelli
- * VDX type safety changes.
- *
- * Revision 1.7  2006/01/11 00:39:13  tparker
- * fix period bug
- *
- * Revision 1.6  2006/01/10 20:53:15  tparker
- * Add RSAM event counts
- *
- * Revision 1.5  2005/12/28 02:13:31  tparker
- * Add toCSV method to support raw data export
- *
- * Revision 1.4  2005/11/03 20:26:16  tparker
- * commit due to repository weirdness. no functional changes
- *
- * Revision 1.3  2005/11/01 00:59:49  tparker
- * Add timezone per bug#68
- *
- * Revision 1.2  2005/10/27 21:35:26  tparker
- * Add timezone per bug #68
- *
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
  *
  * @author Dan Cervelli
  */
@@ -320,6 +257,7 @@ public class RSAMPlotter extends Plotter
 		params.put("period", Double.toString(period));
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
+		params.put("type", type.toString());
 
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
@@ -336,6 +274,8 @@ public class RSAMPlotter extends Plotter
         startTime += TZOffset;
         endTime += TZOffset;
         rd.adjustTime(TZOffset);
+        if (rd.getData() == null)
+        	throw new Valve3Exception("RSAMPlotter: Empty data");
         
         data = new Data(rd.getData().toArray());
 	}
