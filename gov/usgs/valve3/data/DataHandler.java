@@ -1,11 +1,13 @@
 package gov.usgs.valve3.data;
 
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.HttpHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.result.GenericMenu;
+import gov.usgs.valve3.result.ewRsamMenu;
 import gov.usgs.vdx.client.VDXClient;
 
 import java.io.File;
@@ -13,26 +15,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2006/04/09 18:09:44  dcervelli
- * VDX type safety changes.
- *
- * Revision 1.4  2005/11/04 18:57:36  dcervelli
- * Added configurable VDX timeout.
- *
- * Revision 1.3  2005/10/20 05:11:10  dcervelli
- * Support for generic menus.
- *
- * Revision 1.2  2005/10/13 20:35:13  dcervelli
- * Changes for plotterConfig.
- *
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
  *
  * @author Dan Cervelli
  */
@@ -107,9 +95,12 @@ public class DataHandler implements HttpHandler
 	
 	public Object handle(HttpServletRequest request)
 	{
-		System.out.println("DataHandler");
+		
+		Logger logger = Log.getLogger("gov.usgs.vdx");
+
+		logger.info("entering DataHandler.handle()");
 		String source = request.getParameter("src");
-		System.out.println(source);
+		logger.info("src = " + source);
 		DataSourceDescriptor dsd = dataSources.get(source);
 		if (dsd == null)
 			return null;  // TODO: throw Valve3Exception
@@ -117,7 +108,8 @@ public class DataHandler implements HttpHandler
 		String action = request.getParameter("da"); // da == data action
 		if (action == null)
 			return null;  // TODO: throw Valve3Exception
-		
+
+		logger.info("action = " + action);
 		// TODO: refactor out cut/paste job
 		if (action.equals("genericMenu"))
 		{
@@ -133,6 +125,26 @@ public class DataHandler implements HttpHandler
 				List<String> ls = client.getTextData(params);
 				if (ls != null)
 					result = new GenericMenu(ls);
+			}
+			pool.checkin(client);
+			return result;
+		}
+		else if (action.equals("ewRsamMenu"))
+		{
+			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("source", dsd.getVDXSource());
+			params.put("action", "ewRsamMenu");
+			
+			VDXClient client = pool.checkout();
+			ewRsamMenu result = null;
+			if (client != null)
+			{
+				List<String> ls = client.getTextData(params);
+				logger.info("params = " + params.toString());
+				logger.info("EWRSAMMENU params = " + ls.toString());
+				if (ls != null)
+					result = new ewRsamMenu(ls);
 			}
 			pool.checkin(client);
 			return result;
