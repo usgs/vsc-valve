@@ -20,10 +20,14 @@ create_ewrsammenu = function(menu)
 				if (types == "[VALUES]")
 				{
 					document.getElementById(menu.id + "_mv").checked = "true";
+					document.getElementById(menu.id + "_pane_options_0-").style.display = "block";
+					document.getElementById(menu.id + "_pane_options_1").style.display = "none";
 				}
 				else if (types == "[EVENTS]")
 				{
 					document.getElementById(menu.id + "_cnts").checked = "true";
+					document.getElementById(menu.id + "_pane_options_0-").style.display = "none";
+					document.getElementById(menu.id + "_pane_options_1").style.display = "block";
 				}
 				else
 				{
