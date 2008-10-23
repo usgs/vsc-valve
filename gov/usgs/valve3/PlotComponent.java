@@ -86,7 +86,7 @@ public class PlotComponent
 		String ysMin = params.get(pre + "Min");
 		if (ysMin == null)
 			d[0] = min;
-		else if (ysMin.toLowerCase().equals("min"))
+		else if (ysMin.toLowerCase().equals("min") || ysMin.toLowerCase().equals("auto"))
 			d[0] = min;
 		else
 			d[0] = Util.stringToDouble(ysMin, Double.NaN);
@@ -94,7 +94,7 @@ public class PlotComponent
 		String ysMax = params.get(pre + "Max");
 		if (ysMax == null)
 			d[1] = max;
-		else if (ysMax.toLowerCase().equals("max"))
+		else if (ysMax.toLowerCase().equals("max") || ysMax.toLowerCase().equals("auto"))
 			d[1] = max;
 		else
 			d[1] = Util.stringToDouble(ysMax, Double.NaN);
