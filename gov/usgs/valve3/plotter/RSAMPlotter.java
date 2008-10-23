@@ -84,35 +84,20 @@ public class RSAMPlotter extends Plotter
 		dr.setUnit("rsam");
 		dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
-		double dmax = data.getMax(1);
-		double dmin = data.getMinData();
-
 //		Remove the mean from the first column (this needs to be user controlled)
 		if (removeBias)
 			data.unbias(1);
 		
-		double yMin, yMax;
-		boolean allowExpand = true;
-		if (component.isAutoScale("ys"))
-		{
-//			double mean = data.getMean(1);
-//			yMin = dmin;
-//			yMax = Math.min(3 * mean, dmax);
-			yMin = data.getMin(1);
-			yMax = data.getMax(1);
-		}
-		else
-		{
-			double[] d = component.getYScale("ys", dmin, dmax);
-			yMin = d[0];
-			yMax = d[1];
-			allowExpand = false;
-		}
+		double[] d = component.getYScale("ys", data.getMin(1), data.getMax(1));
+		double yMin = d[0];
+		double yMax = d[1];
+
 		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
 			throw new Valve3Exception("Illegal axis values.");
+		
 		dr.setExtents(startTime, endTime, yMin, yMax);
 		
-		dr.createDefaultAxis(8, 8, false, allowExpand);
+		dr.createDefaultAxis(8, 8, false, component.isAutoScale("ys"));
 		dr.createDefaultLineRenderers();
 		dr.createDefaultLegendRenderer(new String[] {ch + " " + label});
 		dr.setXAxisToTime(8);
