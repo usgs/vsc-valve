@@ -16,7 +16,7 @@ import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.generic.fixed.GenericColumn;
+import gov.usgs.vdx.data.generic.GenericColumn;
 
 import java.awt.Color;
 import java.io.File;
@@ -27,6 +27,7 @@ import java.util.List;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
+ * Generate images for generic data plot to files
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.9  2006/09/28 17:58:19  tparker
@@ -75,9 +76,16 @@ public class GenericVariablePlotter extends Plotter
 	private String rightUnit;
 	private List<GenericColumn> rightColumns;
 
+	/**
+	 * Default constructor
+	 */
 	public GenericVariablePlotter()
 	{}
-	
+
+	/**
+	 * Gets binary data from VDX server.
+	 * @throws Valve3Exception
+	 */
 	private void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -99,7 +107,11 @@ public class GenericVariablePlotter extends Plotter
 		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
-	
+
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	private void getInputs() throws Valve3Exception
 	{
 		
@@ -178,7 +190,11 @@ public class GenericVariablePlotter extends Plotter
 			}
 		}
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderer for left plot axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getLeftMatrixRenderer()
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
@@ -210,7 +226,11 @@ public class GenericVariablePlotter extends Plotter
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderer for right plot axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getRightMatrixRenderer()
 	{
 		if (rightUnit == null)
@@ -249,7 +269,12 @@ public class GenericVariablePlotter extends Plotter
 		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
 		return mr;
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderers for left and right axis,
+	 * adds them to plot
+	 * @throws Valve3Exception
+	 */
 	public void plotData()
 	{
 		MatrixRenderer leftMR = getLeftMatrixRenderer();
@@ -261,7 +286,14 @@ public class GenericVariablePlotter extends Plotter
 		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 	}
-	
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Initialize MatrixRenderers for left and right axis
+	 * (plot may have 2 different value axis)
+	 * Generate PNG image to file with random file name.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 				
@@ -281,7 +313,10 @@ public class GenericVariablePlotter extends Plotter
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
-	
+
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
 		

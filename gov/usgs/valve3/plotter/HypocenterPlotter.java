@@ -40,111 +40,100 @@ import java.util.HashMap;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
- * A class for making hypocenter map plots and histograms.
+ * A class for making hypocenter map plots and histograms. 
  * 
- * TODO: display number of hypocenters on plot.
- * TODO: implement triple view.
- * TODO: implement arbitrary cross-sections.
+ * TODO: display number of hypocenters on plot. 
+ * TODO: implement triple view. 
+ * TODO: implement arbitrary cross-sections. 
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.12  2006/08/29 21:03:22  dcervelli
- * Changed GeoRange import.
- *
- * Revision 1.11  2006/06/09 00:48:56  tparker
- * Add toCSV for data export
- *
- * Revision 1.10  2006/04/09 18:19:36  dcervelli
- * VDX type safety changes.
- *
- * Revision 1.9  2005/12/23 00:51:41  tparker
- * avoid labeling issues described in bug id #86
- *
- * Revision 1.8  2005/12/22 01:18:26  tparker
- * Changed X-Axis label on histogram
- *
- * Revision 1.7  2005/10/07 17:14:30  dcervelli
- * Added top label with number of earthquakes and date range to counts plot.
- *
- * Revision 1.6  2005/10/07 17:10:10  dcervelli
- * Added top label with number of earthquakes and date range.
- *
- * Revision 1.5  2005/10/07 16:47:09  dcervelli
- * Added lon/lat label, time/depth scale.
- *
- * Revision 1.4  2005/10/05 00:07:02  dcervelli
- * Added axis labels to lon/depth, lat/depth, depth/time plots.
- *
- * Revision 1.3  2005/09/01 00:30:38  dcervelli
+ * $Log: not supported by cvs2svn $ 
+ * Revision 1.12 2006/08/29 21:03:22 dcervelli 
+ * Changed GeoRange import. 
+ * 
+ * Revision 1.11 2006/06/09 00:48:56 tparker 
+ * Add toCSV for data export 
+ * 
+ * Revision 1.10 2006/04/09 18:19:36 dcervelli
+ * VDX type safety changes. 
+ * 
+ * Revision 1.9 2005/12/23 00:51:41 tparker 
+ * avoid labeling issues described in bug id #86 
+ * 
+ * Revision 1.8 2005/12/22 01:18:26 tparker 
+ * Changed X-Axis label on histogram 
+ * 
+ * Revision 1.7 2005/10/07 17:14:30 dcervelli 
+ * Added top label with number of earthquakes and date range to counts plot. 
+ * 
+ * Revision 1.6 2005/10/07 17:10:10 dcervelli 
+ * Added top label with number of earthquakes and date range. 
+ * 
+ * Revision 1.5 2005/10/07 16:47:09 dcervelli 
+ * Added lon/lat label, time/depth scale. 
+ * 
+ * Revision 1.4 2005/10/05 00:07:02 dcervelli 
+ * Added axis labels to lon/depth, lat/depth, depth/time plots. 
+ * 
+ * Revision 1.3 2005/09/01 00:30:38 dcervelli 
  * Reordered translations.
- *
- * Revision 1.2  2005/08/28 19:02:00  dcervelli
- * Totally refactored (now uses JDK1.5 enums, gets histogram data from HypocenterList, etc.).
- *
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
- *
+ * 
+ * Revision 1.2 2005/08/28 19:02:00 dcervelli 
+ * Totally refactored (now uses JDK1.5 enums, gets histogram data from HypocenterList, etc.). 
+ * 
+ * Revision 1.1 2005/08/26 20:41:31 dcervelli Initial
+ * avosouth commit.
+ * 
  * @author Dan Cervelli
  */
-public class HypocenterPlotter extends Plotter
-{
-	private enum PlotType 
-	{
+public class HypocenterPlotter extends Plotter {
+	private enum PlotType {
 		MAP, COUNTS;
-		
-		public static PlotType fromString(String s)
-		{
+
+		public static PlotType fromString(String s) {
 			if (s == null)
 				return null;
-			
+
 			if (s.equals("map"))
 				return MAP;
 			else if (s.equals("cnts"))
 				return COUNTS;
-			else 
+			else
 				return null;
 		}
 	}
-	
-	private enum RightAxis
-	{
-		NONE(""), 
-		CUM_COUNTS("Cumulative Counts"), 
-		CUM_MAGNITUDE("Cumulative Magnitude"), 
-		CUM_MOMENT("Cumulative Moment");
-		
+
+	private enum RightAxis {
+		NONE(""), CUM_COUNTS("Cumulative Counts"), CUM_MAGNITUDE("Cumulative Magnitude"), CUM_MOMENT("Cumulative Moment");
+
 		private String description;
-		
-		private RightAxis(String s)
-		{
+
+		private RightAxis(String s) {
 			description = s;
 		}
-		
-		public String toString()
-		{
+
+		public String toString() {
 			return description;
 		}
-		
-		public static RightAxis fromString(String s)
-		{
+
+		public static RightAxis fromString(String s) {
 			if (s == null)
 				return null;
-			
-			switch (s.charAt(0))
-			{
-				case 'N':
-					return NONE;
-				case 'C':
-					return CUM_COUNTS;
-				case 'M':
-					return CUM_MAGNITUDE;
-				case 'T': 
-					return CUM_MOMENT;
-				default:
-					return null;
+
+			switch (s.charAt(0)) {
+			case 'N':
+				return NONE;
+			case 'C':
+				return CUM_COUNTS;
+			case 'M':
+				return CUM_MAGNITUDE;
+			case 'T':
+				return CUM_MOMENT;
+			default:
+				return null;
 			}
 		}
 	}
-	
+
 	private Valve3Plot v3Plot;
 	private PlotComponent component;
 	private double startTime;
@@ -161,31 +150,37 @@ public class HypocenterPlotter extends Plotter
 	private RightAxis rightAxis;
 	private HypocenterList hypos;
 	private DateFormat dateFormat;
-	
-	public HypocenterPlotter()
-	{
+
+	/**
+	 * Default constructor
+	 */
+	public HypocenterPlotter() {
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	}
 
-	private BasicFrameRenderer plotMapView(Plot plot)
-	{
+	/**
+	 * Initialize MapRenderer and add it to given plot 
+	 * 
+	 * @param plot
+	 */
+	private BasicFrameRenderer plotMapView(Plot plot) {
 		// TODO: make projection variable
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
 
 		hypos.project(proj);
-		
+
 		MapRenderer mr = new MapRenderer(range, proj);
 		int mh = Integer.parseInt(component.get("mh"));
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), mh);
-		
+
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		mr.setGeoLabelSet(labels.getSubset(range));
-		
+
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
-		
+
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, true);
@@ -199,21 +194,20 @@ public class HypocenterPlotter extends Plotter
 		component.setTranslationType("map");
 		return mr;
 	}
-	
-	private String getTopLabel()
-	{
+
+	/**
+	 * 
+	 * @return plot top label text
+	 */
+	private String getTopLabel() {
 		StringBuilder top = new StringBuilder(100);
 		top.append(hypos.size());
-		if (hypos.size() == 1)
-		{
+		if (hypos.size() == 1) {
 			top.append(" earthquake on ");
 			top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).getTime())));
-		}
-		else
-		{
+		} else {
 			top.append(" earthquakes");
-			if (hypos.size() > 1)
-			{
+			if (hypos.size() > 1) {
 				top.append(" between ");
 				top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).getTime())));
 				top.append(" and ");
@@ -222,71 +216,75 @@ public class HypocenterPlotter extends Plotter
 		}
 		return top.toString();
 	}
-	
-	private void plotMap()
-	{
+
+	/**
+	 * Initialize BasicFrameRenderer (init mode depends from axes type) and add it to plot.
+	 * Generate PNG image to local file.
+	 * 
+	 */
+	private void plotMap() {
 		Plot plot = v3Plot.getPlot();
 		BasicFrameRenderer base = null;
-		
+
 		base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		switch(axes)
-		{
-			case MAP_VIEW:
-				base = plotMapView(plot);
-				base.createEmptyAxis();
-				base.getAxis().setBottomLabelAsText("Longitude");
-				base.getAxis().setLeftLabelAsText("Latitude");
-				((MapRenderer)base).createScaleRenderer();
-				break;
-			case LON_DEPTH:
-				base.setExtents(range.getWest(), range.getEast(), -maxDepth, -minDepth);
-				base.createDefaultAxis();
-				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
-				component.setTranslationType("xy");
-				base.getAxis().setBottomLabelAsText("Longitude");
-				base.getAxis().setLeftLabelAsText("Depth (km)");
-				break;
-			case LAT_DEPTH:
-				base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
-				base.createDefaultAxis();
-				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
-				component.setTranslationType("xy");
-				base.getAxis().setBottomLabelAsText("Latitude");
-				base.getAxis().setLeftLabelAsText("Depth (km)");
-				break;
-			case DEPTH_TIME:
-				base.setExtents(startTime, endTime, -maxDepth, -minDepth);
-				base.createDefaultAxis();
-				base.setXAxisToTime(8);
-				component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
-				component.setTranslationType("ty");
-				base.getAxis().setBottomLabelAsText("Time");
-				base.getAxis().setLeftLabelAsText("Depth (km)");
-				break;
+		switch (axes) {
+		case MAP_VIEW:
+			base = plotMapView(plot);
+			base.createEmptyAxis();
+			base.getAxis().setBottomLabelAsText("Longitude");
+			base.getAxis().setLeftLabelAsText("Latitude");
+			((MapRenderer) base).createScaleRenderer();
+			break;
+		case LON_DEPTH:
+			base.setExtents(range.getWest(), range.getEast(), -maxDepth, -minDepth);
+			base.createDefaultAxis();
+			component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
+			component.setTranslationType("xy");
+			base.getAxis().setBottomLabelAsText("Longitude");
+			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
+		case LAT_DEPTH:
+			base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
+			base.createDefaultAxis();
+			component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
+			component.setTranslationType("xy");
+			base.getAxis().setBottomLabelAsText("Latitude");
+			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
+		case DEPTH_TIME:
+			base.setExtents(startTime, endTime, -maxDepth, -minDepth);
+			base.createDefaultAxis();
+			base.setXAxisToTime(8);
+			component.setTranslation(base.getDefaultTranslation(plot.getHeight()));
+			component.setTranslationType("ty");
+			base.getAxis().setBottomLabelAsText("Time");
+			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
 		}
-
 		base.getAxis().setTopLabelAsText(getTopLabel());
-		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
 		hr.setColorOption(color);
 		if (color == ColorOption.TIME)
 			hr.setColorTime(startTime, endTime);
 		hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY() + base.getGraphHeight());
-//		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
+		// hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16,
+		// base.getGraphY());
 		plot.addRenderer(base);
 		plot.addRenderer(hr);
 
-		
 		plot.writePNG(v3Plot.getLocalFilename());
 		v3Plot.addComponent(component);
 		v3Plot.setTitle("Earthquake Map");
 	}
-	
-	private void plotCounts()
-	{
+
+	/**
+	 * Initialize HistogramRenderer and add it to plot.
+	 * Generate PNG image to local file.
+	 */
+	private void plotCounts() {
 		Plot plot = v3Plot.getPlot();
-		
+
 		HistogramRenderer hr = new HistogramRenderer(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setUnit("counts per time");
@@ -299,52 +297,53 @@ public class HypocenterPlotter extends Plotter
 		hr.getAxis().setLeftLabelAsText("Located Earthquakes per " + bin);
 		hr.getAxis().setBottomLabelAsText("Time");
 		plot.addRenderer(hr);
-		
+
 		DoubleMatrix2D data = null;
-		switch(rightAxis)
-		{
-			case CUM_COUNTS:
-				data = hypos.getCumulativeCounts();
-				break;
-			case CUM_MAGNITUDE:
-				data = hypos.getCumulativeMagnitude();
-				break;
-			case CUM_MOMENT:
-				data = hypos.getCumulativeMoment();
-				break;
+		switch (rightAxis) {
+		case CUM_COUNTS:
+			data = hypos.getCumulativeCounts();
+			break;
+		case CUM_MAGNITUDE:
+			data = hypos.getCumulativeMagnitude();
+			break;
+		case CUM_MOMENT:
+			data = hypos.getCumulativeMoment();
+			break;
 		}
-		if (data != null && data.rows() > 0)
-		{
+		if (data != null && data.rows() > 0) {
 			Data countData = new Data(data.toArray());
 			DataRenderer dr = new DataRenderer(countData);
 			dr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 			dr.createDefaultLineRenderers();
-			
+
 			Renderer[] r = dr.getLineRenderers();
-			((ShapeRenderer)r[0]).color = Color.red;
-			((ShapeRenderer)r[0]).stroke = new BasicStroke(2.0f);
+			((ShapeRenderer) r[0]).color = Color.red;
+			((ShapeRenderer) r[0]).stroke = new BasicStroke(2.0f);
 			double cmin = countData.getData()[0][1];
 			double cmax = countData.getData()[data.rows() - 1][1];
 			dr.setExtents(startTime, endTime, cmin, cmax);
 			AxisRenderer ar = new AxisRenderer(dr);
 			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
 			dr.setAxis(ar);
-			
+
 			hr.addRenderer(dr);
 			hr.getAxis().setRightLabelAsText(rightAxis.toString());
 		}
-		
+
 		plot.writePNG(v3Plot.getLocalFilename());
 		component.setTranslation(hr.getDefaultTranslation(plot.getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.addComponent(component);
 		v3Plot.setTitle("Earthquake Counts");
 	}
-	
-	private void getInputs() throws Valve3Exception
-	{
-		try
-		{
+
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * 
+	 * @throws Valve3Exception
+	 */
+	private void getInputs() throws Valve3Exception {
+		try {
 			double w = Double.parseDouble(component.get("west"));
 			double e = Double.parseDouble(component.get("east"));
 			double s = Double.parseDouble(component.get("south"));
@@ -357,60 +356,61 @@ public class HypocenterPlotter extends Plotter
 			if (minDepth > maxDepth)
 				throw new Valve3Exception("Illegal depth filter.");
 			minMag = Double.parseDouble(component.get("minMag"));
-			maxMag  = Double.parseDouble(component.get("maxMag"));
+			maxMag = Double.parseDouble(component.get("maxMag"));
 			if (minMag > maxMag)
 				throw new Valve3Exception("Illegal magnitude filter.");
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			throw new Valve3Exception("Illegal filter settings.");
 		}
-		
+
 		endTime = component.getEndTime();
 		if (Double.isNaN(endTime))
 			throw new Valve3Exception("Illegal end time.");
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
-		
+
 		type = PlotType.fromString(component.get("type"));
 		if (type == null)
 			throw new Valve3Exception("Illegal plot type.");
-		
-		switch(type)
-		{
-			case MAP:
-				axes = Axes.fromString(component.get("axes"));
-				if (axes == null)
-					throw new Valve3Exception("Illegal axes type.");
-				
-				String c = Util.stringToString(component.get("color"), "A");
-				if (c.equals("A"))
-					color = ColorOption.chooseAuto(axes);
-				else
-					color = ColorOption.fromString(c);
-				
-				if (color == null)
-					throw new Valve3Exception("Illegal color option.");
-				break;
-			case COUNTS:
-				String bs = Util.stringToString(component.get("cntsBin"), "day");
-				bin = BinSize.fromString(bs);
-				if (bin == null)
-					throw new Valve3Exception("Illegal bin size option.");
-				
-				if ((endTime - startTime)/bin.toSeconds() > 10000)
-					throw new Valve3Exception("Bin size too small.");
-				
-				rightAxis = RightAxis.fromString(component.get("cntsAxis"));
-				if (rightAxis == null)
-					throw new Valve3Exception("Illegal counts axis option.");
-				break;
+
+		switch (type) {
+		case MAP:
+			axes = Axes.fromString(component.get("axes"));
+			if (axes == null)
+				throw new Valve3Exception("Illegal axes type.");
+
+			String c = Util.stringToString(component.get("color"), "A");
+			if (c.equals("A"))
+				color = ColorOption.chooseAuto(axes);
+			else
+				color = ColorOption.fromString(c);
+
+			if (color == null)
+				throw new Valve3Exception("Illegal color option.");
+			break;
+		case COUNTS:
+			String bs = Util.stringToString(component.get("cntsBin"), "day");
+			bin = BinSize.fromString(bs);
+			if (bin == null)
+				throw new Valve3Exception("Illegal bin size option.");
+
+			if ((endTime - startTime) / bin.toSeconds() > 10000)
+				throw new Valve3Exception("Bin size too small.");
+
+			rightAxis = RightAxis.fromString(component.get("cntsAxis"));
+			if (rightAxis == null)
+				throw new Valve3Exception("Illegal counts axis option.");
+			break;
 		}
 	}
-	
-	private void getData() throws Valve3Exception
-	{
+
+	/**
+	 * Gets hypocenter list binary data from VDX
+	 * 
+	 * @throws Valve3Exception
+	 */
+	private void getData() throws Valve3Exception {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("st", Double.toString(startTime));
@@ -423,47 +423,50 @@ public class HypocenterPlotter extends Plotter
 		params.put("maxDepth", Double.toString(-minDepth));
 		params.put("minMag", Double.toString(minMag));
 		params.put("maxMag", Double.toString(maxMag));
-		
+
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		if (client == null)
 			return;
-		hypos = (HypocenterList)client.getBinaryData(params);
+		hypos = (HypocenterList) client.getBinaryData(params);
 		pool.checkin(client);
 		// allow empty lists
 		if (hypos == null)
 			hypos = new HypocenterList();
 	}
-	
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
-	{
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate PNG image (hypocenters map or histogram, depends on plot type) to file with random name.
+	 * @see Plotter
+	 */
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		v3Plot = v3p;
 		component = comp;
 		getInputs();
 		getData();
-		
+
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		Plot plot = v3Plot.getPlot();
 		plot.setBackgroundColor(Color.white);
-		
-		switch(type)
-		{
-			case MAP:
-				plotMap();
-				break;
-			case COUNTS:
-				plotCounts();
-				break;
+
+		switch (type) {
+		case MAP:
+			plotMap();
+			break;
+		case COUNTS:
+			plotCounts();
+			break;
 		}
 	}
-	
-	public String toCSV(PlotComponent c) throws Valve3Exception
-	{
+
+	/**
+	 * @return CSV string of binary data described by given PlotComponent
+	 */
+	public String toCSV(PlotComponent c) throws Valve3Exception {
 		component = c;
 		getInputs();
 		getData();
-		
 		return hypos.toCSV();
 	}
-
 }

@@ -42,6 +42,8 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * TODO: un-hardcode stid 
  * TODO: check map sizes against client max height.
  * 
+ * Generate images of coordinate time series and velocity maps from vdx source
+ * 
  * $Log: not supported by cvs2svn $
  * Revision 1.9  2006/08/29 21:03:22  dcervelli
  * Changed GeoRange import.
@@ -108,10 +110,17 @@ public class GPSPlotter extends Plotter
 	private GPSData baselineData;
 	private String solutionTypeID;
 	private Map<String, GPSData> stationDataMap;
-//	
+
+	/**
+	 * Default constructor
+	 */
 	public GPSPlotter()
 	{}
 	
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	public void getInputs() throws Valve3Exception
 	{
 		endTime = component.getEndTime();
@@ -141,6 +150,10 @@ public class GPSPlotter extends Plotter
 		scaleErrors = (se != null && se.equals("T"));
 	}
 	
+	/**
+	 * Gets binary data from VDX
+	 * @throws Valve3Exception
+	 */
 	public void getData() throws Valve3Exception
 	{
 		stationDataMap = new HashMap<String, GPSData>();
@@ -177,6 +190,9 @@ public class GPSPlotter extends Plotter
 		pool.checkin(client);
 	}
 	
+	/**
+	 * Initialize DataRenderer to plot time series and adds renderer to plot
+	 */
 	private void plotTimeSeries()
 	{			
 		boolean ce = component.get("east").equals("T");
@@ -253,7 +269,11 @@ public class GPSPlotter extends Plotter
 		
 		v3Plot.setTitle(String.format("GPS: %s%s", bm.getCode(), bs));
 	}
-	
+
+	/**
+	 * Initialize MapRenderer to plot map and list of EllipseVectorRenderer2 
+	 * elements which plot a station's movement
+	 */
 	private void plotVelocityMap()
 	{
 //		Map<String, Point2D.Double> locs = new HashMap<String, Point2D.Double>();
@@ -415,7 +435,12 @@ public class GPSPlotter extends Plotter
 		
 		v3Plot.setTitle("GPS Velocities");
 	}
-	
+
+	/**
+	 * Initialize list of benchmarks for given vdx source
+	 * @param source vdx source name
+	 * @param client vdx name
+	 */
 	private static void getBenchmarks(String source, String client)
 	{
 		synchronized (benchmarksMap)
@@ -436,7 +461,12 @@ public class GPSPlotter extends Plotter
 			}
 		}
 	}
-	
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate PNG image to local file.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 		v3Plot = v3p;

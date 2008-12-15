@@ -23,8 +23,9 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Generates raw data from http request.
  * A request represents exactly one image plot.
-
+ *
  * $Log: not supported by cvs2svn $
  * Revision 1.3  2006/07/24 17:02:09  tparker
  * cleanup old data files
@@ -43,11 +44,22 @@ public class RawDataHandler implements HttpHandler
 	public static final int MAX_PLOT_HEIGHT = 6000;
 	private DataHandler dataHandler;
 	
+	/**
+	 * Constructor
+	 * @param dh data handler for this raw data handler
+	 */
 	public RawDataHandler(DataHandler dh)
 	{
 		dataHandler = dh;
 	}
 	
+	/**
+	 * Process HttpServletRequest and generate one {@link PlotComponent}
+	 * @param request request to process
+	 * @param i serial number of source in the request 
+	 * @return generated PlotComponent
+	 * @throws Valve3Exception
+	 */
 	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
 	{
 		String source = request.getParameter("src." + i);
@@ -74,6 +86,12 @@ public class RawDataHandler implements HttpHandler
 		return component;
 	}
 	
+	/**
+	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
+	 * @param request request to process
+	 * @return list of generated PlotComponents
+	 * @throws Valve3Exception
+	 */
 	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
 		int n = Util.stringToInt(request.getParameter("n"), -1);
@@ -108,9 +126,12 @@ public class RawDataHandler implements HttpHandler
 		return list;
 	}
 	
+	/**
+	 * Handle the given http request and generate raw data type result. 
+	 * @see HttpHandler#handle 
+	 */
 	public Object handle(HttpServletRequest request)
 	{
-
 		try
 		{
 			List<PlotComponent> components = parseRequest(request);
@@ -179,7 +200,5 @@ public class RawDataHandler implements HttpHandler
 		{
 			return new ErrorMessage(e.getMessage());
 		}
-		
-		
 	}
 }

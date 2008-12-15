@@ -15,8 +15,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Generates valve plot from http request.
  * A request represents exactly one image plot.
-
+ *
  * $Log: not supported by cvs2svn $
  * Revision 1.5  2005/09/13 17:54:44  dcervelli
  * Fixed bugs from x > w and y > h.
@@ -41,11 +42,22 @@ public class PlotHandler implements HttpHandler
 	public static final int MAX_PLOT_HEIGHT = 6000;
 	private DataHandler dataHandler;
 	
+	/**
+	 * Constructor
+	 * @param dh data handler for this plot handler
+	 */
 	public PlotHandler(DataHandler dh)
 	{
 		dataHandler = dh;
 	}
 	
+	/**
+	 * Process HttpServletRequest and generate one {@link PlotComponent}
+	 * @param request request to process
+	 * @param i serial number of source in the request 
+	 * @return generated PlotComponent
+	 * @throws Valve3Exception
+	 */
 	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
 	{
 		String source = request.getParameter("src." + i);
@@ -72,6 +84,12 @@ public class PlotHandler implements HttpHandler
 		return component;
 	}
 	
+	/**
+	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
+	 * @param request request to process
+	 * @return list of generated PlotComponents
+	 * @throws Valve3Exception
+	 */
 	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
 		int n = Util.stringToInt(request.getParameter("n"), -1);
@@ -106,6 +124,10 @@ public class PlotHandler implements HttpHandler
 		return list;
 	}
 	
+	/**
+	 * Handle the given http request and generate a plot. 
+	 * @see HttpHandler#handle 
+	 */
 	public Object handle(HttpServletRequest request)
 	{
 		try
@@ -145,6 +167,9 @@ public class PlotHandler implements HttpHandler
 		}
 	}
 	
+	/**
+	 * @return random file name in the img/ directory with .png extension
+	 */
 	public static String getRandomFilename()
 	{
 		return "img" + File.separator + "tmp" + Math.round(Math.random() * 100000) + ".png"; 

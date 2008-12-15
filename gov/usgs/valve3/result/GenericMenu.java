@@ -3,6 +3,7 @@ package gov.usgs.valve3.result;
 import java.util.ArrayList;
 
 /**
+ * Generic menu to render on valve GUI
  * 
  * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
@@ -15,6 +16,10 @@ public class GenericMenu extends Result
 	public String selectorString = "Channels";
 	public String description = "";
 	
+	/**
+	 * Constructor
+	 * @param src list of strings: title, description, selector string, time shortcuts, columns count.
+	 */
 	public GenericMenu(java.util.List<String> src)
 	{
 		title = src.get(0);
@@ -27,6 +32,9 @@ public class GenericMenu extends Result
 			columns.add(src.get(i));
 	}
 	
+	/**
+	 * @return XML representation of this GenericMenu
+	 */
 	public String toXML()
 	{
 		StringBuilder sb = new StringBuilder(256);

@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
+ * Generate helicorder images 
+ * from raw wave data from vdx source
+ * 
  * $Log: not supported by cvs2svn $
  * Revision 1.8  2006/04/09 18:19:36  dcervelli
  * VDX type safety changes.
@@ -53,9 +56,16 @@ public class HelicorderPlotter extends Plotter
 	private PlotComponent component;
 	private Valve3Plot v3Plot;
 	
+	/**
+	 * Default constructor
+	 */
 	public HelicorderPlotter()
 	{}
 	
+	/**
+	 * Gets binary helicorder data from VDX
+	 * @throws Valve3Exception
+	 */
 	public void getData()
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -69,7 +79,11 @@ public class HelicorderPlotter extends Plotter
 		data = (HelicorderData)client.getBinaryData(params);
 		pool.checkin(client);
 	}
-	
+
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	public void getInputs() throws Valve3Exception
 	{
 		settings = new HelicorderSettings();
@@ -110,7 +124,12 @@ public class HelicorderPlotter extends Plotter
 		settings.width = component.getBoxWidth();
 		settings.height = component.getBoxHeight();
 	}
-	
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Initialize HelicorderRenderer, generate PNG image to local file.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot p, PlotComponent c) throws Valve3Exception
 	{
 		v3Plot = p;
@@ -133,14 +152,15 @@ public class HelicorderPlotter extends Plotter
 		String ch = settings.channel.replace('$', ' ').replace('_', ' ');
 		v3Plot.setTitle("Helicorder: " + ch);
 	}
-	
+
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent c) throws Valve3Exception
 	{
 		component = c;
 		getInputs();
 		getData();
-
         return data.toCSV();
 	}
-
 }

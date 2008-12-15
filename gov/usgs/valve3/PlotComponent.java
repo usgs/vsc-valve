@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 /**
+ * Keeps set of parameters to generate valve plot
+ * 
  * $Log: not supported by cvs2svn $
  * Revision 1.4  2005/11/03 19:40:27  tparker
  * Correct time adj for bug #68
@@ -44,35 +46,63 @@ public class PlotComponent
 		dateIn.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
+	/**
+	 * Default constructor
+	 */
 	public PlotComponent()
 	{}
-	
+
+	/**
+	 * Constructor
+	 * @param s source name
+	 */
 	public PlotComponent(String s)
 	{
 		source = s;
 		params = new HashMap<String, String>();
 	}
 	
+	/**
+	 * Getter for source
+	 */
 	public String getSource()
 	{
 		return source;
 	}
-	
+
+	/**
+	 * Setter for source
+	 */
 	public void setSource(String s)
 	{
 		source = s;
 	}
-	
+
+	/**
+	 * Adds parameter
+	 * @param key parameter name
+	 * @param val parameter value
+	 */
 	public void put(String key, String val)
 	{
 		params.put(key, val);
 	}
-	
+
+	/**
+	 * 
+	 * @param key parameter name
+	 * @return value of given parameter
+	 */
 	public String get(String key)
 	{
 		return params.get(key);
 	}
 	
+	/**
+	 * 
+	 * @param pre prefix to query
+	 * @return flag if auto scaling allowed for given prefix
+	 */
 	public boolean isAutoScale(String pre)
 	{
 		String ysMin = params.get(pre + "Min");
@@ -80,6 +110,13 @@ public class PlotComponent
 		return ysMin == null || ysMax == null || ysMin.toLowerCase().startsWith("a") || ysMax.toLowerCase().startsWith("a");
 	}
 	
+	/**
+	 * Compute max and min values for given prefix from PlotComponent's parameters
+	 * @param pre prefix to query
+	 * @param min default min value 
+	 * @param max default max value
+	 * @return array of 2 doubles, first is initialized min value, second is initialized max value
+	 */
 	public double[] getYScale(String pre, double min, double max)
 	{
 		double[] d = new double[2];
@@ -101,57 +138,94 @@ public class PlotComponent
 
 		return d;
 	}
-	
+
+	/**
+	 * Setter for translation type (map, heli, ty, xy)
+	 */
 	public void setTranslationType(String t)
 	{
 		translationType = t;
 	}
-	
+
+	/**
+	 * Setter for translation
+	 */
 	public void setTranslation(double[] t)
 	{
 		translation = t;
 	}
 	
+	/**
+	 * @return X coord of top left corner of graph's box
+	 */
 	public int getBoxX()
 	{
 		return boxX;
 	}
-	
+
+	/**
+	 * @return Y coord of top left corner of graph's box
+	 */
 	public int getBoxY()
 	{
 		return boxY;
 	}
 	
+	/**
+	 * Setter for boxX
+	 * @param x X coord of top left corner of graph's box
+	 */
 	public void setBoxX(int x)
 	{
 		boxX = x;
 	}
 	
+	/**
+	 * Setter for boxY
+	 * @param y Y coord of top left corner of graph's box
+	 */
 	public void setBoxY(int y)
 	{
 		boxY = y;
 	}
 	
+	/**
+	 * @return graph's box width
+	 */
 	public int getBoxWidth()
 	{
 		return boxWidth;
 	}
-	
+
+	/**
+	 * @return graph's box height
+	 */
 	public int getBoxHeight()
 	{
 		return boxHeight;
 	}
 	
+	/**
+	 * Setter for graph's box width
+	 */
 	public void setBoxWidth(int w)
 	{
 		boxWidth = w;
 	}
-	
+
+	/**
+	 * Setter for graph's box height
+	 */	
 	public void setBoxHeight(int h)
 	{
 		boxHeight = h;
 	}
 	
+	/**
+	 * Compute start time from PlotComponent's parameters
+	 * @param end reference end time for relative parameter values (for example, "-1h")
+	 * @return start time in seconds
+	 */
 	public double getStartTime(double end)
 	{
 		String st = params.get("st");
@@ -162,6 +236,10 @@ public class PlotComponent
 	}
 	
 	// TODO: does this allow startTime > endTime?
+	/**
+	 * Compute end time from PlotComponent's parameters
+	 * @return end time in seconds
+	 */
 	public double getEndTime()
 	{
 		String et = params.get("et");
@@ -203,7 +281,10 @@ public class PlotComponent
 		}
 		return Double.NaN;
 	}
-	
+
+	/**
+	 * @return PlotComponent's xml representation
+	 */
 	public String toXML()
 	{
 		StringBuffer sb = new StringBuffer();

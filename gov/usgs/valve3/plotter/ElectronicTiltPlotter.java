@@ -25,6 +25,7 @@ import java.util.HashMap;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
+ * Generate tilt plots images to files
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.4  2006/04/13 22:33:19  dcervelli
@@ -73,9 +74,16 @@ public class ElectronicTiltPlotter extends Plotter
 	private boolean showMagnitude = false;
 //	private double azimuth = 0;
 	
+	/**
+	 * Default constructor
+	 */
 	public ElectronicTiltPlotter()
 	{}
-		
+
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	private void getInputs() throws Valve3Exception
 	{
 		channel = component.get("ch");
@@ -99,6 +107,10 @@ public class ElectronicTiltPlotter extends Plotter
 //		azimuth = Util.stringToDouble(component.get("az"), 0);
 	}
 
+	/**
+	 * Gets binary data from VDX
+	 * @throws Valve3Exception
+	 */
 	private void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -116,7 +128,12 @@ public class ElectronicTiltPlotter extends Plotter
 		if (data == null || data.getTiltData().rows() == 0)
 			throw new Valve3Exception("No data.");
 	}
+
 	
+	/**
+	 * Initialize MatrixRenderer for left plot axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getLeftAxis() throws Valve3Exception
 	{
 //		double az = td.getOptimalAzimuth();
@@ -169,7 +186,11 @@ public class ElectronicTiltPlotter extends Plotter
 		component.setTranslationType("ty");
 		return mr;
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderer for right graph axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getRightAxis() throws Valve3Exception
 	{
 		if (rightAxis == RightAxis.NONE)
@@ -232,7 +253,14 @@ public class ElectronicTiltPlotter extends Plotter
 		component.setTranslationType("ty");
 		return mr;
 	}
-	
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Initialize MatrixRenderers for left and right axis
+	 * (plot may have 2 different value axis)
+	 * Generate PNG image to local file.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 		v3Plot = v3p;
@@ -254,7 +282,9 @@ public class ElectronicTiltPlotter extends Plotter
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
 	
-
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent c) throws Valve3Exception
 	{
 		component = c;

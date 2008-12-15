@@ -1,6 +1,7 @@
 package gov.usgs.valve3.result;
 
 /**
+ * Keeps URL to generated result
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.1  2005/08/26 20:41:31  dcervelli
@@ -12,21 +13,37 @@ abstract public class Result
 {
 	protected String url;
 	
+	/**
+	 * @return URL to generated result
+	 */
 	public String getURL()
 	{
 		return url;
 	}
 	
+	/**
+	 * Setter for URL
+	 * @param url to set
+	 */
 	public void setURL(String u)
 	{
 		url = u;
 	}
 	
+	/**
+	 * Deletes generated result
+	 */
 	public void delete()
 	{
 		System.out.println("Result.delete()");
 	}
 	
+	/**
+	 * 
+	 * @param type result type
+	 * @param nested String with xml representation of result's content
+	 * @return String with xml representation of generated result
+	 */
 	public String toXML(String type, String nested)
 	{
 		StringBuffer sb = new StringBuffer();

@@ -14,6 +14,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Result which contains plot and information how
+ * (in which format, where, size) store it in the file system
+ * 
  * $Log: not supported by cvs2svn $
  * Revision 1.3  2005/09/03 21:51:07  dcervelli
  * Removed new line.
@@ -63,6 +66,11 @@ public class Valve3Plot extends Result
 	
 	protected List<PlotComponent> components;
 	
+	/**
+	 * Constructor
+	 * @param request http servlet request which keeps height, width and output type parameters
+	 * @throws Valve3Exception
+	 */
 	public Valve3Plot(HttpServletRequest request) throws Valve3Exception
 	{
 		String w = request.getParameter("w");
@@ -94,37 +102,64 @@ public class Valve3Plot extends Result
 		
 		plot = new Plot(width, height);
 	}
-	
+
+	/***
+	 * 
+	 * @return plot width
+	 */
 	public int getWidth()
 	{
 		return width;
 	}
 	
+	/**
+	 * Setter for plot width
+	 * @param w
+	 */
 	public void setWidth(int w)
 	{
 		width = w;
 	}
 	
+	/**
+	 * 
+	 * @return plot height
+	 */
 	public int getHeight()
 	{
 		return height;
 	}
 	
+	/**
+	 * Setter for plot height
+	 * @param h
+	 */
 	public void setHeight(int h)
 	{
 		height = h;
 	}
 	
+	/**
+	 * 
+	 * @return output type to generate plot content
+	 */
 	public OutputType getOutputType()
 	{
 		return outputType;
 	}
 	
+	/**
+	 * Setter for file name to generated plot image
+	 */
 	public void setFilename(String fn)
 	{
 		filename = fn;
 	}
 	
+	/**
+	 * 
+	 * @return full file name to generate plot image. If not set return random file name.
+	 */
 	public String getLocalFilename()
 	{
 		if (filename == null)
@@ -133,46 +168,78 @@ public class Valve3Plot extends Result
 		return Valve3.getInstance().getApplicationPath() + File.separatorChar + filename;
 	}
 	
+	/**
+	 * 
+	 * @return short file name to generate plot image.
+	 */
 	public String getFilename()
 	{
 		return filename;
 	}
 	
+	/**
+	 * 
+	 * @return short file name to generate plot image as URL
+	 */
 	public String getURLFilename()
 	{
 		return filename.replace(File.separatorChar, '/');
 	}
 	
+	/**
+	 * Does nothing
+	 * @param rgb
+	 * @return
+	 */
 	public Color getRGB(String rgb)
 	{
 		return null;
 	}
 	
+	/**
+	 * 
+	 * Getter for plot
+	 */
 	public Plot getPlot()
 	{
 		return plot;
 	}
 	
+	/**
+	 * Add PlotComponent. (For what? It is never used)
+	 */
 	public void addComponent(PlotComponent comp)
 	{
 		components.add(comp);
 	}
 
+	/**
+	 * Getter for plot title
+	 */
 	public String getTitle()
 	{
 		return title;
 	}
-	
+
+	/**
+	 * Setter for plot title
+	 */
 	public void setTitle(String t)
 	{
 		title = t;
 	}
 
+	/**
+	 * Delete file with generated plot image from file system
+	 */
 	public void delete()
 	{
 		new File(getLocalFilename()).delete();
 	}
 	
+	/**
+	 * @return XML representation of object
+	 */
 	public String toXML()
 	{
 		StringBuffer sb = new StringBuffer();

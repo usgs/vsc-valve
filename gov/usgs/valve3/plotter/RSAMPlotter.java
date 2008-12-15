@@ -29,7 +29,9 @@ import java.util.HashMap;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
- * 
+ * Get RSAM information from vdx server and  
+ * generate images of RSAM values and RSAM event count histograms
+ * in files with random names.
  *
  * @author Dan Cervelli
  */
@@ -71,11 +73,19 @@ public class RSAMPlotter extends Plotter
 	private PlotType type;
 	protected String label;
 
+	/**
+	 * Default constructor
+	 */
 	public RSAMPlotter()
 	{
 		label = "RSAM";
 	}
 	
+	/**
+	 * Initialize DataRenderer, add it to plot, remove mean from rsam data if needed 
+	 * and render rsam values to PNG image in local file
+	 * @throws Valve3Exception
+	 */
 	protected void plotValues() throws Valve3Exception
 	{	
 		Plot plot = v3Plot.getPlot();
@@ -112,9 +122,13 @@ public class RSAMPlotter extends Plotter
 		v3Plot.setTitle(label + ": " + ch);
 	}
 	
+	/**
+	 * Initialize HistogramRenderer, add it to plot, and 
+	 * render event count histogram to PNG image in local file
+	 */
 	private void plotEvents()
 	{	
-		Plot plot = v3Plot.getPlot();
+		Plot plot = v3Plot.getPlot();		
 		
 		
 		HistogramRenderer hr;
@@ -165,7 +179,10 @@ public class RSAMPlotter extends Plotter
 		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + component.get("selectedStation"));		
 	}
 
-	
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */	
 	private void getInputs() throws Valve3Exception
 	{
 		endTime = component.getEndTime();
@@ -233,7 +250,11 @@ public class RSAMPlotter extends Plotter
 			break;
 		}
 	}
-	
+
+	/**
+	 * Gets binary rsam data from VDX
+	 * @throws Valve3Exception
+	 */
 	private void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -264,7 +285,12 @@ public class RSAMPlotter extends Plotter
         
         data = new Data(rd.getData().toArray());
 	}
-	
+
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate PNG images for values or event count histograms (depends from plot type) to file with random name.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 		v3Plot = v3p;
@@ -287,7 +313,10 @@ public class RSAMPlotter extends Plotter
 				break;
 		}
 	}
-	
+
+	/**
+	 * @return CSV string of RSAM values data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent c) throws Valve3Exception
 	{
 		component = c;

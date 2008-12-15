@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 
+ * Constructs and keeps internal data representation described in the configuration file
  *
  * @author Dan Cervelli
  */
@@ -33,6 +33,9 @@ public class DataHandler implements HttpHandler
 	protected Map<String, Pool<VDXClient>> vdxClients;
 	protected ConfigFile config;
 	
+	/**
+	 * Default constructor
+	 */
 	public DataHandler()
 	{
 		dataSources = new HashMap<String, DataSourceDescriptor>();
@@ -40,6 +43,9 @@ public class DataHandler implements HttpHandler
 		processConfigFile();
 	}
 	
+	/**
+	 * Process valve config file to initialize this object, method is used in constructor.
+	 */
 	public void processConfigFile()
 	{
 		config = new ConfigFile(Valve3.getInstance().getConfigPath() + File.separator + CONFIG_FILE);
@@ -71,21 +77,38 @@ public class DataHandler implements HttpHandler
 		}
 	}
 
+	/**
+	 * Getter for config file
+	 */
 	public ConfigFile getConfig()
 	{
 		return config;
 	}
 	
+	/**
+	 * 
+	 * @param key vdx parameter string in config file
+	 * @return Pool of initialized VDXClients configured in data.config file
+	 */
 	public Pool<VDXClient> getVDXClient(String key)
 	{
 		return vdxClients.get(key);
 	}
 	
+	/**
+	 * 
+	 * @param key data source name ("source" parameter in data.config file)
+	 * @return initialized DataSourceDescriptor corresponding given name
+	 */
 	public DataSourceDescriptor getDataSourceDescriptor(String key)
 	{
 		return dataSources.get(key);
 	}
 	
+	/**
+	 * 
+	 * @return List of descriptors for all configured data sources
+	 */
 	public List<DataSourceDescriptor> getDataSources()
 	{
 		List<DataSourceDescriptor> result = new ArrayList<DataSourceDescriptor>();
@@ -93,6 +116,13 @@ public class DataHandler implements HttpHandler
 		return result;
 	}
 	
+	/**
+	 * Implements HttpHandler.handle(). Computes data 
+	 * source and action from request, send query to server 
+	 * and construct appropriate returning object. 
+	 * @return returning type depends from data action parameter 
+	 * in the request - GenericMenu, ewRsamMenu or list of results.
+	 */
 	public Object handle(HttpServletRequest request)
 	{
 		

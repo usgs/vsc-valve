@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Menu to display on the valve main screen
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.3  2005/10/26 18:43:40  tparker
@@ -25,11 +26,18 @@ public class Menu extends Result
 {
 	private List<Section> sections;
 	
+	/**
+	 * Constructor
+	 * @param s list of sections
+	 */
 	public Menu(List<Section> s)
 	{
 		sections = s;
 	}
 	
+	/**
+	 * Menu xml representation
+	 */
 	public String toXML()
 	{
 		StringBuffer sb = new StringBuffer();

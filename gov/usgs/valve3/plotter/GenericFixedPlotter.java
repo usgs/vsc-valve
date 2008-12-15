@@ -3,7 +3,6 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
-import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
@@ -17,7 +16,8 @@ import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.generic.fixed.GenericColumn;
+import gov.usgs.vdx.data.generic.GenericColumn;
+
 
 import java.awt.Color;
 import java.io.File;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * Generate images for generic data plot to files
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.7  2006/10/25 22:28:53  tparker
@@ -66,9 +67,16 @@ public class GenericFixedPlotter extends Plotter
 	private String rightUnit;
 	private List<GenericColumn> rightColumns;
 
+	/**
+	 * Default constructor
+	 */
 	public GenericFixedPlotter()
 	{}
-	
+
+	/**
+	 * Gets binary data from VDX server.
+	 * @throws Valve3Exception
+	 */
 	private void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -88,7 +96,11 @@ public class GenericFixedPlotter extends Plotter
 		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
-	
+
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	private void getInputs() throws Valve3Exception
 	{
 		channel = component.get("ch");
@@ -153,7 +165,11 @@ public class GenericFixedPlotter extends Plotter
 			}
 		}
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderer for left plot axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getLeftMatrixRenderer() throws Valve3Exception
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
@@ -191,7 +207,11 @@ public class GenericFixedPlotter extends Plotter
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderer for right plot axis
+	 * @throws Valve3Exception
+	 */
 	private MatrixRenderer getRightMatrixRenderer() throws Valve3Exception
 	{
 		if (rightUnit == null)
@@ -219,14 +239,7 @@ public class GenericFixedPlotter extends Plotter
 				if (Double.isNaN(min) || Double.isNaN(max) || min > max)
 					throw new Valve3Exception("Illegal axis values.");
 			}
-		}
-		
-		
-		
-		
-		
-		
-		
+		}	
 		mr.setExtents(startTime, endTime, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
@@ -239,7 +252,12 @@ public class GenericFixedPlotter extends Plotter
 		component.setTranslationType("ty");
 		return mr;
 	}
-	
+
+	/**
+	 * Initialize MatrixRenderers for left and right axis,
+	 * adds them to plot
+	 * @throws Valve3Exception
+	 */
 	public void plotData() throws Valve3Exception
 	{
 		MatrixRenderer leftMR = getLeftMatrixRenderer();
@@ -252,6 +270,13 @@ public class GenericFixedPlotter extends Plotter
 		component.setTranslationType("ty");
 	}
 	
+	/**
+	 * Concrete realization of abstract method. 
+	 * Initialize MatrixRenderers for left and right axis
+	 * (plot may have 2 different value axis)
+	 * Generate PNG image to file with random file name.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -278,7 +303,10 @@ public class GenericFixedPlotter extends Plotter
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
 	}
-	
+
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
 		

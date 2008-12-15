@@ -15,6 +15,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
+ * Program startup class, it is configured in the deployment
+ * descriptor of the web application. Receives notifications about 
+ * changes to the web application's servlet context.
+ * Keeps data about application state.
+ *   
  * $Log: not supported by cvs2svn $
  * Revision 1.10  2006/11/10 01:13:46  tparker
  * version bump
@@ -74,6 +79,9 @@ public class Valve3 implements ServletContextListener
 
 	private Logger logger;
 	
+	/**
+	 * Default constructor
+	 */
 	public Valve3()
 	{
 		instance = this;
@@ -84,6 +92,9 @@ public class Valve3 implements ServletContextListener
 		resultDeleter.start();
 	}
 	
+	/**
+	 * Process configuration files and performs initialization
+	 */
 	public void processConfigFile()
 	{
 		ConfigFile config = new ConfigFile(applicationPath + File.separator + CONFIG_PATH + File.separator + CONFIG_FILE);
@@ -107,16 +118,25 @@ public class Valve3 implements ServletContextListener
 		labelSet = new GeoLabelSet(config.getString("labelIndex"));
 	}
 	
+	/**
+	 * Getter for result deleter
+	 */
 	public ResultDeleter getResultDeleter()
 	{
 		return resultDeleter;
 	}
 	
+	/**
+	 * Implementation of Singleton pattern
+	 */
 	public static Valve3 getInstance()
 	{
 		return instance;
 	}
 	
+	/**
+	 * Getter for menu handle
+	 */
 	public MenuHandler getMenuHandler()
 	{
 		if (menuHandler == null)
@@ -125,6 +145,9 @@ public class Valve3 implements ServletContextListener
 		return menuHandler;
 	}
 	
+	/**
+	 * Getter for data handler
+	 */
 	public DataHandler getDataHandler()
 	{
 		if (dataHandler == null)
@@ -132,7 +155,10 @@ public class Valve3 implements ServletContextListener
 		
 		return dataHandler;
 	}
-	
+
+	/**
+	 * Getter for action handler
+	 */
 	public ActionHandler getActionHandler()
 	{
 		if (actionHandler == null)
@@ -149,51 +175,81 @@ public class Valve3 implements ServletContextListener
 		return actionHandler;
 	}
 
+	/** 
+	 * @return full directory name for application's configuration files
+	 */
 	public String getConfigPath()
 	{
 		return applicationPath + File.separator + CONFIG_PATH;
 	}
 	
+	/**
+	 * @return full real path to deployed application
+	 */
 	public String getApplicationPath()
 	{
 		return applicationPath;
 	}
 
+	/**
+	 * @return application's administrator name
+	 */
 	public String getAdministrator()
 	{
 		return administrator;
 	}
-	
+
+	/**
+	 * @return application's administrator email
+	 */
 	public String getAdministratorEmail()
 	{
 		return administratorEmail;
 	}
 	
+	/**
+	 * @return Title of installation displayed on start page
+	 */
 	public String getInstallationTitle()
 	{
 		return installationTitle;
 	}
 	
+	/**
+	 * @return Abbreviated name of local time zone
+	 */
 	public String getTimeZoneAbbr()
 	{
 		return timeZoneAbbr;
 	}
 	
+	/**
+	 * @return local time zone offset
+	 */
 	public int getTimeZoneOffset()
 	{
 		return timeZone;
 	}
-	
+
+	/**
+	 * Getter for geo image set
+	 */
 	public GeoImageSet getGeoImageSet()
 	{
 		return imageSet;
 	}
-	
+
+	/**
+	 * Getter for geo labels set
+	 */
 	public GeoLabelSet getGeoLabelSet()
 	{
 		return labelSet;
 	}
-	
+
+	/**
+	 * @see ServletContextListener#contextInitialized
+	 */
 	public void contextInitialized(ServletContextEvent sce)
 	{
 		logger.info("Valve " + VERSION + ", " + BUILD_DATE + " initialization");
@@ -201,6 +257,9 @@ public class Valve3 implements ServletContextListener
 		processConfigFile();
 	}
 
+	/**
+	 * @see ServletContextListener#contextDestroyed
+	 */
 	public void contextDestroyed(ServletContextEvent sce)
 	{
 		resultDeleter.kill();

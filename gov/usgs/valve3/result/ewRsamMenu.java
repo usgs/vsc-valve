@@ -2,7 +2,6 @@ package gov.usgs.valve3.result;
 
 import gov.usgs.util.Log;
 
-import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -17,6 +16,10 @@ public class ewRsamMenu extends Result
 	private Logger logger;
 	String dataTypes;
 	
+	/**
+	 * Constructor
+	 * @param src list of data types
+	 */
 	public ewRsamMenu(java.util.List<String> src)
 	{
 		logger = Log.getLogger("gov.usgs.vdx");
@@ -24,7 +27,10 @@ public class ewRsamMenu extends Result
 
 		dataTypes = src.toString();
 	}
-	
+
+	/**
+	 * @return XML representation of this ewRsamMenu
+	 */
 	public String toXML()
 	{
 		StringBuilder sb = new StringBuilder(256);

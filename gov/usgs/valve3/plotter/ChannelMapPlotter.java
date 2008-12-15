@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
+ * Generate PNG map image to local file
+ * from vdx source data.
+ *  
  * $Log: not supported by cvs2svn $
  * Revision 1.6  2006/04/09 21:05:28  dcervelli
  * Allows maps without a data source and different titling.
@@ -51,7 +53,11 @@ public class ChannelMapPlotter extends Plotter
 	private Valve3Plot v3Plot;
 	private GeoRange range;
 	private GeoLabelSet labels;
-	
+
+	/**
+	 * Initialize internal data from PlotComponent 
+	 * @throws Valve3Exception
+	 */
 	private void getInputs() throws Valve3Exception
 	{
 		try
@@ -70,6 +76,10 @@ public class ChannelMapPlotter extends Plotter
 		}
 	}
 	
+	/**
+	 * Loads GeoLabelSet labels from VDX
+	 * @throws Valve3Exception
+	 */
 	private void getData()
 	{
 		if (vdxSource == null || vdxClient == null)
@@ -98,6 +108,11 @@ public class ChannelMapPlotter extends Plotter
 		pool.checkin(client);
 	}
 	
+	/**
+	 * Initialize MapRenderer and add it to plot. 
+	 * Generate PNG map image to local file.
+	 * @throws Valve3Exception
+	 */
 	private void plotMap()
 	{
 		Plot plot = v3Plot.getPlot();
@@ -144,6 +159,11 @@ public class ChannelMapPlotter extends Plotter
 		}
 	}
 
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate PNG map image to local file.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception
 	{
 		v3Plot = plot;

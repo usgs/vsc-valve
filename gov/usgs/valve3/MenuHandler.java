@@ -13,6 +13,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Generates menu from http request, 
+ * keeps information about sections and menu items,
+ * parse configuration to initialize them.
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.3  2006/04/09 18:17:49  dcervelli
@@ -28,9 +31,19 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class MenuHandler implements HttpHandler
 {
+	/**
+	 * map of section name-section pairs
+	 */
 	private Map<String, Section> sections;
+	/**
+	 * map of data source descriptor name-menu item pairs
+	 */
 	private Map<String, MenuItem> items;
 	
+	/**
+	 * Constructor
+	 * @param dh data handler for this menu handler
+	 */
 	public MenuHandler(DataHandler dh)
 	{
 		sections = new HashMap<String, Section>();
@@ -67,6 +80,11 @@ public class MenuHandler implements HttpHandler
 	
 	// TODO: cache
 	// TODO: sortOrder
+	
+	
+	/**
+	 * @return list of Sections associated with this menu handler
+	 */
 	public List<Section> getSections()
 	{
 		ArrayList<Section> list = new ArrayList<Section>();
@@ -76,11 +94,19 @@ public class MenuHandler implements HttpHandler
 		return list;
 	}
 	
+	/** 
+	 * @param id menu item id
+	 * @return menu item from internal list found by it's id
+	 */
 	public MenuItem getItem(String id)
 	{
 		return items.get(id);
 	}
-	
+
+	/**
+	 * Handle the given http request and generate an appropriate response. 
+	 * @see HttpHandler#handle 
+	 */
 	public Object handle(HttpServletRequest request)
 	{
 		return new Menu(getSections());

@@ -22,7 +22,9 @@ import java.io.File;
 import java.util.HashMap;
 
 /**
- * 
+ * Generate images of waveforms, spectras, and spectrograms 
+ * from raw wave data from vdx source
+ *  
  * $Log: not supported by cvs2svn $
  * Revision 1.23  2008/04/11 22:06:08  tparker
  * time wave plots on data rather than inputs
@@ -139,9 +141,16 @@ public class WavePlotter extends Plotter
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
+	/**
+	 * Default constructor
+	 */
 	public WavePlotter()
 	{}
 
+	/**
+	 * Gets binary data from VDX, performs filtering if needed
+	 * @throws Valve3Exception
+	 */
 	public void getData() throws Valve3Exception
 	{
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -192,6 +201,10 @@ public class WavePlotter extends Plotter
 		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 	}
 	
+	/**
+	 * Initialize internal data from PlotComponent component
+	 * @throws Valve3Exception
+	 */
 	public void getInputs() throws Valve3Exception
 	{
 		channel  = component.get("ch");
@@ -279,6 +292,10 @@ public class WavePlotter extends Plotter
 			color = "A";
 	}
 	
+	/**
+	 * Initialize SliceWaveRenderer and add it to plot
+	 * @throws Valve3Exception
+	 */
 	private void plotWaveform() throws Valve3Exception
 	{
 		SliceWaveRenderer wr = new SliceWaveRenderer();
@@ -329,6 +346,10 @@ public class WavePlotter extends Plotter
 		v3Plot.getPlot().addRenderer(wr);
 	}
 	
+	/**
+	 * Initialize SpectraRenderer and add it to plot
+	 * @throws Valve3Exception
+	 */
 	private void plotSpectra()
 	{
 		SpectraRenderer sr = new SpectraRenderer();
@@ -345,7 +366,11 @@ public class WavePlotter extends Plotter
 		component.setTranslationType("xy");
 		v3Plot.getPlot().addRenderer(sr);
 	}
-	
+
+	/**
+	 * Initialize SpectrogramRenderer and add it to plot
+	 * @throws Valve3Exception
+	 */
 	private void plotSpectrogram()
 	{
 		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
@@ -397,6 +422,11 @@ public class WavePlotter extends Plotter
 		v3Plot.getPlot().addRenderer(sr);
 	}
 
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate PNG image to file with random name.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
 		v3Plot = v3p;
@@ -426,6 +456,9 @@ public class WavePlotter extends Plotter
 		v3Plot.setTitle("Wave: " + ch);
 	}
 	
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
 		component = comp;
@@ -433,5 +466,4 @@ public class WavePlotter extends Plotter
 		getData();
 		return wave.toCSV();
 	}
-
 }

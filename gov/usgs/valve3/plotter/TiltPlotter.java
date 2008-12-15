@@ -21,6 +21,8 @@ import java.util.HashMap;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
+ * Generate tilt images 
+ * from raw data got from vdx source
  * 
  * TODO: tilt vectors.
  * TODO: validate.
@@ -38,9 +40,17 @@ import cern.colt.matrix.DoubleMatrix2D;
  */
 public class TiltPlotter extends Plotter
 {
+	/**
+	 * Default constructor
+	 */
 	public TiltPlotter()
 	{}
-		
+	
+	/**
+	 * Concrete realization of abstract method. 
+	 * Generate tilt PNG image to file with random name.
+	 * @see Plotter
+	 */
 	public void plot(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception
 	{
 		v3Plot.setFilename(PlotHandler.getRandomFilename());
