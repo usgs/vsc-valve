@@ -16,8 +16,7 @@ import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.generic.GenericColumn;
-
+import gov.usgs.vdx.data.generic.fixed.GenericColumn;
 
 import java.awt.Color;
 import java.io.File;
@@ -27,28 +26,6 @@ import java.util.List;
 
 /**
  * Generate images for generic data plot to files
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2006/10/25 22:28:53  tparker
- * y-axis scaling
- *
- * Revision 1.6  2006/04/09 21:29:30  dcervelli
- * Uses title from menu.
- *
- * Revision 1.5  2006/04/09 18:19:36  dcervelli
- * VDX type safety changes.
- *
- * Revision 1.4  2005/12/28 02:14:23  tparker
- * Add toCSV method to support raw data export
- *
- * Revision 1.3  2005/11/08 23:31:09  tparker
- * Adjust for timzone bug #68
- *
- * Revision 1.2  2005/10/20 17:26:45  dcervelli
- * More development.
- *
- * Revision 1.1  2005/10/20 05:10:09  dcervelli
- * Initial commit.
  *
  * @author Dan Cervelli
  */

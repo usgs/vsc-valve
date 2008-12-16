@@ -16,7 +16,7 @@ import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.generic.GenericColumn;
+import gov.usgs.vdx.data.generic.fixed.GenericColumn;
 
 import java.awt.Color;
 import java.io.File;
@@ -29,35 +29,6 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * Generate images for generic data plot to files
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.9  2006/09/28 17:58:19  tparker
- * more descriptive error messages
- *
- * Revision 1.8  2006/09/21 18:44:15  tparker
- * add a bit of space to the right y-axis
- *
- * Revision 1.7  2006/09/20 23:31:00  tparker
- * Add a bit of space to y-axis
- *
- * Revision 1.6  2006/09/14 20:57:38  tparker
- * process data before finding extents.
- *
- * Revision 1.5  2006/09/14 18:09:13  tparker
- * NWIS plot cumulative percip
- *
- * Revision 1.4  2006/09/14 00:04:33  tparker
- * Fix NWIS toCSV
- *
- * Revision 1.3  2006/09/13 23:32:48  tparker
- * NWIS labels match line color
- *
- * Revision 1.2  2006/09/13 23:12:58  tparker
- * Station name in NWIS title
- *
- * Revision 1.1  2006/08/29 00:03:17  tparker
- * Initial NWIS commit
- *
- *
  * @author Tom Parker
  */
 public class GenericVariablePlotter extends Plotter
