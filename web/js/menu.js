@@ -363,7 +363,7 @@ Menu.prototype.getForm = function()
 }
 
 Menu.prototype.loadChannels = function()
-{
+{   
 	if (this.selector && this.formName)
 		populateSelectors(this);
 		//populateSelectors(this.id, this.formName, this.selector);
