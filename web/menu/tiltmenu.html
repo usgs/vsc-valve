@@ -1,30 +1,68 @@
-<!-- $Id: tiltmenu.html,v 1.2 2005-09-24 17:51:38 dcervelli Exp $ -->
-
 <div id="tiltBox">
 
 	<form id="tiltForm">
 	
-	<div class="box w140 fl">
+	<div class="box w180 fl">
 		<h1>Channels</h1>
 		<p><select class="w100p" multiple="multiple" size="16" name="selector:ch">
 		</select></p>
 	</div>
 	
-	<div class="box w200 fl">
-		<h1>Options</h1>
-		<p><b>Time Series Options</b></p>
-		<p><input type="checkbox" id="e" name="e"> <label for="e">East</label></p>
-		<p><input type="checkbox" id="n" name="n"> <label for="n">North</label></p>
+	<div class="w180 fl">
+	<div class="box">
+		<h1>Left Axis Options</h1>
+		<div class="fr">
+			<p><b>Detrend</b></p>
+			<p><input type="checkbox" id="d_e" name="d_e"></p>
+			<p><input type="checkbox" id="d_n" name="d_n"></p>
+			<p><input type="checkbox" id="d_r" name="d_r"></p>
+			<p><input type="checkbox" id="d_t" name="d_t"></p>
+			<p><input type="checkbox" id="d_m" name="d_m"></p>
+			<p><input type="checkbox" id="d_a" name="d_a"></p>
+		</div>
+		<div>
+			<p><b>Components</b></p>
+			<p><input type="checkbox" id="l_e" name="l_e"> <label for="l_e">East</label></p>
+			<p><input type="checkbox" id="l_n" name="l_n"> <label for="l_n">North</label></p>
+			<p><input type="checkbox" id="l_r" name="l_r" checked="checked"> <label for="l_r">Radial</label></p>
+			<p><input type="checkbox" id="l_t" name="l_t" checked="checked"> <label for="l_t">Tangential</label></p>
+			<p><input type="checkbox" id="l_m" name="l_m"> <label for="l_m">Magnitude</label></p>
+			<p><input type="checkbox" id="l_a" name="l_a"> <label for="l_a">Azimuth</label></p>
+		</div>
 		<hr>
-		<p><input type="checkbox" id="r" name="r" checked="checked"> <label for="r">Radial</label></p>
-		<p><input type="checkbox" id="t" name="t" checked="checked"> <label for="t">Tangential</label></p>
-		<!-- <p><input type="checkbox" id="m" name="m"> <label for="m">Magnitude</label></p> -->
-		<br>
-		<p><input type="radio" name="az" id="opt" checked="checked"> <label for="opt">Optimal</label>
-		<input type="radio" name="az" id="nom"> <label for="nom">Nominal</label></p>
-		<p><input type="radio" name="az" id="az"> <label for="az">Azimuth:</label>
+		<p><b>Radial Options</b></p>
+		<p><input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n">Nominal</label></p>
+		<p><input type="radio" value="o" name="az" id="az_o"> <label for="az_o">Optimal</label></p>
+		<p><input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth:</label>
 		<input type="text" size="4" name="azval" id="azval"></p>
+		<hr>
+		<p><b>Scale Options</b></p>
+		<p>Min: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> Max: <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+	</div>
+	</div>
+	
+	<div class="w180 fl">
+		<div class="box">
+			<h1>Right Axis Options</h1>
+			<p><b>Time Series Options</b></p>
+			<p><input type="radio" id="r_n" value="r_n" name="right" checked="checked"> <label for="r_n">None</label></p>
+			<p><input type="radio" id="r_h" value="r_h" name="right"> <label for="r_h">Hole Temperature</label></p>
+			<p><input type="radio" id="r_b" value="r_b" name="right"> <label for="r_b">Box Temperature</label></p>
+			<p><input type="radio" id="r_i" value="r_i" name="right"> <label for="r_i">Tiltmeter Voltage</label></p>
+			<p><input type="radio" id="r_g" value="r_g" name="right"> <label for="r_g">Ground Voltage</label></p>
+			<p><input type="radio" id="r_r" value="r_r" name="right"> <label for="r_r">Rainfall</label></p>
+			<hr>
+			<p><b>Scale Options</b></p>
+			<p>Min: <input type="text" size="4" id="ysMinRight" value="Auto" name="ysRMin"> Max: <input type="text" size="4" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+		</div>
+		<div class="box">
+			<h1>Output Type</h1>	
+			<p><b>Time Series Options</b></p>
+			<p><input type="radio" name="type" value="ts" id="ts" checked="checked"> <label for="ts">Time Series</label></p>
+			<p><input type="radio" name="type" value="tv" id="tv"> <label for="tv">Tilt Vectors</label></p>
+		</div>
 	</div>
 	
 	</form>
+	
 </div>

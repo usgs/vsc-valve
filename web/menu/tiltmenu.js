@@ -1,5 +1,3 @@
-// $Id: tiltmenu.js,v 1.1 2005-09-06 21:34:48 dcervelli Exp $
-
 create_tiltmenu = function(menu)
 {
 	menu.allowChannelMap = true;
