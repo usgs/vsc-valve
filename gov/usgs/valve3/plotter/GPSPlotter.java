@@ -167,12 +167,10 @@ public class GPSPlotter extends Plotter
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		boolean gotData = false;
-		for (String bm : bms)
-		{
+		for (String bm : bms) {
 			params.put("bm", bm);
 			GPSData data = (GPSData)client.getBinaryData(params);
-			if (data != null && data.observations() > 0)
-			{
+			if (data != null && data.observations() > 0) {
 				gotData = true;
 				stationDataMap.put(bm, data);
 			}
