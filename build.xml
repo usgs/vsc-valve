@@ -62,18 +62,6 @@ jar -- generates new ${jarfile}
 	
 	<target name="deploy" depends="jar">
 		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
-		
-		<copy todir="c:\source\Valve3Web\web\WEB-INF\lib">
-			<fileset dir="../USGS/contrib">
-				<include name="colt.jar" />
-				<include name="jai_codec.jar" />
-				<include name="jai_core.jar" />
-				<include name="mlibwrapper_jai.jar" />
-			</fileset>
-			<fileset dir="../USGS/lib">
-				<include name="usgs.jar" />
-			</fileset>
-		</copy>
 	</target>
 
 </project>
