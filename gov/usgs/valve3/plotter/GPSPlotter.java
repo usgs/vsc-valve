@@ -2,7 +2,7 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Data;
 import gov.usgs.plot.DataRenderer;
-import gov.usgs.plot.EllipseVectorRenderer2;
+import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.TextRenderer;
@@ -252,11 +252,10 @@ public class GPSPlotter extends Plotter
 				dr.createDefaultLegendRenderer(new String[] { String.format("%s%s ", bm.getCode(), bs) + LEGENDS[i] });
 				dr.setXAxisToTime(8);
 				dr.getAxis().setLeftLabelAsText("Meters");
-				dr.getAxis().setBottomLabelAsText("Time");
 				
 				displayCount++;
-				if (displayCount != compCount)
-					dr.getAxis().setBottomLabels(null);
+				if (displayCount == compCount)
+					dr.getAxis().setBottomLabelAsText("Time");
 				
 				pc.setTranslation(dr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 				pc.setTranslationType("ty");
@@ -383,7 +382,7 @@ public class GPSPlotter extends Plotter
 			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
 			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
 			System.out.printf("w: %f h: %f\n", w, h);
-			EllipseVectorRenderer2 vr = new EllipseVectorRenderer2();
+			EllipseVectorRenderer vr = new EllipseVectorRenderer();
 			vr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(bm.getLonLat());
 			vr.x = ppt.x;
@@ -404,7 +403,7 @@ public class GPSPlotter extends Plotter
 			return;
 		}
 		
-		double scale = EllipseVectorRenderer2.getBestScale(maxMag);
+		double scale = EllipseVectorRenderer.getBestScale(maxMag);
 		System.out.println("Scale: " + scale);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
 		System.out.println("desiredLength: " + desiredLength);
@@ -412,11 +411,11 @@ public class GPSPlotter extends Plotter
 		
 		for (int i = 0; i < vrs.size(); i++)
 		{
-			EllipseVectorRenderer2 vr = (EllipseVectorRenderer2)vrs.get(i);
+			EllipseVectorRenderer vr = (EllipseVectorRenderer)vrs.get(i);
 			vr.setScale(desiredLength / scale);
 		}
 		
-		EllipseVectorRenderer2 svr = new EllipseVectorRenderer2();
+		EllipseVectorRenderer svr = new EllipseVectorRenderer();
 		svr.frameRenderer = mr;
 		svr.drawEllipse = false;
 		svr.x = mr.getMinX();
