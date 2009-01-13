@@ -313,10 +313,14 @@ public class GPSPlotter extends Plotter
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
-		trans[4] = range.getWest();
-		trans[5] = range.getEast();
-		trans[6] = range.getSouth();
-		trans[7] = range.getNorth();
+		// trans[4] = range.getWest();
+		// trans[5] = range.getEast();
+		// trans[6] = range.getSouth();
+		// trans[7] = range.getNorth();
+		trans[4] = 0;
+		trans[5] = 0;
+		trans[6] = origin.x;
+		trans[7] = origin.y;
 		component.setTranslation(trans);
 		component.setTranslationType("map");
 		v3Plot.addComponent(component);
