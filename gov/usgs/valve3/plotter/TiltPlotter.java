@@ -10,8 +10,8 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.Time;
 import gov.usgs.valve3.PlotComponent;
-import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
@@ -32,12 +32,10 @@ import gov.usgs.proj.TransverseMercator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -190,8 +188,8 @@ public class TiltPlotter extends Plotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		
-		System.out.println("startTime:" + startTime);
-		System.out.println("endTime:" + endTime);
+		System.out.println("startTime:" + Time.toDateString(startTime));
+		System.out.println("endTime:" + Time.toDateString(endTime));
 
 		// get a connection to the database
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
@@ -439,6 +437,7 @@ public class TiltPlotter extends Plotter {
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		Map<String, Station> stations = stationsMap.get(vdxSource);
 		
+		// build up a list of all the stations that are being plotted
 		for (String key : stationDataMap.keySet()) {
 			TiltStationData data = stationDataMap.get(key);
 			if (data != null) {
@@ -446,14 +445,15 @@ public class TiltPlotter extends Plotter {
 			}
 		}
 		
+		// create the dimensions of the plot based on these stations
 		GeoRange range = GeoRange.getBoundingBox(locs);
-		System.out.println(range);
 		
 		Plot plot = v3Plot.getPlot();
 		
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
+		System.out.println("origin.x:" + origin.x + "/origin.y:" + origin.y);
 		
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
@@ -471,10 +471,14 @@ public class TiltPlotter extends Plotter {
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
-		trans[4] = range.getWest();
-		trans[5] = range.getEast();
-		trans[6] = range.getSouth();
-		trans[7] = range.getNorth();
+		// trans[4] = range.getWest();
+		// trans[5] = range.getEast();
+		// trans[6] = range.getSouth();
+		// trans[7] = range.getNorth();
+		trans[4] = 0;
+		trans[5] = 0;
+		trans[6] = origin.x;
+		trans[7] = origin.y;
 		component.setTranslation(trans);
 		component.setTranslationType("map");
 		v3Plot.addComponent(component);
@@ -503,40 +507,36 @@ public class TiltPlotter extends Plotter {
 			double nt2	= dm.getQuick(dm.rows() - 1, 2);
 			double e	= et2 - et1;
 			double n	= nt2 - nt1;
-			double mag	= Math.sqrt((e * e) + (n * n));
-			maxMag		= Math.max(mag, maxMag);
 			
-			System.out.println(station.getCode());
-			System.out.println("e:" + e + ",n:" + n + ",maxMag:" + maxMag);
-			
-			EllipseVectorRenderer vr = new EllipseVectorRenderer();
-			vr.frameRenderer = mr;
+			EllipseVectorRenderer evr = new EllipseVectorRenderer();
+			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(station.getLonLat());
-			vr.x = ppt.x;
-			vr.y = ppt.y;
-			vr.u = vr.x + e;
-			vr.v = vr.y + n;
+			evr.x = ppt.x;
+			evr.y = ppt.y;
+			evr.u = e;
+			evr.v = n;
 			
-			maxMag = Math.max(vr.getMag(), maxMag);
-			plot.addRenderer(vr);
-			vrs.add(vr);
+			System.out.println("plotter - x:" + evr.x + "/y:" + evr.y + "/u:" + evr.u + "/v:" + evr.v);
+			
+			maxMag = Math.max(evr.getMag(), maxMag);
+			plot.addRenderer(evr);
+			vrs.add(evr);
 		}
 		
 		if (maxMag == -1E300) {
 			return;
 		}
 		
+		// set the length of the legend vector to 1/5 of the width of the shortest side of the map
 		double scale = EllipseVectorRenderer.getBestScale(maxMag);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
-		System.out.println("maxMag:" + maxMag);
-		System.out.println("scale:" + scale);
-		System.out.println("desiredLength:" + desiredLength);
 		
 		for (int i = 0; i < vrs.size(); i++) {
-			EllipseVectorRenderer vr = (EllipseVectorRenderer)vrs.get(i);
-			vr.setScale(desiredLength / scale);
+			EllipseVectorRenderer evr = (EllipseVectorRenderer)vrs.get(i);
+			evr.setScale(desiredLength / scale);
 		}
 		
+		// draw the legend vector
 		EllipseVectorRenderer svr = new EllipseVectorRenderer();
 		svr.frameRenderer = mr;
 		svr.drawEllipse = false;
@@ -544,12 +544,13 @@ public class TiltPlotter extends Plotter {
 		svr.y = mr.getMinY() + 17 / mr.getYScale();
 		svr.u = desiredLength;
 		svr.v = 0;
-		 
+		plot.addRenderer(svr);
+		
+		// draw the legend vector units
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
 		tr.text = scale + " " + MICRO + "R";
-		plot.addRenderer(svr);
 		plot.addRenderer(tr);
 		
 		v3Plot.setTitle("Tilt Vectors");		
