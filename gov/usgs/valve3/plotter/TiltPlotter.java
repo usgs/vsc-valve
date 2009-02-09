@@ -64,6 +64,7 @@ public class TiltPlotter extends Plotter {
 	private static Map<String, Map<String, Station>> stationsMap = new HashMap<String, Map<String, Station>>();
 	
 	private TiltStationData data;
+	private double TZOffset;
 	
 	private String channels;
 	private double startTime;
@@ -86,7 +87,6 @@ public class TiltPlotter extends Plotter {
 	private boolean detrendTangential = false;
 	
 	private double azimuthValue;
-	private double tangentialValue;
 	
 	private enum PlotType {
 		TIME_SERIES, TILT_VECTORS;
@@ -187,22 +187,28 @@ public class TiltPlotter extends Plotter {
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		
-		System.out.println("startTime:" + Time.toDateString(startTime));
-		System.out.println("endTime:" + Time.toDateString(endTime));
 
 		// get a connection to the database
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		
+		// figure out the time zone offset		
+		System.out.println("GMT startTime:" + Time.toDateString(startTime));
+		System.out.println("GMT endTime:  " + Time.toDateString(endTime));
+		TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		startTime += TZOffset;
+		endTime += TZOffset;		
+		System.out.println(Valve3.getInstance().getTimeZoneAbbr() + " startTime:" + Time.toDateString(startTime));
+		System.out.println(Valve3.getInstance().getTimeZoneAbbr() + " endTime:  " + Time.toDateString(endTime));
+		
 		// iterate through each of the selected channels and get the data from the db
 		boolean gotData = false;
 		for (String channel : channelArray) {
 			params.put("cid", channel);		
-			data = (TiltStationData)client.getBinaryData(params);			
+			data = (TiltStationData)client.getBinaryData(params);
 			if (data != null || data.getTiltData().rows() > 0) {
-				gotData = true;	
 				stationDataMap.put(channel, data);
+				gotData = true;	
 			}
 		}
 		
@@ -222,7 +228,6 @@ public class TiltPlotter extends Plotter {
 		int dh = component.getBoxHeight() / stationDataMap.size();
 		int displayCount = 0;
 		boolean allowExpand	= true;
-		List<String> stationList = new ArrayList<String>();
 		
 		// iterate through each of the selected stations
 		for (String key : stationDataMap.keySet()) {
@@ -230,7 +235,9 @@ public class TiltPlotter extends Plotter {
 			// instantiate the data structure for this station
 			TiltStationData data = stationDataMap.get(key);
 			List<String> legends = new ArrayList<String> ();
-			stationList.add(stations.get(key).getCode());
+			
+			// adjust the tilt data for the installation time zone
+			data.getTiltData().adjustTime(TZOffset);			
 			
 			// instantiate this plot
 			PlotComponent pc = new PlotComponent();
@@ -253,8 +260,8 @@ public class TiltPlotter extends Plotter {
 				default:
 					azimuthValue = 0.0;
 					break;
-			}			
-			tangentialValue = (azimuthValue + 90.0) % 360.0;
+			}
+			azimuthValue -= 90.0;
 
 			// get the set of tilt data using this azimuth value (1=east,2=north,3=radial,4=tangential)
 			DoubleMatrix2D mm = data.getTiltData().getAllData(azimuthValue);		
@@ -300,12 +307,12 @@ public class TiltPlotter extends Plotter {
 			if (showRadial) {
 				min = Math.min(dm.min(3), min);
 				max = Math.max(dm.max(3), max);
-				legends.add(stations.get(key).getCode() + " " + azimuthValue);
+				legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 90.0) % 360.0));
 			}
 			if (showTangential) {
 				min = Math.min(dm.min(4), min);
 				max = Math.max(dm.max(4), max);
-				legends.add(stations.get(key).getCode() + " " + tangentialValue);
+				legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 180.0) % 360.0));
 			}
 			if (showMagnitude) {
 				min = Math.min(dm.min(5), min);
@@ -351,34 +358,39 @@ public class TiltPlotter extends Plotter {
 				String unit = "";
 				switch (rightAxis) {
 					case HOLETEMPERATURE:
+						data.getHoleTempData().adjustTime(TZOffset);
 						rightData	= data.getHoleTempData().getData();
 						label		= "Temperature (" + DEGREES + "C)";
 						unit		= "degrees c";
-						//legends.add(stations.get(key).getCode() + " Hole Temperature");
+						legends.add(stations.get(key).getCode() + " Hole Temperature");
 						break;
 					case BOXTEMPERATURE:
+						data.getBoxTempData().adjustTime(TZOffset);
 						rightData	= data.getBoxTempData().getData();
 						label		= "Temperature (" + DEGREES + "C)";
 						unit		= "degrees c";
-						//legends.add(stations.get(key).getCode() + " Box Temperature");
+						legends.add(stations.get(key).getCode() + " Box Temperature");
 						break;
 					case INSTVOLTAGE:
+						data.getInstVoltData().adjustTime(TZOffset);
 						rightData	= data.getInstVoltData().getData();
 						label		= "Voltage (V)";
 						unit		= "volts";
-						//legends.add(stations.get(key).getCode() + " Instrument Voltage");
+						legends.add(stations.get(key).getCode() + " Instrument Voltage");
 						break;
 					case GNDVOLTAGE:
+						data.getGndVoltData().adjustTime(TZOffset);
 						rightData	= data.getGndVoltData().getData();
 						label		= "Voltage (V)";
 						unit		= "volts";
-						//legends.add(stations.get(key).getCode() + " Ground Voltage");
+						legends.add(stations.get(key).getCode() + " Ground Voltage");
 						break;
 					case RAINFALL:
+						data.getRainfallData().adjustTime(TZOffset);		
 						rightData	= data.getRainfallData().getData();
 						label		= "Rainfall (mm)";
 						unit		= "millimeters";
-						//legends.add(stations.get(key).getCode() + " Rainfall");
+						legends.add(stations.get(key).getCode() + " Rainfall");
 						break;
 				}
 			
@@ -401,21 +413,21 @@ public class TiltPlotter extends Plotter {
 				if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
 					throw new Valve3Exception("Illegal axis values.");
 			
-				mr = new MatrixRenderer(dm.getData());
-				mr.setUnit(unit);
-				mr.setLocation(pc.getBoxX(), pc.getBoxY() + displayCount * dh + 8, pc.getBoxWidth(), dh - 16);
-				mr.setExtents(startTime, endTime, yMin, yMax);
-				AxisRenderer ar = new AxisRenderer(mr);
+				MatrixRenderer lmr = new MatrixRenderer(dm.getData());
+				lmr.setUnit(unit);
+				lmr.setLocation(pc.getBoxX(), pc.getBoxY() + displayCount * dh + 8, pc.getBoxWidth(), dh - 16);
+				lmr.setExtents(startTime, endTime, yMin, yMax);
+				AxisRenderer ar = new AxisRenderer(lmr);
 				ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, false), null);
-				mr.setAxis(ar);
-				mr.createDefaultLineRenderers();
-				Renderer[] r = mr.getLineRenderers();
-				((ShapeRenderer)r[0]).color = Color.red;
-				mr.getAxis().setRightLabelAsText(label);
+				lmr.setAxis(ar);
+				lmr.createDefaultLineRenderers();
+				Renderer[] r = lmr.getLineRenderers();
+				((ShapeRenderer)r[0]).color = Color.black;
+				lmr.getAxis().setRightLabelAsText(label);
 				
-				pc.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+				pc.setTranslation(lmr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 				pc.setTranslationType("ty");
-				v3Plot.getPlot().addRenderer(mr);
+				v3Plot.getPlot().addRenderer(lmr);
 				v3Plot.addComponent(pc);
 			}
 			
@@ -429,7 +441,7 @@ public class TiltPlotter extends Plotter {
 		}
 		
 		// set information related to the entire plot		
-		v3Plot.setTitle("Tilt:" + component.get("selectedStation"));
+		v3Plot.setTitle("Tilt: Time Series");
 	}
 	
 	public void plotTiltVectors() {
@@ -453,7 +465,6 @@ public class TiltPlotter extends Plotter {
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
-		System.out.println("origin.x:" + origin.x + "/origin.y:" + origin.y);
 		
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
@@ -471,10 +482,6 @@ public class TiltPlotter extends Plotter {
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
-		// trans[4] = range.getWest();
-		// trans[5] = range.getEast();
-		// trans[6] = range.getSouth();
-		// trans[7] = range.getNorth();
 		trans[4] = 0;
 		trans[5] = 0;
 		trans[6] = origin.x;
@@ -516,8 +523,6 @@ public class TiltPlotter extends Plotter {
 			evr.u = e;
 			evr.v = n;
 			
-			System.out.println("plotter - x:" + evr.x + "/y:" + evr.y + "/u:" + evr.u + "/v:" + evr.v);
-			
 			maxMag = Math.max(evr.getMag(), maxMag);
 			plot.addRenderer(evr);
 			vrs.add(evr);
@@ -553,7 +558,7 @@ public class TiltPlotter extends Plotter {
 		tr.text = scale + " " + MICRO + "R";
 		plot.addRenderer(tr);
 		
-		v3Plot.setTitle("Tilt Vectors");		
+		v3Plot.setTitle("Tilt: Vectors");		
 	}
 	
 	private static void getStations (String source, String client) {
