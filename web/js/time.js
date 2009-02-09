@@ -188,6 +188,8 @@ function validateDate(textField, start)
 	
 function buildTimeString(tIn)
 {
+	// this is where the time gets converted from local time to GMT time.  All within the system of processing, times are GMT.
+	// it is only when the plot is returned that the x-axis displays the time as local time again.
 	//var t = Math.round(1000*tIn) + 946728000000;// - (document.getElementById('timeZoneOffset') * 60 * 60 * 1000);//+ 36000000;	
 	var t = Math.round(1000*tIn) + 946728000000 + (document.getElementById('timeZoneOffset').value * 60 * 60 * 1000);//+ 36000000;	
 	
