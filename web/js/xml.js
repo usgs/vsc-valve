@@ -4,10 +4,11 @@ var numLoading = 0;
 function loadXML(title, url, func)
 {
 	var req = null;
-	if (window.XMLHttpRequest)
+	if (window.XMLHttpRequest) {
 		req = new XMLHttpRequest();
-	else if (window.ActiveXObject)
+	} else if (window.ActiveXObject) {
 		req = new ActiveXObject("Microsoft.XMLHTTP");
+	}
 		
 	addURLLoading();
 
@@ -18,16 +19,12 @@ function loadXML(title, url, func)
 			removeURLLoading();
 			var status = -1;
 			try { status = req.status; } catch (e) {}
-			
-			if (status != -1 && status == 200)
-			{
+			if (status != -1 && status == 200) {
 				if (func)
 					func(req);
 				else 
 					handleXML(req);
-			}
-			else
-			{
+			} else {
 				if (title)
 					alert("There was a problem loading component '" + title + "'.");
 				else
@@ -35,7 +32,7 @@ function loadXML(title, url, func)
 			}
 		}
 	}
-	
+
 	url = url.replace(/#/, "%23");
 	req.open("GET", url, true);
 	req.send(null);
