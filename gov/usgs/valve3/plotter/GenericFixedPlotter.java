@@ -180,7 +180,7 @@ public class GenericFixedPlotter extends Plotter
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")", Color.BLUE);
+		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")");
 		mr.getAxis().setBottomLabelAsText("Time");
 		return mr;
 	}
@@ -224,7 +224,7 @@ public class GenericFixedPlotter extends Plotter
 		mr.createDefaultLineRenderers(1);
 		ShapeRenderer[] r = mr.getLineRenderers();
 		
-		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")", r[r.length-1].color);
+		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")");
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		return mr;
