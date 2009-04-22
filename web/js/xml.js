@@ -1,5 +1,23 @@
-// $Id: xml.js,v 1.6 2006-10-04 16:38:06 tparker Exp $
+// $Id: xml.js,v 1.6 2006/10/04 16:38:06 tparker Exp $
 
+/** @fileoverview deals with AJAX functionality, the XMLHttpRequest method and necessary handlers 
+ * @author Dan Cervelli
+ */
+
+
+/**
+ *  Use the "XMLHttpRequest" to make an asynchronous AJAX call. First detect if we're using
+ *  Microsoft's ActiveX implementation (Internet Explorer 6 and earlier) to set up the right
+ *  request object.
+ *  
+ *  Open the url passed to the function with an http GET request. Wait for the readystatechange
+ *  with a cycling circle of circles wait-graphic animation. 
+ *  If things look good send it off to the func or handleXML (see below.)
+ *
+ * @param {string} title example: "gpsmenu javascript"
+ * @param {string} url example: "menu/gpsmenu.html"
+ * @param {function} func function to run on load
+ */
 var numLoading = 0;
 function loadXML(title, url, func)
 {
@@ -37,7 +55,12 @@ function loadXML(title, url, func)
 	req.open("GET", url, true);
 	req.send(null);
 }
-
+/**
+ * sends the results of an XML request to the appropriate handler, 
+ * the menu handler or the plot handler
+ *
+ * @param {object} req request object for AJAX 
+ */
 function handleXML(req)
 {
 	var doc = req.responseXML;
@@ -62,7 +85,9 @@ function handleXML(req)
 		alert(doc.getElementsByTagName("message")[0].firstChild.data);
 	}
 }
-
+/** 
+ * Start the wait animation loading, a cycling circle of circles wait-graphic gif anim.
+ */
 function addURLLoading()
 {
 	numLoading++;
@@ -73,6 +98,13 @@ function addURLLoading()
 	}
 }
 
+/**
+ *  If all XML has returned (as tracked by the global variable numLoading), 
+ *  whether successfully or not, replace the animated "throbber"
+ *  with a static image.
+ *
+ *  @param {string} url doesn't seem to be used
+ */
 function removeURLLoading(url)
 {
 	numLoading--;
@@ -84,6 +116,15 @@ function removeURLLoading(url)
 	}
 }
 
+/**
+ *  Returns the value of an xml cell by tag. Get first index if index 
+ *  parameter isn't included. 
+ *  @param {text} xml xml to search
+ *  @param {string} tag tag to search for
+ *  @param {int} index to search for, if any
+ *  @returns element data found
+ *  @type object
+ */
 function getXMLField(xml, tag, index)
 {
 	if (!index)
@@ -95,6 +136,13 @@ function getXMLField(xml, tag, index)
 		return null;
 }
 
+/**
+ *  Write xml tree out in html readable format. You get this when you click the 'x' icon
+ *  on a plot, for example.
+ *
+ *  @param {object} doc document object
+ *  @param {object} tree document object to treat as a tree
+ */
 function xmlToHTML(doc, tree)
 {
 	if (tree)
@@ -114,6 +162,14 @@ function xmlToHTML(doc, tree)
 	} 
 }
 
+/**
+ *  Search through all branches of xml tree for "url" tag, and return url
+ *  found.
+ *  @param {object} doc document object
+ *  @param {object} tree document object
+ *  @returns url found in xml
+ *  @type string
+ */
 function xmlToURL(doc, tree)
 {
 	if (tree)

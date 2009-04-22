@@ -1,8 +1,24 @@
-// $Id: box.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+// $Id: box.js,v 1.1 2005/09/03 19:18:35 dcervelli Exp $
+
+/** @fileoverview  
+ * 
+ * initialization of and control of interface elements with the box that contains 
+ * the data source specific sub-menus 
+ *
+ * @author Dan Cervelli
+ */
 
 var IMG_COLLAPSE = "images/minus.png";
 var IMG_EXPAND = "images/plus.png";
 
+/**
+ *  mapFunctionToTree calls itself to recursively traverse the tree, and 
+ *  apply the passed 'func' to the element and all children of the element.
+ *  root can be an element such as an html div named eTiltBox for example.
+ *
+ *  @param {element} root The root element to traverse and map function to
+ *  @param {function} func Function to map to
+ */
 function mapFunctionToTree(root, func)
 {
 	if (root)
@@ -13,6 +29,21 @@ function mapFunctionToTree(root, func)
 	} 
 }
 
+/**
+ *  Incorporate passed ID parameter with all ids or htmlFors in an element.
+ *  
+ *  element can be an html div named eTiltBox for example, while uid = "msh_tilt"
+ *  the element 'id' is changed from eTiltBox to msh_tilt_eTiltBox.
+ *  
+ *  All children of the element tree are checked and similarly renamed.
+ *  
+ *  For browsers or elements that use htmlFor the same sort of renaming happens 
+ *  for that tag as well.
+ *  
+ *  @param {element} element The root element to traverse and label
+ *  @param {string} uid The ID to tag this element with.
+ *
+ */
 function unifyIds(element, uid)
 {
 	mapFunctionToTree(element,
@@ -26,6 +57,12 @@ function unifyIds(element, uid)
 		});
 }
 
+/**
+ *  By changing the target element's style, show or hide the collapsible element
+ *  after a mouse click on the + or -
+ *
+ *  @param {event} event The event that initiates the toggle
+ */
 function toggleCollapser(event)
 {
 	var target = getTarget(event);
@@ -41,8 +78,21 @@ function toggleCollapser(event)
 	}
 }
 
+/**
+ *  This checks for a collapse element in the element or any of the element's children,
+ *  if it finds one it adds the +/- image, and sets up the listener to toggle
+ *  the open/collapse.
+ *  
+ *  For example, you have a certain data source. It has it's own set of menus (see
+ *  the menu html/js pairs). If a collapser is included, this deals with initializing 
+ *  it.
+ *
+ *  @param {element} element The root element to traverse and activate
+ *  @param {string} uid The ID to retrieve this element with.
+ */
 function activateCollapsers(element, uid)
 {
+	// Create the match regular expression string to use later
 	var cre = /collapse_(.*)$/;
 	mapFunctionToTree(element,
 		function(elt)
@@ -79,6 +129,11 @@ function activateCollapsers(element, uid)
 			}
 		});
 }
+/**
+ *  By changing the event target element's style, show or hide the toggleable pane
+ *
+ *  @param {event} event The event that initiates the toggle
+ */
 
 function togglePane(event)
 {
@@ -97,6 +152,18 @@ function togglePane(event)
 	}
 }
 
+/**
+ *  This checks for a pane element or pane selector element
+ *  in the passed element or any of the element's children;
+ *  if it finds one it sets up the listener to toggle the open/hide.
+ *  
+ *  For example, you have a certain data source. It has it's own set of menus (see
+ *  the menu html/js pairs). If a pane is included, this deals with initializing 
+ *  it.
+ *  
+ *  @param {element} element The root element to traverse and activate
+ *  @param {string} uid The ID to identify this element by.
+ */
 function activatePanes(element, uid)
 {
 	var pre = /pane_(.*)_(.*)$/;
@@ -145,7 +212,17 @@ function activatePanes(element, uid)
 			}
 		});
 }
-
+/**
+ *  Do some general housekeeping and tweaking on a new box. Recurse through all box 
+ *  elements and label the ids in a uniform manner. 
+ *
+ *  Activate the +/- collapsers, activate the menu panes having to do with this box.
+ *  An example of a box can be the set of sub-menus needed between Data Sources and 
+ *  Start Time, when you select a data source.
+ *  
+ *  @param {string} bid The box ID
+ *  @param {string} uid The ID to identify this element by.
+ */
 function activateBox(bid, uid)
 {
 	var box = document.getElementById(bid);

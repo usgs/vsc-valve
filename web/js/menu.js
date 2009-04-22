@@ -1,14 +1,30 @@
-// $Id: menu.js,v 1.11 2007-09-11 18:47:49 tparker Exp $
+// $Id: menu.js,v 1.11 2007/09/11 18:47:49 tparker Exp $
+/** @fileoverview Functions in menu.js have to do with the text-based menus at the top of the Valve screen 
+ *  @author Dan Cervelli
+ */
+
 
 var lastDiv = null;
 var currentMenu = null;
+/**
+ *  Sets the currentMenu global variable to the menu parameter passed in
+ *  Populate the time shortcut panel, but don't display it.
+ *  Activate the geographical filter.
+ *  
+ *  @param {menu object} menu 
+ */
 function setCurrentMenu(menu)
 {
 	currentMenu = menu;
 	populateTimeShortcuts(menu.timeShortcuts);
 	menu.menuFocused();
 }
-
+/**
+ *  Initiates the "AJAX" asynchronous load for the submenu div specified by the target(id) parameter.
+ *  This new submenu then should appear on the screen to the right of the main menu. Clears any previous submenu.
+ *
+ *  @param {string} id
+ */
 function loadMenu(id)
 {
 	if (lastDiv)
@@ -47,6 +63,12 @@ function loadMenu(id)
 }
 
 var menus = new Array(10);
+/**
+ *  Set up the initial menu, populate data sources - current data, historical data, 
+ *  geographic filter, start/end time, administrator email link, etc.
+ *  
+ *  @param {text} xml block of xml text
+ */
 function handleMenu(xml)
 {
 	var sections = xml.getElementsByTagName("section");
@@ -97,6 +119,14 @@ function handleMenu(xml)
 	document.getElementById('version').appendChild(document.createTextNode("Valve " + getXMLField(xml, "version")));
 }
 
+/**
+ *  Load up the geographical filter drop-down menu from the filters.txt text file that has  
+ *  lines like this:
+ *      Alaska:172,-129.9,51,72
+ *      Volcanic Arc:172,-151,51,62
+ *      Adagdak:-176.955912,-176.228088,51.76331042,52.2126809
+ *  Also, add a listener for menu selections.
+ */
 function loadFilters()
 {
 	var url = "filters.txt";
@@ -122,6 +152,9 @@ function loadFilters()
 		});
 }
 
+/**
+ * Load main menu data sources.
+ */
 function loadDataSources()
 {
 	loadFilters();
@@ -129,6 +162,11 @@ function loadDataSources()
 	loadXML("main menu", url);
 }
 
+/** 
+ *	Make an AJAX call via jsp to return the values for the Channels menu
+ *  
+ *  @param {menu object} menu 
+ */
 function populateSelectors(menu)
 {
 	var f = document.getElementById(menu.id + '_' + menu.formName);
@@ -177,6 +215,12 @@ function populateSelectors(menu)
 		});
 }
 
+/** 
+ *	hide or show submenus via + or - icons. For example, the "options" submenu.
+ *  
+ *  @param {event object} event This is the event that causes the toggle.
+ * 
+ */
 function toggle(event)
 {
 	var target = getTarget(event).parentNode.parentNode;
@@ -196,6 +240,16 @@ function toggle(event)
 
 var lastSelected = null;
 var wasSelected = false;
+/**
+ *  Select target menu item that has been clicked on, changing it's menu color to
+ *  "selected" (see valve3.css), and clear the select color from any previously 
+ *  selected menu item.
+ *  
+ *  Next load the menu associated with the target
+ *
+ *  @param {event object} e
+ *  @param {element object} elt 
+ */
 function doSelect(e, elt)
 {
 	if (lastSelected != null)
@@ -209,6 +263,12 @@ function doSelect(e, elt)
 	loadMenu(target.id);
 }
 
+/**
+ *  Remember if an item in a menu is selected, if you hover over any 
+ *  item it turns css "hover" which currently is light blue (see valve3.css)
+ *
+ *  @param {event object} e
+ */
 function doMouseOver(e)
 {
 	var target = getTarget(e);
@@ -217,6 +277,13 @@ function doMouseOver(e)
 	target.className = "hover";
 }
 
+/**
+ *  On mousing out of a menu list item, either change the css class to show 
+ *  the color for "selected" or the color for not selected and not hovered over
+ *  in this case white (see valve3.css)
+ *
+ *  @param {event object} e
+ */
 function doMouseOut(e)
 {
 	var target = getTarget(e);
@@ -227,6 +294,13 @@ function doMouseOut(e)
 	wasSelected = false;
 }
 
+/**
+ *  Creates from this the text "Last minute", "Last two minutes" etc.
+ *  
+ *  @param {array} scs Example of scs array: "-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h"
+ *  @return array of strings of time shortcut labels
+ *  @type array
+ */
 function createTimeShortcuts(scs)
 {
 	var result = new Array(scs.length);
@@ -265,6 +339,13 @@ function createTimeShortcuts(scs)
 	return result;
 }
 
+/**
+ *  Populates the shortcut panel that you can get by clicking the clock icon in the 
+ *  time entry panel on the right hand side of the text menus.
+ *  Remove old ones, add new ones
+ *
+ *  @param {array} shortcuts Example of array of strings: "-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h"
+ */
 function populateTimeShortcuts(shortcuts)
 {
 	var scs = createTimeShortcuts(shortcuts);
@@ -285,6 +366,11 @@ function populateTimeShortcuts(shortcuts)
 	}
 }
 
+/** 
+ *	Clicking on a time shortcut drops that shortcut into the "Start Time" entry
+ *
+ *  @param {event object} event for example: mouse click
+ */
 function timeShortcutClick(event)
 {
 	var t = /\[(.*)\]/;
@@ -298,7 +384,13 @@ function timeShortcutClick(event)
 		toggleTimeShortcutPanel();
 	}
 }
-
+/**
+ *  clicking the clock icon to the left of 'Start Time' will bring up the panel 
+ *  that displays shortcut hints, ie: [-1w] Last week.
+ *  If it's already up, running this function will close the panel
+ *
+ *  @param {event object} event for example: mouse click
+ */
 function toggleTimeShortcutPanel(event)
 {
 	var p = document.getElementById('timeShortcutPanel');
@@ -321,6 +413,16 @@ function toggleTimeShortcutPanel(event)
 	}
 }
 
+/**
+ *  Check the current geographic filter interface element to find out the active geo filter.
+ *  For example "Alaska": return appropriate latitude and longitude to define the area. This 
+ *  is parsed out of the text array 'value' stored in the popup menu, 
+ *  ie: [172, -129.9, 51, 72]
+ *  These values originate from AVO/filters.txt
+ *  
+ *  @return array of numbers
+ *  @type array	
+ */
 function getGeoFilter()
 {
 	var gf = document.getElementById("geoFilter");
@@ -336,16 +438,31 @@ function getGeoFilter()
 	}
 }
 
+/**
+ *  Create an empty menu function to be filled out later
+ */
 function Menu()
 {}
 
 Menu.prototype.allowChannelMap = false;
 
+/**
+	Initialize the time shortcuts array
+ */
 Menu.prototype.timeShortcuts = new Array("-1h");
 
+/**
+ 	Sets up a function to take some parameters.
+ */
 Menu.prototype.acceptMapClick = function(target, mx, my, lon, lat)
 {}
 
+/**
+	Sets the start and end times in the main menu to start and 
+	end times for the area clicked on (assuming X values are over time)
+	The first click sets the start time. The second click sets the end time.
+	(Then you can submit to zoom in on your new time range.)
+ */
 Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 {
 	if (lastTimeClick++ % 2 == 0)
@@ -353,22 +470,34 @@ Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 	else
 		document.getElementById("endTime").value = buildTimeString(gx);
 }
-
+/**
+ 	Sets up a function to take some parameters.
+ */
 Menu.prototype.acceptXYClick = function(target, mx, my, gx, gy)
 {}
 
+/**
+	Generate the name for calling a form element, and return the form element
+ */
 Menu.prototype.getForm = function()
 {
 	return document.getElementById(this.id + '_' + this.formName);
 }
 
+/**
+	Initiate populateSelectors to populate the channel names into the menu
+ */ 
 Menu.prototype.loadChannels = function()
-{   
+{
 	if (this.selector && this.formName)
 		populateSelectors(this);
 		//populateSelectors(this.id, this.formName, this.selector);
 }
 
+/** 
+	Initialize the sub-menus once a menu selection has been made. The sub-menus
+	happen in the "box"
+ */
 Menu.prototype.initialize = function()
 {
 	activateBox(this.boxName, this.id);
@@ -377,6 +506,10 @@ Menu.prototype.initialize = function()
 
 Menu.prototype.presubmit = function() { return true; }
 
+/**
+	This is the main "submit" button. Some error checking is sone on channels before
+	the asynchronous xml request is made.
+ */
 Menu.prototype.submit = function()
 {
 	var f = this.getForm();
@@ -405,6 +538,10 @@ Menu.prototype.submit = function()
 		loadXML(this.id + " plot", pr.getURL());
 }
 
+/**
+	Set and apply the geographicial filter for the selection in the first sub-menu.
+	and for any map to be drawn
+ */
 Menu.prototype.filterChanged = function()
 {
 	if (this.selector && this.getForm().options)
@@ -432,6 +569,9 @@ Menu.prototype.filterChanged = function()
 	}
 }
 
+/** 
+	Run filterChanged based on the new menu chosen.
+ */ 
 Menu.prototype.menuFocused = function()
 {
 	this.filterChanged();

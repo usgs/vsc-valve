@@ -1,5 +1,18 @@
-// $Id: time.js,v 1.3 2006-04-09 21:54:14 dcervelli Exp $
+// $Id: time.js,v 1.3 2006/04/09 21:54:14 dcervelli Exp $
 
+/** @fileoverview deals with Start Time and End Time entry fields 
+ * @author Dan Cervelli
+ */
+
+/**
+ *  grab the start and end times from the entry fields, and do some checking on them
+ *  Make sure start time is before end time, make sure that difference in time is 
+ *  greater than parameter maxDiff. return start time and end time variables in 'this'
+ *
+ *  @param {integer} maxDiff Maximum difference in seconds allowed.
+ *  @return object with et and st components: start time and end time
+ *  @type object
+ */
 function getTimes(maxDiff)
 {
 	this.et = getEndTime();
@@ -25,6 +38,16 @@ function getTimes(maxDiff)
 	return null;
 }
 
+/**
+ *  grab the start time form field from the document.
+ *  Do checks and conversions if this is a "shortcut" time like -1d (the previous 
+ *  one day) or -1h *  (previous hour) -10m (previous 10 min) or whatever.
+ *  
+ *  Confirm that it's a valid date/time, and then return it.
+ *
+ *  @return the start time as an integer
+ *  @type int
+ */
 function getStartTime()
 {
 	var st = document.getElementById('startTime'); 
@@ -70,6 +93,14 @@ function getStartTime()
 	}
 }
 
+/**
+ *  grab the end time form field from the document.
+ *  
+ *  Confirm that it's a valid date/time, or that it's the value NOW, and then return it.
+ *
+ *  @return the end time as an integer
+ *  @type int
+ */
 function getEndTime()
 {
 	var et = document.getElementById('endTime');
@@ -86,7 +117,18 @@ function getEndTime()
 	else
 		return et.value;
 }
-		
+
+/**
+ *  Looks at a text field data like 20090331125600000 or -5d or -1h or -1m or Now
+ *  and checks each element of the number to make sure it's a valid date and 
+ *  time. (Or if it's -5d or -1h or whatever, make sure it's a valid time shortcut
+ *  value.)
+ *
+ * @param {string} textField for example a date like 20090331125600000
+ * @param {boolean} start boolean to see if we're working on start or end date
+ * @returns a boolean reporting if this the data passed to it is valid or not
+ * @type boolean
+ */
 function validateDate(textField, start)
 {
 	var val = textField.value;
@@ -186,10 +228,21 @@ function validateDate(textField, start)
 	return false;
 }	
 	
+/**
+ *  Build a time string for a new time generated for example by a click on the middle of an image where
+ *  the X axis is time. tIn is a second-based numerical time like 291737638.7858823 which is in Dan's epoch 
+ *  that starts  at 2000 01 01 12:00 0.00 which is 946728000 in unix time. (See that number being added below...)
+ *  
+ *  This function then uses the built in time functions with an epoch of 1970 01 01 00:00 0.00 to separate 
+ *  out each time element and create the string to drop back in the start or end time entry form html fields, 
+ *  for example: 20090331012753845 for 2009 Mar 31, 1:27am...
+ *  
+ * @param {float} tIn second based numerical time in Dan's year 2000 based epoch
+ * @returns date text string for entry field
+ * @type string
+ */
 function buildTimeString(tIn)
 {
-	// this is where the time gets converted from local time to GMT time.  All within the system of processing, times are GMT.
-	// it is only when the plot is returned that the x-axis displays the time as local time again.
 	//var t = Math.round(1000*tIn) + 946728000000;// - (document.getElementById('timeZoneOffset') * 60 * 60 * 1000);//+ 36000000;	
 	var t = Math.round(1000*tIn) + 946728000000 + (document.getElementById('timeZoneOffset').value * 60 * 60 * 1000);//+ 36000000;	
 	
@@ -207,6 +260,14 @@ function buildTimeString(tIn)
 	return "" + time.getUTCFullYear() + mo + da + hr + mi + sc + ms;
 }
 
+/**
+ *  Take a time string and create 
+ *  and return a new standard Javascript date object for it.
+ *
+ * @param {string} tIn time string in the format of 20090331012753845 for 2009 Mar 31, 1:27am
+ * @returns date object
+ * @type date object
+ */
 function parseTimeString(tIn)
 {
 	var t = new Date(tIn.substring(0, 4), tIn.substring(4, 6) - 1, tIn.substring(6, 8), 
@@ -214,6 +275,14 @@ function parseTimeString(tIn)
 	return t;
 }
 
+/**
+ *	Take two time strings, compare them and return the number of seconds difference between the two
+ * 
+ * @param {string} ts start time
+ * @param {string} te end time
+ * @returns seconds difference between params
+ * @type int
+ */
 function timeDiff(ts, te)
 {
 	if (ts < 0)

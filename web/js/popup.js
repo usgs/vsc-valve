@@ -1,8 +1,23 @@
-// $Id: popup.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
-
+// $Id: popup.js,v 1.1 2005/09/03 19:18:35 dcervelli Exp $
+/**	@fileoverview 
+ * contains a function for dealing with popup windows.
+ * closeups of waveform plots are popup windows. This js also adds
+ * listeners for mouse move or mouse up.
+ *
+ * @author Dan Cervelli
+ */
 var dragging = false;
 var dragged = null;
 var popupCount = 0;
+/**
+ *  Create a popup window for a waveform, for example. You can move this popup around on the 
+ *  screen.
+ *
+ *  @param {integer} px X coordinate for popup location
+ *  @param {integer} py Y coordinate for popup location
+ *  @return Returns the popup element
+ *  @type element
+ */
 function createPopup(px, py)
 {
 	var p = document.getElementById('popupTemplate').cloneNode(true);
@@ -37,7 +52,10 @@ function createPopup(px, py)
 	
 	return p;
 }
-
+/**
+	Monitors for dragging an object, and then move the target object
+	along with the mouse coordinates
+ */
 addListener(document, 'mousemove',
 		function(ev)
 		{
@@ -51,6 +69,10 @@ addListener(document, 'mousemove',
 				consume(e);
 			}
 		}, false);
+
+/**
+	If mouse is let go on a drag, clear element cursor and let it go to default value.
+ */
 		
 addListener(document, 'mouseup',
 		function(ev)

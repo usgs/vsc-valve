@@ -1,5 +1,20 @@
-// $Id: plot.js,v 1.12 2007-09-11 18:47:10 tparker Exp $
+// $Id: plot.js,v 1.12 2007/09/11 18:47:10 tparker Exp $
+/**
+ * @fileoverview responsible for waveform plots
+ *
+ * @author Dan Cervelli
+ */
 
+
+/**
+ *  This function creates a popup/ zoomed-in plot for a waveform plot.
+ *  It sets all the attributs of the popup panel.
+ *  It is called by Plot Request
+ * 
+ *  @param {text} xml text defining the plot
+ *  @param {integer} px x coordinate
+ *  @param {integer} py y coordinate
+ */
 function createPopupPlot(xml, px, py)
 {		
 	px = px * 1;
@@ -36,6 +51,18 @@ function createPopupPlot(xml, px, py)
 
 var count = 0;
 var dataCount = 0;
+/** 
+ *  This function is called by Plot Request and is responsible for 
+ *  bringing a plot pane onto the screen, based on the xml from the request.
+ *  
+ *  It sets up the div panel area, and reads the created png from the temp
+ *  area where it resides on the tomcat server. It attaches listeners to the 
+ *  menu bar icons of the created window. The translation is to translate the 
+ *  image xy web coordinates to whatever coordinates are native to the image 
+ *  being displayed.
+ *  
+ *  @param {text} xml text definining the plot
+ */
 function handlePlot(xml)
 {
 	var title = getXMLField(xml, "title");
@@ -171,6 +198,9 @@ function handlePlot(xml)
 	count++;
 }
 
+/**
+ *	Initialize some defaults for the Valve page
+ */
 var POPUP_SIZE_INDEX = 4;
 var STANDARD_SIZES = new Array(
 	new Array(300, 100, 35, 19, 260, 70, 300),
@@ -178,7 +208,16 @@ var STANDARD_SIZES = new Array(
 	new Array(1000, 250, 75, 19, 850, 188, 600),
 	new Array(1200, 350, 75, 19, 1050, 288, 800),
 	new Array(600, 200, 60, 20, 500, 160, 1200));
-	
+
+/** 
+ *  When the user requests a plot with the "Submit" button, or when the user clicks
+ *  on an existing plot to zoom in on one area, this function is called.
+ *  
+ *  Set the plot size, elements, etc. create URL to request component information via
+ *  jsp
+ *
+ *  @param {object} popup The popup object to write to
+ */
 function PlotRequest(popup)
 {
 	this.params = new Object();
@@ -199,7 +238,14 @@ function PlotRequest(popup)
 			this.params.h =	size[1];
 		}
 	}
-
+    /**
+     *  @param {string} src image source
+     *  @param {string} st Start Time
+     *  @param {string} et End Time
+     *
+     *  @return array of strings of time shortcut labels
+     *  @type associative array
+     */
 	this.createComponent = function(src, st, et)
 	{
 		var size = STANDARD_SIZES[this.sizeIndex];
@@ -284,6 +330,10 @@ function PlotRequest(popup)
 		return comp;
 	}
 
+    /**
+     *  @return url
+     *  @type string
+     */
 	this.getURL = function()
 	{
 		var url = "valve3.jsp?";

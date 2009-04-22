@@ -1,5 +1,14 @@
-// $Id: ui.js,v 1.2 2006-08-29 00:01:43 tparker Exp $
+// $Id: ui.js,v 1.2 2006/08/29 00:01:43 tparker Exp $
 
+/** @fileoverview various user interface functions 
+ * @author Dan Cervelli
+ */
+
+/**
+ *  From the main valve tool interace bar, this hides or shows the 
+ *  menu elements, but leaves the plots or maps showing. (Click minimize
+ *  or maximize icons.)
+ */
 function toggleUI()
 {
 	if (document.getElementById('uiPanel').style.display == 'none')
@@ -14,6 +23,9 @@ function toggleUI()
 	}
 }
 
+/**
+ * if the current menu exists, execute a submit. Otherwise do nothing.
+ */
 function doSubmit()
 {
 	if (currentMenu == null)
@@ -22,6 +34,13 @@ function doSubmit()
 		currentMenu.submit();
 }
 
+/** 
+ *  Deletes all plots or maps that have been drawn to the screen. This is
+ *  somewhat non-standardly accessed by clicking the X in the close *  box of
+ *  the main valve interface menu. The menu itself doesn't go away.
+ *  
+ *  This does not delete popup plots that come up when you click on a plot
+ */
 function deleteAll()
 {
 	var cip = document.getElementById('contentInsertionPoint');
@@ -29,6 +48,13 @@ function deleteAll()
 		cip.removeChild(cip.firstChild);
 }
 
+/**
+ *  Shows the administrator name and link to email address on the page as 
+ *  configured in valve3/WEB-INF/config/valve3.config
+ *  
+ *  @param {string} admin Administrator name
+ *  @param {string} adminEmail Administrator email address
+ */
 function setAdmin(admin, adminEmail)
 {
 	var a = document.getElementById('admin');
@@ -36,6 +62,13 @@ function setAdmin(admin, adminEmail)
 	a.appendChild(document.createTextNode(admin));
 }
 
+/**
+ *  Returns the index number of the item in an array which is checked.
+ *
+ *  @param {array} array an array of checkboxes or radio buttons
+ *  @returns index number of the checked item
+ *  @type int
+ */
 function getChecked(array)
 {
 	for (var i = 0; i < array.length; i++)
@@ -46,6 +79,15 @@ function getChecked(array)
 	return -1;
 }
 
+/**
+ *  return an array of the name and value of the selected items in a 
+ *  menu listing for example
+ *
+ *  @param {array} array an array of document elements
+ *  @param {string} text name where to store the parameters 
+ *  @returns joined string of name/value pairs
+ *  @type string
+ */
 function getSelected(array, text)
 {
 	var list = new Array(1);
@@ -64,6 +106,13 @@ function getSelected(array, text)
 	//return list;
 }
 
+/**
+ *	Check a form element to see if it's checked or not, and return
+ *	T or F.
+ *  @param {object} cb document object
+ *  @returns T or F, so perhaps this isn't really a true boolean
+ *  @type boolean
+ */
 function getTF(cb)
 {
 	if (cb.checked)
@@ -73,7 +122,9 @@ function getTF(cb)
 }
 
 var redLineVisible = false;
-
+/**
+ *	When you mouse-over a plot, the vertical red line is made visible
+ */
 function enableRedLine()
 {
 	if (!redLineVisible)
@@ -84,6 +135,9 @@ function enableRedLine()
 	}
 }
 
+/**
+ *	When you mouse-out of a plot, the vertical red line is hidden
+ */
 function disableRedLine()
 {
 	redLineVisible = false;
@@ -92,6 +146,11 @@ function disableRedLine()
 }
 
 // This needs to be fixed to better set the lower height. clientHeight screwed up when scrolled.
+/**
+ * Moves the vertical red line over the screen as the mouse moves.
+ *
+ * @param {event object} e event such as mouseover
+ */
 function moveRedLine(e)
 {
 	if (redLineVisible)

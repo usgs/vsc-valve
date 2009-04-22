@@ -1,7 +1,19 @@
-// $Id: xlat.js,v 1.4 2007-01-30 21:53:32 dcervelli Exp $
+// $Id: xlat.js,v 1.4 2007/01/30 21:53:32 dcervelli Exp $
+
+/** @fileoverview functions for translating x and y mouse coordinates to their corresponding
+ * values on the element which they're hovering over.
+ * @author Dan Cervelli
+ */
 
 var lastTimeClick = 0;
 
+/** 
+ * Convert a time variable (t) to a time string in the form "2009-03-27 11:45:23.003"
+ *
+ * @param {float} t year 2000 epoch based time number
+ * @returns time string in the form "2009-03-27 11:45:23.003"
+ * @type string
+ */
 function timeToString(t)
 {
 	t = (1000 * (t + 946728000));
@@ -21,6 +33,12 @@ function timeToString(t)
 	return ds;
 }
 
+/**
+ *  Takes an event and the mouse position, and translates the positions to the relevant
+ *  values in the image or plot. For example: x/y becomes time/counts.
+ * 
+ * @param {object} event event object such as mouseover
+ */
 function translate_ty(event)
 {
 	var ev = getEvent(event);
@@ -30,6 +48,20 @@ function translate_ty(event)
 	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
 }
 
+/**
+ *  Get event and target element x/y coordinates. For example mouse coordinates
+ *  and png image coordinates which mouse is rolling over. Ty can mean latitude
+ *  but doesn't necessarily in this case.
+ *  
+ *  Returns an array with two numeral based on the 'translation' property of the 
+ *  target, as well as a time string. The numerals are related to x/y. In this case
+ *  these are translated to the vertical counts scale, and the time is converted to 
+ *  where you are on the timeline, left/right. This updates continuously.
+ *
+ *  @param {object} event event object such as mouseover
+ *  @returns an array with x, y and time and calculated Y
+ *  @type array
+ */
 function getTranslation_ty(event)
 {
 	var ev = getEvent(event);
@@ -51,6 +83,12 @@ function getTranslation_ty(event)
 	return result;
 }
 
+/**
+ *  Get the event, get the mouse coordinates, get the translation coordinates for
+ *  the target, latitude or time or whatever they may be.
+ *
+ *  @param {object} event event object such as mouseover
+ */
 function translate_xy(event)
 {
 	var ev = getEvent(event);
@@ -61,6 +99,12 @@ function translate_xy(event)
 	currentMenu.acceptXYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
 }
 
+/**
+ *  Get the translation that's appropriate for a particular event, and pair it
+ *  with the non-translated X Y with any decimal places dropped off.
+ *
+ *  @param {object} event event object such as mouseover
+ */
 function getTranslation_xy(event)
 {
 	var gxy = getTranslation_ty(event);
@@ -70,6 +114,12 @@ function getTranslation_xy(event)
 	return gxy;
 }
 
+/**
+ *  Get the heli translation for the XY values, pair these with mouse XY values.
+ *  Accept TY means that clicks can change the start and end times.
+ *
+ *  @param {object} event event object such as mouseover
+ */
 function translate_heli(event)
 {
 	var gxy = getTranslation_heli(event);
@@ -80,6 +130,14 @@ function translate_heli(event)
 	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
 }	
 
+/**
+ *  Finds out where you are on a helicorder to return accurate times, and accurate 
+ *  vertical value for each row.
+ *
+ *  @param {object} event event object such as mouseover
+ *  @returns an array with x, y and time
+ *  @type array 
+ */
 function getTranslation_heli(event)
 {
 	var ev = getEvent(event);
@@ -112,6 +170,20 @@ function getTranslation_heli(event)
 	return result;
 }
 
+/**
+ *  Get event and target element x/y coordinates. For example mouse coordinates
+ *  and png image coordinates which mouse is rolling over.
+ *  
+ *  Returns an array with two numeral based on the 'translation' property of the 
+ *  target, as well as a time string. The numerals are latitude and longitude 
+ *  translations for the map image.
+ *  
+ *  The numerals returned are then fed along with the mouse coordinates to 
+ *  the function parameter "func" *  
+ *
+ *  @param {object} event event object such as mouseover
+ *  @param {function} func function to apply
+ */
 function translate_map(event, func)
 {
 	var ev = getEvent(event);
@@ -124,6 +196,18 @@ function translate_map(event, func)
 	else if (currentMenu)
 		currentMenu.acceptMapClick(target, mxy.x, mxy.y, ll[0], ll[1]);
 }
+
+/**
+ *  Get event and target element x/y coordinates. For example mouse coordinates
+ *  and png image coordinates which mouse is rolling over.
+ *  
+ *  Returns an array with two numeral based on the 'translation' property of the 
+ *  target, as well as a time string. The numerals can be latitude and longitude 
+ *  translations for the map image.
+ *  
+ *
+ *  @param {object} event event object such as mouseover
+ */
 
 function getTranslation_map(event)
 {
@@ -138,7 +222,7 @@ function getTranslation_map(event)
 	sy = target.height - sy;
 	gx = sx * t[0] + t[1] * 1;
 	gy = sy * t[2] + t[3] * 1;
-	/*
+	/**
 	var ox = (t[4] * 1 + t[5] * 1) / 2;
 	var oy = (t[6] * 1 + t[7] * 1) / 2;
 	*/
@@ -153,12 +237,34 @@ function getTranslation_map(event)
 	ll[2] = ll[0] + ", " + ll[1];
 	return ll;	
 }
-
+/** 
+ *  Function to efficiently do nothing.
+ *
+ *  @param {object} event event object such as mouseover
+ */
 function translate_none(event)
 {}
+
+/** 
+ *  Function to efficiently do nothing.
+ *
+ *  @param {object} event event object such as mouseover
+ */
 function getTranslation_none(event)
 {}
 
+/**
+ *  This function takes latitude and longitude and returns the calculated Mercator x y.
+ *  
+ *  The Universal Transverse Mercator (UTM) coordinate system is a grid-based method of specifying locations on the surface of the Earth. It is used to identify locations on the earth, but differs from the traditional method of latitude and longitude.
+ *
+ *  @param {float} ox Mercator x
+ *  @param {float} oy Mercator y
+ *  @param {float} lon longitude
+ *  @param {float} lat latitude
+ *  @returns an array with x, y
+ *  @type array 	
+ */
 function forwardTransverseMercator(ox, oy, lon, lat)
 {
 	var a=6378137;
@@ -189,7 +295,18 @@ function forwardTransverseMercator(ox, oy, lon, lat)
     var y = scale*(M - MO + N*Math.tan(phi)*(A*A/2+(5-T+9*C+4*C*C)*A*A*A*A/24+(61-58*T+T*T+600*C-330*epsq)*A*A*A*A*A*A/720));
 	return new Array(x, y);
 }
-
+/**
+ *  Take Mercator coordinates, and return latitude (lambda) and longitude (phi)
+ *  
+ *  The Universal Transverse Mercator (UTM) coordinate system is a grid-based method of specifying locations on the surface of the Earth. It is used to identify locations on the earth, but differs from the traditional method of latitude and longitude.
+ *  
+ *  @param {float} ox Mercator x
+ *  @param {float} oy Mercator y
+ *  @param {float} lon longitude
+ *  @param {float} lat latitude
+ *  @returns an array with latitude and longitude
+ *  @type array 	
+*/
 function inverseTransverseMercator(ox, oy, x, y)
 {
 	var N1,T1,C1,R1,D,M,MO,phi1,mu,phi,lambda;
