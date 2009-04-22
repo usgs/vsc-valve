@@ -1,5 +1,21 @@
 // $Id: gpsmenu.js,v 1.2 2005-09-06 20:19:31 dcervelli Exp $
+/** @fileoverview  
+ * 
+ * function menu for gpsmenu.html 
+ *
+ * @author Dan Cervelli
+ */
 
+/**
+ *  Called for gpsmenu.html, allows access to form elements via menu object
+ *  Sets up time shortcut values for popup.
+ *  
+ *  Some checking is done in the menu here to disallow invalid choices.
+ *  
+ *  Add some listeners for the Set Baseline and Clear buttons.
+ *  
+ *  @param {menu object} menu 
+ */
 create_gpsmenu = function(menu)
 {
 	menu.allowChannelMap = true;

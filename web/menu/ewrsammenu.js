@@ -1,5 +1,17 @@
-// $Id: ewrsammenu.js,v 1.2 2007-06-06 22:49:14 tparker Exp $
+// $Id: ewrsammenu.js,v 1.2 2007/06/06 22:49:14 tparker Exp $
+/** @fileoverview  
+ * 
+ * function menu for ewrsammenu.html 
+ *
+ * @author Dan Cervelli
+ */
 
+/**
+ *  Called for ewrsammenu.html, allows access to form elements via menu object for RSAM data sources.
+ *	Sets up time shortcut values for popup. 
+ *
+ *  @param {menu object} menu 
+ */
 create_ewrsammenu = function(menu)
 {
 	menu.allowChannelMap = true;
@@ -7,7 +19,6 @@ create_ewrsammenu = function(menu)
 	menu.boxName = "ewrsamBox";
 	menu.selector = "selector:ch";
 	menu.timeShortcuts = new Array("-1m", "-6m", "-1y", "-2y", "-4y");
-	
 	// make this work
 	menu.initialize = function()
 	{

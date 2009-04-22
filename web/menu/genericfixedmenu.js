@@ -1,3 +1,20 @@
+// $Id: genericmenu.js,v 1.1 2005/10/20 05:08:40 dcervelli Exp $
+/** @fileoverview  
+ * 
+ * function menu for genericfixedmenu.html 
+ *
+ * @author Dan Cervelli
+ */
+
+/**
+ *  Called for genericfixedmenu.html, allows access to form elements via menu object
+ *  Sets up time shortcut values for popup.
+ *  
+ *  Also, this tries to create and display a menu defined by an XML file for this
+ *  generic data source.
+ *  
+ *  @param {menu object} menu 
+ */
 create_genericfixedmenu = function(menu) {
 	menu.allowChannelMap	= true;
 	menu.formName			= "genericForm";

@@ -1,5 +1,24 @@
 // $Id: wavemenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
-
+/** @fileoverview  
+ * 
+ * function menu for wavemenu.html 
+ *
+ * @author Dan Cervelli
+ */
+/**
+  *  Called for wavemenu.html which deals with Waveforms data type,  it allows access 
+  *  to form elements via menu object. *  Sets up time shortcut values for popup.
+  *  
+  *  This also listens for clicks to generate pop-up or "inset" plot requests 
+  *  initiated by the user clicking on a waveform png.
+  *  
+  *  Accepting TY click allows first click to set start time and 2nd click to set end time 
+  *  if Click Action is set to "Set Time" rather than "Popup". Otherwise a popup will be 
+  *  shown for the duration shown in the drop-down men, default is 2 minutes.
+  *  This makes an AJAX request for the necessary data.
+  *
+  *  @param {menu object} menu 
+  */
 create_wavemenu = function(menu)
 {
 	menu.allowChannelMap = true;

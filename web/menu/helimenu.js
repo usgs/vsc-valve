@@ -1,5 +1,23 @@
 // $Id: helimenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+/** @fileoverview  
+ * 
+ * function menu for helimenu.html 
+ *
+ * @author Dan Cervelli
+ */
 
+/**
+ *  Allows access to form elements via menu object
+ *  Sets up time shortcut values for popup.
+ *  
+ *  This creates the menu that allows you to generate helicorder images, which show 
+ *  waveforms half hour per line, all lined up.
+ *  
+ *  The size of the helicorder changes based on how much time is selected, as calculated
+ *  below. The web browser may not be able to display all the time chose for 1 week, say.
+ *  
+ *  @param {menu object} menu 
+ */
 create_helimenu = function(menu)
 {
 	menu.allowChannelMap = true;

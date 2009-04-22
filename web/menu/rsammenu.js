@@ -1,5 +1,16 @@
 // $Id: rsammenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
-
+/** @fileoverview  
+ * 
+ * function menu for rsammenu.html 
+ *
+ * @author Dan Cervelli
+ */
+/**
+  *  Called for rsammenu.html, RSAM data source, allows access to form elements via menu object
+  *  Sets up time shortcut values for popup.
+  *
+  *  @param {menu object} menu 
+  */
 create_rsammenu = function(menu)
 {
 	menu.allowChannelMap = true;

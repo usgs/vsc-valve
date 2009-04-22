@@ -1,5 +1,18 @@
-// $Id: ratsammenu.js,v 1.1 2007-09-11 18:46:00 tparker Exp $
+// $Id: ratsammenu.js,v 1.1 2007/09/11 18:46:00 tparker Exp $
+/** @fileoverview  
+ * 
+ * function menu for ratsammenu.html 
+ *
+ * @author Dan Cervelli
+ */
 
+/**
+  *  Called for ratsammenu.html, RATSAM allows access to form elements via menu object
+  *  Sets up time shortcut values for popup.  
+  *  Populates the channels menu.
+  *
+  *  @param {menu object} menu 
+  */
 create_ratsammenu = function(menu)
 {
 	menu.allowChannelMap = true;

@@ -1,9 +1,28 @@
-// $Id: catalogmenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
-
+// $Id: catalogmenu.js,v 1.1 2005/09/03 19:18:35 dcervelli Exp $
 /*
  * Design note: can't use 'this' in functions passed to addListener.
  */
+/** @fileoverview  
+ * 
+ * function menu for catalogmenu.html 
+ *
+ * @author Dan Cervelli
+ */
 
+
+/**
+  *  Called for catalogmenu.html, allows access to form elements via menu object.
+  *  Sets up time shortcut values for popup.
+  *  
+  *  Initilizes entry for Area of Interest NWES/ Depth Range min max/ Magnitude Filter min max/
+  *  Output Type map view counts/ Options map view axes color counts, etc.
+  *  
+  *  Set up acceptMapClick to get latitude/longitude translations from web coordinates
+  *  
+  *  Filter by areas of interest.
+  *  
+  *  @param {menu object} menu 
+ */
 create_catalogmenu = function(menu)
 {
 	menu.formName = "catalogForm";

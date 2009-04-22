@@ -1,3 +1,16 @@
+/** @fileoverview  
+ * 
+ * function menu for titlemenu.html 
+ *
+ * @author Dan Cervelli
+ */
+
+/**
+  *  Called for tiltmenu.html, allows access to form elements via menu object
+  *  Sets up time shortcut values for popup.  *  
+  *
+  *  @param {menu object} menu 
+  */
 create_tiltmenu = function(menu)
 {
 	menu.allowChannelMap = true;
