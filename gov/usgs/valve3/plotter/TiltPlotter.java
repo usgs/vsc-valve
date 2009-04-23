@@ -362,28 +362,28 @@ public class TiltPlotter extends Plotter {
 						rightData	= data.getHoleTempData().getData();
 						label		= "Temperature (" + DEGREES + "C)";
 						unit		= "degrees c";
-						legends.add(stations.get(key).getCode() + " Hole Temperature");
+						legends.add(stations.get(key).getCode() + " Hole Temp");
 						break;
 					case BOXTEMPERATURE:
 						data.getBoxTempData().adjustTime(TZOffset);
 						rightData	= data.getBoxTempData().getData();
 						label		= "Temperature (" + DEGREES + "C)";
 						unit		= "degrees c";
-						legends.add(stations.get(key).getCode() + " Box Temperature");
+						legends.add(stations.get(key).getCode() + " Box Temp");
 						break;
 					case INSTVOLTAGE:
 						data.getInstVoltData().adjustTime(TZOffset);
 						rightData	= data.getInstVoltData().getData();
 						label		= "Voltage (V)";
 						unit		= "volts";
-						legends.add(stations.get(key).getCode() + " Instrument Voltage");
+						legends.add(stations.get(key).getCode() + " Inst Volt");
 						break;
 					case GNDVOLTAGE:
 						data.getGndVoltData().adjustTime(TZOffset);
 						rightData	= data.getGndVoltData().getData();
 						label		= "Voltage (V)";
 						unit		= "volts";
-						legends.add(stations.get(key).getCode() + " Ground Voltage");
+						legends.add(stations.get(key).getCode() + " Gnd Volt");
 						break;
 					case RAINFALL:
 						data.getRainfallData().adjustTime(TZOffset);		
