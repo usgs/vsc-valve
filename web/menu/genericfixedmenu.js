@@ -30,23 +30,70 @@ create_genericfixedmenu = function(menu) {
 				var xml = req.responseXML;				
 				var ip = document.getElementById(menu.id + "_insertionPoint");
 				var cols = xml.getElementsByTagName("column");
+				
+				var colDiv = document.createElement('div');
+				var detDiv = document.createElement('div');
+				var norDiv = document.createElement('div');
+				colDiv.className = 'm4';
+				detDiv.className = 'fr m4';
+				norDiv.className = 'fr m4';
+				
+				var p = document.createElement('p');
+				var l = document.createTextNode('Name');
+				p.appendChild(l);
+				colDiv.appendChild(p);
+				
+				var p = document.createElement('p');
+				var l = document.createTextNode('Detrend');
+				p.appendChild(l);
+				detDiv.appendChild(p);
+				
+				var p = document.createElement('p');
+				var l = document.createTextNode('Normalize');
+				p.appendChild(l);
+				norDiv.appendChild(p);
+				
 				for (var i = 0; i < cols.length; i++) {
-					var p = document.createElement('p');					
-					var col = cols[i].firstChild.data.split(":");
-					var label = " " + col[2] + " (" + col[3] + ")";
-					var cb = document.createElement('input');
-					cb.type = 'checkbox';
-					cb.id = menu.id + "_" + col[1];
-					if (col[4] == "T") {
-						cb.checked = "checked";
-					}
-					cb.name = col[1];
-					p.appendChild(cb);
-					var tn = document.createTextNode(label);
-					p.appendChild(tn);
 					
-					ip.appendChild(p);
+					// build the column checkbox
+					var p		= document.createElement('p');					
+					var col		= cols[i].firstChild.data.split(":");
+					var label	= " " + col[2] + " (" + col[3] + ")";
+					var el		= document.createElement('input');
+					el.type		= 'checkbox';
+					el.id		= menu.id + "_" + col[1];
+					if (col[4] == "T") { el.checked = "checked"; }
+					el.name		= col[1];
+					p.appendChild(el);
+					var tn		= document.createTextNode(label);
+					p.appendChild(tn);
+					colDiv.appendChild(p);
+					
+					// build the detrend checkbox
+					var p		= document.createElement('p');
+					p.className	= 'center';
+					var el		= document.createElement('input');
+					el.type		= 'checkbox';
+					el.id		= menu.id + "_d_" + col[1];
+					el.name		= "d_" + col[1];
+					p.appendChild(el);
+					detDiv.appendChild(p);
+					
+					// build the normalize checkbox
+					var p		= document.createElement('p');
+					p.className	= 'center';
+					var el		= document.createElement('input');
+					el.type		= 'checkbox';
+					el.id		= menu.id + "_n_" + col[1];
+					el.name		= "n_" + col[1];
+					el.checked	= "checked";
+					p.appendChild(el);
+					norDiv.appendChild(p);
 				}
+				
+				ip.appendChild(detDiv);
+				ip.appendChild(norDiv);
+				ip.appendChild(colDiv);
 			});
 	}
 }
