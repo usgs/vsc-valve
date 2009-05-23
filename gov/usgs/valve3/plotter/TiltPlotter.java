@@ -102,7 +102,7 @@ public class TiltPlotter extends Plotter {
 	}
 	
 	private enum RightAxis {
-		NONE, HOLETEMPERATURE, BOXTEMPERATURE, INSTVOLTAGE, GNDVOLTAGE, RAINFALL;
+		NONE, HOLETEMPERATURE, BOXTEMPERATURE, INSTVOLTAGE, RAINFALL;
 		
 		public static RightAxis fromString(String s) {
 			if (s.equals("r_h"))
@@ -111,8 +111,6 @@ public class TiltPlotter extends Plotter {
 				return BOXTEMPERATURE;
 			else if (s.equals("r_i"))
 				return INSTVOLTAGE;
-			else if (s.equals("r_g"))
-				return GNDVOLTAGE;
 			else if (s.equals("r_r"))
 				return RAINFALL;
 			else
@@ -376,14 +374,7 @@ public class TiltPlotter extends Plotter {
 						rightData	= data.getInstVoltData().getData();
 						label		= "Voltage (V)";
 						unit		= "volts";
-						legends.add(stations.get(key).getCode() + " Inst Volt");
-						break;
-					case GNDVOLTAGE:
-						data.getGndVoltData().adjustTime(TZOffset);
-						rightData	= data.getGndVoltData().getData();
-						label		= "Voltage (V)";
-						unit		= "volts";
-						legends.add(stations.get(key).getCode() + " Gnd Volt");
+						legends.add(stations.get(key).getCode() + " Batt Volt");
 						break;
 					case RAINFALL:
 						data.getRainfallData().adjustTime(TZOffset);		
@@ -399,12 +390,12 @@ public class TiltPlotter extends Plotter {
 				min = dm.min(1);
 				max = dm.max(1);
 				if (component.isAutoScale("ysR")) {
-					yMin = min;
-					yMax = max;
-					if (max - min < 0.2) {
-						yMax += 0.1;
-						yMin -= 0.1;
-					}
+					yMin = min - 0.05;
+					yMax = max + 0.05;
+					//if (max - min < 0.2) {
+						//yMax += 0.1;
+						//yMin -= 0.1;
+					//}
 				} else {
 					double[] ys = component.getYScale("ysR", min, max);
 					yMin = ys[0];
