@@ -43,6 +43,10 @@ public class GenericFixedPlotter extends Plotter
 	private List<GenericColumn> leftColumns;
 	private String rightUnit;
 	private List<GenericColumn> rightColumns;
+	
+	private int columnsCount;
+	private boolean detrendCols[];
+	private boolean normalzCols[];
 
 	/**
 	 * Default constructor
@@ -72,6 +76,12 @@ public class GenericFixedPlotter extends Plotter
 		data.adjustTime(Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
 		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
 		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		
+		// the data matrix indexes are one more than these column arrays, because the first column has the timestamp
+		for (int i = 0; i < columnsCount; i++) {
+			if (detrendCols[i]) { data.detrend(i + 1); }
+			if (normalzCols[i]) { data.add(i + 1, -data.mean(i + 1)); }
+		}
 	}
 
 	/**
@@ -91,30 +101,33 @@ public class GenericFixedPlotter extends Plotter
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
-		for (String c : menu.columns)
-		{
+		columnsCount	= menu.columns.size();
+		detrendCols		= new boolean [menu.columns.size()];
+		normalzCols		= new boolean [menu.columns.size()];
+		int i = 0;
+		
+		for (String c : menu.columns) {
 			GenericColumn col = new GenericColumn(c);
 			boolean display = Util.stringToBoolean(component.get(col.name));
-			if (display)
-			{
-				if (leftUnit != null && leftUnit.equals(col.unit))
+			detrendCols[i]	= Util.stringToBoolean(component.get("d_" + col.name));
+			normalzCols[i]	= Util.stringToBoolean(component.get("n_" + col.name));
+			i++;
+			if (display) {
+				if (leftUnit != null && leftUnit.equals(col.unit)) {
 					leftColumns.add(col);
-				else if (rightUnit != null && rightUnit.equals(col.unit))
+				} else if (rightUnit != null && rightUnit.equals(col.unit)) {
 					rightColumns.add(col);
-				else if (leftUnit == null)
-				{
+				} else if (leftUnit == null) {
 					leftUnit = col.unit;
 					leftColumns = new ArrayList<GenericColumn>();
 					leftColumns.add(col);
-				}
-				else if (rightUnit == null)
-				{
+				} else if (rightUnit == null) {
 					rightUnit = col.unit;
 					rightColumns = new ArrayList<GenericColumn>();
 					rightColumns.add(col);
-				}
-				else
+				} else {
 					throw new Valve3Exception("Too many different units.");
+				}
 			}
 		}
 		
@@ -148,7 +161,7 @@ public class GenericFixedPlotter extends Plotter
 	 * @throws Valve3Exception
 	 */
 	private MatrixRenderer getLeftMatrixRenderer() throws Valve3Exception
-	{
+	{		
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
