@@ -40,17 +40,9 @@ import java.util.Map;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
- * Generate tilt images 
- * from raw data got from vdx source
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2005/09/24 17:57:22  dcervelli
- * Working on implementing various tilt features.
+ * Generate tilt images from raw data got from vdx source
  *
- * Revision 1.1  2005/09/06 20:10:24  dcervelli
- * Initial commit.
- *
- * @author Dan Cervelli
+ * @author Dan Cervelli, Loren Antolik
  */
 public class TiltPlotter extends Plotter {
 	
