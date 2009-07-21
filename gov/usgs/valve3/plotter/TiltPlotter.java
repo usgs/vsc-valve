@@ -269,7 +269,7 @@ public class TiltPlotter extends Plotter {
 			if (detrendRadial)		{ dm.detrend(3); }
 			if (detrendTangential)	{ dm.detrend(4); }
 			
-			
+			// set the visibility on the lines the user selected
 			MatrixRenderer mr = new MatrixRenderer(dm.getData());
 			mr.setVisible(0, showEast);
 			mr.setVisible(1, showNorth);
@@ -277,6 +277,14 @@ public class TiltPlotter extends Plotter {
 			mr.setVisible(3, showTangential);
 			mr.setVisible(4, showMagnitude);
 			mr.setVisible(5, showAzimuth);
+			
+			// build a list for the legend
+			legends.add(stations.get(key).getCode() + " East");
+			legends.add(stations.get(key).getCode() + " North");
+			legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 90.0) % 360.0));
+			legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 180.0) % 360.0));
+			legends.add(stations.get(key).getCode() + " Magnitude");
+			legends.add(stations.get(key).getCode() + " Azimuth");
 			
 			double min	= 0.0;
 			double max	= 0.0;
@@ -287,32 +295,26 @@ public class TiltPlotter extends Plotter {
 			if (showEast) {
 				min = Math.min(dm.min(1), min);
 				max = Math.max(dm.max(1), max);
-				legends.add(stations.get(key).getCode() + " East");
 			}
 			if (showNorth) {
 				min = Math.min(dm.min(2), min);
 				max = Math.max(dm.max(2), max);
-				legends.add(stations.get(key).getCode() + " North");
 			}
 			if (showRadial) {
 				min = Math.min(dm.min(3), min);
 				max = Math.max(dm.max(3), max);
-				legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 90.0) % 360.0));
 			}
 			if (showTangential) {
 				min = Math.min(dm.min(4), min);
 				max = Math.max(dm.max(4), max);
-				legends.add(stations.get(key).getCode() + " " + ((azimuthValue + 180.0) % 360.0));
 			}
 			if (showMagnitude) {
 				min = Math.min(dm.min(5), min);
 				max = Math.max(dm.max(5), max);
-				legends.add(stations.get(key).getCode() + " Magnitude");
 			}
 			if (showAzimuth) {
 				min = Math.min(dm.min(6), min);
 				max = Math.max(dm.max(6), max);
-				legends.add(stations.get(key).getCode() + " Azimuth");
 			}
 			
 			if (!component.isAutoScale("ysL")) {
