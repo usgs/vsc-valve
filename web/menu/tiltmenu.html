@@ -8,38 +8,7 @@
 		</select></p>
 	</div>
 	
-	<div class="w180 fl">
-	<div class="box">
-		<h1>Left Axis Options</h1>
-		<div class="fr">
-			<p><b>Detrend</b></p>
-			<p><input type="checkbox" id="d_e" name="d_e"></p>
-			<p><input type="checkbox" id="d_n" name="d_n"></p>
-			<p><input type="checkbox" id="d_r" name="d_r"></p>
-			<p><input type="checkbox" id="d_t" name="d_t"></p>
-		</div>
-		<div>
-			<p><b>Components</b></p>
-			<p><input type="checkbox" id="l_e" name="l_e"> <label for="l_e">East</label></p>
-			<p><input type="checkbox" id="l_n" name="l_n"> <label for="l_n">North</label></p>
-			<p><input type="checkbox" id="l_r" name="l_r" checked="checked"> <label for="l_r">Radial</label></p>
-			<p><input type="checkbox" id="l_t" name="l_t" checked="checked"> <label for="l_t">Tangential</label></p>
-			<p><input type="checkbox" id="l_m" name="l_m"> <label for="l_m">Magnitude</label></p>
-			<p><input type="checkbox" id="l_a" name="l_a"> <label for="l_a">Azimuth</label></p>
-		</div>
-		<hr>
-		<p><b>Radial Options</b></p>
-		<p><input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n">Nominal</label></p>
-		<p><input type="radio" value="o" name="az" id="az_o"> <label for="az_o">Optimal</label></p>
-		<p><input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth:</label>
-		<input type="text" size="4" name="azval" id="azval"></p>
-		<hr>
-		<p><b>Scale Options</b></p>
-		<p>Min: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> Max: <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
-	</div>
-	</div>
-	
-	<div class="w180 fl">
+	<div class="w200 fr">
 		<div class="box">
 			<h1>Right Axis Options</h1>
 			<p><b>Time Series Options</b></p>
@@ -57,6 +26,39 @@
 			<p><b>Time Series Options</b></p>
 			<p><input type="radio" name="type" value="ts" id="ts" checked="checked"> <label for="ts">Time Series</label></p>
 			<p><input type="radio" name="type" value="tv" id="tv"> <label for="tv">Tilt Vectors</label></p>
+		</div>
+	</div>
+	
+	<div class="w200 fr">
+		<div class="box">
+			<h1>Left Axis Options</h1>
+			<div class="fr">
+				<p><b>Detrend</b></p>
+				<p><input type="checkbox" id="d_e" name="d_e" class="center"></p>
+				<p><input type="checkbox" id="d_n" name="d_n" class="center"></p>
+				<p><input type="checkbox" id="d_r" name="d_r" class="center"></p>
+				<p><input type="checkbox" id="d_t" name="d_t" class="center"></p>
+			</div>
+			<div>
+				<p><b>Components</b></p>
+				<p><input type="checkbox" id="l_e" name="l_e"> <label for="l_e">East</label></p>
+				<p><input type="checkbox" id="l_n" name="l_n"> <label for="l_n">North</label></p>
+				<p><input type="checkbox" id="l_r" name="l_r" checked="checked"> <label for="l_r">Radial</label></p>
+				<p><input type="checkbox" id="l_t" name="l_t" checked="checked"> <label for="l_t">Tangential</label></p>
+				<p><input type="checkbox" id="l_m" name="l_m"> <label for="l_m">Magnitude</label></p>
+				<p><input type="checkbox" id="l_a" name="l_a"> <label for="l_a">Azimuth</label></p>
+			</div>
+			<hr>
+			<p><b>Radial Options</b></p>
+			<p>
+				<input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n">Nominal</label>
+				<input type="radio" value="o" name="az" id="az_o"> <label for="az_o">Optimal</label>
+			</p>
+			<p><input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth:</label>
+			<input type="text" size="4" name="azval" id="azval"></p>
+			<hr>
+			<p><b>Scale Options</b></p>
+			<p>Min: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> Max: <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
 		</div>
 	</div>
 	
