@@ -47,6 +47,7 @@ public class GenericFixedPlotter extends Plotter
 	private int columnsCount;
 	private boolean detrendCols[];
 	private boolean normalzCols[];
+	private String legendsCols[];
 
 	/**
 	 * Default constructor
@@ -102,16 +103,16 @@ public class GenericFixedPlotter extends Plotter
 			throw new Valve3Exception("Illegal start time.");
 		
 		columnsCount	= menu.columns.size();
-		detrendCols		= new boolean [menu.columns.size()];
-		normalzCols		= new boolean [menu.columns.size()];
-		int i = 0;
+		detrendCols		= new boolean [columnsCount];
+		normalzCols		= new boolean [columnsCount];
+		legendsCols		= new String  [columnsCount];
 		
 		for (String c : menu.columns) {
 			GenericColumn col = new GenericColumn(c);
 			boolean display = Util.stringToBoolean(component.get(col.name));
-			detrendCols[i]	= Util.stringToBoolean(component.get("d_" + col.name));
-			normalzCols[i]	= Util.stringToBoolean(component.get("n_" + col.name));
-			i++;
+			detrendCols[col.index - 1]	= Util.stringToBoolean(component.get("d_" + col.name));
+			normalzCols[col.index - 1]	= Util.stringToBoolean(component.get("n_" + col.name));
+			legendsCols[col.index - 1]	= col.description;
 			if (display) {
 				if (leftUnit != null && leftUnit.equals(col.unit)) {
 					leftColumns.add(col);
@@ -154,6 +155,76 @@ public class GenericFixedPlotter extends Plotter
 				rightColumns = tempColumns;
 			}
 		}
+	}
+	
+	/**
+	 * Initialize MatrixRenderer for both plot axis
+	 * 
+	 * @throws Valve3Exception
+	 */
+	private MatrixRenderer getMatrixRenderer() throws Valve3Exception {
+		
+		MatrixRenderer mr = new MatrixRenderer(data.getData());
+		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		
+		double max = -1E300;
+		double min = 1E300;
+		boolean allowExpand = true;
+			
+		mr.setAllVisible(false);
+		
+		// left axis calcs
+		for (GenericColumn col : leftColumns) {
+			mr.setVisible(col.index - 1, true);
+			if (component.isAutoScale("ysL")) {
+				max = Math.max(max, data.max(col.index));
+				min = Math.min(min, data.min(col.index));
+			} else {
+				double[] ys = component.getYScale("ysL", min, max);
+				min = ys[0];
+				max = ys[1];
+				allowExpand = false;
+				if (Double.isNaN(min) || Double.isNaN(max) || min > max)
+					throw new Valve3Exception("Illegal axis values.");
+			}
+		}
+		
+		mr.setExtents(startTime, endTime, min, max);	
+		mr.createDefaultAxis(8, 8, false, allowExpand);
+		mr.setXAxisToTime(8);
+		
+		// right axis calcs
+		if (rightUnit != null) {
+			
+			for (GenericColumn col : rightColumns) {
+				mr.setVisible(col.index - 1, true);
+				if (component.isAutoScale("ysR")) {
+					max = Math.max(max, data.max(col.index));
+					min = Math.min(min, data.min(col.index));
+				} else {
+					double[] ys = component.getYScale("ysR", min, max);
+					min = ys[0];
+					max = ys[1];
+					allowExpand = false;
+					if (Double.isNaN(min) || Double.isNaN(max) || min > max)
+						throw new Valve3Exception("Illegal axis values.");
+				}
+			}
+		
+			AxisRenderer ar = new AxisRenderer(mr);
+			ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, allowExpand), null);
+			mr.setAxis(ar);
+			mr.getAxis().setRightLabelAsText(rightColumns.get(0).description + " (" + rightUnit + ")");
+		}
+
+		mr.createDefaultLineRenderers();
+		
+		mr.createDefaultLegendRenderer(legendsCols);
+		
+		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description + " (" + leftUnit + ")");
+		mr.getAxis().setBottomLabelAsText("Time");
+		
+		return mr;
 	}
 
 	/**
@@ -209,8 +280,10 @@ public class GenericFixedPlotter extends Plotter
 		
 		MatrixRenderer mr = new MatrixRenderer(data.getData());
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		
 		double max = -1E300;
 		double min = 1E300;
+		boolean allowExpand = true;
 		
 		mr.setAllVisible(false);
 		for (GenericColumn col : rightColumns)
@@ -226,13 +299,14 @@ public class GenericFixedPlotter extends Plotter
 				double[] ys = component.getYScale("ysR", min, max);
 				min = ys[0];
 				max = ys[1];
+				allowExpand = false;
 				if (Double.isNaN(min) || Double.isNaN(max) || min > max)
 					throw new Valve3Exception("Illegal axis values.");
 			}
 		}	
 		mr.setExtents(startTime, endTime, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, allowExpand), null);
 		mr.setAxis(ar);
 		mr.createDefaultLineRenderers(1);
 		ShapeRenderer[] r = mr.getLineRenderers();
@@ -244,19 +318,21 @@ public class GenericFixedPlotter extends Plotter
 	}
 
 	/**
-	 * Initialize MatrixRenderers for left and right axis,
-	 * adds them to plot
+	 * Initialize MatrixRenderers for left and right axis, adds them to plot
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception
-	{
-		MatrixRenderer leftMR = getLeftMatrixRenderer();
-		MatrixRenderer rightMR = getRightMatrixRenderer();
-		v3Plot.getPlot().addRenderer(leftMR);
-		if (rightMR != null)
-			v3Plot.getPlot().addRenderer(rightMR);
+	public void plotData() throws Valve3Exception {
+		// MatrixRenderer leftMR = getLeftMatrixRenderer();
+		// MatrixRenderer rightMR = getRightMatrixRenderer();
+		// v3Plot.getPlot().addRenderer(leftMR);
+		// if (rightMR != null)
+		// v3Plot.getPlot().addRenderer(rightMR);
 		
-		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+		MatrixRenderer mr = getMatrixRenderer();
+		v3Plot.getPlot().addRenderer(mr);
+		
+		// component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 	}
 	
