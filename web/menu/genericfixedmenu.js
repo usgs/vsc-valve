@@ -86,7 +86,7 @@ create_genericfixedmenu = function(menu) {
 					el.type		= 'checkbox';
 					el.id		= menu.id + "_n_" + col[1];
 					el.name		= "n_" + col[1];
-					el.checked	= "checked";
+					// el.checked	= "checked";
 					p.appendChild(el);
 					norDiv.appendChild(p);
 				}
