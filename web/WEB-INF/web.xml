@@ -26,7 +26,7 @@ Initial commit.
     
     <welcome-file-list>
         <welcome-file>
-            valve3.html
+            index.jsp
         </welcome-file>
     </welcome-file-list>
     
