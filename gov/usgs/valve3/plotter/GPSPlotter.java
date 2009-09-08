@@ -108,7 +108,7 @@ public class GPSPlotter extends Plotter
 	private String benchmarkIDs;
 	private String baselineID;
 	private GPSData baselineData;
-	private String solutionTypeID;
+	// private String solutionTypeID;
 	private Map<String, GPSData> stationDataMap;
 
 	/**
@@ -138,9 +138,9 @@ public class GPSPlotter extends Plotter
 		if (baselineID.equals("[none]"))
 			baselineID = null;
 		
-		solutionTypeID = component.get("stid");
-		if (solutionTypeID == null)
-			throw new Valve3Exception("Illegal solution type.");		
+		// solutionTypeID = component.get("stid");
+		// if (solutionTypeID == null)
+			// throw new Valve3Exception("Illegal solution type.");		
 		
 		plotType = PlotType.fromString(component.get("type"));
 		if (plotType == null)
@@ -163,7 +163,7 @@ public class GPSPlotter extends Plotter
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		params.put("stid", solutionTypeID);
+		params.put("stid", plotterConfig.getString("solutionType"));
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		boolean gotData = false;
