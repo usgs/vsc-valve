@@ -1,0 +1,415 @@
+body
+{
+	padding: 0px;
+	margin: 0px;
+	margin-top: 5px;
+	background-color: #efecda;
+	font-family: tahoma;
+	font-size: 11px;
+	text-align: center;
+}
+
+#listItemTemplate, #contentTemplate, #panelTemplate, #popupTemplate
+{
+	display: none;
+}
+
+#dataTemplate, #dataFrame
+{
+	display: none;
+	height: 0px;
+	width: 0px;
+}
+
+div#container
+{
+	width: 100%;
+	margin: 0 auto;
+	text-align: left;
+}
+
+#uiPanel
+{
+	width: 980px;
+	margin: 0 auto;
+}
+
+div.content
+{
+	border:	1px solid rgb( 145, 155, 156 );
+	background: white;
+	margin: 0 auto;
+	margin-bottom: 10px;
+}
+
+div.content img.button
+{
+	padding-top: 1px;
+	margin: 0px;
+	background: url(images/bg.png) repeat-x;
+	float: right;
+}
+
+div.content div.titleBar
+{
+	background: url(images/bg.png) repeat-x;
+	height: 20px;
+}
+
+div.content h1
+{
+	display: inline;
+	padding-left: 6px;
+	font-family: tahoma;
+	font-size: 14px;
+	color: white;
+}
+
+div.content h1.min
+{
+	display: inline;
+	padding-left: 3px;
+	font-family: tahoma;
+	font-size: 11px;
+	font-weight: normal;
+	color: white;
+}
+				
+div.topBar
+{
+	width: 980px;
+	font-weight: bold;
+	border:	1px solid rgb( 145, 155, 156 );
+	background: url(images/bg.png) repeat-x;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 5px;
+	color: white;
+	font-size: 18px;
+	font-family: Verdana;
+	text-align: center;
+}
+
+div.dataPanel
+{
+	float: left;
+	border:	1px solid rgb( 145, 155, 156 );
+	background: #ece9d8;
+	width: 160px;
+	padding: 4px;
+	font-family: tahoma;
+	font-size: 11px;
+	padding-bottom: 0px;
+}
+
+div.openPanel
+{
+	float: left;
+	margin-left: 5px;
+	margin-bottom: 5px;
+	border:	1px solid rgb( 145, 155, 156 );
+	background: #ece9d8;
+	width: 620px;
+	height: 300px;
+	padding: 4px;
+}
+
+div#timePanel
+{
+	background: #ece9d8;
+	height: 300px;
+	float: left;
+	margin: 0px;
+	margin-left: 5px;
+	border:	1px solid rgb( 145, 155, 156 );
+	width: 160px;
+	padding: 4px;
+}			
+
+div#timePanel p
+{
+	margin: 2px;
+}
+
+div.dataPanel h2
+{
+	font-size: 14px;
+	font-family: Verdana;
+	background: url(images/bg.png) repeat-x;
+	color: white;
+	margin: 0px;
+	margin-bottom: 4px;
+	padding: 2px 0px 2px 28px;
+	border: 1px solid #ddd;
+	text-align: left;
+}
+
+ul.menu
+{
+	width: 100%;
+	padding: 0px;
+	margin: 0px;
+}
+
+ul.menu li
+{
+	text-decoration: none;
+	list-style-type: none;
+	margin-bottom: 5px;
+	padding: 0px;
+	font-size: 14px;
+	font-family: Tahoma;
+}
+
+ul.subMenu
+{
+	display: block;
+	padding-left: 0px;
+	margin-left: 0px;
+	background-color: white;
+	border: 1px solid #ddd;
+}
+
+ul.subMenu li
+{
+	background-color: white;
+	border: 0px;
+	padding-left: 10px;
+	margin: 0px;
+}
+
+ul.hiddenSubMenu
+{
+	display: none;
+}
+
+ul h1
+{
+	font-size: 13px;
+	font-family: Verdana;
+	padding-left: 5px;
+	margin: 0px;
+	cursor: pointer;
+	color: white;
+	background: url(images/bg.png) repeat-x;
+}
+
+ul.subMenu li.selected
+{
+	background: #eee;
+	color: black;
+}
+
+ul.subMenu li.hover
+{
+	background-color: #e8f2fe;
+	cursor: pointer;
+}
+
+div.dataPanel p
+{
+	margin: 0px;
+	margin-bottom: 2px;
+}
+
+h5
+{
+	font-weight: normal;
+	font-size: 11px;
+	padding: 0px;
+	margin: 0px;
+	margin-bottom: 2px;
+}
+
+h1.filter
+{
+	padding: 2px;
+	color: white;
+	background: url(images/bg.png);
+	font-size: 11px;
+	font-family: Verdana;
+	padding-top: 2px;
+	margin: 0px;
+}
+
+select
+{
+	background: #fefefe;
+	border: 1px solid #ddd;
+}
+
+input
+{
+	vertical-align: middle;
+}
+
+label
+{
+	vertical-align: middle;
+}
+
+a#nowLink
+{
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+img.button
+{
+	border: 0px;
+	float: right;
+}
+
+form
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+div.boxContainer
+{
+	background: #eee;
+	padding: 3px;
+	width: 800px;
+	height: 300px;
+	text-align: left;
+}
+
+div.box
+{
+	border: 1px solid #aca899;
+	margin: 3px 3px 6px 3px;
+	padding: 0px 3px 0px 3px;
+	background: white;
+}
+
+div.box h1
+{
+	cursor: default;
+	padding: 2px;
+	color: white;
+	background: url(images/bg.png) repeat-x;
+	font-size: 12px;
+	font-family: Verdana;
+	margin: 0px -3px 0px -3px;
+}
+
+div.box input
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+div.box p
+{
+	margin: 3px 0px 3px 0px;
+	padding: 0px;
+	font-size: 12px;
+	font-family: Verdana;
+}
+
+.p0 { padding: 0px; }
+.m0 { margin: 0px; }
+.m2 { margin: 2px; }
+.m4 { margin: 4px; }
+.m6 { margin: 6px; }
+.mlr4 { margin: 0px 4px; }
+.ml4 { margin: 0px 0px 0px 4px; }
+.mr4 { margin: 0px 4px 0px 0px; }
+.w75 { width: 75px; }
+.w80 { width: 80px; }
+.w90 { width: 90px; }
+.w100 { width: 100px; }
+.w110 { width: 110px; }
+.w120 { width: 120px; }
+.w140 { width: 140px; }
+.w145 { width: 145px; }
+.w150 { width: 150px; }
+.w160 { width: 160px; }
+.w180 { width: 180px; }
+.w200 { width: 200px; }
+.w220 { width: 220px; }
+.w240 { width: 240px; }
+.w260 { width: 260px; }
+.w280 { width: 280px; }
+.w300 { width: 300px; }
+.w310 { width: 310px; }
+.w320 { width: 320px; }
+.w330 { width: 330px; }
+.w340 { width: 340px; }
+.w360 { width: 360px; }
+.w380 { width: 380px; }
+.w400 { width: 400px; }
+.w420 { width: 420px; }
+.w440 { width: 440px; }
+.w460 { width: 460px; }
+.w470 { width: 470px; }
+.w480 { width: 480px; }
+.w500 { width: 500px; }
+.w100p { width: 100%; }
+.mono { font-family: monospace; }
+.center { text-align: center; }
+.right { text-align: right; }
+.left { text-align: left; }
+.fl { float: left; }
+.fr { float: right; }
+.hide { display: none; }
+.pointer { cursor: crosshair; }
+.abs { position: absolute; }
+
+div#timeShortcutPanel
+{
+	position: absolute;
+	top: 50px;
+	left: 775px;
+	border:	1px solid rgb( 145, 155, 156 );
+	width: 140px;
+	height: 240px;
+	display: none;	
+}
+
+div.listbox
+{
+	position: absolute;
+	top: 100px;
+	left: 100px;
+	text-align: left;
+	padding-bottom: 2px;
+}
+
+div.listbox p
+{
+	cursor: pointer;
+	margin: 1px 0px 0px 0px;
+	padding: 0px;
+	font-family: verdana;
+	font-size: 11px;
+	padding: 1px 3px 1px 3px;
+}
+
+div.listbox hr
+{
+	padding: 0px;
+	margin: 3px 0px 3px 0px;
+}
+
+div.listbox p:hover
+{
+	background: #3151c5;
+	color: white;
+}
+
+#redLine1, #redLine2
+{
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 1px;
+	height: 1px;
+	background-color: red;
+	z-index: 100;
+	font-size: 1px;
+	visibility: hidden;
+}

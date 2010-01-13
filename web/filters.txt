@@ -1,0 +1,8 @@
+#
+# Valve3 Example Filter file
+#
+# $Id: filters.txt,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+
+USA (Lower 48):-125,-65,25,50
+
+Mount St Helens:-122.35,-122,46.1,46.3

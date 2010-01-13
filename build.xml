@@ -1,0 +1,58 @@
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.1  2005/09/03 19:18:35  dcervelli
+Initial commit.
+
+-->
+
+<project name="USGS VHP Valve3 Web" default="help" basedir=".">
+	<description>USGS VHP Valve3Web Build File</description>
+
+	<property name="root" location="."/>
+	<property name="bin-dir" value="../valve3-bin"/>
+	
+	<target name="help">
+		<echo>
+Available targets:
+		</echo>
+	</target>
+	
+	<target name="init">
+	</target>
+	
+	<target name="bin-dist">
+		<delete dir="${bin-dir}/valve3" />
+		
+		<!-- Create the distribution directory structure -->
+		<mkdir dir="${bin-dir}/valve3/WEB-INF/" />
+		<mkdir dir="${bin-dir}/valve3/WEB-INF/config" />
+		<mkdir dir="${bin-dir}/valve3/WEB-INF/lib" />
+		<mkdir dir="${bin-dir}/valve3/img/" />
+		<mkdir dir="${bin-dir}/valve3/images/" />
+		<mkdir dir="${bin-dir}/valve3/js/" />
+		<mkdir dir="${bin-dir}/valve3/menu/" />
+		
+		<!-- Copy the distribution files -->
+		<copy todir="${bin-dir}/valve3">
+			<fileset dir="${root}/web">
+				<include name="**/**" />
+			</fileset>
+		</copy>
+				
+		<copy todir="${bin-dir}/valve3/WEB-INF/lib">
+			<fileset dir="../USGS/contrib">
+				<include name="colt.jar" />
+				<include name="jai_codec.jar" />
+				<include name="jai_core.jar" />
+				<include name="mlibwrapper_jai.jar" />
+			</fileset>
+			<fileset dir="../USGS/lib">
+				<include name="usgs.jar" />
+			</fileset>
+		</copy>
+
+		<tar destfile="valve3-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
+		<zip destfile="valve3-bin.zip" basedir="${bin-dir}" />	
+	</target>
+	
+</project>
