@@ -1,0 +1,67 @@
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.5  2005/10/13 20:36:59  dcervelli
+Removed line that copied to a specific directory.  This only happens in "deploy" now.
+
+Revision 1.4  2005/09/20 20:45:23  dcervelli
+Fixed case in classpath.
+
+Revision 1.3  2005/09/03 21:15:09  dcervelli
+Fixed classpath.
+
+Revision 1.2  2005/09/03 21:13:58  dcervelli
+Fixed classpath.
+
+Revision 1.1  2005/08/26 20:41:31  dcervelli
+Initial avosouth commit.
+
+Revision 1.3  2005/04/07 04:06:38  cervelli
+Moved buildversion script to jar task and delete Version.class when done.
+
+Revision 1.2  2005/01/21 22:02:49  cvs
+Added version script.
+
+Revision 1.1  2004/10/12 18:48:25  cvs
+Initial commit.
+
+-->
+
+<project name="Valve3 Classes" default="deploy" basedir=".">
+	<description>USGS Valve Source Build File</description>
+
+	<property name="source" location="."/>
+	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/vdx.jar;../USGS/lib/net.jar"/>
+	<property name="jarfile" value="valve3.jar"/>
+
+	<target name="help">
+		<echo>
+Available targets:
+
+compile [default] -- compiles Java code
+jar -- generates new ${jarfile}
+		</echo>
+	</target>
+	
+	<target name="init">
+	</target>
+
+	<target name="compile" depends="init" description="compile the source">
+		<javac srcdir="${source}" destdir="${source}" classpath="${classpath}" target="1.5" debug="on"/>
+	</target>
+
+	<target name="jar" depends="compile">
+		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+			<property name="version" value="3.00"/>
+			<property name="path" value="../Valve3/gov/usgs/valve3"/>
+			<property name="package" value="gov.usgs.valve3"/>
+		</ant>
+		<mkdir dir="${source}/../USGS/lib"/>
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>
+		<delete file="../Valve3/gov/usgs/valve3/Version.class"/>
+	</target>
+	
+	<target name="deploy" depends="jar">
+		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+	</target>
+
+</project>
