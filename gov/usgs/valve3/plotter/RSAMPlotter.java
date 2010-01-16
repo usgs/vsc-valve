@@ -318,10 +318,10 @@ public class RSAMPlotter extends Plotter {
 		}
 		
 		hr.createDefaultLegendRenderer(new String[] {channelCode + " Events"});
+		v3Plot.getPlot().addRenderer(hr);
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(hr);
 		v3Plot.addComponent(component);	
 	}
 
