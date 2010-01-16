@@ -86,6 +86,7 @@ public class TiltPlotter extends Plotter {
 	private static Map<Integer, Rank> ranksMap;
 	private static Map<Integer, Double> azimuthsMap;
 	private static List<Column> columnsList;
+	
 	private double startTime;
 	private double endTime;
 	private String ch;
@@ -306,7 +307,6 @@ public class TiltPlotter extends Plotter {
 		
 		double yMin = 1E300;
 		double yMax = -1E300;
-		boolean allowExpand = true;
 		
 		mr.setAllVisible(false);
 
@@ -324,7 +324,6 @@ public class TiltPlotter extends Plotter {
 					double[] ys = component.getYScale("ysR", yMin, yMax);
 					yMin = ys[0];
 					yMax = ys[1];
-					allowExpand = false;
 					if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
 						throw new Valve3Exception("Illegal axis values.");
 				}
@@ -359,8 +358,6 @@ public class TiltPlotter extends Plotter {
 		// create the dimensions of the plot based on these stations
 		GeoRange range = GeoRange.getBoundingBox(locs);
 		
-		Plot plot = v3Plot.getPlot();
-		
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
@@ -379,19 +376,16 @@ public class TiltPlotter extends Plotter {
 		mr.createBox(8);
 		mr.createGraticule(8, true);
 		mr.createScaleRenderer();
-		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
-		double[] trans = mr.getDefaultTranslation(plot.getHeight());
+		v3Plot.getPlot().setSize(v3Plot.getPlot().getWidth(), mr.getGraphHeight() + 60);
+		double[] trans = mr.getDefaultTranslation(v3Plot.getPlot().getHeight());
 		trans[4] = 0;
 		trans[5] = 0;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
-		component.setTranslation(trans);
-		component.setTranslationType("map");
-		v3Plot.addComponent(component);
 		mr.createEmptyAxis();
 		mr.getAxis().setBottomLabelAsText("Longitude");
 		mr.getAxis().setLeftLabelAsText("Latitude");
-		plot.addRenderer(mr);
+		v3Plot.getPlot().addRenderer(mr);
 		
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
@@ -424,7 +418,7 @@ public class TiltPlotter extends Plotter {
 			evr.v = n;
 			
 			maxMag = Math.max(evr.getMag(), maxMag);
-			plot.addRenderer(evr);
+			v3Plot.getPlot().addRenderer(evr);
 			vrs.add(evr);
 		}
 		
@@ -449,14 +443,18 @@ public class TiltPlotter extends Plotter {
 		svr.y = mr.getMinY() + 17 / mr.getYScale();
 		svr.u = desiredLength;
 		svr.v = 0;
-		plot.addRenderer(svr);
+		v3Plot.getPlot().addRenderer(svr);
 		
 		// draw the legend vector units
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
 		tr.text = scale + " " + MICRO + "R";
-		plot.addRenderer(tr);	
+		v3Plot.getPlot().addRenderer(tr);
+		
+		component.setTranslation(trans);
+		component.setTranslationType("map");
+		v3Plot.addComponent(component);
 	}
 
 	/**

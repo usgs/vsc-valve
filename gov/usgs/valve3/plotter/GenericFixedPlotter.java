@@ -246,7 +246,6 @@ public class GenericFixedPlotter extends Plotter {
 
 		double yMin = 1E300;
 		double yMax = -1E300;
-		boolean allowExpand = true;
 		
 		mr.setAllVisible(false);
 
@@ -264,7 +263,6 @@ public class GenericFixedPlotter extends Plotter {
 					double[] ys = component.getYScale("ysR", yMin, yMax);
 					yMin = ys[0];
 					yMax = ys[1];
-					allowExpand = false;
 					if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
 						throw new Valve3Exception("Illegal axis values.");
 				}
