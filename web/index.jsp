@@ -161,8 +161,8 @@
 		
 		<ul>
 			<li id='listItemTemplate'>
-				<h1><img src="images/minus.png"> Category</h1>
-				<ul class="subMenu">
+				<h1><img src="images/plus.png"> Category</h1>
+				<ul class="hiddenSubMenu">
 				</ul>
 			</li>
 		</ul>
