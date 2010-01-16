@@ -72,8 +72,8 @@ function handleMenu(xml) {
 	var vp			= document.getElementById('dataPanel');
 	
 	for (var i = 0; i < sections.length; i++) {
-		var name = sections[i].getElementsByTagName("name")[0].firstChild.data;
 		//var icon = sections[i].getElementsByTagName("icon")[0].firstChild.data;
+		var name = sections[i].getElementsByTagName("name")[0].firstChild.data;
 	
 		var t		= document.getElementById('listItemTemplate').cloneNode(true);
 		t.id		= "section" + i;
@@ -343,14 +343,20 @@ function populateGenericColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
 				if (col[4] == "T") { el.checked = "checked"; }
-				el.name		= col[1];
+				el.name		= col[1];				
 				p.appendChild(el);
-				p.appendChild(tn);
+				
+				var el		= document.createElement('label');
+				el.setAttribute("for", menu.id + "_" + col[1]);
+				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				el.appendChild(tn);
+				p.appendChild(el);
+				
 				colDiv.appendChild(p);
 				
 				// build the units list
@@ -425,14 +431,20 @@ function populateTiltColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
 				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
 				p.appendChild(el);
-				p.appendChild(tn);
+								
+				var el		= document.createElement('label');
+				el.setAttribute("for", menu.id + "_" + col[1]);
+				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				el.appendChild(tn);
+				p.appendChild(el);
+
 				colDiv.appendChild(p);
 				
 				// build the units list
@@ -489,14 +501,20 @@ function populateGPSColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
 				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
+				p.appendChild(el);				
+				
+				var el		= document.createElement('label');
+				el.setAttribute("for", menu.id + "_" + col[1]);
+				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				el.appendChild(tn);
 				p.appendChild(el);
-				p.appendChild(tn);
+				
 				colDiv.appendChild(p);
 				
 				// build the units list
@@ -616,15 +634,15 @@ function toggle(event)
 	var target = getTarget(event).parentNode.parentNode;
 	var subMenu = target.getElementsByTagName("ul")[0];
 	var img = target.getElementsByTagName("img")[0];
-	if (subMenu.className == "hiddenSubMenu")
-	{
-		subMenu.className = "subMenu";
-		img.src = "images/minus.png";
-	}
-	else
+	if (subMenu.className == "subMenu")
 	{
 		subMenu.className = "hiddenSubMenu";
 		img.src = "images/plus.png";
+	}
+	else
+	{
+		subMenu.className = "subMenu";
+		img.src = "images/minus.png";
 	}
 }
 
