@@ -316,6 +316,7 @@ div.box p
 .mlr4 { margin: 0px 4px; }
 .ml4 { margin: 0px 0px 0px 4px; }
 .mr4 { margin: 0px 4px 0px 0px; }
+.mr8 { margin: 0px 8px 0px 0px; }
 .w75 { width: 75px; }
 .w80 { width: 80px; }
 .w90 { width: 90px; }
@@ -347,6 +348,7 @@ div.box p
 .w480 { width: 480px; }
 .w500 { width: 500px; }
 .w100p { width: 100%; }
+.w90p { width: 90%; }
 .mono { font-family: monospace; }
 .center { text-align: center; }
 .right { text-align: right; }
