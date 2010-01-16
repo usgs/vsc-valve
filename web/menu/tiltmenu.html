@@ -4,7 +4,7 @@
 	
 	<div class="box w120 fl">
 		<h1>Channels</h1>
-		<p><select class="w100p" multiple="multiple" size="20" name="selector:ch">
+		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
 		</select></p>
 	</div>
 	
@@ -15,21 +15,15 @@
 			<p><input type="radio" name="plotType" value="tv" id="tv:paneSelector_options_1"> <label for="tv">Vectors</label></p>
 		</div>
 		<div class="box w140">
-			<h1>Radial Options</h1>
-			<p><input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n">Nominal</label></p>
-			<p><input type="radio" value="o" name="az" id="az_o"> <label for="az_o">Optimal</label></p>
-			<p><input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth: </label><input type="text" size="4" name="azval" id="azval"></p>
-		</div>
-		<div class="box w140">
 			<h1 id="collapse_leftOptions-">Left Axis Options</h1>
 			<div id="collapseTarget_leftOptions">
-				<p>Scale: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+				<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
 			</div>
 		</div>
 		<div class="box w140">
 			<h1 id="collapse_rightOptions-">Right Axis Options</h1>
 			<div id="collapseTarget_rightOptions">
-				<p>Scale: <input type="text" size="4" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="4" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+				<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
 			</div>
 		</div>
 		<div class="box w140">
@@ -44,6 +38,14 @@
 			<div class="box w310">
 				<h1>Time Series Options</h1>
 				<span id="columns"></span>
+			</div>
+			<div class="box w310">
+				<h1>Radial Options</h1>
+				<p>
+					<input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n" class="mr8">Nominal</label>
+					<input type="radio" value="o" name="az" id="az_o"> <label for="az_o" class="mr8">Optimal</label>
+					<input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth: </label><input type="text" size="4" name="azval" id="azval">
+				</p>
 			</div>
 		</div>
 		<div id="pane_options_1">

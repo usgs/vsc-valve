@@ -16,24 +16,10 @@
 			<h1>Plot Type</h1>
 			<p><input type="radio" name="plotType" id="mv:paneSelector_options_0" checked="checked" value="map"> <label for="mv">Map View</label></p>
 			<p><input type="radio" name="plotType" id="cnts:paneSelector_options_1" value="cnts"> <label for="cnts">Counts</label></p>
-		</div>
+		</div>		
 		<div class="box w140">
-			<h1>Depth Filter (km)</h1>
-			<p>
-				Min: <input type="text" size="4" value="-5" name="minDepth" id="minDepth">
-			   	Max: <input type="text" size="4" value="20" name="maxDepth" id="maxDepth">
-			</p>
-		</div>
-		<div class="box w140">
-			<h1>Magnitude Filter</h1>
-			<p>
-				Min: <input type="text" size="4" value="-5" name="minMag" id="minMag">
-			   	Max: <input type="text" size="4" value="20" name="maxMag" id="maxMag">
-			</p>
-		</div>
-		<div class="box w140">
-			<h1>MagType Filter</h1>
-			<p><select class="w100p" name="selector:mt">
+			<h1>Ranks</h1>
+			<p><select class="w100p" name="selector:rk">
 			</select></p>
 		</div>
 		<div class="box w140">
@@ -82,6 +68,48 @@
 					<option value="Y">Year</option>
 				</select> <label for="value:cntsBin">Bin Size</label></p>
 			</div>
+		</div>	
+		<div class="box w140 fl">
+			<h1>Magnitude Filter</h1>
+			<p>
+				Min <input type="text" size="2" value="-2" name="minMag" id="minMag">
+			   	Max <input type="text" size="2" value="10" name="maxMag" id="maxMag">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>Depth Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minDepth" id="minDepth">
+			   	Max <input type="text" size="2" value="200" name="maxDepth" id="maxDepth">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>NPhases Filter (N)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minNPhases" id="minNPhases">
+			   	Max <input type="text" size="2" value="100" name="maxNPhases" id="maxNPhases">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>RMS Filter (seconds)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minRMS" id="minRMS">
+			   	Max <input type="text" size="2" value="5" name="maxRMS" id="maxRMS">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>H Err Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minHerr" id="minHerr">
+			   	Max <input type="text" size="2" value="50" name="maxHerr" id="maxHerr">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>V Err Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minVerr" id="minVerr">
+			   	Max <input type="text" size="2" value="50" name="maxVerr" id="maxVerr">
+			</p>
 		</div>
 	</div>
 	
