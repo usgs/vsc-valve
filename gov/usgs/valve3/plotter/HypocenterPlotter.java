@@ -151,10 +151,10 @@ public class HypocenterPlotter extends Plotter {
 			throw new Valve3Exception("Illegal plot type.");
 		}
 		
-		double w = Double.parseDouble(component.get("west"));
-		double e = Double.parseDouble(component.get("east"));
-		double s = Double.parseDouble(component.get("south"));
-		double n = Double.parseDouble(component.get("north"));
+		double w = Util.stringToDouble(component.get("west"), -999);
+		double e = Util.stringToDouble(component.get("east"), -999);
+		double s = Util.stringToDouble(component.get("south"), -999);
+		double n = Util.stringToDouble(component.get("north"), -999);
 		if (s >= n || s < -90 || n > 90 || w > 360 || w < -360 || e > 360 || e < -360) {
 			throw new Valve3Exception("Illegal area of interest.");
 		} else {		
@@ -291,9 +291,9 @@ public class HypocenterPlotter extends Plotter {
 	 * 
 	 * @return plot top label text
 	 */
-	private String getTopLabel() {
+	private String getTopLabel(Rank rank) {
 		StringBuilder top = new StringBuilder(100);
-		top.append(hypos.size());
+		top.append(hypos.size() + " " + rank.getCode());
 		if (hypos.size() == 1) {
 			top.append(" earthquake on ");
 			top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).j2ksec)));
@@ -314,7 +314,7 @@ public class HypocenterPlotter extends Plotter {
 	 * Generate PNG image to local file.
 	 * 
 	 */
-	private void plotMap(String rankString) {
+	private void plotMap(Rank rank) {
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -353,7 +353,7 @@ public class HypocenterPlotter extends Plotter {
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		}
-		base.getAxis().setTopLabelAsText(getTopLabel());
+		base.getAxis().setTopLabelAsText(getTopLabel(rank));
 		v3Plot.getPlot().addRenderer(base);
 		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
@@ -370,7 +370,7 @@ public class HypocenterPlotter extends Plotter {
 	 * Initialize HistogramRenderer and add it to plot.
 	 * Generate PNG image to local file.
 	 */
-	private void plotCounts(String rankString) {
+	private void plotCounts(Rank rank) {
 
 		HistogramRenderer hr = new HistogramRenderer(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -381,7 +381,7 @@ public class HypocenterPlotter extends Plotter {
 		hr.setXAxisToTime(8);
 		hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
-		hr.getAxis().setTopLabelAsText(getTopLabel());
+		hr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		leftTicks = hr.getAxis().leftTicks.length;
 
 		DoubleMatrix2D data = null;
@@ -419,7 +419,7 @@ public class HypocenterPlotter extends Plotter {
 			hr.getAxis().setRightLabelAsText(rightAxis.toString());
 		}
 		
-		hr.createDefaultLegendRenderer(new String[] {rankString + " Events"});
+		hr.createDefaultLegendRenderer(new String[] {rank.getCode() + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
@@ -428,18 +428,14 @@ public class HypocenterPlotter extends Plotter {
 	}
 	
 	public void plotData() throws Valve3Exception {
-		
-		// get the rank information for this plot
-		Rank rank			= ranksMap.get(rk);
-		String rankString	= rank.getCode() + " (" + rank.getRank() + ")";
 
 		switch (plotType) {
 		case MAP:
-			plotMap(rankString);
+			plotMap(ranksMap.get(rk));
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			break;
 		case COUNTS:
-			plotCounts(rankString);
+			plotCounts(ranksMap.get(rk));
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			break;
 		}		

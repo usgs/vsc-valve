@@ -221,7 +221,7 @@ public class GenericFixedPlotter extends Plotter {
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);
 		mr.getAxis().setLeftLabelAsText(leftUnit);
-		mr.createDefaultLineRenderers();
+		mr.createDefaultPointRenderers();
 		mr.createDefaultLegendRenderer(channelLegendsCols);
 		leftTicks = mr.getAxis().leftTicks.length;
 		
@@ -276,7 +276,7 @@ public class GenericFixedPlotter extends Plotter {
 		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);
 		mr.setAxis(ar);
 		mr.getAxis().setRightLabelAsText(rightUnit);
-		mr.createDefaultLineRenderers(leftLines);
+		mr.createDefaultPointRenderers(leftLines);
 		mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
 		
 		return mr;
@@ -298,7 +298,7 @@ public class GenericFixedPlotter extends Plotter {
 		// get the rank information for this plot
 		String rankLegend	= "";
 		Rank rank			= ranksMap.get(rk);
-		rankLegend			= rank.getCode() + " (" + rank.getRank() + ")";
+		rankLegend			= rank.getCode();
 		
 		for (int cid : channelDataMap.keySet()) {
 			

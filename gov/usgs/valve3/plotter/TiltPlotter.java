@@ -476,7 +476,7 @@ public class TiltPlotter extends Plotter {
 				// get the rank information for this plot
 				String rankLegend	= "";
 				Rank rank			= ranksMap.get(rk);
-				rankLegend			= rank.getCode() + " (" + rank.getRank() + ")";
+				rankLegend			= rank.getCode();
 				
 				for (int cid : channelDataMap.keySet()) {
 					
@@ -492,7 +492,7 @@ public class TiltPlotter extends Plotter {
 					// instantiate the azimuth and tangential values based on the user selection
 					switch (azimuth) {
 					case NOMINAL:
-						azimuthValue = azimuthsMap.get(channel.getId());
+						azimuthValue = azimuthsMap.get(channel.getCID());
 						break;
 					case OPTIMAL:
 						azimuthValue = data.getOptimalAzimuth();

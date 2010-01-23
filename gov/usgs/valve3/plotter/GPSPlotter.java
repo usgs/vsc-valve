@@ -332,7 +332,6 @@ public class GPSPlotter extends Plotter {
 
 		double yMin = 1E300;
 		double yMax = -1E300;
-		boolean allowExpand = true;
 			
 		mr.setAllVisible(false);
 
@@ -350,7 +349,6 @@ public class GPSPlotter extends Plotter {
 				double[] ys = component.getYScale("ysL", yMin, yMax);
 				yMin = ys[0];
 				yMax = ys[1];
-				allowExpand = false;
 				if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
 					throw new Valve3Exception("Illegal axis values.");
 			}
@@ -604,7 +602,7 @@ public class GPSPlotter extends Plotter {
 				// setup the display for the legend
 				String rankLegend	= "";
 				Rank rank			= ranksMap.get(rk);
-				rankLegend			= rank.getCode() + " (" + rank.getRank() + ")";
+				rankLegend			= rank.getCode();
 				
 				// if a baseline was chosen then setup the display for the legend
 				String baselineLegend = "";
