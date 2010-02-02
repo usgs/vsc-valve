@@ -1003,10 +1003,10 @@ Menu.prototype.submit = function() {
 	
 	// temporarily disable best possible data requests (plotters haven't implemented this yet)
 	if (rkselect) {
-		if (rkselect[rkselect.selectedIndex].value == 0) {
-			alert("Best Possible Data not available at this time.");
-			return;
-		}
+		// if (rkselect[rkselect.selectedIndex].value == 0) {
+			// alert("Best Possible Data not available at this time.");
+			// return;
+		// }
 	}
 	
 	// create the plot request and plot component
