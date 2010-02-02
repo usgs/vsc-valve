@@ -53,13 +53,14 @@ create_gpsmenu = function(menu) {
 	menu.presubmit = function(pr, pc) {
 		
 		var f			= this.getForm();
-		var select		= f.elements["selector:ch"];
+		var select		= this.allChannels;
 		var baseline	= f.bl;
+		// var select		= f.elements["selector:ch"];
 		
 		// if a baseline was selected, update it's value to the cid found in the select list, element 0
 		if (baseline.value != '[none]') {
-			for (var i = 0; i < select.options.length; i++) {
-				var s = select.options[i].value.split(":");
+			for (var i = 0; i < this.allChannels.length; i++) {
+				var s = this.allChannels[i].value.split(":");
 				if (s[1] == baseline.value) {
 					pc.bl = s[0];
 				}
