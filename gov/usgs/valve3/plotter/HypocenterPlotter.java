@@ -293,7 +293,7 @@ public class HypocenterPlotter extends Plotter {
 	 */
 	private String getTopLabel(Rank rank) {
 		StringBuilder top = new StringBuilder(100);
-		top.append(hypos.size() + " " + rank.getCode());
+		top.append(hypos.size() + " " + rank.getName());
 		if (hypos.size() == 1) {
 			top.append(" earthquake on ");
 			top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).j2ksec)));
@@ -419,7 +419,7 @@ public class HypocenterPlotter extends Plotter {
 			hr.getAxis().setRightLabelAsText(rightAxis.toString());
 		}
 		
-		hr.createDefaultLegendRenderer(new String[] {rank.getCode() + " Events"});
+		hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
@@ -428,14 +428,22 @@ public class HypocenterPlotter extends Plotter {
 	}
 	
 	public void plotData() throws Valve3Exception {
+		
+		// setup the display for the legend
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+		} else {
+			rank	= ranksMap.get(rk);
+		}
 
 		switch (plotType) {
 		case MAP:
-			plotMap(ranksMap.get(rk));
+			plotMap(rank);
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			break;
 		case COUNTS:
-			plotCounts(ranksMap.get(rk));
+			plotCounts(rank);
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			break;
 		}		

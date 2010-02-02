@@ -473,10 +473,14 @@ public class TiltPlotter extends Plotter {
 				int displayCount	= 0;
 				int dh				= component.getBoxHeight() / compCount;
 				
-				// get the rank information for this plot
-				String rankLegend	= "";
-				Rank rank			= ranksMap.get(rk);
-				rankLegend			= rank.getCode();
+				// setup the display for the legend
+				Rank rank	= new Rank();
+				if (rk == 0) {
+					rank	= rank.bestPossible();
+				} else {
+					rank	= ranksMap.get(rk);
+				}
+				String rankLegend	= rank.getName();
 				
 				for (int cid : channelDataMap.keySet()) {
 					

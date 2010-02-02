@@ -55,6 +55,8 @@ public class GenericFixedPlotter extends Plotter {
 	private String legendsCols[];
 	private String channelLegendsCols[];
 	
+	private String shape;
+	
 	public final boolean ranks	= true;
 	
 	protected Logger logger;
@@ -88,6 +90,8 @@ public class GenericFixedPlotter extends Plotter {
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
+		
+		shape = component.get("lt");
 		
 		columnsCount		= columnsList.size();
 		detrendCols			= new boolean [columnsCount];
@@ -221,7 +225,13 @@ public class GenericFixedPlotter extends Plotter {
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);
 		mr.getAxis().setLeftLabelAsText(leftUnit);
-		mr.createDefaultPointRenderers();
+		
+		if (shape.equals("l")) {
+			mr.createDefaultLineRenderers();
+		} else {
+			mr.createDefaultPointRenderers(shape.charAt(0));
+		}
+		
 		mr.createDefaultLegendRenderer(channelLegendsCols);
 		leftTicks = mr.getAxis().leftTicks.length;
 		
@@ -276,7 +286,13 @@ public class GenericFixedPlotter extends Plotter {
 		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);
 		mr.setAxis(ar);
 		mr.getAxis().setRightLabelAsText(rightUnit);
-		mr.createDefaultPointRenderers(leftLines);
+		
+		if (shape.equals("l")) {
+			mr.createDefaultLineRenderers(leftLines);
+		} else {
+			mr.createDefaultPointRenderers(leftLines, shape.charAt(0));
+		}
+
 		mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
 		
 		return mr;
@@ -295,10 +311,14 @@ public class GenericFixedPlotter extends Plotter {
 		int displayCount	= 0;
 		int dh				= component.getBoxHeight() / compCount;
 		
-		// get the rank information for this plot
-		String rankLegend	= "";
-		Rank rank			= ranksMap.get(rk);
-		rankLegend			= rank.getCode();
+		// setup the display for the legend
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+		} else {
+			rank	= ranksMap.get(rk);
+		}
+		String rankLegend	= rank.getName();
 		
 		for (int cid : channelDataMap.keySet()) {
 			

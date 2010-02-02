@@ -600,9 +600,13 @@ public class GPSPlotter extends Plotter {
 				int dh				= component.getBoxHeight() / compCount;
 				
 				// setup the display for the legend
-				String rankLegend	= "";
-				Rank rank			= ranksMap.get(rk);
-				rankLegend			= rank.getCode();
+				Rank rank	= new Rank();
+				if (rk == 0) {
+					rank	= rank.bestPossible();
+				} else {
+					rank	= ranksMap.get(rk);
+				}
+				String rankLegend	= rank.getName();
 				
 				// if a baseline was chosen then setup the display for the legend
 				String baselineLegend = "";
