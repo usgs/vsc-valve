@@ -512,15 +512,9 @@ public class TiltPlotter extends Plotter {
 					azimuthRadial		= (azimuthValue + 90.0) % 360.0;
 					azimuthTangential	= (azimuthValue + 180.0) % 360.0;
 					
-					// System.out.println("tilt plotter:" + channel.getCode() + "/azimuthValue:" + azimuthValue + "/azimuthRadial:" + azimuthRadial + "/azimuthTangential:" + azimuthTangential);
-					
-					// subtract the mean from the data to get it on a zero based scale (for east, north, radial and tangential
+					// subtract the mean from the data to get it on a zero based scale (for east and north)
 					data.add(2, -data.mean(2));
 					data.add(3, -data.mean(3));
-					// data.add(4, -data.mean(4));
-					// data.add(5, -data.mean(5));
-					
-					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
 					
 					// detrend the data that the user requested to be detrended					
 					for (int i = 0; i < columnsCount; i++) {
@@ -539,6 +533,8 @@ public class TiltPlotter extends Plotter {
 						}
 						channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
 					}
+					
+					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
 					
 					MatrixRenderer leftMR	= getLeftMatrixRenderer(channel, gdm, displayCount, dh);
 					MatrixRenderer rightMR	= getRightMatrixRenderer(channel, gdm, displayCount, dh);
