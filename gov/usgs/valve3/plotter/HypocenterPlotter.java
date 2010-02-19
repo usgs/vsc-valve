@@ -106,7 +106,7 @@ public class HypocenterPlotter extends Plotter {
 	private double minRMS, maxRMS;
 	private double minHerr, maxHerr;
 	private double minVerr, maxVerr;
-	private String rm;
+	private String rmk;
 	
 	private Axes axes;
 	private ColorOption color;
@@ -165,37 +165,37 @@ public class HypocenterPlotter extends Plotter {
 			range	= new GeoRange(w, e, s, n);
 		}
 		
-		minMag		= Double.parseDouble(component.get("minMag"));
-		maxMag		= Double.parseDouble(component.get("maxMag"));
+		minMag		= Util.stringToDouble(component.get("minMag"), -Double.MAX_VALUE);
+		maxMag		= Util.stringToDouble(component.get("maxMag"), Double.MAX_VALUE);
 		if (minMag > maxMag)
 			throw new Valve3Exception("Illegal magnitude filter.");
 		
-		minDepth	= Double.parseDouble(component.get("minDepth"));
-		maxDepth	= Double.parseDouble(component.get("maxDepth"));
+		minDepth	= Util.stringToDouble(component.get("minDepth"), -Double.MAX_VALUE);
+		maxDepth	= Util.stringToDouble(component.get("maxDepth"), Double.MAX_VALUE);
 		if (minDepth > maxDepth)
 			throw new Valve3Exception("Illegal depth filter.");
 		
-		minNPhases	= Integer.parseInt(component.get("minNPhases"));
-		maxNPhases	= Integer.parseInt(component.get("maxNPhases"));
+		minNPhases	= Util.stringToInteger(component.get("minNPhases"), Integer.MIN_VALUE);
+		maxNPhases	= Util.stringToInteger(component.get("maxNPhases"), Integer.MAX_VALUE);
 		if (minNPhases > maxNPhases)
 			throw new Valve3Exception("Illegal nphases filter.");
 		
-		minRMS		= Double.parseDouble(component.get("minRMS"));
-		maxRMS		= Double.parseDouble(component.get("maxRMS"));
+		minRMS		= Util.stringToDouble(component.get("minRMS"), -Double.MAX_VALUE);
+		maxRMS		= Util.stringToDouble(component.get("maxRMS"), Double.MAX_VALUE);
 		if (minRMS > maxRMS)
 			throw new Valve3Exception("Illegal RMS filter.");
 		
-		minHerr		= Double.parseDouble(component.get("minHerr"));
-		maxHerr		= Double.parseDouble(component.get("maxHerr"));
+		minHerr		= Util.stringToDouble(component.get("minHerr"), -Double.MAX_VALUE);
+		maxHerr		= Util.stringToDouble(component.get("maxHerr"), Double.MAX_VALUE);
 		if (minHerr > maxHerr)
 			throw new Valve3Exception("Illegal horizontal error filter.");
 		
-		minVerr		= Double.parseDouble(component.get("minVerr"));
-		maxVerr		= Double.parseDouble(component.get("maxVerr"));
+		minVerr		= Util.stringToDouble(component.get("minVerr"), -Double.MAX_VALUE);
+		maxVerr		= Util.stringToDouble(component.get("maxVerr"), Double.MAX_VALUE);
 		if (minVerr > maxVerr)
 			throw new Valve3Exception("Illegal vertical error filter.");
 		
-		rm			= component.get("rm");
+		rmk			= Util.stringToString(component.get("rmk"), "");
 
 		switch (plotType) {
 		
@@ -261,7 +261,7 @@ public class HypocenterPlotter extends Plotter {
 		params.put("maxHerr", Double.toString(maxHerr));
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
-		params.put("rm", (rm));
+		params.put("rmk", (rmk));
 
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
