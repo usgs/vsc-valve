@@ -276,7 +276,7 @@ function populateSelectOptions(menu, selectName) {
 			
 			// create the default channel type of '[none]'
 			var opt		= document.createElement('option');
-			opt.value	= "[none]";
+			opt.value	= "";
 			opt.appendChild(document.createTextNode("[none]"));
 			select.appendChild(opt);
 			
