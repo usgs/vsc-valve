@@ -43,7 +43,7 @@ create_hypocentermenu = function(menu) {
 		// populate the magtype and remarks dropdowns
 		menu.selector	= "selector:mt";
 		populateSelectOptions(this, "magtype");
-		menu.selector	= "selector:rm";
+		menu.selector	= "selector:rmk";
 		populateSelectOptions(this, "remark");
 	}
 	
