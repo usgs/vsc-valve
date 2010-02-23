@@ -614,10 +614,10 @@ function populateRanks(menu) {
 				opts[i] = opt;
 			}
 			
-			// add in the option for best possible data
+			// add in the option for best possible rank
 			var opt		= document.createElement('option');
 			opt.value	= "0";
-			opt.appendChild(document.createTextNode("Best Possible Data"));
+			opt.appendChild(document.createTextNode("Best Possible Rank"));
 			select.appendChild(opt);
 			opts[i]		= opt;
 		});
@@ -1001,10 +1001,10 @@ Menu.prototype.submit = function() {
 		}
 	}
 	
-	// temporarily disable best possible data requests (plotters haven't implemented this yet)
+	// temporarily disable best possible rank requests (plotters haven't implemented this yet)
 	if (rkselect) {
 		// if (rkselect[rkselect.selectedIndex].value == 0) {
-			// alert("Best Possible Data not available at this time.");
+			// alert("Best Possible Rank not available at this time.");
 			// return;
 		// }
 	}
