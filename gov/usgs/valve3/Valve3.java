@@ -55,8 +55,8 @@ import javax.servlet.ServletContextListener;
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String VERSION = "3.2.7";
-	public static final String BUILD_DATE = "2009-11-09";
+	public static final String VERSION = "3.3.0";
+	public static final String BUILD_DATE = "2010-02-25";
 	
 	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
