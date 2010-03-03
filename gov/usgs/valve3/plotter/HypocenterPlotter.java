@@ -396,7 +396,7 @@ public class HypocenterPlotter extends Plotter {
 		if (color == ColorOption.TIME)
 			hr.setColorTime(startTime, endTime);
 		hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY() + base.getGraphHeight());
-		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth(), base.getGraphY());
+		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
 		v3Plot.getPlot().addRenderer(hr);
 
 		v3Plot.addComponent(component);
