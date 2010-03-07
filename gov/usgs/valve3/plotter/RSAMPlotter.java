@@ -246,7 +246,7 @@ public class RSAMPlotter extends Plotter {
 			yMin	= yMin - buff;
 			yMax	= yMax + buff;
 		} else {
-			double[] ys = component.getYScale("ysR", yMin, yMax);
+			double[] ys = component.getYScale("ys", yMin, yMax);
 			yMin = ys[0];
 			yMax = ys[1];
 			allowExpand = false;
