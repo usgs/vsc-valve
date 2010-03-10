@@ -2,7 +2,7 @@
 	<description>USGS Valve Source Build File</description>
 
 	<property name="source" location="."/>
-	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/vdx.jar;../USGS/lib/net.jar"/>
+	<property name="classpath" location="../USGS-trunk/lib/plot.jar;../USGS-trunk/lib/util.jar;../USGS-trunk/lib/math.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/servlet.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/net.jar"/>
 	<property name="jarfile" value="valve3.jar"/>
 
 	<target name="help">
@@ -22,18 +22,18 @@ jar -- generates new ${jarfile}
 	</target>
 
 	<target name="jar" depends="compile">
-		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+		<ant antfile="${source}/../USGS-trunk/buildversion.xml" target="version" dir="${source}/../USGS-trunk" inheritAll="true">
 			<property name="version" value="3.3.0"/>
-			<property name="path" value="../Valve3/gov/usgs/valve3"/>
+			<property name="path" value="../Valve3-trunk/gov/usgs/valve3"/>
 			<property name="package" value="gov.usgs.valve3"/>
 		</ant>
-		<mkdir dir="${source}/../USGS/lib"/>
-		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>
-		<delete file="../Valve3/gov/usgs/valve3/Version.class"/>
+		<mkdir dir="${source}/../USGS-trunk/lib"/>
+		<jar destfile="${source}/../USGS-trunk/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>
+		<delete file="../Valve3-trunk/gov/usgs/valve3/Version.class"/>
 	</target>
 	
 	<target name="deploy" depends="jar">
-		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+		<ant antfile="../USGS-trunk/build.xml" target="jar" dir="../USGS-trunk" />
 	</target>
 
 </project>
