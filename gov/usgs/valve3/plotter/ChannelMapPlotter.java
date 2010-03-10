@@ -14,36 +14,18 @@ import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.data.Channel;
 
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Generate PNG map image to local file
- * from vdx source data.
- *  
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2006/04/09 21:05:28  dcervelli
- * Allows maps without a data source and different titling.
- *
- * Revision 1.5  2006/04/09 18:19:36  dcervelli
- * VDX type safety changes.
- *
- * Revision 1.4  2006/02/19 00:34:36  dcervelli
- * Now sets the graph height data properly.
- *
- * Revision 1.3  2005/10/07 16:45:53  dcervelli
- * Added lon/lat labels.
- *
- * Revision 1.2  2005/09/05 00:40:10  dcervelli
- * Strips channels down to the first space and only plots unique labels.
- *
- * Revision 1.1  2005/09/02 22:37:24  dcervelli
- * Initial commit.
+ * Generate PNG map image to local file from vdx source data.
  *
  * @author Dan Cervelli
  */
@@ -85,24 +67,25 @@ public class ChannelMapPlotter extends Plotter
 		if (vdxSource == null || vdxClient == null)
 			return; 
 		
-		HashMap<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
-		params.put("action", "selectors");
+		params.put("action", "channels");
 
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		List<String> selectors = client.getTextData(params);
-		Set<String> used = new HashSet<String>();
-		labels = new GeoLabelSet();
-		for (String sel : selectors)
-		{
-			String[] ss = sel.split(":");
-			String s = ss[3].split(" ")[0];
-			if (!used.contains(s))
-			{
-				GeoLabel gl = new GeoLabel(s, Double.parseDouble(ss[1]), Double.parseDouble(ss[2]));
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		List<String> channels	= client.getTextData(params);
+		Set<String> used		= new HashSet<String>();
+		labels					= new GeoLabelSet();
+		
+		// iterate through the list of channels and add a geo label
+		for (String ch : channels) {
+			Channel channel		= new Channel(ch);
+			String channelCode	= channel.getCode();
+			String channelCode0 = channelCode.split(" ")[0];
+			if (!used.contains(channelCode0)) {
+				GeoLabel gl = new GeoLabel(channelCode0, channel.getLon(), channel.getLat());
 				labels.add(gl);
-				used.add(s);
+				used.add(channelCode0);
 			}
 		}
 		pool.checkin(client);

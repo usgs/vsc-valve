@@ -117,24 +117,28 @@ public class PlotComponent
 	 * @param max default max value
 	 * @return array of 2 doubles, first is initialized min value, second is initialized max value
 	 */
-	public double[] getYScale(String pre, double min, double max)
-	{
+	public double[] getYScale(String pre, double min, double max) {
+		String ysMin, ysMax;
 		double[] d = new double[2];
-		String ysMin = params.get(pre + "Min");
-		if (ysMin == null)
-			d[0] = min;
-		else if (ysMin.toLowerCase().equals("min") || ysMin.toLowerCase().equals("auto"))
-			d[0] = min;
-		else
-			d[0] = Util.stringToDouble(ysMin, Double.NaN);
 		
-		String ysMax = params.get(pre + "Max");
-		if (ysMax == null)
+		ysMin	= params.get(pre + "Min");
+		ysMax	= params.get(pre + "Max");
+		
+		if (ysMin == null) {
+			d[0] = min;
+		} else if (ysMin.toLowerCase().equals("min") || ysMin.toLowerCase().equals("auto")) {
+			d[0] = min;
+		} else {
+			d[0] = Util.stringToDouble(ysMin, min);
+		}		
+		
+		if (ysMax == null) {
 			d[1] = max;
-		else if (ysMax.toLowerCase().equals("max") || ysMax.toLowerCase().equals("auto"))
+		} else if (ysMax.toLowerCase().equals("max") || ysMax.toLowerCase().equals("auto")) {
 			d[1] = max;
-		else
-			d[1] = Util.stringToDouble(ysMax, Double.NaN);
+		} else {
+			d[1] = Util.stringToDouble(ysMax, max);
+		}
 
 		return d;
 	}

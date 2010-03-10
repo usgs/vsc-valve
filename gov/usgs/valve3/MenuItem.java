@@ -13,6 +13,7 @@ public class MenuItem implements Comparable<MenuItem>
 	public String icon;
 	public String file;
 	public int sortOrder;
+	public String shortcuts;
 	
 	/**
 	 * Constructor
@@ -22,13 +23,14 @@ public class MenuItem implements Comparable<MenuItem>
 	 * @param f menu file
 	 * @param so menu item sort order
 	 */
-	public MenuItem(String id, String n, String i, String f, int so)
+	public MenuItem(String id, String n, String i, String f, int so, String sc)
 	{
-		menuId = id;
-		name = n;
-		icon = i;
-		file = f;
-		sortOrder = so;
+		menuId		= id;
+		name		= n;
+		icon		= i;
+		file		= f;
+		sortOrder	= so;
+		shortcuts	= sc;
 	}
 	
 	/**
@@ -36,8 +38,15 @@ public class MenuItem implements Comparable<MenuItem>
 	 */
 	public String toXML()
 	{
-		return "<menuitem>\n<menuid>" + menuId + "</menuid>\n<name>" + name + 
-			"</name>\n<icon>" + icon + "</icon>\n<file>" + file + "</file>\n</menuitem>";
+		String xml = "";
+		xml	= "<menuitem>\n" +
+			  "<menuid>" + menuId + "</menuid>\n" +
+			  "<name>" + name + "</name>\n" +
+			  "<icon>" + icon + "</icon>\n" +
+			  "<file>" + file + "</file>\n" +
+			  "<timeShortcuts>" + shortcuts + "</timeShortcuts>\n" +
+			  "</menuitem>\n";
+		return xml;
 	}
 
 	/**

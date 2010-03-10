@@ -25,7 +25,17 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Generates raw data from http request.
  * A request represents exactly one image plot.
- * 
+ *
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/24 17:02:09  tparker
+ * cleanup old data files
+ *
+ * Revision 1.2  2006/07/19 16:12:55  tparker
+ * Set filename for non-seismic data streams
+ *
+ * Revision 1.1  2006/05/17 21:56:11  tparker
+ * initial commit
+ *
  * @author Tom Parker
  */
 public class RawDataHandler implements HttpHandler

@@ -2,8 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/VDX-trunk"/>
-	<classpathentry kind="lib" path="/USGS-trunk/contrib/servlet.jar"/>
-	<classpathentry kind="lib" path="/USGS-trunk/contrib/colt.jar"/>
-	<classpathentry kind="output" path="eclipse-bin"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Math"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
+	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/servlet.jar"/>
+	<classpathentry kind="output" path=""/>
 </classpath>

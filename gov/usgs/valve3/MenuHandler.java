@@ -1,6 +1,7 @@
 package gov.usgs.valve3;
 
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Util;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.result.Menu;
@@ -67,10 +68,11 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
-					String menu = cf.getString("menu");
-					String name = cf.getString("name");
-					int sortOrder = Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item = new MenuItem(dsd.getName(), name, "", menu, sortOrder);
+					String menu 		= cf.getString("menu");
+					String name 		= cf.getString("name");
+					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
+					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}

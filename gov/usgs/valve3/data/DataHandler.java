@@ -123,82 +123,45 @@ public class DataHandler implements HttpHandler
 	 * @return returning type depends from data action parameter 
 	 * in the request - GenericMenu, ewRsamMenu or list of results.
 	 */
-	public Object handle(HttpServletRequest request)
-	{
+	public Object handle(HttpServletRequest request) {
 		
 		Logger logger = Log.getLogger("gov.usgs.vdx");
-
 		logger.info("entering DataHandler.handle()");
+		
 		String source = request.getParameter("src");
 		logger.info("src = " + source);
 		DataSourceDescriptor dsd = dataSources.get(source);
 		if (dsd == null)
 			return null;  // TODO: throw Valve3Exception
 		
-		String action = request.getParameter("da"); // da == data action
+		String action = request.getParameter("da");
+		logger.info("action = " + action);
 		if (action == null)
 			return null;  // TODO: throw Valve3Exception
-
-		logger.info("action = " + action);
-		// TODO: refactor out cut/paste job
-		if (action.equals("genericMenu"))
-		{
-			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("source", dsd.getVDXSource());
-			params.put("action", "genericMenu");
-			
-			VDXClient client = pool.checkout();
-			GenericMenu result = null;
-			if (client != null)
-			{
-				List<String> ls = client.getTextData(params);
-				if (ls != null)
-					result = new GenericMenu(ls);
-			}
-			pool.checkin(client);
-			return result;
-		}
-		else if (action.equals("ewRsamMenu"))
-		{
-			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("source", dsd.getVDXSource());
-			params.put("action", "ewRsamMenu");
-			
-			VDXClient client = pool.checkout();
-			ewRsamMenu result = null;
-			if (client != null)
-			{
-				List<String> ls = client.getTextData(params);
-				logger.info("params = " + params.toString());
-				logger.info("EWRSAMMENU params = " + ls.toString());
-				if (ls != null)
-					result = new ewRsamMenu(ls);
-			}
-			pool.checkin(client);
-			return result;
-		}
-		else if (action.equals("selectors"))
-		{
-			Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("source", dsd.getVDXSource());
-			params.put("action", "selectors");
-			
-			// selectors: <unique id>:lon:lat:code:name
-			// TODO: get Results back instead of Lists
-			VDXClient client = pool.checkout();
-			gov.usgs.valve3.result.List result = null;
-			if (client != null)
-			{
-				List<String> ls = client.getTextData(params);
-				result = new gov.usgs.valve3.result.List(ls);
-			}
-			pool.checkin(client);
-			return result;
-		}
 		
+		
+		Pool<VDXClient> pool		= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+		Map<String, String> params	= new HashMap<String, String>();
+		params.put("source", dsd.getVDXSource());
+		params.put("action", action);
+		VDXClient client	= pool.checkout();
+		if (client != null) {
+			List<String> ls	= client.getTextData(params);
+			pool.checkin(client);
+			if (ls != null) {
+				if (action.equals("genericMenu")) {
+					GenericMenu result = new GenericMenu(ls);
+					return result;
+				} else if (action.equals("ewRsamMenu")) {
+					ewRsamMenu result = new ewRsamMenu(ls);
+					return result;
+				} else {
+					gov.usgs.valve3.result.List result	= new gov.usgs.valve3.result.List(ls);
+					return result;
+				}
+			}
+		}
+		pool.checkin(client);
 		return null;
 	}
 }

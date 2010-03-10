@@ -44,7 +44,6 @@ public class ActionHandler implements HttpHandler
 	{
 		System.out.println(request.getQueryString());
 		String action = request.getParameter(key);
-		System.out.println("Action: " + action);
 		if (action == null)
 			return null;
 		

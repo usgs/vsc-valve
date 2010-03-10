@@ -3,6 +3,7 @@ package gov.usgs.valve3;
 /**
  * Specific exception for valve3 application
  * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public class Valve3Exception extends Exception

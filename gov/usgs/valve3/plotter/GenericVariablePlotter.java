@@ -12,17 +12,17 @@ import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.generic.fixed.GenericColumn;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -39,13 +39,13 @@ public class GenericVariablePlotter extends Plotter
 	private double endTime;
 	private GenericDataMatrix data;
 	private String channel;
-	private String channelName = "";
-	private GenericMenu menu;
 	
 	private String leftUnit;
-	private List<GenericColumn> leftColumns;
+	private List<Column> leftColumns;
 	private String rightUnit;
-	private List<GenericColumn> rightColumns;
+	private List<Column> rightColumns;
+	
+	public final boolean ranks	= true;
 
 	/**
 	 * Default constructor
@@ -59,7 +59,7 @@ public class GenericVariablePlotter extends Plotter
 	 */
 	private void getData() throws Valve3Exception
 	{
-		HashMap<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new LinkedHashMap<String, String>();
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		params.put("source", vdxSource);
@@ -115,7 +115,7 @@ public class GenericVariablePlotter extends Plotter
 			
 			String columnSpec = c++ + ":" + type + ":" + description + ":" + description + ":T";
 			
-			GenericColumn col = new GenericColumn(columnSpec);
+			Column col = new Column(columnSpec);
 			
 			if (leftUnit != null && leftUnit.equals(col.unit))
 				leftColumns.add(col);
@@ -124,13 +124,13 @@ public class GenericVariablePlotter extends Plotter
 			else if (leftUnit == null)
 			{
 				leftUnit = col.unit;
-				leftColumns = new ArrayList<GenericColumn>();
+				leftColumns = new ArrayList<Column>();
 				leftColumns.add(col);
 			}
 			else if (rightUnit == null)
 			{
 				rightUnit = col.unit;
-				rightColumns = new ArrayList<GenericColumn>();
+				rightColumns = new ArrayList<Column>();
 				rightColumns.add(col);
 			}
 			else
@@ -143,17 +143,17 @@ public class GenericVariablePlotter extends Plotter
 		if (rightUnit != null)
 		{
 			int minRight = Integer.MAX_VALUE;
-			for (GenericColumn col : rightColumns)
-				minRight = Math.min(minRight, col.index);
+			for (Column col : rightColumns)
+				minRight = Math.min(minRight, col.idx);
 			
 			int minLeft = Integer.MAX_VALUE;
-			for (GenericColumn col : leftColumns)
-				minLeft = Math.min(minLeft, col.index);
+			for (Column col : leftColumns)
+				minLeft = Math.min(minLeft, col.idx);
 			
 			if (minLeft > minRight)
 			{
 				String tempUnit = leftUnit;
-				List<GenericColumn> tempColumns = leftColumns;
+				List<Column> tempColumns = leftColumns;
 				leftUnit = rightUnit;
 				leftColumns = rightColumns;
 				rightUnit = tempUnit;
@@ -168,21 +168,21 @@ public class GenericVariablePlotter extends Plotter
 	 */
 	private MatrixRenderer getLeftMatrixRenderer()
 	{
-		MatrixRenderer mr = new MatrixRenderer(data.getData());
+		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
 		
 		mr.setAllVisible(false);
-		for (GenericColumn col : leftColumns)
+		for (Column col : leftColumns)
 		{
-			mr.setVisible(col.index, true);
+			mr.setVisible(col.idx, true);
 			if (col.name.equals("45"))
-				data.sum(col.index+1);
+				data.sum(col.idx+1);
 
-			max = Math.max(max, data.max(col.index + 1));
-			min = Math.min(min, data.min(col.index + 1));
+			max = Math.max(max, data.max(col.idx + 1));
+			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
 			
@@ -207,22 +207,22 @@ public class GenericVariablePlotter extends Plotter
 		if (rightUnit == null)
 			return null;
 		
-		MatrixRenderer mr = new MatrixRenderer(data.getData());
+		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
 		
 		mr.setAllVisible(false);
-		for (GenericColumn col : rightColumns)
+		for (Column col : rightColumns)
 		{
-			mr.setVisible(col.index, true);
+			mr.setVisible(col.idx, true);
 
 			if (col.name.equals("45"))
-				data.sum(col.index+1);
+				data.sum(col.idx+1);
 
-			max = Math.max(max, data.max(col.index + 1));
-			min = Math.min(min, data.min(col.index + 1));
+			max = Math.max(max, data.max(col.idx + 1));
+			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
 			
@@ -234,7 +234,7 @@ public class GenericVariablePlotter extends Plotter
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
 		mr.setAxis(ar);
 		mr.createDefaultLineRenderers();
-		ShapeRenderer[] r = mr.getLineRenderers();
+		ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
 		r[1].color = Color.red;
 
 		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);

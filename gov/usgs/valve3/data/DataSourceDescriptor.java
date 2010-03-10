@@ -23,8 +23,7 @@ public class DataSourceDescriptor
 	private String name;
 	private String vdxClientName;
 	private String vdxSource;
-	private String plotterClassName; 
-	
+	private String plotterClassName; 	
 	private ConfigFile config;
 	
 	/**
@@ -35,13 +34,12 @@ public class DataSourceDescriptor
 	 * @param pc plotter name ("plotter" config file parameter)
 	 * @param cf subconfiguration for this data source
 	 */
-	public DataSourceDescriptor(String n, String c, String s, String pc, ConfigFile cf)
-	{
-		name = n;
-		vdxClientName = c;
-		vdxSource = s;
-		plotterClassName = pc;
-		config = cf;
+	public DataSourceDescriptor(String n, String c, String s, String pc, ConfigFile cf) {
+		name				= n;
+		vdxClientName		= c;
+		vdxSource			= s;
+		plotterClassName	= pc;
+		config				= cf;
 	}
 	
 	/**
