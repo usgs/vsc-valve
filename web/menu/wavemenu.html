@@ -1,69 +1,78 @@
-<!-- $Id: wavemenu.html,v 1.4 2006-04-13 22:32:23 dcervelli Exp $ -->
-
 <div id="waveBox">
 
 	<form id="waveForm">
-	<div class="box w140 fl">
+	
+	<div class="box w120 fl">
 		<h1>Channels</h1>
-		<p><select class="w100p" multiple="multiple" size="16" name="selector:ch">
+		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
 		</select></p>
 	</div>
 	
-	<div class="w140 fl">
-		<div class="box">
-			<h1>Output Type</h1>
-			<p><input type="radio" name="type" value="wf" id="wf:paneSelector_options_0" checked="checked"> <label for="wf">Waveform</label></p>
-			<p><input type="radio" name="type" value="sp" id="sp:paneSelector_options_1"> <label for="sp">Spectra</label></p>
-			<p><input type="radio" name="type" value="sg" id="sg:paneSelector_options_1"> <label for="sg">Spectrogram</label></p>
-		</div>
-		
-		<div class="box">
+	<div class="w160 fl">
+		<div class="box w140">
+			<h1>Plot Type</h1>
+			<p><input type="radio" name="plotType" value="wf" id="wf:paneSelector_options_0" checked="checked"> <label for="wf">Waveform</label></p>
+			<p><input type="radio" name="plotType" value="sp" id="sp:paneSelector_options_1"> <label for="sp">Spectra</label></p>
+			<p><input type="radio" name="plotType" value="sg" id="sg:paneSelector_options_2"> <label for="sg">Spectrogram</label></p>
+		</div>		
+		<div class="box w140">
 			<h1>Click Action</h1>
 			<p><input type="radio" name="skip:ca" id="cast"> <label for="cast">Set Time</label></p>
 			<p><input type="radio" name="skip:ca" id="capu" checked="checked"> <label for="capu">Popup</label></p>
-			<p>&nbsp;
-				<select name="skip:popupDuration">
+			<p><select name="skip:popupDuration">
 				<option>1</option>
 				<option selected="selected">2</option>
 				<option>5</option>
 				<option>10</option>
 				<option>30</option>
 				<option>60</option>
-				</select> minutes</p>
+			</select> minutes</p>
 		</div>
 	</div>
 	
-	<div class="w280 fl">
-		<div class="box">
-			<h1 id="collapse_options">Options</h1>
-			<div id="collapseTarget_options">
-				<div id="pane_options_0-">
-					<p><b>Waveform Options</b></p>
-					<p><input type="checkbox" name="rb" checked="checked" id="rb"> <label for="rb">Remove Bias</label></p>
-					<p>Scale: <input type="text" size="4" id="ysMin" value="Auto" name="ysMin"> <input type="text" size="4" id="ysMax" value="Auto" name="ysMax"></p>
-				</div>
-				<div id="pane_options_1">
-					<p><b>Spectra/Spectrogram Options</b></p>
-					<p>Minimum Frequency: <input type="text" size="5" name="spminf" value="0.0"></p>
-					<p>Maximum Frequency: <input type="text" size="5" name="spmaxf" value="15.0"></p>
-					<p><input type="checkbox" name="splp" id="spLP" checked="checked"> <label for="spLP">Log Power</label></p>
-					<p><input type="checkbox" name="splf" id="spLF"> <label for="spLF">Log Frequency</label></p>
+	<div class="w310 fl">
+		<div class="box w310">
+			<h1>Filtering Options</h1>
+			<div class="fr mlr4 right w140">
+				<p>Frequency</p>
+				<p>Minimum Hz: <input type="text" size="4" value="0" name="fminhz"></p>
+				<p>Maximum Hz: <input type="text" size="4" value="5" name="fmaxhz"></p>
+			</div>
+			<div class="mlr4">
+				<p>Type</p>
+				<p><input type="radio" name="ftype" value="N" id="none" checked="checked"> <label for="none">None</label></p>
+				<p><input type="radio" name="ftype" value="L" id="lp"> <label for="lp">Low Pass</label></p>
+				<p><input type="radio" name="ftype" value="H" id="hp"> <label for="hp">High Pass</label></p>
+				<p><input type="radio" name="ftype" value="B" id="bp"> <label for="bp">Band Pass</label></p>
+			</div>
+		</div>
+		<div id="pane_options_0-">
+			<div class="box w310">
+				<h1>Waveform Options</h1>
+				<p><input type="checkbox" name="rb" checked="checked" id="rb"> <label for="rb">Remove Bias</label></p>
+			</div>
+			<div class="box w140 fl">
+				<h1 id="collapse_leftOptions-">Axis Options</h1>
+				<div id="collapseTarget_leftOptions">
+					<p>Scale: <input type="text" size="2" id="ysMin" value="Auto" name="ysMin"> <input type="text" size="2" id="ysMax" value="Auto" name="ysMax"></p>
 				</div>
 			</div>
 		</div>
-		<div class="box">
-			<h1 id="collapse_filter">Filter</h1>
-			<div id="collapseTarget_filter">
-				<div class="fr">
-					<p>Minimum Hz: <input type="text" size="4" value="0" name="fminhz"></p>
-					<p>Maximum Hz: <input type="text" size="4" value="5" name="fmaxhz"></p>
-				</div>
-				<div>
-					<p><input type="radio" name="ftype" value="N" id="none" checked="checked"> <label for="none">None</label></p>
-					<p><input type="radio" name="ftype" value="L" id="lp"> <label for="lp">Low Pass</label></p>
-					<p><input type="radio" name="ftype" value="H" id="hp"> <label for="hp">High Pass</label></p>
-					<p><input type="radio" name="ftype" value="B" id="bp"> <label for="bp">Band Pass</label></p>
-				</div>
+		<div id="pane_options_1">
+			<div class="box w310">
+				<h1>Spectra Options</h1>
+				<p><input type="text" size="5" name="spminf" value="0.0"> <label for="spminf">Minimum Frequency</label></p>
+				<p><input type="text" size="5" name="spmaxf" value="15.0"> <label for="spminf">Maximum Frequency</label></p>
+				<p><input type="checkbox" name="splp" id="spLP" checked="checked"> <label for="spLP">Log Power</label></p>
+				<p><input type="checkbox" name="splf" id="spLF"> <label for="spLF">Log Frequency</label></p>
+			</div>
+		</div>
+		<div id="pane_options_2">
+			<div class="box w310">
+				<h1>Spectrogram Options</h1>
+				<p><input type="text" size="5" name="spminf" value="0.0"> <label for="spminf">Minimum Frequency</label></p>
+				<p><input type="text" size="5" name="spmaxf" value="15.0"> <label for="spminf">Maximum Frequency</label></p>
+				<p><input type="checkbox" name="splp" id="spLP" checked="checked"> <label for="spLP">Log Power</label></p>
 			</div>
 		</div>
 	</div>

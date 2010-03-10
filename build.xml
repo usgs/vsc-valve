@@ -1,13 +1,5 @@
-<!--
-$Log: not supported by cvs2svn $
-Revision 1.1  2005/09/03 19:18:35  dcervelli
-Initial commit.
-
--->
-
 <project name="USGS VHP Valve3 Web" default="help" basedir=".">
 	<description>USGS VHP Valve3Web Build File</description>
-
 	<property name="root" location="."/>
 	<property name="bin-dir" value="../valve3-bin"/>
 	

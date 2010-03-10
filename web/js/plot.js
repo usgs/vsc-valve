@@ -200,6 +200,7 @@ function handlePlot(xml)
 
 /**
  *	Initialize some defaults for the Valve page
+ *	width, height, x, y, width, height, map height
  */
 var POPUP_SIZE_INDEX = 4;
 var STANDARD_SIZES = new Array(
@@ -220,9 +221,9 @@ var STANDARD_SIZES = new Array(
  */
 function PlotRequest(popup)
 {
-	this.params = new Object();
-	this.components = new Array(0);
-	this.sizeIndex = document.getElementById("outputSize").selectedIndex;
+	this.params		= new Object();
+	this.components	= new Array(0);
+	this.sizeIndex	= document.getElementById("outputSize").selectedIndex;
 	if (popup)
 		this.sizeIndex = POPUP_SIZE_INDEX;
 	
@@ -246,81 +247,91 @@ function PlotRequest(popup)
      *  @return array of strings of time shortcut labels
      *  @type associative array
      */
-	this.createComponent = function(src, st, et)
-	{
-		var size = STANDARD_SIZES[this.sizeIndex];
-		var index = this.components.length;
-		var comp = new Object();
-		comp.x = size[2];
-		comp.y = size[3];
-		comp.w = size[4];
-		comp.h = size[5];
-		comp.mh = size[6];
+	this.createComponent = function(src, st, et) {
+		var size	= STANDARD_SIZES[this.sizeIndex];
+		var index	= this.components.length;
+		var comp	= new Object();
+		comp.x		= size[2];
+		comp.y		= size[3];
+		comp.w		= size[4];
+		comp.h		= size[5];
+		comp.mh		= size[6];
+		comp.chCnt	= 1;
+		
 		if (src)
-			comp.src = src;
+			comp.src	= src;
 		if (st)
-			comp.st = st;
+			comp.st		= st;
 		if (et)
-			comp.et = et;
+			comp.et		= et;
 		this.components[index] = comp;
 
-		comp.setFromForm = function(form)
-		{
-			for (var i = 0; i < form.elements.length; i++)
-			{
+		comp.setFromForm = function(form) {
+			
+			// iterate through each element in the form
+			for (var i = 0; i < form.elements.length; i++) {
 				var elt = form.elements[i];
-				if (elt.name && elt.name.indexOf("skip:") == -1)
-				{
-					if (elt.type == "select-multiple" || elt.type == "select-one")
-					{
+				
+				// disregard inputs labeled skip
+				if (elt.name && elt.name.indexOf("skip:") == -1) {
+					
+					// inputs of these type need to be parsed in the same way
+					if (elt.type == "select-multiple" || elt.type == "select-one") {
 						var text = true;
 						var name = elt.name;
-						if (elt.name.indexOf("value:") != -1)
-						{
-							text = false;
-							name = elt.name.substring(6);
-							comp[name] = getSelected(elt, text);
-						}
-						else if (elt.name.indexOf("selector:") != -1)
-						{
-							name = elt.name.substring(elt.name.indexOf(":") + 1);
-							var val = getSelected(elt);
-							var vals = val.split('^');
+						
+						// one type of specially named input
+						if (elt.name.indexOf("value:") != -1) {
+							text		= false;
+							name		= elt.name.substring(6);
+							comp[name]	= getSelected(elt, text);
+							
+						// another type of specially named input
+						} else if (elt.name.indexOf("selector:") != -1) {
+							name		= elt.name.substring(elt.name.indexOf(":") + 1);
+							var val		= getSelected(elt);
+							var vals	= val.split('^');
+							
+							// for channel inputs, count how many channels were selected
+							if (elt.name.indexOf(":ch") != -1) {
+								comp.chCnt = vals.length;
+							}	
+							
 							comp["selectedStation"] = elt.options[elt.selectedIndex].text;
 							if (!comp[name])
 								comp[name] = "";
 							
-							for (var j = 0; j < vals.length; j++)
-							{
+							for (var j = 0; j < vals.length; j++) {
 								var ss = vals[j].split(':');
 								if (comp[name])
 									comp[name] += ',';
 								comp[name] += ss[0];
 								// grab data types for nwis
 								if (ss[5])
-									comp["dataTypes"] = ss[5].replace(/=/g, ":");
-									
+									comp["dataTypes"] = ss[5].replace(/=/g, ":");									
 							}
-						}
-						else
+						} else {
 							comp[name] = getSelected(elt, true);
-					}
-					else if (elt.name.indexOf("dataType") != -1)
-					{						
-						if (elt.checked)
-						{
+						}
+						
+					} else if (elt.name.indexOf("dataType") != -1) {						
+						if (elt.checked) {
 							if (comp["selectedTypes"] == null)
 								comp["selectedTypes"] = elt.value;
 							else
 								comp["selectedTypes"] += ":" + elt.value;
 						}
-					}					
-					else if (elt.type == "checkbox")
+						
+					} else if (elt.type == "checkbox") {
 						comp[elt.name] = elt.checked ? "T" : "F";
-					else if (elt.type == "text")
+						
+					} else if (elt.type == "text") {
 						comp[elt.name] = elt.value;
-					else if (elt.type == "radio")
-					{
+						
+					} else if (elt.type == "hidden") {
+						comp[elt.name] = elt.value;
+						
+					} else if (elt.type == "radio") {
 						if (elt.checked) 
 							comp[elt.name] = elt.value;
 					}

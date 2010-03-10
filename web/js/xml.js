@@ -1,5 +1,3 @@
-// $Id: xml.js,v 1.6 2006/10/04 16:38:06 tparker Exp $
-
 /** @fileoverview deals with AJAX functionality, the XMLHttpRequest method and necessary handlers 
  * @author Dan Cervelli
  */
@@ -43,10 +41,11 @@ function loadXML(title, url, func)
 				else 
 					handleXML(req);
 			} else {
-				if (title)
+				if (title) {
 					alert("There was a problem loading component '" + title + "'.");
-				else
+				} else {
 					alert("There was a problem loading a component.");
+				}
 			}
 		}
 	}

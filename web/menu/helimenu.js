@@ -18,34 +18,45 @@
  *  
  *  @param {menu object} menu 
  */
-create_helimenu = function(menu)
-{
-	menu.allowChannelMap = true;
-	menu.formName = "heliForm";
-	menu.boxName = "heliBox";
-	menu.selector = "selector:ch";
-	menu.timeShortcuts = new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w");
+create_helimenu = function(menu) {
+	
+	menu.allowChannelMap	= true;
+	menu.formName			= "heliForm";
+	menu.boxName			= "heliBox";
+	menu.SIZES				= new Array(8, 10, 12, 14);
 
-	menu.SIZES = new Array(8, 10, 12, 14);
+	// override the default initialize function because additional functionality needs to be setup
+	menu.initialize = function() {
 		
-	menu.setSize = function(pr, pc)
-	{
-		var si = document.getElementById("outputSize").selectedIndex;
-		var size = this.SIZES[si];
-		var dt = timeDiff(pc.st, pc.et);
-		var rows = Math.ceil(dt / (pc.tc * 60000));
-		pr.params.h = size * rows + 60;
-		pc.h = size * rows;
-		if (si == 0)
-		{
-			pc.min = "T";
-			pr.params.h -= 30;
+		// default initialization
+		Menu.prototype.initialize.call(this);	
+		
+		// initialize the time shortcuts
+		if (menu.timeShortcuts[0] == "") {
+			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w");
 		}
 	}
 	
-	menu.presubmit = function(pr, pc)
-	{
+	menu.presubmit = function(pr, pc) {	
+		
+		// call the presubmit function
+		Menu.prototype.presubmit.call(this);
+		
 		this.setSize(pr, pc);
+		
 		return true;
+	}
+		
+	menu.setSize = function(pr, pc) {
+		var si		= document.getElementById("outputSize").selectedIndex;
+		var size	= this.SIZES[si];
+		var dt		= timeDiff(pc.st, pc.et);
+		var rows	= Math.ceil(dt / (pc.tc * 60000));
+		pr.params.h	= pc.chCnt * (size * rows) + 60;
+		pc.h		= pc.chCnt * (size * rows);
+		if (si == 0) {
+			pc.min = "T";
+			pr.params.h -= 30;
+		}
 	}
 }

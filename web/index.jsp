@@ -77,7 +77,7 @@
 	</head>
 	
 	<% if (config.getServletContext().getResource("/header.html") != null) { %>
-        <jsp:include page="header.html" />
+        <!-- <jsp:include page="header.html" /> -->
     <% } %>
 	
 	<body onload="ieWindowLoaded(event);">
@@ -121,7 +121,7 @@
 				<div class="box">
 					<h1>Output Size</h1>
 					<p>
-					<select id="outputSize">
+					<select id="outputSize" class="w100p">
 					<option>Tiny</option>
 					<option>Small</option>
 					<option selected="selected">Medium</option>
@@ -161,8 +161,8 @@
 		
 		<ul>
 			<li id='listItemTemplate'>
-				<h1><img src="images/minus.png"> Category</h1>
-				<ul class="subMenu">
+				<h1><img src="images/plus.png"> Category</h1>
+				<ul class="hiddenSubMenu">
 				</ul>
 			</li>
 		</ul>
@@ -178,12 +178,10 @@
 			<iframe id="dataFrame"></iframe>
 		</div>
 		
-		<!-- -->
-		
 		</div>
 		
 		<div id="redLine1"></div>
-		<div id="redLine2"></div>\
+		<div id="redLine2"></div>
 		
 		<% if (config.getServletContext().getResource("/footer.html") != null) { %>
 			<jsp:include page="footer.html" />

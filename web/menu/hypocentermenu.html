@@ -1,0 +1,118 @@
+<div id="hypocenterBox">
+
+	<form id="hypocenterForm">
+	
+	<div class="box w120 fl">
+		<h1>Area of Interest</h1>
+		<p><input type="text" name="north" id="north" size="7"> <label for="north">North</label></p>
+		<p><input type="text" name="south" id="south" size="7"> <label for="south">South</label></p>
+		<p><input type="text" name="east" id="east" size="7"> <label for="east">East</label></p>
+		<p><input type="text" name="west" id="west" size="7"> <label for="west">West</label></p>
+		<p><input type="button" value="Set from Filter" id="useGeoFilter"></p>
+	</div>
+	
+	<div class="w160 fl">
+		<div class="box w140">
+			<h1>Plot Type</h1>
+			<p><input type="radio" name="plotType" id="mv:paneSelector_options_0" checked="checked" value="map"> <label for="mv">Map View</label></p>
+			<p><input type="radio" name="plotType" id="cnts:paneSelector_options_1" value="cnts"> <label for="cnts">Counts</label></p>
+		</div>		
+		<div class="box w140">
+			<h1>Ranks</h1>
+			<p><select class="w100p" name="selector:rk">
+			</select></p>
+		</div>
+		<div class="box w140">
+			<h1>Remarks Filter</h1>
+			<p><select class="w100p" name="selector:rmk">
+			</select></p>
+		</div>
+	</div>
+	
+	<div class="w310 fl">
+		<div id="pane_options_0-">
+			<div class="box w310">
+				<h1>Map View Options</h1>
+				<p><select name="value:axes">
+					<!-- <option value="3" selected="selected">Triple View</option> -->
+					<option value="M" selected="selected">Lon-Lat</option>
+					<option value="E">Lon-Depth</option>
+					<option value="N">Lat-Depth</option>
+					<option value="D">Depth-Time</option>
+					<!-- <option value="A">Arbitrary-Depth</option> -->
+					<!-- <option value="T">Arbitrary-Time</option> -->
+				</select> <label for="value:axes">Axes</label></p>
+				<p><select name="value:color">
+					<option value="A" selected="selected">Auto</option>
+					<option value="M">Monochrome</option>
+					<option value="D">Depth</option>
+					<option value="T">Time</option>
+				</select> <label for="value:color">Color</label></p>
+			</div>
+		</div>
+		<div id="pane_options_1">
+			<div class="box w310">
+				<h1>Counts Options</h1>
+				<p><select name="value:cntsAxis">
+					<option value="N">[none]</option>
+					<option value="C" selected="selected">Cumulative Counts</option>
+					<option value="M">Cumulative Magnitude</option>
+					<option value="T">Cumulative Moment</option>
+				</select> <label for="value:cntsAxis">Right Axis</label></p>
+				<p><select name="value:cntsBin">
+					<option value="I">Minute</option>
+					<option value="H">Hour</option>
+					<option value="D" selected="selected">Day</option>
+					<option value="W">Week</option>
+					<option value="M">Month</option>
+					<option value="Y">Year</option>
+				</select> <label for="value:cntsBin">Bin Size</label></p>
+			</div>
+		</div>	
+		<div class="box w140 fl">
+			<h1>Magnitude Filter</h1>
+			<p>
+				Min <input type="text" size="2" value="-2" name="minMag" id="minMag">
+			   	Max <input type="text" size="2" value="10" name="maxMag" id="maxMag">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>Depth Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minDepth" id="minDepth">
+			   	Max <input type="text" size="2" value="200" name="maxDepth" id="maxDepth">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>NPhases Filter (N)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minNPhases" id="minNPhases">
+			   	Max <input type="text" size="2" value="100" name="maxNPhases" id="maxNPhases">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>RMS Filter (seconds)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minRMS" id="minRMS">
+			   	Max <input type="text" size="2" value="5" name="maxRMS" id="maxRMS">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>H Err Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minHerr" id="minHerr">
+			   	Max <input type="text" size="2" value="50" name="maxHerr" id="maxHerr">
+			</p>
+		</div>
+		<div class="box w140 fl">
+			<h1>V Err Filter (km)</h1>
+			<p>
+				Min <input type="text" size="2" value="0" name="minVerr" id="minVerr">
+			   	Max <input type="text" size="2" value="50" name="maxVerr" id="maxVerr">
+			</p>
+		</div>
+	</div>
+	
+	</form>
+	
+</div>

@@ -13,37 +13,43 @@
   *
   *  @param {menu object} menu 
   */
-create_ratsammenu = function(menu)
-{
-	menu.allowChannelMap = true;
-	menu.formName = "ratsamForm";
-	menu.boxName = "ratsamBox";
-	menu.selector = "first_selector:ch";
-	menu.secondSelector = "second_selector:ch";
+create_ratsammenu = function(menu) {
 	
-	menu.timeShortcuts = new Array("-1h", "-2h", "-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m");
+	menu.allowChannelMap	= true;
+	menu.formName			= "ratsamForm";
+	menu.boxName			= "ratsamBox";	
 
-//	menu.presubmit = function(pr, pc)
-//	{
-//		var f = this.getForm();
-//		
-//		var sel1 = f.elements['selector:ch'];
-//		var sel2 = f.elements['selector2:ch'];
-//		
-//		var val1 = sel1.options[sel1.selectedIndex].value;		
-//		val1 = val1.replace(/:.*$/, "");
-//		val1 = val1.replace(/\s.*$/, "");
-//		
-//		var val2 = sel2.options[sel2.selectedIndex].value;
-//		val2 = val2.replace(/:.*$/, "");
-//		
-//		sel1.options[sel1.selectedIndex].value = val1 + "+" + val2;
-//		return true;		
-//	}
+	// override the default initialize function because additional functionality needs to be setup
+	menu.initialize = function() {
+		
+		// default initialization
+		Menu.prototype.initialize.call(this);	
+		
+		// initialize the time shortcuts
+		if (menu.timeShortcuts[0] == "") {
+			menu.timeShortcuts	= new Array("-1h", "-2h", "-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m");
+		}
+	}
 	
-	menu.loadChannels = function()
-	{
-		Menu.prototype.loadChannels.call(this);
-		// hackily change selector box name
+	menu.presubmit = function(pr, pc) {	
+		
+		// call the presubmit function
+		Menu.prototype.presubmit.call(this);
+		
+		var form	= this.getForm();
+		var select	= form.elements["selector:ch"];
+		var selstr	= getSelected(select, false);
+		var selarr	= selstr.split("^");
+			
+		if (selarr.length != 2) {
+			alert("You must select two channels.");
+			return false;
+		}
+		
+		// resize the box to make only one plot for two channels instead of two plots
+		pr.params.h	= 150 + 60;
+		pc.h		= 150;
+		
+		return true;
 	}
 }

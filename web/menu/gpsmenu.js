@@ -1,9 +1,8 @@
-// $Id: gpsmenu.js,v 1.2 2005-09-06 20:19:31 dcervelli Exp $
 /** @fileoverview  
  * 
  * function menu for gpsmenu.html 
  *
- * @author Dan Cervelli
+ * @author Dan Cervelli, Loren Antolik
  */
 
 /**
@@ -16,62 +15,64 @@
  *  
  *  @param {menu object} menu 
  */
-create_gpsmenu = function(menu)
-{
-	menu.allowChannelMap = true;
-	menu.formName = "gpsForm";
-	menu.boxName = "gpsBox";
-	menu.selector = "selector:bm";
-	menu.timeShortcuts = new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");
+create_gpsmenu = function(menu) {
+	
+	menu.allowChannelMap	= true;
+	menu.formName			= "gpsForm";
+	menu.boxName			= "gpsBox";
 
-	menu.presubmit = function(pr, pc)
-	{
-		var f = this.getForm();
-		var baseline = f.bl;
-		if (baseline.value != '[none]');
-		{
-			for (var i = 0; i < f.options.length; i++)
-			{
-				var s = f.options[i].value.split(":");
-				if (s[3] == baseline.value)
-					pc.bl = s[0];
-			}
-		}
-		var comp = getTF(f.east) + getTF(f.north) + getTF(f.up) + getTF(f.len);
-		if (comp == "FFFF")
-		{
-			alert("You must select at least one component.");
-			return false;
-		}
-		var comps = 0;
-		for (var i = 0; i < comp.length; i++)
-			if (comp[i] == 'T')
-				comps++;
-
-		pr.params.h = comps * 150 + 60;
-		pc.h = comps * 150;
-		return true;
-	}
-
-	menu.initialize = function()
-	{
-		Menu.prototype.initialize.call(this);
+	// override the default initialize function because additional functionality needs to be setup
+	menu.initialize = function() {
 		
-		var f = this.getForm();
-		var bm = f[this.selector];
+		// default initialization
+		Menu.prototype.initialize.call(this);	
+		
+		// populate columns
+		populateGPSColumns(this);
+		
+		// initialize the time shortcuts
+		if (menu.timeShortcuts[0] == "") {
+			menu.timeShortcuts	= new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");
+		}
+		
+		var f	= this.getForm();
+		var ch	= f["selector:ch"];
 		
 		addListener(document.getElementById(this.id + '_baselineButton'), 'click', 
-			function()
-			{
-				if (bm.selectedIndex != -1)
-					f.bl.value = bm[bm.selectedIndex].text;
+			function() {
+				if (ch.selectedIndex != -1)
+					f.bl.value = ch[ch.selectedIndex].text;
 			}, false);
 			
 		addListener(document.getElementById(this.id + '_clearButton'), 'click', 
-			function()
-			{
-				if (bm.selectedIndex != -1)
-					f.bl.value = "[none]";
+			function() {
+				f.bl.value = "[none]";
 			}, false);
+	}
+
+	menu.presubmit = function(pr, pc) {
+		
+		var f			= this.getForm();
+		var select		= this.allChannels;
+		var baseline	= f.bl;
+		// var select		= f.elements["selector:ch"];
+		
+		// if a baseline was selected, update it's value to the cid found in the select list, element 0
+		if (baseline.value != '[none]') {
+			for (var i = 0; i < this.allChannels.length; i++) {
+				var s = this.allChannels[i].value.split(":");
+				if (s[1] == baseline.value) {
+					pc.bl = s[0];
+				}
+			}
+		}
+		
+		// calculate the plot size based on the number of selected componenets
+		var selectedColumns	= countSelectedColumns(this);
+		pr.params.h	= selectedColumns * (pr.params.h - 60) + 60;
+		pc.h		= selectedColumns * (pc.h);
+		
+		// call the presubmit function		
+		return Menu.prototype.presubmit.call(this);
 	}
 }

@@ -1,10 +1,10 @@
-// $Id: wavemenu.js,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
 /** @fileoverview  
  * 
  * function menu for wavemenu.html 
  *
  * @author Dan Cervelli
  */
+
 /**
   *  Called for wavemenu.html which deals with Waveforms data type,  it allows access 
   *  to form elements via menu object. *  Sets up time shortcut values for popup.
@@ -19,19 +19,36 @@
   *
   *  @param {menu object} menu 
   */
-create_wavemenu = function(menu)
-{
-	menu.allowChannelMap = true;
-	menu.formName = "waveForm";
-	menu.boxName = "waveBox";
-	menu.selector = "selector:ch";
-	menu.timeShortcuts = new Array("-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h");
+create_wavemenu = function(menu) {
 	
-	menu.acceptTYClick = function(target, mx, my, gx, gy)
-	{
+	menu.allowChannelMap	= true;
+	menu.formName			= "waveForm";
+	menu.boxName			= "waveBox";
+
+	// override the default initialize function because additional functionality needs to be setup
+	menu.initialize = function() {
+		
+		// default initialization
+		Menu.prototype.initialize.call(this);	
+		
+		// initialize the time shortcuts
+		if (menu.timeShortcuts[0] == "") {
+			menu.timeShortcuts	= new Array("-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h");
+		}
+	}
+	
+	menu.presubmit = function(pr, pc) {	
+		
+		// call the presubmit function
+		Menu.prototype.presubmit.call(this);
+		
+		return true;
+	}
+	
+	menu.acceptTYClick = function(target, mx, my, gx, gy) {
+		
 		var f = this.getForm();
-		if (getChecked(f["skip:ca"]) == 0)
-		{
+		if (getChecked(f["skip:ca"]) == 0) {
 			Menu.prototype.acceptTYClick.call(this, target, mx, my, gx, gy);
 			return;
 		}
@@ -49,8 +66,7 @@ create_wavemenu = function(menu)
 		pc.ch = ch;
 		
 		loadXML(this.id + " inset plot", pr.getURL(), 
-			function(req)
-			{
+			function(req) {
 				var xml = req.responseXML;
 				createPopupPlot(xml, mx, my);
 			});

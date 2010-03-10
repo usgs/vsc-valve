@@ -2,63 +2,59 @@
 
 	<form id="tiltForm">
 	
-	<div class="box w180 fl">
+	<div class="box w120 fl">
 		<h1>Channels</h1>
-		<p><select class="w100p" multiple="multiple" size="16" name="selector:ch">
+		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
 		</select></p>
 	</div>
 	
-	<div class="w200 fr">
-		<div class="box">
-			<h1>Right Axis Options</h1>
-			<p><b>Time Series Options</b></p>
-			<p><input type="radio" id="r_n" value="r_n" name="right" checked="checked"> <label for="r_n">None</label></p>
-			<p><input type="radio" id="r_h" value="r_h" name="right"> <label for="r_h">Hole Temperature</label></p>
-			<p><input type="radio" id="r_b" value="r_b" name="right"> <label for="r_b">Box Temperature</label></p>
-			<p><input type="radio" id="r_i" value="r_i" name="right"> <label for="r_i">Battery Voltage</label></p>
-			<p><input type="radio" id="r_r" value="r_r" name="right"> <label for="r_r">Rainfall</label></p>
-			<hr>
-			<p><b>Scale Options</b></p>
-			<p>Min: <input type="text" size="4" id="ysMinRight" value="Auto" name="ysRMin"> Max: <input type="text" size="4" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+	<div class="w160 fl">	
+		<div class="box w140">
+			<h1>Plot Type</h1>
+			<p><input type="radio" name="plotType" value="ts" id="ts:paneSelector_options_0" checked="checked"> <label for="ts">Time Series</label></p>
+			<p><input type="radio" name="plotType" value="tv" id="tv:paneSelector_options_1"> <label for="tv">Vectors</label></p>
 		</div>
-		<div class="box">
-			<h1>Output Type</h1>	
-			<p><b>Time Series Options</b></p>
-			<p><input type="radio" name="type" value="ts" id="ts" checked="checked"> <label for="ts">Time Series</label></p>
-			<p><input type="radio" name="type" value="tv" id="tv"> <label for="tv">Tilt Vectors</label></p>
+		<div class="box w140">
+			<h1 id="collapse_leftOptions-">Left Axis Options</h1>
+			<div id="collapseTarget_leftOptions">
+				<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+			</div>
+		</div>
+		<div class="box w140">
+			<h1 id="collapse_rightOptions-">Right Axis Options</h1>
+			<div id="collapseTarget_rightOptions">
+				<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+			</div>
+		</div>
+		<div class="box w140">
+			<h1>Ranks</h1>
+			<p><select class="w100p" name="selector:rk">
+			</select></p>
 		</div>
 	</div>
 	
-	<div class="w200 fr">
-		<div class="box">
-			<h1>Left Axis Options</h1>
-			<div class="fr">
-				<p><b>Detrend</b></p>
-				<p><input type="checkbox" id="d_e" name="d_e" class="center"></p>
-				<p><input type="checkbox" id="d_n" name="d_n" class="center"></p>
-				<p><input type="checkbox" id="d_r" name="d_r" class="center"></p>
-				<p><input type="checkbox" id="d_t" name="d_t" class="center"></p>
+	<div class="w310 fl">
+		<div id="pane_options_0-">
+			<div class="box w310">
+				<h1>Time Series Options</h1>
+				<span id="columns"></span>
 			</div>
-			<div>
-				<p><b>Components</b></p>
-				<p><input type="checkbox" id="l_e" name="l_e"> <label for="l_e">East</label></p>
-				<p><input type="checkbox" id="l_n" name="l_n"> <label for="l_n">North</label></p>
-				<p><input type="checkbox" id="l_r" name="l_r" checked="checked"> <label for="l_r">Radial</label></p>
-				<p><input type="checkbox" id="l_t" name="l_t" checked="checked"> <label for="l_t">Tangential</label></p>
-				<p><input type="checkbox" id="l_m" name="l_m"> <label for="l_m">Magnitude</label></p>
-				<p><input type="checkbox" id="l_a" name="l_a"> <label for="l_a">Azimuth</label></p>
+			<div class="box w310">
+				<h1>Radial Options</h1>
+				<p>
+					<input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n" class="mr8">Nominal</label>
+					<input type="radio" value="o" name="az" id="az_o"> <label for="az_o" class="mr8">Optimal</label>
+					<input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth: </label><input type="text" size="4" name="azval" id="azval">
+				</p>
 			</div>
-			<hr>
-			<p><b>Radial Options</b></p>
-			<p>
-				<input type="radio" value="n" name="az" id="az_n" checked="checked"> <label for="az_n">Nominal</label>
-				<input type="radio" value="o" name="az" id="az_o"> <label for="az_o">Optimal</label>
-			</p>
-			<p><input type="radio" value="u" name="az" id="az_u"> <label for="az_u">Azimuth:</label>
-			<input type="text" size="4" name="azval" id="azval"></p>
-			<hr>
-			<p><b>Scale Options</b></p>
-			<p>Min: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> Max: <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+		</div>
+		<div id="pane_options_1">
+			<div class="box w310">
+				<h1>Tilt Vectors Options</h1>
+				<div class="mlr4">
+					<p><label for="vs">Scale: </label><input type="text" size="4" id="vs" name="vs" value="Auto" disabled></p>
+				</div>
+			</div>
 		</div>
 	</div>
 	

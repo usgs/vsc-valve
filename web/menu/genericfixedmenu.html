@@ -1,34 +1,44 @@
-<!-- $Id: genericmenu.html,v 1.2 2006-10-25 22:29:35 tparker Exp $ -->
+<div id="genericFixedBox">
 
-<div id="genericBox">
-
-	<form id="genericForm">
+	<form id="genericFixedForm">
 	
-	<div class="box w140 fl">
+	<div class="box w120 fl">
 		<h1>Channels</h1>
-		<p><select class="w100p" multiple="multiple" size="16" name="selector:ch">
+		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
 		</select></p>
 	</div>
 	
-	<!-- <div class="box w320 fl"> -->
-	<div class="box w360 fl">
-		<h1>Columns</h1>
-		<span id="insertionPoint"></span>
-	</div>
+	<div class="w470 fl">
+		<div class="box w470">
+			<h1>Columns</h1>
+			<span id="columns"></span>
+		</div>		
 		
-	<div class="box w160 fl">
-		<h1 id="collapse_leftOptions">Left Axis Options</h1>
-		<div id="collapseTarget_leftOptions">
-			<p>Scale: <input type="text" size="4" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="4" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+		<div class="box w140 fl">
+			<h1>Line Type</h1>
+			<p><select class="w100p" name="selector:lt">
+			<option value="l">Line</option>
+			<option value="o">Circle</option>
+			<option value="s">Square</option>
+			<option value="*">Star</option>
+			<option value="t">Triangle</option>
+			</select></p>
 		</div>
-	</div>
-
-	<div class="box w160 fl">
-		<h1 id="collapse_rightOptions">Right Axis Options</h1>
-		<div id="collapseTarget_rightOptions">
-			<p>Scale: <input type="text" size="4" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="4" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+		<div class="box w140 fl">
+			<h1>Left Axis Options</h1>
+			<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
 		</div>
-	</div>
+		<div class="box w140 fl">
+			<h1>Right Axis Options</h1>
+			<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+		</div>
+		
+		<div class="box w140 fl">
+			<h1>Ranks</h1>
+			<p><select class="w100p" name="selector:rk">
+			</select></p>
+		</div>
+	</div>	
 				
 	</form>
 </div>

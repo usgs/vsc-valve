@@ -107,8 +107,7 @@ function getSelected(array, text)
 }
 
 /**
- *	Check a form element to see if it's checked or not, and return
- *	T or F.
+ *	Check a form element to see if it's checked or not, and return T or F.
  *  @param {object} cb document object
  *  @returns T or F, so perhaps this isn't really a true boolean
  *  @type boolean

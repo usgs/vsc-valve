@@ -19,7 +19,6 @@ Initial commit.
 <%@ page import="java.io.*" %>
 
 <%
-	System.out.println("Valve3");
 	response.setHeader("Cache-Control", "no-cache");
 	response.setHeader("Pragma", "no-cache");
 	response.setDateHeader("Expires", 0);
@@ -32,7 +31,7 @@ Initial commit.
 		%>
 <html>
 <body>
-<p>Please use the <a href="valve3.html">main user interface</a>.</p>
+<p>Please use the <a href="index.jsp">main user interface</a>.</p>
 </body>
 </html>
 		<%
