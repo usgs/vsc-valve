@@ -32,13 +32,13 @@ Available targets:
 		</copy>
 				
 		<copy todir="${bin-dir}/valve3/WEB-INF/lib">
-			<fileset dir="../USGS/contrib">
+			<fileset dir="../USGS-trunk/contrib">
 				<include name="colt.jar" />
 				<include name="jai_codec.jar" />
 				<include name="jai_core.jar" />
 				<include name="mlibwrapper_jai.jar" />
 			</fileset>
-			<fileset dir="../USGS/lib">
+			<fileset dir="../USGS-trunk/lib">
 				<include name="usgs.jar" />
 			</fileset>
 		</copy>
