@@ -1,50 +1,58 @@
-<project name="USGS VHP Valve3 Web" default="help" basedir=".">
-	<description>USGS VHP Valve3Web Build File</description>
-	<property name="root" location="."/>
-	<property name="bin-dir" value="../valve3-bin"/>
+<project name="Valve3Web" default="help" basedir=".">
+	<description>USGS Valve3Web Build File</description>
+	
+	<property name="dist-basedir" value="../dist"/>
+	<property name="dist-dir" value="Valve3" />
 	
 	<target name="help">
 		<echo>
-Available targets:
+Available targets:			
+help    -- displays this help information
+init    --
+deploy  -- build usgs.jar file
+dist    -- creates a binary distribution
 		</echo>
 	</target>
 	
 	<target name="init">
 	</target>
 	
-	<target name="bin-dist">
-		<delete dir="${bin-dir}/valve3" />
+	<target name="deploy">
+		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+	</target>
+	
+	<target name="dist" depends="deploy">
+		<delete dir="${dist-basedir}/${dist-dir}" />
 		
 		<!-- Create the distribution directory structure -->
-		<mkdir dir="${bin-dir}/valve3/WEB-INF/" />
-		<mkdir dir="${bin-dir}/valve3/WEB-INF/config" />
-		<mkdir dir="${bin-dir}/valve3/WEB-INF/lib" />
-		<mkdir dir="${bin-dir}/valve3/img/" />
-		<mkdir dir="${bin-dir}/valve3/images/" />
-		<mkdir dir="${bin-dir}/valve3/js/" />
-		<mkdir dir="${bin-dir}/valve3/menu/" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/config" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/lib" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/img/" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/images/" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/js/" />
+		<mkdir dir="${dist-basedir}/${dist-dir}/menu/" />
 		
 		<!-- Copy the distribution files -->
-		<copy todir="${bin-dir}/valve3">
-			<fileset dir="${root}/web">
+		<copy todir="${dist-basedir}/${dist-dir}">
+			<fileset dir="./web">
 				<include name="**/**" />
 			</fileset>
 		</copy>
 				
-		<copy todir="${bin-dir}/valve3/WEB-INF/lib">
-			<fileset dir="../USGS-trunk/contrib">
+		<copy todir="${dist-basedir}/${dist-dir}/WEB-INF/lib">
+			<fileset dir="../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="jai_codec.jar" />
 				<include name="jai_core.jar" />
 				<include name="mlibwrapper_jai.jar" />
 			</fileset>
-			<fileset dir="../USGS-trunk/lib">
+			<fileset dir="../USGS/lib">
 				<include name="usgs.jar" />
 			</fileset>
 		</copy>
 
-		<tar destfile="valve3-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
-		<zip destfile="valve3-bin.zip" basedir="${bin-dir}" />	
-	</target>
-	
+		<tar destfile="valve3web-dist.tar.gz" basedir="${dist-basedir}" compression="gzip" />
+		<zip destfile="valve3web-dist.zip" basedir="${dist-basedir}" />	
+	</target>	
 </project>
