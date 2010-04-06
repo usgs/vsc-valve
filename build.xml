@@ -1,39 +1,43 @@
-<project name="Valve3 Classes" default="deploy" basedir=".">
-	<description>USGS Valve Source Build File</description>
+<project name="Valve3" default="compile" basedir=".">
+	<description>USGS Valve3 Build File</description>
 
 	<property name="source" location="."/>
-	<property name="classpath" location="../USGS-trunk/lib/plot.jar;../USGS-trunk/lib/util.jar;../USGS-trunk/lib/math.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/servlet.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/net.jar"/>
-	<property name="jarfile" value="valve3.jar"/>
+	<property name="destination" location="classes"/>
+	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/servlet.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/net.jar"/>
+	<property name="jarfile" value="valve.jar"/>
 
 	<target name="help">
 		<echo>
-Available targets:
-
-compile [default] -- compiles Java code
-jar -- generates new ${jarfile}
+Available targets:			
+help    -- displays this help information
+init    -- 
+clean   -- remove the classes directory
+compile -- compile the source
+jar     -- generates new jarfile
 		</echo>
 	</target>
 	
 	<target name="init">
 	</target>
 
-	<target name="compile" depends="init" description="compile the source">
-		<javac srcdir="${source}" destdir="${source}" classpath="${classpath}" target="1.5" debug="on"/>
+	<target name="clean" description="remove the classes directory">
+		<delete dir="${destination}"/>
+		<mkdir  dir="${destination}"/>
 	</target>
 
-	<target name="jar" depends="compile">
-		<ant antfile="${source}/../USGS-trunk/buildversion.xml" target="version" dir="${source}/../USGS-trunk" inheritAll="true">
-			<property name="version" value="3.3.0"/>
-			<property name="path" value="../Valve3-trunk/gov/usgs/valve3"/>
+	<target name="compile" depends="clean" description="compile the source">
+		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
 			<property name="package" value="gov.usgs.valve3"/>
+			<property name="version" value="3.3.0"/>
+			<property name="srcpath" value="../Valve3/gov/usgs/valve3"/>
+			<property name="destpath" value="../Valve3/${destination}/gov/usgs/valve3"/>
 		</ant>
-		<mkdir dir="${source}/../USGS-trunk/lib"/>
-		<jar destfile="${source}/../USGS-trunk/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>
-		<delete file="../Valve3-trunk/gov/usgs/valve3/Version.class"/>
+		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on"/>
 	</target>
-	
-	<target name="deploy" depends="jar">
-		<ant antfile="../USGS-trunk/build.xml" target="jar" dir="../USGS-trunk" />
+
+	<target name="jar" depends="compile" description="generates new ${jarfile}">
+		<mkdir dir="${source}/../USGS/lib"/>
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>
 	</target>
 
 </project>
