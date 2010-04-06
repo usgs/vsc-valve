@@ -1,11 +1,13 @@
 <project name="Valve3" default="compile" basedir=".">
 	<description>USGS Valve3 Build File</description>
 
+	<property name="package" value="gov.usgs.valve3"/>
+	<property name="version" value="3.3.0"/>
+	<property name="jarfile" value="valve.jar"/>
 	<property name="source" location="."/>
 	<property name="destination" location="classes"/>
 	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/servlet.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/net.jar"/>
-	<property name="jarfile" value="valve.jar"/>
-
+	
 	<target name="help">
 		<echo>
 Available targets:			
@@ -26,13 +28,13 @@ jar     -- generates new jarfile
 	</target>
 
 	<target name="compile" depends="clean" description="compile the source">
-		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
-			<property name="package" value="gov.usgs.valve3"/>
-			<property name="version" value="3.3.0"/>
-			<property name="srcpath" value="../Valve3/gov/usgs/valve3"/>
-			<property name="destpath" value="../Valve3/${destination}/gov/usgs/valve3"/>
-		</ant>
 		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on"/>
+		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+			<property name="package" value="${package}"/>
+			<property name="version" value="${version}"/>
+			<property name="srcpath" value="${source}"/>
+			<property name="destpath" value="${destination}"/>
+		</ant>
 	</target>
 
 	<target name="jar" depends="compile" description="generates new ${jarfile}">
