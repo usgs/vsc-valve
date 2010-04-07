@@ -1,8 +1,9 @@
 <project name="Valve3Web" default="help" basedir=".">
 	<description>USGS Valve3Web Build File</description>
-	
-	<property name="dist-basedir" value="../dist"/>
-	<property name="dist-dir" value="Valve3" />
+
+	<property name="dist-appdir"  value="valve3"/>
+	<property name="dist-tempdir" value="./temp"/>
+	<property name="dist-basedir" value="./dist"/>
 	
 	<target name="help">
 		<echo>
@@ -18,29 +19,32 @@ dist    -- creates a binary distribution
 	</target>
 	
 	<target name="deploy">
-		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+		<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />
 	</target>
 	
 	<target name="dist" depends="deploy">
-		<delete dir="${dist-basedir}/${dist-dir}" />
+		
+		<!-- rebuild the dist dir -->
+		<delete dir="${dist-basedir}"/>
+		<mkdir  dir="${dist-basedir}"/>
 		
 		<!-- Create the distribution directory structure -->
-		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/config" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/WEB-INF/lib" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/img/" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/images/" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/js/" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/menu/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/WEB-INF/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/WEB-INF/config" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/WEB-INF/lib" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/img/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/images/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/js/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/menu/" />
 		
 		<!-- Copy the distribution files -->
-		<copy todir="${dist-basedir}/${dist-dir}">
+		<copy todir="${dist-tempdir}/${dist-appdir}">
 			<fileset dir="./web">
 				<include name="**/**" />
 			</fileset>
 		</copy>
 				
-		<copy todir="${dist-basedir}/${dist-dir}/WEB-INF/lib">
+		<copy todir="${dist-tempdir}/${dist-appdir}/WEB-INF/lib">
 			<fileset dir="../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="jai_codec.jar" />
@@ -52,7 +56,11 @@ dist    -- creates a binary distribution
 			</fileset>
 		</copy>
 
-		<tar destfile="valve3web-dist.tar.gz" basedir="${dist-basedir}" compression="gzip" />
-		<zip destfile="valve3web-dist.zip" basedir="${dist-basedir}" />	
+		<tar destfile="${dist-basedir}/valve3-bin.tar.gz" basedir="${dist-tempdir}" compression="gzip" />
+		<zip destfile="${dist-basedir}/valve3-bin.zip"    basedir="${dist-tempdir}" />
+		
+		<!-- Delete the temporary distribution folder -->
+		<delete dir="${dist-tempdir}" />
+		
 	</target>	
 </project>
