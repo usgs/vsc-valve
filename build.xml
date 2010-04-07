@@ -4,17 +4,17 @@
 	<property name="package" value="gov.usgs.valve3"/>
 	<property name="version" value="3.3.0"/>
 	<property name="jarfile" value="valve.jar"/>
+	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS/contrib/colt.jar;../USGS/contrib/servlet.jar;../USGS/lib/vdx.jar;../USGS/lib/net.jar"/>
 	<property name="source" location="."/>
-	<property name="destination" location="classes"/>
-	<property name="classpath" location="../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/lib/math.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/servlet.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/net.jar"/>
+	<property name="destination" location="./classes"/>	
 	
 	<target name="help">
 		<echo>
 Available targets:			
 help    -- displays this help information
-init    -- 
+init    --
 clean   -- remove the classes directory
-compile -- compile the source
+compile -- compiles the source
 jar     -- generates new jarfile
 		</echo>
 	</target>
@@ -37,7 +37,7 @@ jar     -- generates new jarfile
 		</ant>
 	</target>
 
-	<target name="jar" depends="compile" description="generates new ${jarfile}">
+	<target name="jar" depends="compile" description="generates new jarfile">
 		<mkdir dir="${source}/../USGS/lib"/>
 		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>
 	</target>
