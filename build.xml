@@ -35,6 +35,7 @@ dist    -- creates a binary distribution
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/img/" />
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/images/" />
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/js/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/maps/" />
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/menu/" />
 		
 		<!-- Copy the distribution files -->
