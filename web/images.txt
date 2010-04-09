@@ -1,0 +1,9 @@
+# path, pixel width, pixel height, west, east, south, north
+
+/full/path/to/webapps/valve3/maps/HI.jpg,        3139, 1794, -161.00, -154.00, 18.50, 22.50
+/full/path/to/webapps/valve3/maps/BI_NE.jpg,     2401, 2268, -155.50, -154.78, 19.60, 20.28
+/full/path/to/webapps/valve3/maps/BI_NW.jpg,     2401, 2721, -156.10, -155.50, 19.60, 20.28
+/full/path/to/webapps/valve3/maps/BI_SW.jpg,     2390, 2868, -156.10, -155.50, 18.88, 19.60
+/full/path/to/webapps/valve3/maps/BI_SE.jpg,     2392, 2392, -155.50, -154.78, 18.88, 19.60
+/full/path/to/webapps/valve3/maps/ML_SUM.jpg,    2380, 2578, -155.73, -155.53, 19.40, 19.62
+/full/path/to/webapps/valve3/maps/KI_SUM.jpg,    1991, 1494, -155.31, -155.23, 19.38, 19.44

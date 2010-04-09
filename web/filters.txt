@@ -1,8 +1,15 @@
-#
-# Valve3 Example Filter file
-#
-# $Id: filters.txt,v 1.1 2005-09-03 19:18:35 dcervelli Exp $
+# Geographic Filter: West, East, South, North
 
-USA (Lower 48):-125,-65,25,50
-
-Mount St Helens:-122.35,-122,46.1,46.3
+Big Island:-156.10, -154.78, 18.88, 20.28
+North Half:-156.10, -154.78, 19.60, 20.28
+South Half:-156.10, -154.78, 18.88, 19.60
+Kilauea Summit:-155.31, -155.23, 19.38, 19.44
+Kilauea South Flank:-155.50, -154.90, 19.15, 19.47
+Kilauea ERZ:-155.20, -154.80, 19.35, 19.55
+Kilauea SWRZ:-155.46, -155.25, 19.15, 19.43
+Mauna Loa Summit:-155.73, -155.53, 19.40, 19.62
+Mauna Loa SE Flank:-155.75, -155.25, 19.25, 19.60
+Mauna Loa SWRZ:-155.80, -155.60, 19.15, 19.45
+Kaoiki:-155.55, -155.30, 19.30, 19.55
+Loihi:-155.40, -155.10, 18.60, 19.10
+Hawaiian Islands:-161.00, -154.00, 18.50, 22.50
