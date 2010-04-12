@@ -19,7 +19,6 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +27,7 @@ import java.util.Map;
  *
  * @author Dan Cervelli
  */
-public class WavePlotter extends Plotter {
+public class WavePlotter extends RawDataPlotter {
 	private enum PlotType {
 		WAVEFORM, SPECTRA, SPECTROGRAM;
 		
@@ -44,11 +43,6 @@ public class WavePlotter extends Plotter {
 		}
 	}
 	
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	private String ch;
-	private double startTime;
-	private double endTime;
 	private PlotType plotType;
 	private boolean removeBias;
 	private FilterType filterType;
@@ -64,106 +58,98 @@ public class WavePlotter extends Plotter {
 	private int xLabel;
 	private String color;
 	private Map<Integer, SliceWave> channelDataMap;	
-	private static Map<Integer, Channel> channelsMap;
-	int compCount;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
 	/**
 	 * Default constructor
 	 */
-	public WavePlotter()
-	{}
+	public WavePlotter(){
+		super();
+	}
 	
 	/**
 	 * Initialize internal data from PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getInputs() throws Valve3Exception {
+	protected void getInputs(PlotComponent component) throws Valve3Exception {
 		
-		ch = component.get("ch");
-		if (ch == null || ch.length() <= 0) {
-			throw new Valve3Exception("Illegal channel.");
-		}
-		
-		endTime	= component.getEndTime();
-		if (Double.isNaN(endTime)) {
-			throw new Valve3Exception("Illegal end time.");
-		}
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime)) {
-			throw new Valve3Exception("Illegal start time.");
-		}
-
+		parseCommonParameters(component);
 		if (endTime - startTime > MAX_DATA_REQUEST)
 			throw new Valve3Exception("Maximum waveform request is 24 hours.");
 		
-		plotType	= PlotType.fromString(component.get("plotType"));
+		String pt = component.getString("plotType");
+		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
+			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
 		
-		removeBias = false;
-		String clip = component.get("rb");
-		if (clip != null && clip.toUpperCase().equals("T"))
-			removeBias = true;
+		try{
+			removeBias = component.getBoolean("rb");
+		} catch (Valve3Exception ex){
+			removeBias = false;
+		}
 		
-		filterType = FilterType.fromString(component.get("ftype"));
-		minHz = -1;
-		maxHz = -1;
-		try {
-			minHz = Double.parseDouble(component.get("fminhz"));
-			maxHz = Double.parseDouble(component.get("fmaxhz"));
-		} catch (Exception e) {}
+		String ft = component.get("ftype");
+		if(ft!=null){
+			if(!(ft.equals("L") || ft.equals("H") || ft.equals("B") || ft.equals("N"))){
+				throw new Valve3Exception("Illegal filter type: " + ft);
+			}
+			filterType = FilterType.fromString(ft);
+		}
 		
-		minFreq = -1;
-		maxFreq = -1;
-		try {
-			minFreq = Double.parseDouble(component.get("spminf"));
-			maxFreq = Double.parseDouble(component.get("spmaxf"));
-		} catch (Exception e) {}
+		minHz = component.getDouble("fminhz");
+		maxHz = component.getDouble("fmaxhz");
 		
-		logPower = false;
-		String lp = component.get("splp");
-		if (lp != null && lp.toUpperCase().equals("T"))
-			logPower = true;
+		try{
+			logPower = component.getBoolean("splp");
+		} catch (Valve3Exception ex){
+			logPower = false;
+		}
 		
-		logFreq = false;
-		String lf = component.get("splf");
-		if (lf != null && lf.toUpperCase().equals("T"))
-			logFreq = true;
+		try{
+			logFreq = component.getBoolean("splf");
+		} catch (Valve3Exception ex){
+			logFreq = false;
+		}
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM) {
+			minFreq = component.getDouble("spminf");
+			maxFreq = component.getDouble("spmaxf");
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
-				throw new Valve3Exception("Illegal minimum/maximum frequencies.");
+				throw new Valve3Exception("Illegal minimum/maximum frequencies: " + minFreq + " and " + maxFreq);
 		}
 		
-		yLabel = 1;
-		try {
-			yLabel = Integer.parseInt(component.get("yLabel"));
-		} catch (Exception e){}
-		
-		xLabel = 1;
-		try {
-			xLabel = Integer.parseInt(component.get("xLabel"));
-		} catch (Exception e){}
+		try{
+			yLabel = component.getInt("yLabel");
+		} catch (Valve3Exception ex){
+			yLabel = 1;
+		}
 
-		labels = 0;
-		try {
-			labels = Integer.parseInt(component.get("labels"));
-		} catch (Exception e){}
+		try{
+			xLabel = component.getInt("xLabel");
+		} catch (Valve3Exception ex){
+			xLabel = 1;
+		}
 		
-		color = component.get("color");
-		if (color == null)
+		try{
+			labels = component.getInt("labels");
+		} catch (Valve3Exception ex){
+			labels = 0;
+		}
+		
+		try{
+			color = component.getString("color");
+		} catch (Valve3Exception ex){
 			color = "A";
+		}
 	}
 
 	/**
 	 * Gets binary data from VDX, performs filtering if needed
 	 * @throws Valve3Exception
 	 */
-	public void getData() throws Valve3Exception {
+	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
 		
@@ -243,7 +229,7 @@ public class WavePlotter extends Plotter {
 	 * Initialize SliceWaveRenderer and add it to plot
 	 * @throws Valve3Exception
 	 */
-	private void plotWaveform(Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
+	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		
 		SliceWaveRenderer wr = new SliceWaveRenderer();
 		wr.setRemoveBias(removeBias);
@@ -317,7 +303,7 @@ public class WavePlotter extends Plotter {
 	 * Initialize SpectraRenderer and add it to plot
 	 * @throws Valve3Exception
 	 */
-	private void plotSpectra(Channel channel, SliceWave wave, int displayCount, int dh) {
+	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
 		SpectraRenderer sr = new SpectraRenderer();
 		sr.setWave(wave);
 		sr.setAutoScale(true);
@@ -338,7 +324,7 @@ public class WavePlotter extends Plotter {
 	 * Initialize SpectrogramRenderer and add it to plot
 	 * @throws Valve3Exception
 	 */
-	private void plotSpectrogram(Channel channel, SliceWave wave, int displayCount, int dh) {
+	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
 		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
 		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		sr.setOverlap(0);
@@ -392,7 +378,7 @@ public class WavePlotter extends Plotter {
 	 * Loop through the list of channels and create plots
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
 		/// calculate how many graphs we are going to build (number of channels)
 		compCount	= channelDataMap.size();
@@ -414,13 +400,13 @@ public class WavePlotter extends Plotter {
 			
 			switch(plotType) {
 				case WAVEFORM:
-					plotWaveform(channel, wave, displayCount, dh);
+					plotWaveform(v3Plot, component, channel, wave, displayCount, dh);
 					break;
 				case SPECTRA:
-					plotSpectra(channel, wave, displayCount, dh);
+					plotSpectra(v3Plot, component, channel, wave, displayCount, dh);
 					break;
 				case SPECTROGRAM:
-					plotSpectrogram(channel, wave, displayCount, dh);
+					plotSpectrogram(v3Plot, component, channel, wave, displayCount, dh);
 					break;
 			}
 			displayCount++;
@@ -445,44 +431,23 @@ public class WavePlotter extends Plotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
 		channelsMap	= getChannels(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 		
-		plotData();
+		plotData(v3p, comp);
 		
-		Plot plot = v3Plot.getPlot();
+		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
+		plot.writePNG(v3p.getLocalFilename());
 	}
 	
 	/**
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		component = comp;
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 		return wave.toCSV();
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> chs = cl.getTextData(params);
-		pool.checkin(cl);
-		channels = Channel.fromStringsToMap(chs);
-		return channels;
 	}
 }

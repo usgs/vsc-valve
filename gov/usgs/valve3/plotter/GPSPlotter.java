@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
@@ -49,7 +48,7 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  *
  * @author Dan Cervelli, Loren Antolik
  */
-public class GPSPlotter extends Plotter {
+public class GPSPlotter extends RawDataPlotter {
 	
 	private enum PlotType {		
 		TIME_SERIES, VELOCITY_MAP, DISPLACEMENT_MAP;		
@@ -67,81 +66,45 @@ public class GPSPlotter extends Plotter {
 	}
 	
 	// variables acquired from the PlotComponent
-	private String		ch;
-	private double		startTime,endTime;
 	private PlotType	plotType;
-	private int			rk;
 	private String		bl;
 	private boolean		se,vs,hs;
 
 	// variables used in this class	
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	int compCount;
+
 	private GPSData baselineData;
 	private Map<Integer, GPSData> channelDataMap;	
-	private static Map<Integer, Channel> channelsMap;
-	private static Map<Integer, Rank> ranksMap;
-	private static List<Column> columnsList;
-	
-	private String leftUnit;
-	private String rightUnit;
-	private Map<Integer, String> axisMap;
-	private int leftLines;
-	private int leftTicks;
 	
 	private int columnsCount;
 	private boolean selectedCols[];
 	private String legendsCols[];
-	private String channelLegendsCols[];
 	
-	public final boolean ranks	= true;
-	
-	protected Logger logger;
-
 	/**
 	 * Default constructor
 	 */
 	public GPSPlotter() {
-		logger		= Logger.getLogger("gov.usgs.vdx");		
+		super();
+		shape=null;
 	}
 	
 	/**
 	 * Initialize internal data from PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getInputs() throws Valve3Exception {
+	public void getInputs(PlotComponent component) throws Valve3Exception {
 		
-		ch = component.get("ch");
-		if (ch == null || ch.length() <= 0) {
-			throw new Valve3Exception("Illegal channel.");
-		}
-		
-		rk = Util.stringToInt(component.get("rk"));
-		if (rk < 0) {
-			throw new Valve3Exception("Illegal rank.");
-		}
-		
-		endTime	= component.getEndTime();
-		if (Double.isNaN(endTime)) {
-			throw new Valve3Exception("Illegal end time.");
-		}
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime)) {
-			throw new Valve3Exception("Illegal start time.");
-		}		
-		
-		bl = component.get("bl");
+		parseCommonParameters(component);		
+		rk = component.getInt("rk");	
+		bl = component.getString("bl");
 		if (bl.equals("[none]")) {
 			bl = null;
 		}
 		
-		plotType	= PlotType.fromString(component.get("plotType"));
+		String pt = component.getString("plotType");
+		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
+			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
-		
 		switch(plotType) {		
 		case TIME_SERIES:			
 			columnsCount		= columnsList.size();
@@ -156,7 +119,7 @@ public class GPSPlotter extends Plotter {
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				boolean display	= Util.stringToBoolean(component.get(column.name));
+				boolean display	= Util.stringToBoolean(component.getString(column.name));
 				selectedCols[i]	= display;
 				legendsCols[i]	= column.description;
 				if (display) {
@@ -184,10 +147,9 @@ public class GPSPlotter extends Plotter {
 			break;
 		
 		case VELOCITY_MAP:
-			se = component.get("se").equals("T");
-			vs = component.get("vs").equals("T");
-			hs = component.get("hs").equals("T");
-			
+			se = component.getBoolean("se");
+			vs = component.getBoolean("vs");
+			hs = component.getBoolean("hs");
 			break;
 		}
 	}
@@ -196,7 +158,7 @@ public class GPSPlotter extends Plotter {
 	 * Gets binary data from VDX
 	 * @throws Valve3Exception
 	 */
-	public void getData() throws Valve3Exception {
+	public void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
 		
@@ -253,119 +215,7 @@ public class GPSPlotter extends Plotter {
 		pool.checkin(client);
 	}
 	
-	/**
-	 * Initialize MatrixRenderer for left plot axis
-	 * @throws Valve3Exception
-	 */
-	private MatrixRenderer getLeftMatrixRenderer(Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index) throws Valve3Exception {	
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 
-		double yMin = 1E300;
-		double yMax = -1E300;
-		boolean allowExpand = true;
-			
-		mr.setAllVisible(false);
-
-		if (axisMap.get(index).equals("L")) {
-			mr.setVisible(index, true);
-			if (component.isAutoScale("ysL")) {
-				double buff;
-				yMin	= Math.min(yMin, gdm.min(index + 2));
-				yMax	= Math.max(yMax, gdm.max(index + 2));
-				buff	= (yMax - yMin) * 0.05;
-				yMin	= yMin - buff;
-				yMax	= yMax + buff;
-				
-				/*
-				// least squares method of computing y axis boundaries
-				double[] lsq	= gdm.leastSquares(index + 2);
-				yMin	= lsq[0] * gdm.getStartTime() + lsq[1];
-				yMax	= lsq[0] * gdm.getEndTime() + lsq[1];
-				if (yMin > yMax) {
-					double temp = yMin;
-					yMin		= yMax;
-					yMax		= temp;
-				}
-				double dy	= Math.max(0.02, Math.abs((yMax - yMin) * 1.8));
-				yMin		= yMin - dy;
-				yMax		= yMax + dy;
-				*/
-
-			} else {
-				double[] ys = component.getYScale("ysL", yMin, yMax);
-				yMin = ys[0];
-				yMax = ys[1];
-				allowExpand = false;
-				if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-					throw new Valve3Exception("Illegal axis values.");
-			}
-		}
-		
-		mr.setExtents(startTime, endTime, yMin, yMax);	
-		mr.createDefaultAxis(8, 8, false, allowExpand);
-		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftUnit);
-		mr.createDefaultPointRenderers();
-		mr.createDefaultLegendRenderer(channelLegendsCols);
-		leftTicks = mr.getAxis().leftTicks.length;
-		
-		if (displayCount + 1 == compCount) {
-			mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");	
-		}
-		
-		return mr;
-	}
-
-	/**
-	 * Initialize MatrixRenderer for right plot axis
-	 * @throws Valve3Exception
-	 */
-	private MatrixRenderer getRightMatrixRenderer(Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index) throws Valve3Exception {
-		
-		if (rightUnit == null)
-			return null;
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-
-		double yMin = 1E300;
-		double yMax = -1E300;
-			
-		mr.setAllVisible(false);
-
-		if (axisMap.get(index).equals("R")) {
-			mr.setVisible(index, true);
-			if (component.isAutoScale("ysL")) {
-				double buff;
-				yMin	= Math.min(yMin, gdm.min(index + 2));
-				yMax	= Math.max(yMax, gdm.max(index + 2));
-				buff	= (yMax - yMin) * 0.05;
-				yMin	= yMin - buff;
-				yMax	= yMax + buff;
-
-			} else {
-				double[] ys = component.getYScale("ysL", yMin, yMax);
-				yMin = ys[0];
-				yMax = ys[1];
-				if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-					throw new Valve3Exception("Illegal axis values.");
-			}
-		}
-		
-		mr.setExtents(startTime, endTime, yMin, yMax);
-		
-		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, leftTicks, false), null);
-		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);
-		mr.setAxis(ar);
-		mr.getAxis().setRightLabelAsText(rightUnit);
-		mr.createDefaultPointRenderers(leftLines);
-		mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
-		
-		return mr;
-	}
 	
 	/**
 	 * Initialize DataRenderer to plot time series and adds renderer to plot
@@ -437,7 +287,7 @@ public class GPSPlotter extends Plotter {
 	 * Initialize MapRenderer to plot map and list of EllipseVectorRenderer2 
 	 * elements which plot a station's movement
 	 */
-	private void plotVelocityMap() {
+	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		
@@ -461,7 +311,7 @@ public class GPSPlotter extends Plotter {
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
+		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
 		
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
@@ -587,7 +437,7 @@ public class GPSPlotter extends Plotter {
 	 * Initialize MatrixRenderers for left and right axis, adds them to plot
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
 		switch (plotType) {
 			case TIME_SERIES:
@@ -637,25 +487,37 @@ public class GPSPlotter extends Plotter {
 						channelLegendsCols[i] = String.format("%s%s %s %s", channel.getCode(), baselineLegend, rankLegend, legendsCols[i]);
 					}
 					
-					// create an individual matrix renderer for each component selected
-					for (int i = 0; i < columnsList.size(); i++) {
-						if (selectedCols[i]) {
-							MatrixRenderer leftMR	= getLeftMatrixRenderer(channel, gdm, displayCount, dh, i);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(channel, gdm, displayCount, dh, i);
-							v3Plot.getPlot().addRenderer(leftMR);
-							if (rightMR != null)
-								v3Plot.getPlot().addRenderer(rightMR);
-							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-							component.setTranslationType("ty");
-							v3Plot.addComponent(component);
-							displayCount++;	
+					if(isPlotComponentsSeparately()){
+						// create an individual matrix renderer for each component selected
+						for (int i = 0; i < columnsList.size(); i++) {
+							if (selectedCols[i]) {
+								MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+								MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+								v3Plot.getPlot().addRenderer(leftMR);
+								if (rightMR != null)
+									v3Plot.getPlot().addRenderer(rightMR);
+								component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+								component.setTranslationType("ty");
+								v3Plot.addComponent(component);
+								displayCount++;	
+							}
 						}
+					} else {
+						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+						MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+						v3Plot.getPlot().addRenderer(leftMR);
+						if (rightMR != null)
+							v3Plot.getPlot().addRenderer(rightMR);
+						component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+						component.setTranslationType("ty");
+						v3Plot.addComponent(component);
+						displayCount++;
 					}
 				}
 				break;
 				
 			case VELOCITY_MAP:
-				plotVelocityMap();
+				plotVelocityMap(v3Plot, component);
 				break;
 		}
 		
@@ -675,72 +537,16 @@ public class GPSPlotter extends Plotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 		
-		plotData();
+		plotData(v3p, comp);
 		
-		Plot plot = v3Plot.getPlot();
+		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> chs = cl.getTextData(params);
-		pool.checkin(cl);
-		channels = Channel.fromStringsToMap(chs);
-		return channels;
-	}
-	
-	/**
-	 * Initialize list of ranks for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Rank> getRanks(String source, String client) {
-		Map<Integer, Rank> ranks;
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "ranks");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> rks = cl.getTextData(params);
-		pool.checkin(cl);
-		ranks = Rank.fromStringsToMap(rks);
-		return ranks;
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static List<Column> getColumns(String source, String client) {
-		List<Column> columns;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "columns");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> cols		= cl.getTextData(params);
-		pool.checkin(cl);
-		columns					= Column.fromStringsToList(cols);
-		return columns;
+		plot.writePNG(v3p.getLocalFilename());
 	}
 }

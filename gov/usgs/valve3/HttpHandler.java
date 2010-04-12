@@ -15,5 +15,5 @@ public interface HttpHandler
 	 * @param request
 	 * @return
 	 */
-	public Object handle(HttpServletRequest request);
+	public Object handle(HttpServletRequest request) throws Valve3Exception;
 }

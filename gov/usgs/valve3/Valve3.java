@@ -74,6 +74,7 @@ public class Valve3 implements ServletContextListener
 	
 	private GeoImageSet imageSet;
 	private GeoLabelSet labelSet;
+	private ConfigFile defaults;
 	
 	private ResultDeleter resultDeleter;
 
@@ -116,6 +117,7 @@ public class Valve3 implements ServletContextListener
 		if (ics != null)
 			imageSet.setMaxLoadedImagesSize(Integer.parseInt(ics));
 		labelSet = new GeoLabelSet(config.getString("labelIndex"));
+		defaults = config.getSubConfig("defaults");
 	}
 	
 	/**
@@ -143,6 +145,13 @@ public class Valve3 implements ServletContextListener
 			menuHandler = new MenuHandler(getDataHandler());
 		
 		return menuHandler;
+	}
+
+	/**
+	 * Getter for default values configuration
+	 */
+	public ConfigFile getDefaults(){
+		return defaults;
 	}
 	
 	/**

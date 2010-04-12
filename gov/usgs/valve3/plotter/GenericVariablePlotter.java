@@ -31,43 +31,38 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * @author Tom Parker
  */
-public class GenericVariablePlotter extends Plotter
+public class GenericVariablePlotter extends RawDataPlotter
 {
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	private double startTime;
-	private double endTime;
+
 	private GenericDataMatrix data;
-	private String channel;
 	
 	private String leftUnit;
 	private List<Column> leftColumns;
 	private String rightUnit;
 	private List<Column> rightColumns;
-	
-	public final boolean ranks	= true;
 
 	/**
 	 * Default constructor
 	 */
-	public GenericVariablePlotter()
-	{}
+	public GenericVariablePlotter(){
+		super();
+	}
 
 	/**
 	 * Gets binary data from VDX server.
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception
+	protected void getData(PlotComponent component) throws Valve3Exception
 	{
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
 		params.put("source", vdxSource);
 		params.put("action", "data");
-		params.put("cid", channel);
+		params.put("cid", ch);
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		params.put("selectedTypes", component.get("selectedTypes"));
+		params.put("selectedTypes", component.getString("selectedTypes"));
 
 		data = (GenericDataMatrix)client.getBinaryData(params);
 		pool.checkin(client);
@@ -83,22 +78,12 @@ public class GenericVariablePlotter extends Plotter
 	 * Initialize internal data from PlotComponent component
 	 * @throws Valve3Exception
 	 */
-	private void getInputs() throws Valve3Exception
+	protected void getInputs(PlotComponent component) throws Valve3Exception
 	{
-		
-		channel = component.get("ch");
-		if (channel == null || channel.length() <= 0)
-			throw new Valve3Exception("Illegal channel found in plotter.");
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time found in plotter.");
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time found in plotter.");
-		
-		String[] types = component.get("dataTypes").split("\\$");
-		String[] selectedTypes = component.get("selectedTypes").split(":");
+		parseCommonParameters(component);
+		//ToDo: check for one channel in ch only
+		String[] types = component.getString("dataTypes").split("\\$");
+		String[] selectedTypes = component.getString("selectedTypes").split(":");
 		int c = 0;
 		for (int i = 0; i<types.length; i++)
 		{
@@ -166,7 +151,7 @@ public class GenericVariablePlotter extends Plotter
 	 * Initialize MatrixRenderer for left plot axis
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getLeftMatrixRenderer()
+	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component)
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -202,7 +187,7 @@ public class GenericVariablePlotter extends Plotter
 	 * Initialize MatrixRenderer for right plot axis
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getRightMatrixRenderer()
+	private MatrixRenderer getRightMatrixRenderer(PlotComponent component)
 	{
 		if (rightUnit == null)
 			return null;
@@ -246,10 +231,10 @@ public class GenericVariablePlotter extends Plotter
 	 * adds them to plot
 	 * @throws Valve3Exception
 	 */
-	public void plotData()
+	public void plotData(Valve3Plot v3Plot, PlotComponent component)
 	{
-		MatrixRenderer leftMR = getLeftMatrixRenderer();
-		MatrixRenderer rightMR = getRightMatrixRenderer();
+		MatrixRenderer leftMR = getLeftMatrixRenderer(component);
+		MatrixRenderer rightMR = getRightMatrixRenderer(component);
 		v3Plot.getPlot().addRenderer(leftMR);
 		if (rightMR != null)
 			v3Plot.getPlot().addRenderer(rightMR);
@@ -267,22 +252,19 @@ public class GenericVariablePlotter extends Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
 	{
-				
-		v3Plot = v3p;
-		component = comp;
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 
-		Plot plot = v3Plot.getPlot();
+		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
 		
-		plotData();
+		plotData(v3p, comp);
 
-		v3Plot.addComponent(component);
+		v3p.addComponent(comp);
 		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
-		v3Plot.setFilename(PlotHandler.getRandomFilename());
-		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
+		v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
+		v3p.setFilename(PlotHandler.getRandomFilename());
+		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3p.getFilename());
 	}
 
 	/**
@@ -300,9 +282,8 @@ public class GenericVariablePlotter extends Plotter
 //		menu = new GenericMenu(client.getTextData(params));
 //		pool.checkin(client);
 		
-		component = comp;
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 		DoubleMatrix2D d = data.getData();
 		StringBuffer sb = new StringBuffer();
 		for (int i=0; i<d.rows(); i++)
@@ -315,5 +296,4 @@ public class GenericVariablePlotter extends Plotter
 			
 		return sb.toString();
 	}
-
 }

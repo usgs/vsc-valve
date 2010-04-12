@@ -63,6 +63,20 @@ abstract public class Plotter
 	{
 		throw new Valve3Exception("Data export not available for this data source.");
 	}
+	
+	
+	/**
+	 * Returns flag if plotter output several components separately or as one plot
+	 * @return boolean flag
+	 */
+	public boolean isPlotComponentsSeparately(){
+		String value = plotterConfig.getString("plotComponentsSeparately");
+		if(value==null || !value.equals("true")){
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	/**
 	 * renders PlotComponent in given plot

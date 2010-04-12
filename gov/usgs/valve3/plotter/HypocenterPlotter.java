@@ -50,7 +50,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * @author Dan Cervelli
  */
-public class HypocenterPlotter extends Plotter {
+public class HypocenterPlotter extends RawDataPlotter {
 	
 	private enum PlotType {
 		MAP, COUNTS;
@@ -94,11 +94,6 @@ public class HypocenterPlotter extends Plotter {
 		}
 	}
 
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	private double startTime;
-	private double endTime;
-	private int rk;
 	private GeoRange range;
 	private double minDepth, maxDepth;
 	private double minMag, maxMag;
@@ -117,17 +112,12 @@ public class HypocenterPlotter extends Plotter {
 	private DateFormat dateFormat;
 	private int leftTicks;
 	
-	public final boolean ranks	= true;
-	private static Map<Integer, Rank> ranksMap;
-	
-	protected Logger logger;
-
 	/**
 	 * Default constructor
 	 */
 	public HypocenterPlotter() {
+		super();
 		dateFormat	= new SimpleDateFormat("yyyy-MM-dd");
-		logger		= Logger.getLogger("gov.usgs.vdx");	
 	}
 
 	/**
@@ -135,13 +125,10 @@ public class HypocenterPlotter extends Plotter {
 	 * 
 	 * @throws Valve3Exception
 	 */
-	private void getInputs() throws Valve3Exception {
+	protected void getInputs(PlotComponent component) throws Valve3Exception {
 		
-		rk = Util.stringToInt(component.get("rk"));
-		if (rk < 0) {
-			throw new Valve3Exception("Illegal rank.");
-		}
-		
+		rk = component.getInt("rk");
+	
 		endTime = component.getEndTime();
 		if (Double.isNaN(endTime))
 			throw new Valve3Exception("Illegal end time.");
@@ -150,20 +137,28 @@ public class HypocenterPlotter extends Plotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
-		plotType	= PlotType.fromString(component.get("plotType"));
+		String pt = component.getString("plotType");
+		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
+			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
 		
-		double w = Util.stringToDouble(component.get("west"), -999);
-		double e = Util.stringToDouble(component.get("east"), -999);
-		double s = Util.stringToDouble(component.get("south"), -999);
-		double n = Util.stringToDouble(component.get("north"), -999);
-		if (s >= n || s < -90 || n > 90 || w > 360 || w < -360 || e > 360 || e < -360) {
-			throw new Valve3Exception("Illegal area of interest.");
-		} else {		
-			range	= new GeoRange(w, e, s, n);
-		}
+		double w = component.getDouble("west");
+		if (w > 360 || w < -360)
+			throw new Valve3Exception("Illegal area of interest: w=" +w);
+		double e = component.getDouble("east");
+		if (e > 360 || e < -360)
+			throw new Valve3Exception("Illegal area of interest: e=" +e);
+		double s = component.getDouble("south");
+		if (s < -90)
+			throw new Valve3Exception("Illegal area of interest: s=" +s);
+		double n = component.getDouble("north");
+		if (n > 90)
+			throw new Valve3Exception("Illegal area of interest: n=" +n);
+		if(s>=n){
+			throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
+		}		
+		range	= new GeoRange(w, e, s, n);
 		
 		minMag		= Util.stringToDouble(component.get("minMag"), -Double.MAX_VALUE);
 		maxMag		= Util.stringToDouble(component.get("maxMag"), Double.MAX_VALUE);
@@ -200,7 +195,7 @@ public class HypocenterPlotter extends Plotter {
 		switch (plotType) {
 		
 		case MAP:			
-			axes		= Axes.fromString(component.get("axes"));
+			axes		= Axes.fromString(component.getString("axes"));
 			if (axes == null)
 				throw new Valve3Exception("Illegal axes type.");
 
@@ -223,7 +218,7 @@ public class HypocenterPlotter extends Plotter {
 			if ((endTime - startTime) / bin.toSeconds() > 10000)
 				throw new Valve3Exception("Bin size too small.");
 
-			rightAxis	= RightAxis.fromString(component.get("cntsAxis"));
+			rightAxis	= RightAxis.fromString(component.getString("cntsAxis"));
 			if (rightAxis == null)
 				throw new Valve3Exception("Illegal counts axis option.");
 			
@@ -236,7 +231,7 @@ public class HypocenterPlotter extends Plotter {
 	 * 
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception {
+	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -289,7 +284,7 @@ public class HypocenterPlotter extends Plotter {
 	 * 
 	 * @param plot
 	 */
-	private BasicFrameRenderer plotMapView(Plot plot) {
+	private BasicFrameRenderer plotMapView(Plot plot, PlotComponent component) throws Valve3Exception {
 		
 		// TODO: make projection variable
 		TransverseMercator proj = new TransverseMercator();
@@ -299,7 +294,7 @@ public class HypocenterPlotter extends Plotter {
 		hypos.project(proj);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		int mh = Integer.parseInt(component.get("mh"));
+		int mh = component.getInt("mh");
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), mh);
 
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
@@ -349,14 +344,14 @@ public class HypocenterPlotter extends Plotter {
 	 * Generate PNG image to local file.
 	 * 
 	 */
-	private void plotMap(Rank rank) {
+	private void plotMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
 		switch (axes) {
 		case MAP_VIEW:
-			base = plotMapView(v3Plot.getPlot());
+			base = plotMapView(v3Plot.getPlot(), component);
 			base.createEmptyAxis();
 			base.getAxis().setBottomLabelAsText("Longitude");
 			base.getAxis().setLeftLabelAsText("Latitude");
@@ -406,7 +401,7 @@ public class HypocenterPlotter extends Plotter {
 	 * Initialize HistogramRenderer and add it to plot.
 	 * Generate PNG image to local file.
 	 */
-	private void plotCounts(Rank rank) {
+	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
 
 		HistogramRenderer hr = new HistogramRenderer(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -463,7 +458,7 @@ public class HypocenterPlotter extends Plotter {
 		v3Plot.addComponent(component);	
 	}
 	
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
 		// setup the display for the legend
 		Rank rank	= new Rank();
@@ -475,11 +470,11 @@ public class HypocenterPlotter extends Plotter {
 
 		switch (plotType) {
 		case MAP:
-			plotMap(rank);
+			plotMap(v3Plot, component, rank);
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			break;
 		case COUNTS:
-			plotCounts(rank);
+			plotCounts(v3Plot, component, rank);
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			break;
 		}		
@@ -491,46 +486,25 @@ public class HypocenterPlotter extends Plotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
 		ranksMap	= getRanks(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		getInputs(comp);
+		getData(comp);
 
-		plotData();
+		plotData(v3p, comp);
 				
-		Plot plot = v3Plot.getPlot();
+		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
+		plot.writePNG(v3p.getLocalFilename());
 	}
 
 	/**
 	 * @return CSV string of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent c) throws Valve3Exception {
-		component	= c;
-		
-		getInputs();
-		getData();
+	
+		getInputs(c);
+		getData(c);
 		
 		return hypos.toCSV();
-	}
-	
-	/**
-	 * Initialize list of ranks for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Rank> getRanks(String source, String client) {
-		Map<Integer, Rank> ranks;
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "ranks");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> rks = cl.getTextData(params);
-		pool.checkin(cl);
-		ranks = Rank.fromStringsToMap(rks);
-		return ranks;
 	}
 }

@@ -1,7 +1,10 @@
 package gov.usgs.valve3;
 
+import gov.usgs.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +18,7 @@ public class ActionHandler implements HttpHandler
 {
 	protected Map<String, HttpHandler> handlers;
 	protected String key;
+	private Logger logger;	
 
 	
 	/**
@@ -23,6 +27,7 @@ public class ActionHandler implements HttpHandler
 	 */
 	public ActionHandler(String k)
 	{
+		logger = Log.getLogger("gov.usgs.valve3");
 		key = k;
 		handlers = new HashMap<String, HttpHandler>();
 	}
@@ -40,13 +45,21 @@ public class ActionHandler implements HttpHandler
 	 * apply action with name containing in the 'key' field to http requests.
 	 * See {@link HttpHandler}
 	 */
-	public Object handle(HttpServletRequest request)
+	public Object handle(HttpServletRequest request) throws Valve3Exception
 	{
 		System.out.println(request.getQueryString());
 		String action = request.getParameter(key);
-		if (action == null)
-			return null;
-		
+		if (action == null){
+			action = Valve3.getInstance().getDefaults().getString("parameter."+key);
+			if(action==null){
+				if(key.equals("a"))
+				action="plot";
+			}
+			if(action==null){
+				throw new Valve3Exception("Can't find defaults for parameter " + key);
+			}
+			logger.info("Parameter "+ key +" was set to default value");
+		}
 		HttpHandler handler = handlers.get(action);
 		if (handler == null)
 			return null;

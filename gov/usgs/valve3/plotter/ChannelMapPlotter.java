@@ -42,20 +42,22 @@ public class ChannelMapPlotter extends Plotter
 	 */
 	private void getInputs() throws Valve3Exception
 	{
-		try
-		{
-			double w = Double.parseDouble(component.get("west"));
-			double e = Double.parseDouble(component.get("east"));
-			double s = Double.parseDouble(component.get("south"));
-			double n = Double.parseDouble(component.get("north"));
-			if (s >= n || s < -90 || n > 90 || w > 360 || w < -360 || e > 360 || e < -360)
-				throw new Valve3Exception("Illegal area of interest.");
-			range = new GeoRange(w, e, s, n);
+		double w = component.getDouble("west");
+		if (w > 360 || w < -360)
+			throw new Valve3Exception("Illegal area of interest: w=" +w);
+		double e = component.getDouble("east");
+		if (e > 360 || e < -360)
+			throw new Valve3Exception("Illegal area of interest: e=" +e);
+		double s = component.getDouble("south");
+		if (s < -90)
+			throw new Valve3Exception("Illegal area of interest: s=" +s);
+		double n = component.getDouble("north");
+		if (n > 90)
+			throw new Valve3Exception("Illegal area of interest: n=" +n);
+		if(s>=n){
+			throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
 		}
-		catch (Exception e)
-		{
-			throw new Valve3Exception("Illegal filter settings.");
-		}
+		range = new GeoRange(w, e, s, n);
 	}
 	
 	/**
@@ -96,7 +98,7 @@ public class ChannelMapPlotter extends Plotter
 	 * Generate PNG map image to local file.
 	 * @throws Valve3Exception
 	 */
-	private void plotMap()
+	private void plotMap() throws Valve3Exception
 	{
 		Plot plot = v3Plot.getPlot();
 		TransverseMercator proj = new TransverseMercator();
@@ -104,7 +106,7 @@ public class ChannelMapPlotter extends Plotter
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
+		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
 		
 		if (labels != null)
 			mr.setGeoLabelSet(labels.getSubset(range));

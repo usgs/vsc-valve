@@ -3,9 +3,7 @@ package gov.usgs.valve3.plotter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.HistogramRenderer;
@@ -36,7 +34,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  *
  * @author Dan Cervelli, Loren Antolik
  */
-public class RSAMPlotter extends Plotter {
+public class RSAMPlotter extends RawDataPlotter {
 	
 	private enum PlotType {
 		VALUES, COUNTS;		
@@ -53,14 +51,9 @@ public class RSAMPlotter extends Plotter {
 		}
 	}
 
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
+
 	int compCount;
 	private Map<Integer, RSAMData> channelDataMap;
-	private static Map<Integer, Channel> channelsMap;
-	private double startTime;
-	private double endTime;
-	protected String ch;
 	private boolean removeBias;
 	private int period;
 	private double threshold;
@@ -72,51 +65,40 @@ public class RSAMPlotter extends Plotter {
 	private GenericDataMatrix gdm;
 	
 	protected String label;
-	protected Logger logger;
-	
-	public final boolean ranks	= false;
+
 
 	/**
 	 * Default constructor
 	 */
 	public RSAMPlotter() {
+		super();
 		label	= "RSAM";
-		logger	= Logger.getLogger("gov.usgs.vdx");
+		ranks = false;
 	}
 
 	/**
 	 * Initialize internal data from PlotComponent
 	 * @throws Valve3Exception
 	 */	
-	private void getInputs() throws Valve3Exception {
+	protected void getInputs(PlotComponent component) throws Valve3Exception {
+		parseCommonParameters(component);
 		
-		ch	= component.get("ch");
-		if (ch == null || ch.length() <= 0) {
-			throw new Valve3Exception("Illegal channel.");
-		}
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time.");
-		
-		plotType	= PlotType.fromString(component.get("plotType"));
+		String pt = component.getString("plotType");
+		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
+			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
 	
-		removeBias	= false;
-		String bias	= component.get("rb");
-		if (bias != null && bias.toUpperCase().equals("T"))
-			removeBias = true;
+		try{
+			removeBias = component.getBoolean("rb");
+		} catch (Valve3Exception ex){
+			removeBias = false;
+		}
 		
 		switch(plotType) {
 		
 		case VALUES:
-			period = Integer.parseInt(component.get("valuesPeriod"));
+			period = component.getInt("valuesPeriod");
 			if (period == 0)
 				throw new Valve3Exception("Illegal period.");
 				
@@ -124,7 +106,7 @@ public class RSAMPlotter extends Plotter {
 			
 		case COUNTS:
 			if (component.get("countsPeriod") != null) {
-				period = Integer.parseInt(component.get("countsPeriod"));
+				period = component.getInt("countsPeriod");
 				if (period == 0)
 					throw new Valve3Exception("Illegal period.");
 			} else {
@@ -132,19 +114,19 @@ public class RSAMPlotter extends Plotter {
 			}
 			
 			if (component.get("threshold") != null) {
-				threshold = Double.parseDouble(component.get("threshold"));
+				threshold = component.getDouble("threshold");
 				if (threshold == 0)
 					throw new Valve3Exception("Illegal threshold.");
 			}
 			
 			if (component.get("ratio") != null) {
-				ratio = Double.parseDouble(component.get("ratio"));
+				ratio = component.getDouble("ratio");
 				if (ratio == 0)
 					throw new Valve3Exception("Illegal ratio.");
 			}
 			
 			if (component.get("maxEventLength") != null) {
-				maxEventLength = Double.parseDouble(component.get("maxEventLength"));
+				maxEventLength = component.getDouble("maxEventLength");
 			}
 			
 			String bs	= Util.stringToString(component.get("cntsBin"), "day");
@@ -162,7 +144,7 @@ public class RSAMPlotter extends Plotter {
 	 * Gets binary data from VDX
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception {
+	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
 		
@@ -215,7 +197,7 @@ public class RSAMPlotter extends Plotter {
 	 * and render rsam values to PNG image in local file
 	 * @throws Valve3Exception
 	 */
-	protected void plotValues(Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
+	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
 		
 		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
 		
@@ -275,7 +257,7 @@ public class RSAMPlotter extends Plotter {
 	 * Initialize HistogramRenderer, add it to plot, and 
 	 * render event count histogram to PNG image in local file
 	 */
-	private void plotEvents(Channel channel, RSAMData rd, int displayCount, int dh) {
+	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) {
 
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
@@ -329,7 +311,7 @@ public class RSAMPlotter extends Plotter {
 	 * Loop through the list of channels and create plots
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
 		/// calculate how many graphs we are going to build (number of channels)
 		compCount			= channelDataMap.size();
@@ -351,10 +333,10 @@ public class RSAMPlotter extends Plotter {
 			
 			switch(plotType) {
 				case VALUES:
-					plotValues(channel, data, displayCount, dh);
+					plotValues(v3Plot, component, channel, data, displayCount, dh);
 					break;
 				case COUNTS:
-					plotEvents(channel, data, displayCount, dh);
+					plotEvents(v3Plot, component, channel, data, displayCount, dh);
 					break;
 			}
 			displayCount++;
@@ -376,26 +358,24 @@ public class RSAMPlotter extends Plotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
-		channelsMap	= getChannels(vdxSource, vdxClient);
-		getInputs();
-		getData();
-		
-		plotData();
 
-		Plot plot = v3Plot.getPlot();
+		channelsMap	= getChannels(vdxSource, vdxClient);
+		getInputs(comp);
+		getData(comp);
+		
+		plotData(v3p, comp);
+
+		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
+		plot.writePNG(v3p.getLocalFilename());
 	}
 
 	/**
 	 * @return CSV string of RSAM values data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent c) throws Valve3Exception {
-		component = c;
-		getInputs();
-		getData();
+		getInputs(c);
+		getData(c);
 		
 		switch(plotType) {
 			case VALUES:
@@ -405,23 +385,5 @@ public class RSAMPlotter extends Plotter {
 				return rd.getCountsCSV();
 		}
 		return null;
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
-		pool.checkin(cl);
-		channels				= Channel.fromStringsToMap(chs);
-		return channels;
 	}
 }

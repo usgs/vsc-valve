@@ -5,11 +5,14 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.util.Log;
+import gov.usgs.util.Util;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,8 +54,8 @@ public class Valve3Plot extends Result
 		}
 	}
 	
-	public static final int DEFAULT_WIDTH = 1000;
-	public static final int DEFAULT_HEIGHT = 250;
+	public static final int DEFAULT_WIDTH_PLOT = 1000;
+	public static final int DEFAULT_HEIGHT_PLOT = 250;
 	
 	protected Plot plot;
 	protected String filename;
@@ -65,6 +68,7 @@ public class Valve3Plot extends Result
 	protected String url;
 	
 	protected List<PlotComponent> components;
+	private Logger logger;	
 	
 	/**
 	 * Constructor
@@ -73,26 +77,40 @@ public class Valve3Plot extends Result
 	 */
 	public Valve3Plot(HttpServletRequest request) throws Valve3Exception
 	{
+		logger = Log.getLogger("gov.usgs.valve3");
 		String w = request.getParameter("w");
 		String h = request.getParameter("h");
 		
 		width = -1;
-		if (w == null)
-			width = DEFAULT_WIDTH;
-		else
-			try { width = Integer.parseInt(w); } catch (Exception e) {}
-		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH)
-			throw new Valve3Exception("Illegal width.");
-
+		if (w == null){
+			w= Valve3.getInstance().getDefaults().getString("parameter.plot.w");
+			logger.info("Parameter plot.w was set to default value");
+		}
+		width = Util.stringToInt(w, -1);
+		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH){
+			width = DEFAULT_WIDTH_PLOT;
+			logger.info("Illegal plot.w parameter value, was set to default");
+	}
 		height = -1;
-		if (h == null)
-			height = DEFAULT_HEIGHT;
-		else
-			try { height = Integer.parseInt(h); } catch (Exception e) {}
-		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT)
-			throw new Valve3Exception("Illegal height.");
+		if (h == null){
+			h= Valve3.getInstance().getDefaults().getString("parameter.plot.h");
+			logger.info("Parameter plot.h was set to default value");
+		}
+		height = Util.stringToInt(h, -1);
+		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT){
+			width = DEFAULT_HEIGHT_PLOT;
+			logger.info("Illegal plot.h parameter value, was set to default");
+		}
 		
-		outputType = OutputType.fromString(request.getParameter("o"));
+		String o = request.getParameter("o");
+		if(o==null){
+			o = Valve3.getInstance().getDefaults().getString("parameter.plot.o");
+			if(o==null){
+				o="png";
+			}
+			logger.info("Parameter plot.o was set to default value");
+		}
+		outputType = OutputType.fromString(o);
 		if (outputType == null)
 			throw new Valve3Exception("Illegal output type.");
 
