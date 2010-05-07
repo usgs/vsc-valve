@@ -67,11 +67,6 @@ create_gpsmenu = function(menu) {
 			}
 		}
 		
-		// calculate the plot size based on the number of selected componenets
-		var selectedColumns	= countSelectedColumns(this);
-		pr.params.h	= selectedColumns * (pr.params.h - 60) + 60;
-		pc.h		= selectedColumns * (pc.h);
-		
 		// call the presubmit function		
 		return Menu.prototype.presubmit.call(this);
 	}

@@ -41,6 +41,12 @@ function loadMenu(id) {
 	loadXML(menus[id].file + " javascript", url, 
 		function(req) {	
 			menus[id].html	= req.responseText;
+			var plotSeparately			= document.createElement('input');
+			plotSeparately.id = "input:ps";
+			plotSeparately.name = "plotSeparately";
+			plotSeparately.type = "hidden";
+			plotSeparately.value = menus[id].plotSeparately;
+			document.getElementById('openPanel').appendChild(plotSeparately);
 			var div			= document.createElement('div');
 			div.innerHTML	= menus[id].html;
 			document.getElementById('openPanel').appendChild(div);
@@ -89,6 +95,7 @@ function handleMenu(xml) {
 			var menuid			= items[j].getElementsByTagName("menuid")[0].firstChild.data;
 			var name			= items[j].getElementsByTagName("name")[0].firstChild.data;
 			var file			= items[j].getElementsByTagName("file")[0].firstChild.data;
+			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
 			var timeShortcuts	= "";
@@ -97,6 +104,7 @@ function handleMenu(xml) {
 			m.id			= menuid;
 			m.file			= file;
 			m.timeShortcuts	= timeShortcuts.split(",");
+			m.plotSeparately = plotSeparately;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
 			li.id			= menuid;
@@ -115,7 +123,6 @@ function handleMenu(xml) {
 	
 	document.getElementById('appTitle').appendChild(document.createTextNode(inst));
 	document.getElementById('timeZoneAbbr').appendChild(document.createTextNode(getXMLField(xml, "timeZoneAbbr")));
-	document.getElementById('timeZoneOffset').value = getXMLField(xml, "timeZoneOffset");
 	setAdmin(getXMLField(xml, "administrator"), getXMLField(xml, "administrator-email"));
 	document.getElementById('version').appendChild(document.createTextNode("Valve " + getXMLField(xml, "version")));
 }
@@ -986,6 +993,7 @@ Menu.prototype.submit = function() {
 	var form		= this.getForm();
 	var chselect	= form.elements["selector:ch"];
 	var rkselect	= form.elements["selector:rk"];
+	var plotSeparately	= document.getElementById('input:ps').value;
 	
 	// do validation on the channels input if it exists
 	if (chselect) {
@@ -1000,7 +1008,7 @@ Menu.prototype.submit = function() {
 			return;
 		}
 	}
-	
+
 	// temporarily disable best possible rank requests (plotters haven't implemented this yet)
 	if (rkselect) {
 		// if (rkselect[rkselect.selectedIndex].value == 0) {
@@ -1012,11 +1020,16 @@ Menu.prototype.submit = function() {
 	// create the plot request and plot component
 	var pr = new PlotRequest();
 	var pc = pr.createComponent(this.id, t.st, t.et);
-	pc.setFromForm(form);
+	var compCount = pc.setFromForm(form);
 	
 	// update the sizes on the plots based on how many channels were chosen
-	pr.params.h	= pc.chCnt * 150 + 60;
-	pc.h		= pc.chCnt * 150;
+	
+	if(plotSeparately == "true"){
+		pr.params.h	= (compCount*pc.chCnt * 150) + 60;
+	} else {
+		pr.params.h	= pc.chCnt * 150 + 60;
+	}
+	pc.h = 150;
 	
 	if (this.presubmit(pr, pc)) {
 		loadXML(this.id + " plot", pr.getURL());

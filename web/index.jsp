@@ -1,3 +1,8 @@
+<%@ page language="java" %>
+<%@ page import="gov.usgs.valve3.Valve3, java.util.Date" %>
+<%@ page session="false" %>
+<%@ page isThreadSafe="true" %>
+
 <!DOCTYPE HTML PUBLIC "=-//W3C//DTD HTML 4.01//EN"
 	"http://www.w3.org/TR/html4/strict.dtd">
 
@@ -116,8 +121,18 @@
 					<h1>End Time</h1>
 					<p><input class="mono" type="text" value="Now" id="endTime" size="17"></p>
 				</div>
-				<p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>', in <a id="timeZoneAbbr"></a><input type="hidden" value="" id="timeZoneOffset">.</p>
-				<p><input id="submit" type="button" value="Submit"></p>
+				<!-- p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>', in <a id="timeZoneAbbr">.</p-->
+				<p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>'.</p>
+				<div class="box">
+					<h1>Time Zone</h1>
+					<p>
+					<select id="timeZoneAbbr" name="selector:tz" class="w100p">
+					<option>UTC</option>
+					<option selected="selected"><%=Valve3.getInstance().getTimeZoneAbbr()%></option>
+					</select>
+					</p>
+					<input type="hidden" value="<%=Valve3.getInstance().getTimeZoneOffset(new Date())%>" id="timeZoneOffset">
+				</div>
 				<div class="box">
 					<h1>Output Size</h1>
 					<p>
@@ -129,6 +144,7 @@
 					</select>
 					</p>
 				</div>
+				<p><input id="submit" type="button" value="Submit"></p>
 				<hr>
 				<img id="throbber" style="float: right" src="images/throbber_still.png">
 				<h5 id="version"></h5>
@@ -183,9 +199,9 @@
 		<div id="redLine1"></div>
 		<div id="redLine2"></div>
 		
-		<% if (config.getServletContext().getResource("/footer.html") != null) { %>
-			<jsp:include page="footer.html" />
-		<% } %>		
+		<!--% if (config.getServletContext().getResource("/footer.html") != null) { %-->
+			<!--  jsp:include page="footer.html" /-->
+		<!--  % } %-->		
 		
 	</body>
 </html>

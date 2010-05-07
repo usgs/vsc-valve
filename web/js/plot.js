@@ -229,6 +229,18 @@ function PlotRequest(popup)
 	
 	this.params.a = "plot";
 	this.params.o = "xml";
+	var tzselect  = document.getElementById('timeZoneAbbr');
+	if(tzselect){
+		// at least one time zone must be selected
+		if (tzselect.selectedIndex == -1) {
+			alert("You must select a time zone.");
+			return;
+		}
+	} else {
+		alert("Time zone not defined.");
+		return;
+	}
+	this.params.tz = tzselect[tzselect.selectedIndex].text;
 	
 	this.setStandardSize = function()
 	{
@@ -267,7 +279,7 @@ function PlotRequest(popup)
 		this.components[index] = comp;
 
 		comp.setFromForm = function(form) {
-			
+			var compCount = 0;
 			// iterate through each element in the form
 			for (var i = 0; i < form.elements.length; i++) {
 				var elt = form.elements[i];
@@ -323,8 +335,14 @@ function PlotRequest(popup)
 						}
 						
 					} else if (elt.type == "checkbox") {
-						comp[elt.name] = elt.checked ? "T" : "F";
-						
+						if(elt.checked){
+							comp[elt.name] = "T";
+							if(elt.offsetHeight != 0){
+								compCount = compCount+1;
+							}
+						} else {
+							comp[elt.name] = "F";
+						}		
 					} else if (elt.type == "text") {
 						comp[elt.name] = elt.value;
 						
@@ -337,6 +355,7 @@ function PlotRequest(popup)
 					}
 				}
 			}
+			return compCount;
 		}
 		return comp;
 	}

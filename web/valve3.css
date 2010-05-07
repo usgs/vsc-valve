@@ -122,7 +122,7 @@ div#timePanel
 	margin: 0px;
 	margin-left: 5px;
 	border:	1px solid rgb( 145, 155, 156 );
-	width: 160px;
+	width: 159px;
 	padding: 4px;
 }			
 
@@ -326,7 +326,7 @@ div.box p
 .w140 { width: 140px; }
 .w145 { width: 145px; }
 .w150 { width: 150px; }
-.w160 { width: 160px; }
+.w160 { width: 159px; }
 .w180 { width: 180px; }
 .w200 { width: 200px; }
 .w220 { width: 220px; }
