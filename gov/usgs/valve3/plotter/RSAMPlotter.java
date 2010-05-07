@@ -162,9 +162,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		VDXClient client		= pool.checkout();
 		if (client == null)
 			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
+	
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, RSAMData>();
 		String[] channels	= ch.split(",");
@@ -175,7 +173,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			RSAMData data = (RSAMData)client.getBinaryData(params);
 			if (data != null && data.rows() > 0) {
 				gotData = true;
-				data.adjustTime(TZOffset);
+				data.adjustTime(component.getOffset(startTime));
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
 		}
@@ -183,11 +181,6 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (!gotData) {
 			throw new Valve3Exception("No data for any stations.");
 		}
-		
-		// adjust the start and end times
-        startTime	   += TZOffset;
-        endTime		   += TZOffset;
-
         // check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -200,7 +193,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
 		
 		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
-		
+		double timeOffset = component.getOffset(startTime);
 		// Remove the mean from the first column (this needs to be user controlled)
 		if (removeBias) {
 			gdm.add(1, -gdm.mean(1));
@@ -238,14 +231,14 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-		mr.setExtents(startTime, endTime, yMin, yMax);		
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);		
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);		
 		mr.setAllVisible(true);
 		mr.createDefaultLineRenderers();
 		mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
-		mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
@@ -262,18 +255,18 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
 		}
-		
+		double timeOffset = component.getOffset(startTime);
 		String channelCode = channel.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
 		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		hr.setDefaultExtents();
-		hr.setMinX(startTime);
-		hr.setMaxX(endTime);
+		hr.setMinX(startTime+timeOffset);
+		hr.setMaxX(endTime+timeOffset);
 		hr.createDefaultAxis(8, 8, false, true);
 		hr.setXAxisToTime(8);
 		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
 		DoubleMatrix2D data	= null;		
 		data				= rd.getCumulativeCounts();
@@ -285,7 +278,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			MatrixRenderer mr = new MatrixRenderer(data, ranks);
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-			mr.setExtents(startTime, endTime, cmin, cmax + 1);
+			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
 			mr.createDefaultLineRenderers();
 			
 			Renderer[] r = mr.getLineRenderers();
@@ -318,7 +311,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		// setting up variables to decide where to plot this component
 		int displayCount	= 0;
-		int dh				= component.getBoxHeight() / compCount;
+		int dh				= component.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			

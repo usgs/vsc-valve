@@ -1,11 +1,9 @@
 package gov.usgs.valve3.plotter;
 
-import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
-import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
@@ -36,7 +34,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -76,8 +73,6 @@ public class TiltPlotter extends RawDataPlotter {
 			}
 		}
 	}
-	
-	private int compCount;
 	
 	private Map<Integer, TiltData> channelDataMap;
 	private static Map<Integer, Double> azimuthsMap;
@@ -135,24 +130,30 @@ public class TiltPlotter extends RawDataPlotter {
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				boolean display	= Util.stringToBoolean(component.get(column.name));
+				column.checked	= Util.stringToBoolean(component.get(column.name));
 				detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
 				legendsCols[i]	= column.description;
-				if (display) {
-					if (leftUnit != null && leftUnit.equals(column.unit)) {
+				if (column.checked) {
+					if(isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
-						leftLines++;
-					} else if (rightUnit != null && rightUnit.equals(column.unit)) {
-						axisMap.put(i, "R");
-					} else if (leftUnit == null) {
 						leftUnit	= column.unit;
-						axisMap.put(i, "L");
 						leftLines++;
-					} else if (rightUnit == null) {
-						rightUnit = column.unit;
-						axisMap.put(i, "R");
 					} else {
-						throw new Valve3Exception("Too many different units.");
+						if (leftUnit != null && leftUnit.equals(column.unit)) {
+							axisMap.put(i, "L");
+							leftLines++;
+						} else if (rightUnit != null && rightUnit.equals(column.unit)) {
+							axisMap.put(i, "R");
+						} else if (leftUnit == null) {
+							leftUnit	= column.unit;
+							axisMap.put(i, "L");
+							leftLines++;
+						} else if (rightUnit == null) {
+							rightUnit = column.unit;
+							axisMap.put(i, "R");
+						} else {
+							throw new Valve3Exception("Too many different units.");
+						}
 					}
 				} else {
 					axisMap.put(i, "");
@@ -172,7 +173,6 @@ public class TiltPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -187,8 +187,6 @@ public class TiltPlotter extends RawDataPlotter {
 		if (client == null)
 			return;
 		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, TiltData>();
 		String[] channels	= ch.split(",");
@@ -197,9 +195,10 @@ public class TiltPlotter extends RawDataPlotter {
 		for (String channel : channels) {
 			params.put("ch", channel);		
 			TiltData data = (TiltData)client.getBinaryData(params);
+			
 			if (data != null) {
 				gotData = true;	
-				data.adjustTime(TZOffset);
+				data.adjustTime(component.getOffset(startTime));
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
 		}
@@ -207,11 +206,6 @@ public class TiltPlotter extends RawDataPlotter {
 		if (!gotData) {
 			throw new Valve3Exception("No data for any stations.");
 		}
-		
-		// adjust the start and end times
-		startTime	+= TZOffset;
-		endTime		+= TZOffset;
-		
 		// check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -340,13 +334,10 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		switch (plotType) {
 			case TIME_SERIES:
-				
-				/// calculate how many graphs we are going to build (number of channels)
-				compCount			= channelDataMap.size();
-				
 				// setting up variables to decide where to plot this component
+				
 				int displayCount	= 0;
-				int dh				= component.getBoxHeight() / compCount;
+				int dh				= component.getBoxHeight();
 				
 				// setup the display for the legend
 				Rank rank	= new Rank();
@@ -386,7 +377,6 @@ public class TiltPlotter extends RawDataPlotter {
 					azimuthValue 	   -= 90.0;
 					azimuthRadial		= (azimuthValue + 90.0) % 360.0;
 					azimuthTangential	= (azimuthValue + 180.0) % 360.0;
-					
 					// subtract the mean from the data to get it on a zero based scale (for east and north)
 					data.add(2, -data.mean(2));
 					data.add(3, -data.mean(3));
@@ -410,12 +400,18 @@ public class TiltPlotter extends RawDataPlotter {
 					}
 					
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
-					
+				
 					if(isPlotComponentsSeparately()){
+						for(Column col: columnsList){
+							if(col.checked){
+								compCount++;
+							}
+						}
 						// create an individual matrix renderer for each component selected
 						for (int i = 0; i < columnsList.size(); i++) {
-
-								MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+							Column col = columnsList.get(i);
+							if(col.checked){
+								MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
 								MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
 								v3Plot.getPlot().addRenderer(leftMR);
 								if (rightMR != null)
@@ -424,10 +420,11 @@ public class TiltPlotter extends RawDataPlotter {
 								component.setTranslationType("ty");
 								v3Plot.addComponent(component);
 								displayCount++;	
-							
+							}
 						}
 					} else {
-						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+						compCount = channelDataMap.size();
+						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
 						MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
 						v3Plot.getPlot().addRenderer(leftMR);
 						if (rightMR != null)

@@ -50,11 +50,10 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		rk = component.getInt("rk");
 		shape = component.getString("lt");
 		
-		columnsCount		= columnsList.size();
-		detrendCols			= new boolean [columnsCount];
-		normalzCols			= new boolean [columnsCount];
-		legendsCols			= new String  [columnsCount];
-		channelLegendsCols	= new String  [columnsCount];
+		detrendCols			= new boolean [columnsList.size()];
+		normalzCols			= new boolean [columnsList.size()];
+		legendsCols			= new String  [columnsList.size()];
+		channelLegendsCols	= new String  [columnsList.size()];
 		
 		leftLines		= 0;
 		axisMap			= new LinkedHashMap<Integer, String>();
@@ -62,25 +61,31 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		// iterate through all the active columns and place them in a map if they are displayed
 		for (int i = 0; i < columnsList.size(); i++) {
 			Column column	= columnsList.get(i);
-			boolean display	= Util.stringToBoolean(component.getString(column.name));
+			column.checked	= Util.stringToBoolean(component.get(column.name));
 			detrendCols[i]	= Util.stringToBoolean(component.getString("d_" + column.name));
 			normalzCols[i]	= Util.stringToBoolean(component.getString("n_" + column.name));
 			legendsCols[i]	= column.description;
-			if (display) {
-				if ((leftUnit != null && leftUnit.equals(column.unit))) {
+			if (column.checked) {
+				if(isPlotComponentsSeparately()){
 					axisMap.put(i, "L");
-					leftLines++;
-				} else if (rightUnit != null && rightUnit.equals(column.unit)) {
-					axisMap.put(i, "R");
-				} else if (leftUnit == null) {
 					leftUnit	= column.unit;
-					axisMap.put(i, "L");
 					leftLines++;
-				} else if (rightUnit == null) {
-					rightUnit = column.unit;
-					axisMap.put(i, "R");
 				} else {
-					throw new Valve3Exception("Too many different units.");
+					if ((leftUnit != null && leftUnit.equals(column.unit))) {
+						axisMap.put(i, "L");
+						leftLines++;
+					} else if (rightUnit != null && rightUnit.equals(column.unit)) {
+					axisMap.put(i, "R");
+					} else if (leftUnit == null) {
+						leftUnit	= column.unit;
+						axisMap.put(i, "L");
+						leftLines++;
+					} else if (rightUnit == null) {
+						rightUnit = column.unit;
+						axisMap.put(i, "R");
+					} else {
+						throw new Valve3Exception("Too many different units.");
+					}
 				}
 			} else {
 				axisMap.put(i, "");
@@ -112,9 +117,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		VDXClient client		= pool.checkout();
 		if (client == null)
 			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
+
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, GenericDataMatrix>();
 		String[] channels	= ch.split(",");
@@ -125,19 +128,13 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			GenericDataMatrix data = (GenericDataMatrix)client.getBinaryData(params);		
 			if (data != null && data.rows() > 0) {
 				gotData = true;
-				data.adjustTime(TZOffset);
+				data.adjustTime(component.getOffset(startTime));
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
 		}
-		
 		if (!gotData) {
 			throw new Valve3Exception("No data for any stations.");
 		}
-		
-		// adjust the start and end times
-		startTime	+= TZOffset;
-		endTime		+= TZOffset;
-		
 		// check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -148,12 +145,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
-		/// calculate how many graphs we are going to build (number of channels)
-		compCount			= channelDataMap.size();
-		
 		// setting up variables to decide where to plot this component
 		int displayCount	= 0;
-		int dh				= component.getBoxHeight() / compCount;
+		int dh				= component.getBoxHeight();
 		
 		// setup the display for the legend
 		Rank rank	= new Rank();
@@ -187,10 +181,16 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			}
 			
 			if(isPlotComponentsSeparately()){
+				for(Column col: columnsList){
+					if(col.checked){
+						compCount++;
+					}
+				}
 				// create an individual matrix renderer for each component selected
 				for (int i = 0; i < columnsList.size(); i++) {
-					
-						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+					Column col = columnsList.get(i);
+					if(col.checked){
+						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
 						MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
 						v3Plot.getPlot().addRenderer(leftMR);
 						if (rightMR != null)
@@ -199,10 +199,11 @@ public class GenericFixedPlotter extends RawDataPlotter {
 						component.setTranslationType("ty");
 						v3Plot.addComponent(component);
 						displayCount++;	
-					
+					}
 				}
 			} else {
-				MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+				compCount = channelDataMap.size();
+				MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
 				MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
 				v3Plot.getPlot().addRenderer(leftMR);
 				if (rightMR != null)

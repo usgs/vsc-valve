@@ -35,9 +35,7 @@ import java.awt.image.RenderedImage;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -263,18 +261,11 @@ public class HypocenterPlotter extends RawDataPlotter {
 		VDXClient client		= pool.checkout();
 		if (client == null)
 			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
+
 		// get the data, if nothing is returned then create an empty list
 		hypos = (HypocenterList) client.getBinaryData(params);
 		if (hypos == null)
 			hypos = new HypocenterList();
-		
-		// adjust the start and end times
-		startTime	+= TZOffset;
-		endTime		+= TZOffset;
-		
 		// check back in our connection to the database
 		pool.checkin(client);
 	}

@@ -3,6 +3,7 @@ package gov.usgs.valve3;
 import gov.usgs.util.Util;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -27,8 +28,6 @@ import java.util.TimeZone;
  */
 public class PlotComponent
 {
-	private static SimpleDateFormat dateIn;
-	
 	private String source;
 	private Map<String, String> params;
 	
@@ -39,27 +38,18 @@ public class PlotComponent
 	private int boxY = 0;
 	private int boxHeight = 0;
 	private int boxWidth = 0;
-	
-	static
-	{
-		dateIn = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-		dateIn.setTimeZone(TimeZone.getTimeZone("GMT"));
-	}
-	
-	/**
-	 * Default constructor
-	 */
-	public PlotComponent()
-	{}
+	private SimpleDateFormat df = null;
 
 	/**
 	 * Constructor
 	 * @param s source name
 	 */
-	public PlotComponent(String s)
+	public PlotComponent(String s, TimeZone timeZone)
 	{
 		source = s;
 		params = new HashMap<String, String>();
+		df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		df.setTimeZone(timeZone);
 	}
 	
 	/**
@@ -290,37 +280,39 @@ public class PlotComponent
 	/**
 	 * Compute start time from PlotComponent's parameters
 	 * @param end reference end time for relative parameter values (for example, "-1h")
-	 * @return start time in seconds
+	 * @return start time in seconds, UTC
 	 */
 	public double getStartTime(double end) throws Valve3Exception
 	{
 		String st = params.get("st");
 		if (st == null)
 			return Double.NaN;
-		else 
+		else {
 			return parseTime(st, end);
+		}
 	}
 	
 	// TODO: does this allow startTime > endTime?
 	/**
 	 * Compute end time from PlotComponent's parameters
-	 * @return end time in seconds
+	 * @return end time in seconds, UTC
 	 */
 	public double getEndTime() throws Valve3Exception
 	{
 		String et = params.get("et");
 		if (et == null)
 			return Double.NaN;
-		else
+		else {
 			return parseTime(et, Double.NaN);
+		}
 	}
 	
 	/** Parses the time.
 	 * @param t the string representing the time
 	 * @param end the end time (for -[n][units] times)
-	 * @return the correct j2ksec
+	 * @return the correct j2ksec, UTC
 	 */
-	public static double parseTime(String t, double end) throws Valve3Exception
+	public double parseTime(String t, double end) throws Valve3Exception
 	{
 		try
 		{
@@ -337,9 +329,10 @@ public class PlotComponent
 				else
 					return end - ((double)ms/1000);
 			}
-			else if (t.length() == 17)
-				return Util.dateToJ2K(dateIn.parse(t)) - (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
-				//return  Util.dateToJ2K(dateIn.parse(t)) - (Valve3.getInstance().getTimeZoneOffset() * 60 * 60);// - Valve3.getTimeZoneAdj();
+			else if (t.length() == 17){
+				Date dtIn = df.parse(t);
+				return Util.dateToJ2K(dtIn);
+			}
 			else {
 				throw new Valve3Exception("Illegal time string: " + t);
 			}
@@ -348,6 +341,21 @@ public class PlotComponent
 		{
 			throw new Valve3Exception("Illegal time string: " + t);
 		}
+	}
+	
+	/**
+	 * @return TimeZone which was used for initial time input by user
+	 */
+	public TimeZone getTimeZone(){
+		return df.getTimeZone();
+	}
+	
+	/**
+	 * @param time Time moment in j2Ksec
+	 * @return offset between current time zone and UTC in seconds, on given time moment
+	 */
+	public double getOffset(double time){
+		return df.getTimeZone().getOffset(Util.j2KToDate(time).getTime())/1000.0;
 	}
 
 	/**

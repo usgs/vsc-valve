@@ -16,7 +16,6 @@ import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Generate helicorder images from raw wave data from vdx source
@@ -153,11 +152,9 @@ public class HelicorderPlotter extends RawDataPlotter {
 			settings.width					= component.getBoxWidth();
 			settings.height					= component.getBoxHeight() / compCount;
 			settings.plotCount				= plotCount;
-			
-			settings.timeZoneAbbr	= Valve3.getInstance().getTimeZoneAbbr();
-			settings.timeZoneOffset	= Valve3.getInstance().getTimeZoneOffset();
-			settings.timeZone		= TimeZone.getTimeZone(settings.timeZoneAbbr);
-			
+			settings.timeZoneAbbr			= component.getTimeZone().getID();
+			settings.timeZoneOffset			= component.getOffset(startTime)/3600.0;
+			settings.timeZone				= component.getTimeZone();
 			plotCount++;
 			if (plotCount == compCount) {
 				settings.showDecorator = true;	

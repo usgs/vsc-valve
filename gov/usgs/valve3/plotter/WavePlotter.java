@@ -166,23 +166,17 @@ public class WavePlotter extends RawDataPlotter {
 		if (client == null)
 			return;
 		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
 		// create a map to hold all the channel data
 		channelDataMap			= new LinkedHashMap<Integer, SliceWave>();
 		String[] channels		= ch.split(",");
 		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
-			
 			params.put("ch", channel);
 			Wave data = (Wave)client.getBinaryData(params);
-			
 			if (data != null) {
-				
 				gotData = true;
-				data.setStartTime(data.getStartTime() + TZOffset);
-				
+				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
 				if (filterType != null) {
 					Butterworth bw = new Butterworth();
 					switch(filterType) {
@@ -206,21 +200,14 @@ public class WavePlotter extends RawDataPlotter {
 							break;
 					}
 				}
-				
 				wave = new SliceWave(data);
 				wave.setSlice(data.getStartTime(), data.getEndTime());
 				channelDataMap.put(Integer.valueOf(channel), wave);
 			}
 		}
-		
 		if (!gotData) {
 			throw new Valve3Exception("No data for any stations.");
 		}
-		
-		// adjust the start and end times
-		startTime	+= TZOffset;
-		endTime		+= TZOffset;
-		
 		// check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -230,12 +217,12 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
-		
+		double timeOffset = component.getOffset(startTime);
 		SliceWaveRenderer wr = new SliceWaveRenderer();
 		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		wr.setWave(wave);
-		wr.setViewTimes(startTime, endTime);
+		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset);
 		if (color.equals("M"))
 			wr.setColor(Color.BLACK);
 		
@@ -289,7 +276,7 @@ public class WavePlotter extends RawDataPlotter {
 		} else {			
 			wr.update();
 			if (displayCount + 1 == compCount) {
-				wr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");	
+				wr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
 			}
 		}
 
@@ -325,12 +312,13 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
+		double timeOffset = component.getOffset(startTime);
 		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
 		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		sr.setOverlap(0);
 		sr.setLogPower(logPower);
-		sr.setViewStartTime(startTime);
-		sr.setViewEndTime(endTime);
+		sr.setViewStartTime(startTime+timeOffset);
+		sr.setViewEndTime(endTime+timeOffset);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.setYLabel(yLabel);
@@ -357,7 +345,7 @@ public class WavePlotter extends RawDataPlotter {
 		String xString = "";
 		if (xLabel == 1) {
 			xTick = 8;
-			xString = "Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")";
+			xString = "Time (" + component.getTimeZone().getID()+ ")";
 		}
 		
 		sr.createDefaultAxis(xTick, yTick, false, false);
@@ -385,7 +373,7 @@ public class WavePlotter extends RawDataPlotter {
 		
 		// setting up variables to decide where to plot this component
 		int displayCount	= 0;
-		int dh				= component.getBoxHeight() / compCount;
+		int dh				= component.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			

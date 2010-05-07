@@ -164,23 +164,16 @@ public class RatSAMPlotter extends RawDataPlotter {
 		VDXClient client		= pool.checkout();
 		if (client == null)
 			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
+
 		data = (RSAMData)client.getBinaryData(params);
 		if (data != null && data.rows() > 0) {
 			gotData = true;
-			data.adjustTime(TZOffset);
+			data.adjustTime(component.getOffset(startTime));
 		}
 		
 		if (!gotData) {
 			throw new Valve3Exception("No data for any stations.");
 		}
-		
-		// adjust the start and end times
-        startTime	   += TZOffset;
-        endTime		   += TZOffset;
-
         // check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -213,7 +206,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 		double yMin = 1E300;
 		double yMax = -1E300;
 		boolean allowExpand = true;
-		
+		double timeOffset = component.getOffset(startTime);
 		if (component.isAutoScale("ys")) {
 			double buff;
 			yMin	= Math.min(yMin, gdm.min(1));
@@ -232,14 +225,14 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		mr.setExtents(startTime, endTime, yMin, yMax);		
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);		
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);		
 		mr.setAllVisible(true);
 		mr.createDefaultLineRenderers();
 		mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
-		mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
@@ -256,19 +249,19 @@ public class RatSAMPlotter extends RawDataPlotter {
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
 		}
-		
+		double timeOffset = component.getOffset(startTime);
 		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
 		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
 		hr.setDefaultExtents();
-		hr.setMinX(startTime);
-		hr.setMaxX(endTime);
+		hr.setMinX(startTime+timeOffset);
+		hr.setMaxX(endTime+timeOffset);
 		hr.createDefaultAxis(8, 8, false, true);
 		hr.setXAxisToTime(8);
 		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
 		DoubleMatrix2D data	= null;		
 		data				= rd.getCumulativeCounts();
@@ -280,7 +273,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 			MatrixRenderer mr = new MatrixRenderer(data, ranks);
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-			mr.setExtents(startTime, endTime, cmin, cmax + 1);
+			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
 			mr.createDefaultLineRenderers();
 			
 			Renderer[] r = mr.getLineRenderers();

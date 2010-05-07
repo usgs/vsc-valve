@@ -68,11 +68,12 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
+					boolean plotSeparately = cf.getBoolean("plotter.plotComponentsSeparately");
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, plotSeparately);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}
@@ -82,7 +83,6 @@ public class MenuHandler implements HttpHandler
 	
 	// TODO: cache
 	// TODO: sortOrder
-	
 	
 	/**
 	 * @return list of Sections associated with this menu handler

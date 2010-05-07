@@ -37,9 +37,9 @@ public abstract class RawDataPlotter extends Plotter {
 	protected String channelLegendsCols[];
 	
 	protected Map<Integer, String> axisMap;
-	protected static Map<Integer, Channel> channelsMap;
-	protected static Map<Integer, Rank> ranksMap;
-	protected static List<Column> columnsList;
+	protected Map<Integer, Channel> channelsMap;
+	protected Map<Integer, Rank> ranksMap;
+	protected List<Column> columnsList;
 	
 	protected Logger logger;
 	
@@ -123,16 +123,16 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @param index number of column to plot inside renderer. -1 value means we need to render all columns from gdm matrix.
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index) throws Valve3Exception {	
-		
+	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, String unit) throws Valve3Exception {	
+		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, component, mr);
-		mr.setExtents(startTime, endTime, ap.yMin, ap.yMax);	
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);	
 		mr.createDefaultAxis(8, 8, false, ap.allowExpand);
 		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftUnit);
+		mr.getAxis().setLeftLabelAsText(unit);
 		if(shape==null){
 			mr.createDefaultPointRenderers();
 		} else {
@@ -146,7 +146,7 @@ public abstract class RawDataPlotter extends Plotter {
 		leftTicks = mr.getAxis().leftTicks.length;
 		
 		if (displayCount + 1 == compCount) {
-			mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");	
+			mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
 		}
 		return mr;
 	}
@@ -160,12 +160,12 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		if (rightUnit == null)
 			return null;
-		
+		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
-		mr.setExtents(startTime, endTime, ap.yMin, ap.yMax);
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(ap.yMin, ap.yMax, leftTicks, false), null);
 		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);

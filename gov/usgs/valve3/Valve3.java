@@ -8,6 +8,8 @@ import gov.usgs.util.Log;
 import gov.usgs.valve3.data.DataHandler;
 
 import java.io.File;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,8 +71,7 @@ public class Valve3 implements ServletContextListener
 	private String administrator = "Administrator";
 	private String administratorEmail = "admin@usgs.gov";
 	private String installationTitle = "Valve Installation";
-	private int timeZone = 0;
-	private String timeZoneAbbr = "GMT";
+	private String timeZoneAbbr = "UTC";
 	
 	private GeoImageSet imageSet;
 	private GeoLabelSet labelSet;
@@ -105,13 +106,8 @@ public class Valve3 implements ServletContextListener
 		logger.config("admin.email: " + administratorEmail);
 		installationTitle = config.getString("title");
 		logger.config("title: " + installationTitle);
-		String tz = config.getString("timeZone");
-		if (tz != null) 
-			timeZone = Integer.parseInt(tz);
-		logger.config("timeZone: " + timeZone);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
 		logger.config("timeZoneAbbr: " + timeZoneAbbr);
-		
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
 		if (ics != null)
@@ -225,7 +221,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * @return Abbreviated name of local time zone
+	 * @return Abbreviated name of default time zone
 	 */
 	public String getTimeZoneAbbr()
 	{
@@ -233,13 +229,14 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * @return local time zone offset
+	 * @param date Time moment to compute offset
+	 * @return offset between current time zone and UTC in seconds, on given time moment
 	 */
-	public int getTimeZoneOffset()
-	{
-		return timeZone;
+	public double getTimeZoneOffset(Date date) {
+		TimeZone timeZone = TimeZone.getTimeZone(getTimeZoneAbbr());
+		return timeZone.getOffset(date.getTime())/1000.0;
 	}
-
+	
 	/**
 	 * Getter for geo image set
 	 */

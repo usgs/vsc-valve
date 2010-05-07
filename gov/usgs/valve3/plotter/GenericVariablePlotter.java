@@ -36,9 +36,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 	private GenericDataMatrix data;
 	
-	private String leftUnit;
 	private List<Column> leftColumns;
-	private String rightUnit;
 	private List<Column> rightColumns;
 
 	/**
@@ -69,9 +67,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		
 		if (data == null || data.rows() == 0)
 			throw new Valve3Exception("No data.");
-		data.adjustTime(Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
-		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		data.adjustTime(component.getOffset(startTime));
 	}
 
 	/**
@@ -153,6 +149,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 */
 	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component)
 	{
+		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
@@ -170,16 +167,14 @@ public class GenericVariablePlotter extends RawDataPlotter
 			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
-			
 		}
-		
-		mr.setExtents(startTime, endTime, min, max);		
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);		
 		mr.createDefaultAxis(8, 8, false, true);
 		mr.createDefaultLineRenderers();
 		mr.setXAxisToTime(8);
 
 		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
-		mr.getAxis().setBottomLabelAsText("Time");
+		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		return mr;
 	}
 
@@ -191,7 +186,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	{
 		if (rightUnit == null)
 			return null;
-		
+		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
@@ -202,7 +197,6 @@ public class GenericVariablePlotter extends RawDataPlotter
 		for (Column col : rightColumns)
 		{
 			mr.setVisible(col.idx, true);
-
 			if (col.name.equals("45"))
 				data.sum(col.idx+1);
 
@@ -210,11 +204,8 @@ public class GenericVariablePlotter extends RawDataPlotter
 			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
-			
-
 		}
-
-		mr.setExtents(startTime, endTime, min, max);
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
 		mr.setAxis(ar);

@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,8 +70,11 @@ public class PlotHandler implements HttpHandler
 		String source = request.getParameter("src." + i);
 		if (source == null || source.length()==0)
 			throw new Valve3Exception("Illegal src." + i + " value.");
-		
-		PlotComponent component = new PlotComponent(source);
+		String tz = request.getParameter("tz");
+		if (tz == null)
+			throw new Valve3Exception("Can't find 'tz' parameter");
+		TimeZone timeZone = TimeZone.getTimeZone(tz);
+		PlotComponent component = new PlotComponent(source, timeZone);
 
 		// Not using generics because HttpServletRequest is Java 1.4
 		Map parameters = request.getParameterMap();

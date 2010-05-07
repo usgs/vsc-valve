@@ -46,7 +46,6 @@ public class Menu extends Result
 		sb.append("\t\t<administrator><![CDATA[" + Valve3.getInstance().getAdministrator() + "]]></administrator>\n");
 		sb.append("\t\t<administrator-email><![CDATA[" + Valve3.getInstance().getAdministratorEmail() + "]]></administrator-email>\n");
 		sb.append("\t\t<timeZoneAbbr>" + Valve3.getInstance().getTimeZoneAbbr() + "</timeZoneAbbr>\n");
-		sb.append("\t\t<timeZoneOffset>" + Valve3.getInstance().getTimeZoneOffset() + "</timeZoneOffset>\n");
 		sb.append("\t\t<version>" + Valve3.VERSION + ", " + Valve3.BUILD_DATE + "</version>\n");
 		sb.append("\t\t<sections>\n");
 		
