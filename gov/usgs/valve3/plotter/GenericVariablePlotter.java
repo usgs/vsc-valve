@@ -7,6 +7,7 @@ import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
@@ -61,8 +62,15 @@ public class GenericVariablePlotter extends RawDataPlotter
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("selectedTypes", component.getString("selectedTypes"));
-
-		data = (GenericDataMatrix)client.getBinaryData(params);
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
+		try{
+			data = (GenericDataMatrix)client.getBinaryData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		pool.checkin(client);
 		
 		if (data == null || data.rows() == 0)

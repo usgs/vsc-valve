@@ -9,6 +9,7 @@ import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -69,14 +70,20 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @param source	vdx source name
 	 * @param client	vdx name
 	 */
-	protected static List<Column> getColumns(String source, String client) {
+	protected static List<Column> getColumns(String source, String client) throws Valve3Exception{
 		List<Column> columns;	
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", source);
 		params.put("action", "columns");
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
 		VDXClient cl			= pool.checkout();
-		List<String> cols		= cl.getTextData(params);
+		List<String> cols = null;
+		try{
+			cols = cl.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		pool.checkin(cl);
 		columns					= Column.fromStringsToList(cols);
 		return columns;
@@ -87,14 +94,20 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @param source	vdx source name
 	 * @param client	vdx name
 	 */
-	protected static Map<Integer, Channel> getChannels(String source, String client) {
+	protected static Map<Integer, Channel> getChannels(String source, String client) throws Valve3Exception {
 		Map<Integer, Channel> channels;	
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", source);
 		params.put("action", "channels");
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
 		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
+		List<String> chs		= null;
+		try{
+			chs	= cl.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		pool.checkin(cl);
 		channels				= Channel.fromStringsToMap(chs);
 		return channels;
@@ -105,14 +118,20 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @param source	vdx source name
 	 * @param client	vdx name
 	 */
-	protected static Map<Integer, Rank> getRanks(String source, String client) {
+	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
 		Map<Integer, Rank> ranks;
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", source);
 		params.put("action", "ranks");
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
 		VDXClient cl = pool.checkout();
-		List<String> rks = cl.getTextData(params);
+		List<String> rks = null;
+		try{
+			rks = cl.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		pool.checkin(cl);
 		ranks = Rank.fromStringsToMap(rks);
 		return ranks;

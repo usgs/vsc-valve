@@ -21,6 +21,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -173,7 +174,9 @@ public class GPSPlotter extends RawDataPlotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
-		
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -185,8 +188,14 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
+			GPSData data = null;
 			params.put("ch", channel);
-			GPSData data = (GPSData)client.getBinaryData(params);
+			try{
+				data = (GPSData)client.getBinaryData(params);
+			}
+			catch(UtilException e){
+				throw new Valve3Exception(e.getMessage());
+			}
 			if (data != null && data.observations() > 0) {
 				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
@@ -201,7 +210,12 @@ public class GPSPlotter extends RawDataPlotter {
 		// if a baseline was selected then retrieve that data from the database
 		if (bl != null) {
 			params.put("ch", bl);
-			baselineData = (GPSData)client.getBinaryData(params);
+			try{
+				baselineData = (GPSData)client.getBinaryData(params);
+			}
+			catch(UtilException e){
+				throw new Valve3Exception(e.getMessage()); 
+			}
 			if (baselineData == null || baselineData.observations() == 0) {
 				throw new Valve3Exception("No baseline data.");
 			}

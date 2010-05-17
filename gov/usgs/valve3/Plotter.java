@@ -23,6 +23,7 @@ abstract public class Plotter
 {
 	protected String vdxClient;
 	protected String vdxSource;
+	protected int maxrows = 0;
 	
 	protected ConfigFile plotterConfig;
 	
@@ -51,6 +52,15 @@ abstract public class Plotter
 	public void setPlotterConfig(ConfigFile cf)
 	{
 		plotterConfig = cf;
+	}
+	
+	/**
+	 * Setter for max rows count
+	 * @param c vdx name ("....vdx" config file parameter)
+	 */
+	public void setMaxRows(int maxrows)
+	{
+		this.maxrows = maxrows;
 	}
 	
 	/**

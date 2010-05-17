@@ -93,6 +93,10 @@ public class DataSourceDescriptor
 			plotter.setVDXClient(vdxClientName);
 			plotter.setVDXSource(vdxSource);
 			plotter.setPlotterConfig(config.getSubConfig("plotter"));
+			if(config.get("maxrows")!=null){
+				int maxrows = Integer.parseInt(config.getString("maxrows"));
+				plotter.setMaxRows(maxrows);
+			}
 			return plotter;
 		}
 		catch (Exception ex)

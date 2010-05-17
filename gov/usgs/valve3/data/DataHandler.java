@@ -4,8 +4,11 @@ import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.HttpHandler;
 import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.GenericMenu;
 import gov.usgs.valve3.result.ewRsamMenu;
 import gov.usgs.vdx.client.VDXClient;
@@ -124,44 +127,55 @@ public class DataHandler implements HttpHandler
 	 * in the request - GenericMenu, ewRsamMenu or list of results.
 	 */
 	public Object handle(HttpServletRequest request) {
+		try{
+			Logger logger = Log.getLogger("gov.usgs.vdx");
+			logger.info("entering DataHandler.handle()");
 		
-		Logger logger = Log.getLogger("gov.usgs.vdx");
-		logger.info("entering DataHandler.handle()");
+			String source = request.getParameter("src");
+			logger.info("src = " + source);
+			DataSourceDescriptor dsd = dataSources.get(source);
+			if (dsd == null)
+				return null;  // TODO: throw Valve3Exception
 		
-		String source = request.getParameter("src");
-		logger.info("src = " + source);
-		DataSourceDescriptor dsd = dataSources.get(source);
-		if (dsd == null)
-			return null;  // TODO: throw Valve3Exception
-		
-		String action = request.getParameter("da");
-		logger.info("action = " + action);
-		if (action == null)
-			return null;  // TODO: throw Valve3Exception
+			String action = request.getParameter("da");
+			logger.info("action = " + action);
+			if (action == null)
+				return null;  // TODO: throw Valve3Exception
 		
 		
-		Pool<VDXClient> pool		= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
-		Map<String, String> params	= new HashMap<String, String>();
-		params.put("source", dsd.getVDXSource());
-		params.put("action", action);
-		VDXClient client	= pool.checkout();
-		if (client != null) {
-			List<String> ls	= client.getTextData(params);
-			pool.checkin(client);
-			if (ls != null) {
-				if (action.equals("genericMenu")) {
-					GenericMenu result = new GenericMenu(ls);
-					return result;
-				} else if (action.equals("ewRsamMenu")) {
-					ewRsamMenu result = new ewRsamMenu(ls);
-					return result;
-				} else {
-					gov.usgs.valve3.result.List result	= new gov.usgs.valve3.result.List(ls);
-					return result;
+			Pool<VDXClient> pool		= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			Map<String, String> params	= new HashMap<String, String>();
+			params.put("source", dsd.getVDXSource());
+			params.put("action", action);
+			VDXClient client	= pool.checkout();
+			if (client != null) {
+				List<String> ls	= null;
+				try{
+					ls	= client.getTextData(params);
+				}
+				catch(UtilException e){
+					throw new Valve3Exception(e.getMessage()); 
+				}
+				pool.checkin(client);
+				if (ls != null) {
+					if (action.equals("genericMenu")) {
+						GenericMenu result = new GenericMenu(ls);
+						return result;
+					} else if (action.equals("ewRsamMenu")) {
+						ewRsamMenu result = new ewRsamMenu(ls);
+						return result;
+					} else {
+						gov.usgs.valve3.result.List result	= new gov.usgs.valve3.result.List(ls);
+						return result;
+					}
 				}
 			}
+			pool.checkin(client);
+			return null;
 		}
-		pool.checkin(client);
-		return null;
+		catch (Valve3Exception e)
+		{
+			return new ErrorMessage(e.getMessage());
+		}
 	}
 }

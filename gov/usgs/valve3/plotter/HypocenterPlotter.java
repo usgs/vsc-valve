@@ -15,6 +15,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -255,6 +256,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
 		params.put("rmk", (rmk));
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
@@ -263,7 +267,12 @@ public class HypocenterPlotter extends RawDataPlotter {
 			return;
 
 		// get the data, if nothing is returned then create an empty list
-		hypos = (HypocenterList) client.getBinaryData(params);
+		try{
+			hypos = (HypocenterList) client.getBinaryData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		if (hypos == null)
 			hypos = new HypocenterList();
 		// check back in our connection to the database

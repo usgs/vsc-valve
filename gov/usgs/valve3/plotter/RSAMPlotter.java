@@ -14,6 +14,7 @@ import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -156,7 +157,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("plotType", plotType.toString());
 		params.put("period", Integer.toString(period));
-
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -170,7 +173,13 @@ public class RSAMPlotter extends RawDataPlotter {
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
-			RSAMData data = (RSAMData)client.getBinaryData(params);
+			RSAMData data = null;
+			try{
+				data = (RSAMData)client.getBinaryData(params);
+			}
+			catch(UtilException e){
+				throw new Valve3Exception(e.getMessage()); 
+			}
 			if (data != null && data.rows() > 0) {
 				gotData = true;
 				data.adjustTime(component.getOffset(startTime));

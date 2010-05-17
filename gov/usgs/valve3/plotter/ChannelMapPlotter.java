@@ -8,6 +8,7 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -64,7 +65,7 @@ public class ChannelMapPlotter extends Plotter
 	 * Loads GeoLabelSet labels from VDX
 	 * @throws Valve3Exception
 	 */
-	private void getData()
+	private void getData() throws Valve3Exception
 	{
 		if (vdxSource == null || vdxClient == null)
 			return; 
@@ -72,10 +73,18 @@ public class ChannelMapPlotter extends Plotter
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("action", "channels");
-
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		List<String> channels	= client.getTextData(params);
+		List<String> channels	= null;
+		try{
+			channels = client.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage());
+		}
 		Set<String> used		= new HashSet<String>();
 		labels					= new GeoLabelSet();
 		

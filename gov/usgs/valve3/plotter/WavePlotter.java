@@ -4,6 +4,7 @@ import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -159,7 +160,9 @@ public class WavePlotter extends RawDataPlotter {
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -173,7 +176,13 @@ public class WavePlotter extends RawDataPlotter {
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
-			Wave data = (Wave)client.getBinaryData(params);
+			Wave data = null;
+			try{
+				data = (Wave)client.getBinaryData(params);
+			}
+			catch(UtilException e){
+				throw new Valve3Exception(e.getMessage()); 
+			}
 			if (data != null) {
 				gotData = true;
 				data.setStartTime(data.getStartTime() + component.getOffset(startTime));

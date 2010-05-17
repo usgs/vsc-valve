@@ -7,6 +7,7 @@ import gov.usgs.plot.Renderer;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -180,7 +181,9 @@ public class TiltPlotter extends RawDataPlotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
-		
+		if(maxrows!=0){
+			params.put("maxrows", Integer.toString(maxrows));
+		}
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -193,8 +196,14 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		// iterate through each of the selected channels and get the data from the db=
 		for (String channel : channels) {
-			params.put("ch", channel);		
-			TiltData data = (TiltData)client.getBinaryData(params);
+			params.put("ch", channel);	
+			TiltData data = null;
+			try{
+				data = (TiltData)client.getBinaryData(params);
+			}
+			catch(UtilException e){
+				throw new Valve3Exception(e.getMessage()); 
+			}
 			
 			if (data != null) {
 				gotData = true;	
@@ -470,6 +479,21 @@ public class TiltPlotter extends RawDataPlotter {
 		Plot plot = v3p.getPlot();
 		plot.setBackgroundColor(Color.white);
 		plot.writePNG(v3p.getLocalFilename());
+	}
+	
+	/**
+	 * @return CSV dump of binary data described by given PlotComponent
+	 */
+	public String toCSV(PlotComponent comp) throws Valve3Exception {
+		channelsMap	= getChannels(vdxSource, vdxClient);
+		ranksMap	= getRanks(vdxSource, vdxClient);
+		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
+		columnsList	= getColumns(vdxSource, vdxClient);
+		getInputs(comp);
+		getData(comp);
+		
+		// return data.toCSV();
+		return "NOT IMPLEMENTED YET FOR MULTIPLE STATIONS";
 	}	
 
 	/**
@@ -477,14 +501,20 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @param source	vdx source name
 	 * @param client	vdx name
 	 */
-	private static Map<Integer, Double> getAzimuths(String source, String client) {
+	private static Map<Integer, Double> getAzimuths(String source, String client) throws Valve3Exception {
 		Map<Integer, Double> azimuths = new LinkedHashMap<Integer, Double>();	
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", source);
 		params.put("action", "azimuths");
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
 		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
+		List<String> chs = null;
+		try{
+			chs = cl.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
 		pool.checkin(cl);
 		for (int i = 0; i < chs.size(); i++) {
 			String[] temp = chs.get(i).split(":");
