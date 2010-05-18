@@ -42,7 +42,7 @@ div.content
 	margin-bottom: 10px;
 }
 
-div.content img.button
+div.content img.button, img.button_off
 {
 	padding-top: 1px;
 	margin: 0px;

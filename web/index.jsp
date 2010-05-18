@@ -167,7 +167,7 @@
 			<img class="button" src="images/min.gif">
 			<img class="button" src="images/clock.gif">
 			<img class="button" src="images/xml.gif">
-			<img class="button" src="images/data.gif">
+			<img name="export_btn" class="button" src="images/data.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
 			<div class="titleBar">
 				<h1>Content Template</h1>

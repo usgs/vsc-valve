@@ -46,20 +46,7 @@ create_wavemenu = function(menu) {
 	}
 	
 	menu.acceptTYClick = function(target, mx, my, gx, gy) {
-		var tzselect  = document.getElementById('timeZoneAbbr');
-		if(tzselect){
-			// at least one time zone must be selected
-			if (tzselect.selectedIndex == -1) {
-				alert("You must select a time zone.");
-				return;
-			}
-		} else {
-			alert("Time zone not defined.");
-			return;
-		}
-		if(tzselect[tzselect.selectedIndex].text != "UTC"){
-			gx = gx - (document.getElementById('timeZoneOffset').value);
-		}
+		
 		var f = this.getForm();
 		if (getChecked(f["skip:ca"]) == 0) {
 			Menu.prototype.acceptTYClick.call(this, target, mx, my, gx, gy);
@@ -68,8 +55,9 @@ create_wavemenu = function(menu) {
 		
 		var pd = f["skip:popupDuration"];
 		var span = pd[pd.selectedIndex].text * 1;
-		var st = gx - (span / 2) * 60;
-		var et = gx + (span / 2) * 60;
+		var time = gx;
+		var st = time - (span / 2) * 60;
+		var et = time + (span / 2) * 60;
 		var ch = getXMLField(target.xml, "ch");
 		
 		var pr = new PlotRequest(true);

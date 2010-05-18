@@ -72,6 +72,7 @@ function handlePlot(xml)
 	var translationType = getXMLField(xml, "translation-type");
 	var translation = getXMLField(xml, "translation");
 	var url = getXMLField(xml, "url");
+	var raw_ok = (getXMLField(xml, "exportable") == "true");
 	
 	var t = document.getElementById('contentTemplate').cloneNode(true);
 	t.id = "content" + count;
@@ -159,32 +160,45 @@ function handlePlot(xml)
 		});
 		
 	// raw data
-	addListener(imgs[4], 'click',
-		function()
-		{
-			var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
-			var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
-			
-			loadXML("rawData", url, function(req)
+    if ( raw_ok ) {
+		addListener(imgs[4], 'click',
+			function()
 			{ 
-				var doc = req.responseXML;
-				if (doc != null)
+				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
+			
+				loadXML("rawData", url, function(req)
 				{
-					var result = doc.getElementsByTagName("valve3result")[0];
-					if (result != null)
+					var doc = req.responseXML;
+					if (doc != null)
 					{
-						type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-						if (type == 'error')
-							alert(doc.getElementsByTagName("message")[0].firstChild.data);
-						else if (type == 'rawData')
+						var result = doc.getElementsByTagName("valve3result")[0];
+						if (result != null)
 						{
-							var d = document.getElementById('dataFrame');
-							d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+							if (type == 'error')
+								alert(doc.getElementsByTagName("message")[0].firstChild.data);
+							else if (type == 'rawData')
+							{
+								var d = document.getElementById('dataFrame');
+								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							}
 						}
 					}
-				}
-			});
-		}, false);
+				});
+			}, false);
+	} 
+	else {
+		var ebs = t.getElementsByClassName('button');
+		var e;
+		for ( e in ebs ) {
+			if ( ebs[e].getAttribute('name') == 'export_btn' ) {
+				ebs[e].setAttribute( 'src', 'images/nodata.gif' );
+				ebs[e].setAttribute( 'class', 'button_off' );
+				break;
+			}
+		}
+	}
 		
 	// setup direct link
 	url = url.replace("o=xml", "o=png");
