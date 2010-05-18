@@ -40,6 +40,8 @@ public class PlotComponent
 	private int boxWidth = 0;
 	private SimpleDateFormat df = null;
 
+	private boolean exportable = false;
+
 	/**
 	 * Constructor
 	 * @param s source name
@@ -391,4 +393,23 @@ public class PlotComponent
 		sb.append("\t\t</component>\n");
 		return sb.toString();
 	}
+
+	/**
+	 * Setter for graph's exportability
+	 * @returns boolean "is exportable"
+	 */
+	public boolean getExportable()
+	{
+		return exportable;
+	}
+
+	/**
+	 * Setter for graph's exportability
+	 * @param e "is exportable"
+	 */	
+	public void setExportable(boolean e)
+	{
+		exportable = e;
+	}
+	
 }

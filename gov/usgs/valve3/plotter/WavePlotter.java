@@ -12,6 +12,8 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.SliceWaveExporter;
 import gov.usgs.vdx.data.wave.SliceWave;
 import gov.usgs.vdx.data.wave.Wave;
 import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
@@ -21,6 +23,7 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 
 /**
  * Generate images of waveforms, spectras, and spectrograms 
@@ -227,7 +230,7 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		double timeOffset = component.getOffset(startTime);
-		SliceWaveRenderer wr = new SliceWaveRenderer();
+		SliceWaveExporter wr = new SliceWaveExporter();
 		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		wr.setWave(wave);
@@ -239,6 +242,15 @@ public class WavePlotter extends RawDataPlotter {
 		if (removeBias)
 			bias = wave.mean();
 		
+		if ( v3Plot == null ) {
+			csvText.append(",");
+			csvText.append(channel.getCode().replace('$', '_').replace(',', '/'));
+			csvText.append("_Count");
+			ExportData ed = new ExportData( csvIndex, wr );
+			csvIndex++;
+			csvData.add( ed );
+			return;
+		}
 		/*
 		double max = wave.max() - bias;
 		double min = wave.min() - bias;
@@ -371,11 +383,23 @@ public class WavePlotter extends RawDataPlotter {
 		v3Plot.addComponent(component);
 	}
 	
-	/**
-	 * Loop through the list of channels and create plots
+	 /**
+	 * If v3Plot is null, prepare data for exporting
+	 * Otherwise, Loop through the list of channels and create plots
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
+		
+		if ( forExport )
+			switch(plotType) {
+				case WAVEFORM:
+					break;
+				case SPECTRA:
+					throw new Valve3Exception( "Spectra cannot be exported" );
+				case SPECTROGRAM:
+					throw new Valve3Exception( "Spectrograms cannot be exported" );
+			}
 		
 		/// calculate how many graphs we are going to build (number of channels)
 		compCount	= channelDataMap.size();
@@ -411,12 +435,17 @@ public class WavePlotter extends RawDataPlotter {
 		
 		switch(plotType) {
 			case WAVEFORM:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Waveform");
+				if ( !forExport )
+					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Waveform");
+				else
+					csvText.append("\n");  // close the header line
 				break;
 			case SPECTRA:
+				v3Plot.setExportable( false ); // Can't export vectors
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectra");
 				break;
 			case SPECTROGRAM:
+				v3Plot.setExportable( false ); // Can't export vectors
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectrogram");
 				break;
 		}
@@ -425,6 +454,7 @@ public class WavePlotter extends RawDataPlotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image to file with random name.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -434,17 +464,11 @@ public class WavePlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 		
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
+		if ( v3p != null ) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 	
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		getInputs(comp);
-		getData(comp);
-		return wave.toCSV();
-	}
 }

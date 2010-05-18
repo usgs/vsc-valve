@@ -10,9 +10,13 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.Exportable;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
 import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
+import gov.usgs.vdx.data.MatrixExporter;
+import gov.usgs.vdx.ExportConfig;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
@@ -121,10 +125,12 @@ public class HelicorderPlotter extends RawDataPlotter {
 	}
 	
 	/**
-	 * Loop through the list of channels and create plots
+	 * If v3Plot is null, prepare data for exporting
+	 * Otherwise, Loop through the list of channels and create plots
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		/// calculate how many graphs we are going to build (number of channels)
 		compCount	= channelDataMap.size();
@@ -140,6 +146,16 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			// verify their is something to plot
 			if (data == null || data.rows() == 0) {
+				continue;
+			}
+			
+			if ( forExport ) {
+				// Add column headers to csvText
+				csvText.append("," + channel.getCode().replace("$","_") + "_Data");
+				// Initialize data for export; add to set for CSV
+				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, component.getOffset(startTime)) );
+				csvIndex++;
+				csvData.add( ed );
 				continue;
 			}
 			
@@ -189,12 +205,17 @@ public class HelicorderPlotter extends RawDataPlotter {
 			v3Plot.addComponent(component);
 		}
 		
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
+		if ( forExport )
+			csvText.append("\n");  // close the header line
+		else
+			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
 	}
 
 	/**
 	 * Concrete realization of abstract method. 
 	 * Initialize HelicorderRenderer, generate PNG image to local file.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -204,17 +225,10 @@ public class HelicorderPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 		
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
-	}
-
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-		getInputs(c);
-		getData(c);
-        return data.toCSV();
+		if ( v3p != null ) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 }

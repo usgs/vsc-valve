@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.Vector;
 
+import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.Plot;
@@ -30,10 +33,13 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
+import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
+import gov.usgs.vdx.ExportConfig;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -380,32 +386,46 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		PlotType	corePlotType = plotType; 		// Copy of plotType used to decide how to process
+		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
+		//int         csvIndex = 0;
 		
-		switch (plotType) {
+		if ( forExport )
+			// Export is treated as a time series, even if requested plot was a velocity map
+			corePlotType = PlotType.TIME_SERIES;
+		
+		int displayCount = 0, dh = 0;
+		Rank rank = null;
+		String rankLegend = null, baselineLegend = null;
+		
+		switch (corePlotType) {
 			case TIME_SERIES:
 				
 				// calculate how many graphs we are going to build (number of channels * number of components)
 				compCount			= channelDataMap.size() * compCount;
 				
 				// setting up variables to decide where to plot this component
-				int displayCount	= 0;
-				int dh				= component.getBoxHeight();
+				displayCount	= 0;
+				dh				= component.getBoxHeight();
 				
 				// setup the display for the legend
-				Rank rank	= new Rank();
+				rank	= new Rank();
 				if (rk == 0) {
 					rank	= rank.bestPossible();
+					if ( !forExport )
+						v3Plot.setExportable( false );
+					else
+						throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
 				} else {
 					rank	= ranksMap.get(rk);
 				}
-				String rankLegend	= rank.getName();
+				rankLegend	= rank.getName();
 				
 				// if a baseline was chosen then setup the display for the legend
-				String baselineLegend = "";
+				baselineLegend = "";
 				if (baselineData != null) {
 					baselineLegend = "-" + channelsMap.get(Integer.valueOf(bl)).getCode();
 				}
-				
 				for (int cid : channelDataMap.keySet()) {
 					
 					// get the relevant information for this channel
@@ -423,38 +443,51 @@ public class GPSPlotter extends RawDataPlotter {
 						// gdm.add(2, -dm.getQuick(0, 2));
 					}
 					
-					// set up the legend 
-					for (int i = 0; i < legendsCols.length; i++) {
-						channelLegendsCols[i] = String.format("%s%s %s %s", channel.getCode(), baselineLegend, rankLegend, legendsCols[i]);
-					}
-					
-					if(isPlotComponentsSeparately()){
-						// create an individual matrix renderer for each component selected
+					if ( forExport ) {
+						// Add column headers to csvText
 						for (int i = 0; i < columnsList.size(); i++) {
-							Column col = columnsList.get(i);
-							if(col.checked){
-								MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
-								MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
-								v3Plot.getPlot().addRenderer(leftMR);
-								if (rightMR != null)
-									v3Plot.getPlot().addRenderer(rightMR);
-								component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-								component.setTranslationType("ty");
-								v3Plot.addComponent(component);
-								displayCount++;	
+							if ( !axisMap.get(i).equals("") ) {
+								csvText.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
 							}
 						}
+						// Initialize data for export; add to set for CSV
+						ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+						csvIndex++;
+						csvData.add( ed );
 					} else {
-						compCount = channelDataMap.size();
-						MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
-						MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
-						v3Plot.getPlot().addRenderer(leftMR);
-						if (rightMR != null)
-							v3Plot.getPlot().addRenderer(rightMR);
-						component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-						component.setTranslationType("ty");
-						v3Plot.addComponent(component);
-						displayCount++;
+						// set up the legend 
+						for (int i = 0; i < legendsCols.length; i++) {
+							channelLegendsCols[i] = String.format("%s%s %s %s", channel.getCode(), baselineLegend, rankLegend, legendsCols[i]);
+						}
+						
+						if(isPlotComponentsSeparately()){
+							// create an individual matrix renderer for each component selected
+							for (int i = 0; i < columnsList.size(); i++) {
+								Column col = columnsList.get(i);
+								if(col.checked){
+									MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
+									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+									v3Plot.getPlot().addRenderer(leftMR);
+									if (rightMR != null)
+										v3Plot.getPlot().addRenderer(rightMR);
+									component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+									component.setTranslationType("ty");
+									v3Plot.addComponent(component);
+									displayCount++;	
+								}
+							}
+						} else {
+							compCount = channelDataMap.size();
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+							v3Plot.getPlot().addRenderer(leftMR);
+							if (rightMR != null)
+								v3Plot.getPlot().addRenderer(rightMR);
+							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+							component.setTranslationType("ty");
+							v3Plot.addComponent(component);
+							displayCount++;
+						}
 					}
 				}
 				break;
@@ -464,9 +497,12 @@ public class GPSPlotter extends RawDataPlotter {
 				break;
 		}
 		
-		switch(plotType) {
+		switch(corePlotType) {
 			case TIME_SERIES:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+				if ( forExport )
+					csvText.append("\n"); // close the header line
+				else
+					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 				break;
 			case VELOCITY_MAP:
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
@@ -477,6 +513,8 @@ public class GPSPlotter extends RawDataPlotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image to local file.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -488,8 +526,10 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 		
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
+		if ( v3p != null ) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 }

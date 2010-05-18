@@ -1,7 +1,18 @@
 package gov.usgs.valve3;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
 import gov.usgs.util.ConfigFile;
+import gov.usgs.vdx.ExportConfig;
+import gov.usgs.util.Pool;
 import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.util.UtilException;
 
 /**
  * Abstract base class for plotter, all concrete plotters
@@ -92,4 +103,37 @@ abstract public class Plotter
 	 * renders PlotComponent in given plot
 	 */
 	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception;
+	
+	/**
+	 * Yield export configuration for specified source & client
+	 * @param source	vdx source name
+	 * @param client	vdx name
+	 */
+	public ExportConfig getExportConfig(String source, String client) {
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", source);
+		params.put("action", "exportinfo");
+		Valve3 v3 = Valve3.getInstance();
+		ExportConfig ec = v3.getExportConfig(source);
+		if ( ec == null ) {
+			// Build inital config from Valve parameters
+			ec = v3.getExportConfig("");
+			ec.parameterize( params );
+			
+			// Fold in overrides from VDX for this source
+			Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(client);
+			VDXClient cl = pool.checkout();
+			List<String> ecs = null;
+			try {
+				ecs = cl.getTextData(params);
+			} catch (UtilException e){
+				ecs = new ArrayList<String>();
+			}
+			pool.checkin(cl);
+			ec = new ExportConfig( ecs );
+			v3.putExportConfig(source, ec);
+		}
+		return ec;
+	}
+
 }

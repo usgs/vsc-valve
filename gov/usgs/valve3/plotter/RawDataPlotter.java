@@ -3,13 +3,17 @@ package gov.usgs.valve3.plotter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.Date;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
+import gov.usgs.util.Util;
+import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -19,6 +23,7 @@ import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.Rank;
+import gov.usgs.vdx.data.ExportData;
 
 public abstract class RawDataPlotter extends Plotter {
 	
@@ -43,6 +48,10 @@ public abstract class RawDataPlotter extends Plotter {
 	protected List<Column> columnsList;
 	
 	protected Logger logger;
+	
+	protected TreeSet<ExportData> csvData;
+	protected StringBuffer csvText;
+	protected int csvIndex = 0;
 	
 	/**
 	 * Default constructor
@@ -207,15 +216,125 @@ public abstract class RawDataPlotter extends Plotter {
 	abstract void getData(PlotComponent component) throws Valve3Exception;
 	
 	/**
+	 * Format time and data using decFmt (and nullField for empty fields); 
+	 * append to csvText 
+	 */
+	private void addCSVline( Double[][] data, Double time, String decFmt, String nullField ) {
+		String line = String.format( "%14.3f,", time ) + Util.j2KToDateString(time);					
+		for ( Double[] group : data )
+			for ( int i = 1; i < group.length; i++ ) {
+				Double v = group[i];
+				if ( v != null )
+					line += String.format( decFmt, v );
+				else
+					line += nullField;
+			}
+		csvText.append(line);
+		csvText.append("\n");	
+	}
+	
+	/**
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
-	
-		getInputs(comp);
-		getData(comp);
+		// Get export configuration parameters
+		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		
-		// return data.toCSV();
-		return "NOT IMPLEMENTED YET FOR MULTIPLE STATIONS";
+		if ( !ec.isExportable() )
+			throw new Valve3Exception( "Requested export not allowed" );
+	
+		// Add openeing comment line(s) to text
+		String[] comments = ec.getComments();
+		csvText = new StringBuffer();
+		if ( comments != null )
+			for ( String s: comments ) {
+				csvText.append("#");
+				csvText.append(s);
+				csvText.append("\n");
+			}
+		
+		// Add the common column headers
+		String timeZone = comp.getTimeZone().getID();
+		csvText.append("Seconds_since_1970 (");
+		csvText.append(timeZone);
+		csvText.append("), Date (");
+		csvText.append(timeZone);
+		csvText.append(")");
+
+		// Fill csvData with data to be exported; also completes csvText
+		csvData = new TreeSet<ExportData>();
+		csvIndex = 0;
+		plot( null, comp );
+		
+		// currLine is an array of the current row of data from each source, indexed by that source's ID
+		Double[][] currLine = new Double[ csvData.size() ][];
+		String decFmt = ",%" + ec.getFixedWidth()[0] + "." + ec.getFixedWidth()[1] + "f";
+		String nullField = String.format( ",%" + ec.getFixedWidth()[0] + "s", "" );
+
+		if ( currLine.length == 1 ) {
+			// Since there's only 1 source, we can just loop through it
+			ExportData cd = csvData.first();
+			Double[] datum = cd.nextExportDatum();
+			while ( datum != null ) {
+				currLine[0] = datum;
+				addCSVline( currLine, datum[0], decFmt, nullField );
+				datum = cd.nextExportDatum();
+			}
+			return csvText.toString();
+		}
+
+		// An array of our data sources, indexed by ID
+		ExportData[] sources = new ExportData[ csvData.size() ];
+		for ( ExportData cd: csvData ) {
+			sources[ cd.exportDataID() ] = cd;
+			currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+		}
+		
+		// prevTime is the time of the last row formatted into csvText
+		Double prevTime = null;
+		while ( true ) {
+			ExportData loED;
+			try {
+				// Grab the ExportData whose next datum has the earliest time
+				loED = csvData.first();
+			} catch (Exception e) {
+				loED = null;
+			}
+			
+			if ( prevTime != null ) {
+				int cmp = -1;
+				if ( loED != null ) {
+					Double[] l = loED.currExportDatum();
+					Double l0 = l[0];
+					cmp = prevTime.compareTo(l0);
+				}
+				if ( cmp < 0 ) {
+					// Add the current line to csvText
+					addCSVline( currLine, prevTime, decFmt, nullField );
+					
+					if ( loED == null )
+						// No new data; we're done!
+						break;
+					// "Erase" the current line
+					for ( ExportData cd: sources )
+						currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+					prevTime = loED.currExportDatum()[0];
+				}
+			} else if ( loED != null ) {
+				// This is our first item
+				prevTime = loED.currExportDatum()[0];
+			} else {
+				throw new Valve3Exception( "No data to export" );
+			}
+			// Add current item to current line
+			currLine[ loED.exportDataID() ] = loED.currExportDatum();
+			
+			// Remove & add our ExportData back so that it gets placed based on its new data
+			csvData.remove( loED );
+			if ( loED.nextExportDatum() != null )
+				csvData.add( loED );
+		}
+		return csvText.toString();
 	}	
 	
 	class AxisParameters {

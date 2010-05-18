@@ -70,6 +70,8 @@ public class Valve3Plot extends Result
 	protected List<PlotComponent> components;
 	private Logger logger;	
 	
+	protected boolean exportable;
+	
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters
@@ -119,6 +121,8 @@ public class Valve3Plot extends Result
 		components = new ArrayList<PlotComponent>(2);
 		
 		plot = new Plot(width, height);
+		
+		exportable = false;
 	}
 
 	/***
@@ -248,6 +252,24 @@ public class Valve3Plot extends Result
 	}
 
 	/**
+	 * Getter for plot exportable flag
+	 * @returns "plot is exportable"
+	 */
+	public boolean getExportable()
+	{
+		return exportable;
+	}
+
+	/**
+	 * Setter for plot exportable flag
+	 * @param e boolean: "plot is exportable"
+	 */
+	public void setExportable(boolean e)
+	{
+		exportable = e;
+	}
+
+	/**
 	 * Delete file with generated plot image from file system
 	 */
 	public void delete()
@@ -267,6 +289,7 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<title>" + title + "</title>\n");
 		sb.append("\t\t<width>" + width + "</width>\n");
 		sb.append("\t\t<height>" + height + "</height>\n");
+		sb.append("\t\t<exportable>" + exportable + "</exportable>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)

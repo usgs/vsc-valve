@@ -23,11 +23,15 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Rank;
+import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.HistogramExporter;
 import gov.usgs.vdx.data.hypo.HypocenterList;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
+import gov.usgs.vdx.data.MatrixExporter;
+import gov.usgs.vdx.ExportConfig;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -37,6 +41,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -398,12 +403,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 	}
 
 	/**
-	 * Initialize HistogramRenderer and add it to plot.
-	 * Generate PNG image to local file.
+	 * If v3Plot is null, prepare data for exporting
+	 * Otherwise, initialize HistogramRenderer and add it to plot.
+	 * 		Generate PNG image to local file.
 	 */
 	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
-
-		HistogramRenderer hr = new HistogramRenderer(hypos.getCountsHistogram(bin));
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
+		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
 		hr.setMinX(startTime);
@@ -415,41 +421,67 @@ public class HypocenterPlotter extends RawDataPlotter {
 		hr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		leftTicks = hr.getAxis().leftTicks.length;
 
+		if ( forExport ) {
+			// Add column headers to csvText (second one incomplete)
+			csvText.append(String.format( ",%s_EventsPer%s", rank.getName(), bin ));
+			csvData.add( new ExportData( csvIndex, hr ) );
+			csvIndex++;
+		}
 		DoubleMatrix2D data = null;
+		String headerFmt = "";
 		switch (rightAxis) {
 		case CUM_COUNTS:
 			data = hypos.getCumulativeCounts();
+			if ( forExport )
+				// Add specialized part of column header to csvText
+				headerFmt = ",%s_CumulativeCounts";
 			break;
 		case CUM_MAGNITUDE:
 			data = hypos.getCumulativeMagnitude();
+			if ( forExport )
+				// Add specialized part of column header to csvText
+				headerFmt = ",%s_CumulativeMagnitude";
 			break;
 		case CUM_MOMENT:
 			data = hypos.getCumulativeMoment();
+			if ( forExport )
+				// Add specialized part of column header to csvText
+				headerFmt = ",%s_CumulativeMoment";
 			break;
 		}
 		if (data != null && data.rows() > 0) {
-			
 			double cmin = data.get(0, 1);
 			double cmax = data.get(data.rows() - 1, 1);	
 			
 			// TODO: utilize ranks for counts plots
-			MatrixRenderer mr = new MatrixRenderer(data, false);
+			MatrixExporter mr = new MatrixExporter(data, false, null);
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 			mr.setExtents(startTime, endTime, cmin, cmax * 1.05);
 			mr.createDefaultLineRenderers();
 			
-			Renderer[] r = mr.getLineRenderers();
-			((ShapeRenderer)r[0]).color		= Color.red;
-			((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
-			AxisRenderer ar = new AxisRenderer(mr);
-			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftTicks, false), null);
-			mr.setAxis(ar);
+			if ( forExport ) {
+				// Add coulmn to header; add Exporter to set for CSV
+				csvText.append(String.format( headerFmt, rank.getName() ));
+				csvData.add( new ExportData( csvIndex, mr ) );
+				csvIndex++;
+			} else {
+				Renderer[] r = mr.getLineRenderers();
+				((ShapeRenderer)r[0]).color		= Color.red;
+				((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
+				AxisRenderer ar = new AxisRenderer(mr);
+				ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftTicks, false), null);
+				mr.setAxis(ar);
 			
-			hr.addRenderer(mr);
-			hr.getAxis().setRightLabelAsText(rightAxis.toString());
+				hr.addRenderer(mr);
+				hr.getAxis().setRightLabelAsText(rightAxis.toString());
+			}
 		}
 		
+		if ( forExport ) {
+			csvText.append("\n");	//
+			return;
+		}
 		hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
@@ -459,23 +491,31 @@ public class HypocenterPlotter extends RawDataPlotter {
 	}
 	
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		// setup the display for the legend
 		Rank rank	= new Rank();
 		if (rk == 0) {
 			rank	= rank.bestPossible();
+			if ( !forExport )
+				v3Plot.setExportable( false );
+			else
+				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
 		} else {
 			rank	= ranksMap.get(rk);
 		}
 
 		switch (plotType) {
 		case MAP:
+			if ( forExport )
+				throw new Valve3Exception( "Hypocenter map cannot be exported" );
 			plotMap(v3Plot, component, rank);
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			break;
 		case COUNTS:
 			plotCounts(v3Plot, component, rank);
-			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
+			if ( !forExport )
+				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			break;
 		}		
 	}
@@ -483,6 +523,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image (hypocenters map or histogram, depends on plot type) to file with random name.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -492,19 +533,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		plotData(v3p, comp);
 				
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
-	}
-
-	/**
-	 * @return CSV string of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-	
-		getInputs(c);
-		getData(c);
-		
-		return hypos.toCSV();
+		if ( v3p != null ) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 }

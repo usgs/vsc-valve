@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.HistogramRenderer;
@@ -22,9 +23,13 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
+import gov.usgs.vdx.data.HistogramExporter;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
+import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.rsam.RSAMData;
+import gov.usgs.vdx.ExportConfig;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -200,6 +205,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
 		double timeOffset = component.getOffset(startTime);
@@ -218,6 +224,16 @@ public class RSAMPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal axis values.");
 		*/
 
+		if ( forExport ) {
+			// Add column header to csvText
+			csvText.append(",");
+			csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + "_RSAM");
+			// Initialize data for export; add to set for CSV
+			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+			csvData.add( ed );
+			csvIndex++;
+			return;
+		}
 		double yMin = 1E300;
 		double yMax = -1E300;
 		boolean allowExpand = true;
@@ -260,6 +276,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * render event count histogram to PNG image in local file
 	 */
 	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) {
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
@@ -267,7 +284,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		double timeOffset = component.getOffset(startTime);
 		String channelCode = channel.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
-		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
+		HistogramExporter hr = new HistogramExporter(rd.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
@@ -277,6 +294,15 @@ public class RSAMPlotter extends RawDataPlotter {
 		hr.getAxis().setLeftLabelAsText("Events per " + bin);
 		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
+		if ( forExport ) {
+			// Add column header to csvText
+			csvText.append(",");
+			csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_EventsPer%s", bin ));
+			// Initialize data for export; add to set for CSV
+			csvData.add( new ExportData( csvIndex, hr ) );
+			csvIndex++;
+		}
+
 		DoubleMatrix2D data	= null;		
 		data				= rd.getCumulativeCounts();
 		if (data != null && data.rows() > 0) {
@@ -284,7 +310,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			double cmin = data.get(0, 1);
 			double cmax = data.get(data.rows() - 1, 1);	
 			
-			MatrixRenderer mr = new MatrixRenderer(data, ranks);
+			MatrixExporter mr = new MatrixExporter(data, ranks);
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
@@ -299,8 +325,20 @@ public class RSAMPlotter extends RawDataPlotter {
 			
 			hr.addRenderer(mr);
 			hr.getAxis().setRightLabelAsText("Cumulative Counts");
+			
+			if ( forExport ) {
+				// Add column header to csvText
+				csvText.append(",");
+				csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_CumulativeCount", bin ));
+				// Initialize data for export; add to set for CSV
+				csvData.add( new ExportData( csvIndex, mr ) );
+				csvIndex++;
+			}
 		}
 		
+		if ( forExport )
+			return;
+			
 		hr.createDefaultLegendRenderer(new String[] {channelCode + " Events"});
 		v3Plot.getPlot().addRenderer(hr);
 		
@@ -310,10 +348,12 @@ public class RSAMPlotter extends RawDataPlotter {
 	}
 
 	/**
-	 * Loop through the list of channels and create plots
+	 * If v3Plot is null, prepare data for exporting
+	 * Otherwise, Loop through the list of channels and create plots
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		/// calculate how many graphs we are going to build (number of channels)
 		compCount			= channelDataMap.size();
@@ -344,19 +384,24 @@ public class RSAMPlotter extends RawDataPlotter {
 			displayCount++;
 		}
 		
-		switch(plotType) {
-			case VALUES:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
-				break;
-			case COUNTS:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
-				break;
-		}
+		if ( !forExport )
+			switch(plotType) {
+				case VALUES:
+					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+					break;
+				case COUNTS:
+					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
+					break;
+			}
+		else
+			csvText.append("\n");  // close the header line
+
 	}
 
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG images for values or event count histograms (depends from plot type) to file with random name.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -367,25 +412,10 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
-	}
-
-	/**
-	 * @return CSV string of RSAM values data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-		getInputs(c);
-		getData(c);
-		
-		switch(plotType) {
-			case VALUES:
-				return gdm.toCSV();
-			case COUNTS:
-				rd.countEvents(threshold, ratio, maxEventLength);
-				return rd.getCountsCSV();
+		if ( v3p != null ) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
 		}
-		return null;
 	}
 }

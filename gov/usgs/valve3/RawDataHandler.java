@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -173,11 +174,26 @@ public class RawDataHandler implements HttpHandler
 			if (components == null || components.size() <= 0)
 				return null;
 			
-			String fn = "";
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+			df.setTimeZone(TimeZone.getTimeZone("GMT"));
 			StringBuffer sb = new StringBuffer();
+			String fn_source = null, fn_rank = null;
 			for (PlotComponent component : components)
 			{
 				String source = component.getSource();
+				if ( fn_source == null )
+					fn_source = source;
+				else if ( !fn_source.equals(source) )
+					throw new Valve3Exception( "Multi-source export not supported" );
+				String rank = component.getString( "selectedStation" );
+				if ( rank != null )
+					if ( fn_rank == null ) {
+						if ( rank.equals( "Best Possible Rank" ) )
+							throw new Valve3Exception( "Mixed-rank export not supported" );
+						fn_rank = rank;
+					} else if ( !fn_rank.equals(rank) )
+						throw new Valve3Exception( "Multi-rank export not supported" );
+						
 				Plotter plotter = null;
 				if (source.equals("channel_map"))
 				{
@@ -195,23 +211,12 @@ public class RawDataHandler implements HttpHandler
 				}
 				if (plotter != null)
 					sb.append(plotter.toCSV(component));
-				
-				SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				
-				if (fn.length() > 0)
-					fn += "-";
-				
-				if (component.get("ch") != null)
-					fn = component.get("ch").replace('$','_');
-				else
-					fn = component.get("src");
-					
-				fn += "-" + df.format(Util.j2KToDate(component.getStartTime(component.getEndTime()) ));
-				fn += "-" + df.format(Util.j2KToDate(component.getEndTime()));
 			}
 			
-			fn += ".csv";
+			String fn = df.format(new Date()) + "-" 
+				+ fn_source + "-" 
+				+ (fn_rank==null ? "NO_RANK" : fn_rank) 
+				+ ".csv";
 			String filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
 			try
 			{

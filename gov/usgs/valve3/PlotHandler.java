@@ -1,15 +1,20 @@
 package gov.usgs.valve3;
 
 import gov.usgs.util.Log;
+import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.ExportConfig;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -118,6 +123,32 @@ public class PlotHandler implements HttpHandler
 			PlotComponent component = createComponent(request, i);
 			if (component == null)
 				continue;
+			
+			String source = request.getParameter("src." + i);
+			Map<String, String> params = new LinkedHashMap<String, String>();
+			params.put("source", source);
+			params.put("action", "exportinfo");
+			Valve3 v3 = Valve3.getInstance();
+			ExportConfig ec = v3.getExportConfig(source);
+			if ( ec == null ) {
+				DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(source);
+				if (dsd == null)
+					throw new Valve3Exception("Missing data source for " + source);
+				ec = v3.getExportConfig("");
+				ec.parameterize( params );
+				Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(dsd.getVDXClientName());
+				VDXClient cl = pool.checkout();
+				java.util.List<String> ecs = null;
+				try {
+					ecs = cl.getTextData(params);
+				} catch (UtilException e){
+					ecs = new ArrayList<String>();
+				}
+				pool.checkin(cl);
+				ec = new ExportConfig( ecs );
+				v3.putExportConfig(source, ec);
+			}
+			
 			int x = Util.stringToInt(request.getParameter("x." + i), 0);
 			if (x < 0 || x > plot.getWidth()){
 				throw new Valve3Exception("Illegal x." + i + " value.");
@@ -153,6 +184,7 @@ public class PlotHandler implements HttpHandler
 			component.setBoxY(y);
 			component.setBoxWidth(w);
 			component.setBoxHeight(h);
+			component.setExportable( ec.isExportable() );
 			list.add(component);
 		}
 		return list;
@@ -168,12 +200,15 @@ public class PlotHandler implements HttpHandler
 		{
 			Valve3Plot plot = new Valve3Plot(request);
 			List<PlotComponent> components = parseRequest(request, plot);
+			boolean exportable = false;
 			if (components == null || components.size() <= 0)
 				return null;
 			for (PlotComponent component : components)
 			{
 				String source = component.getSource();
 				Plotter plotter = null;
+				if ( component.getExportable() )
+					plot.setExportable( true );
 				if (source.equals("channel_map"))
 				{
 					plotter = new ChannelMapPlotter();

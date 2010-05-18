@@ -5,10 +5,15 @@ import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
+import gov.usgs.util.Util;
+import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.data.DataHandler;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,6 +86,8 @@ public class Valve3 implements ServletContextListener
 
 	private Logger logger;
 	
+	private HashMap<String,ExportConfig> exportConfigs;
+	
 	/**
 	 * Default constructor
 	 */
@@ -92,6 +99,7 @@ public class Valve3 implements ServletContextListener
 		Log.getLogger("gov.usgs.net").setLevel(Level.SEVERE);
 		resultDeleter = new ResultDeleter();
 		resultDeleter.start();
+		exportConfigs = new HashMap<String,ExportConfig>();
 	}
 	
 	/**
@@ -108,6 +116,10 @@ public class Valve3 implements ServletContextListener
 		logger.config("title: " + installationTitle);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
 		logger.config("timeZoneAbbr: " + timeZoneAbbr);
+
+		ExportConfig ec = new ExportConfig( "", config );
+		exportConfigs.put( "", ec );
+
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
 		if (ics != null)
@@ -251,6 +263,21 @@ public class Valve3 implements ServletContextListener
 	public GeoLabelSet getGeoLabelSet()
 	{
 		return labelSet;
+	}
+
+	/**
+	 * Getter for export config
+	 */
+	public ExportConfig getExportConfig( String source ) 
+	{
+		return exportConfigs.get(source);
+	}
+	/**
+	 * Setter for export config
+	 */
+	public void putExportConfig( String source, ExportConfig ec ) 
+	{
+		exportConfigs.put(source, ec);
 	}
 
 	/**
