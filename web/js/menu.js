@@ -116,6 +116,14 @@ function handleMenu(xml) {
 			ip.appendChild(li);
 		}
 		vp.getElementsByTagName('ul')[0].appendChild(t);
+
+	    if ( sections[i].getElementsByTagName("expanded")[0].firstChild.data == "true" ) {
+			// It would be better to call toggle, but then we'd need to fake an event
+			var subMenu = t.getElementsByTagName("ul")[0];
+			var img = t.getElementsByTagName("img")[0];
+			subMenu.className = "subMenu";
+			img.src = "images/minus.png";
+	    }
 	}
 	
 	var inst = xml.getElementsByTagName("title")[0].firstChild.data;
