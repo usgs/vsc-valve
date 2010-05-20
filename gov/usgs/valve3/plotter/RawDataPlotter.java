@@ -53,6 +53,8 @@ public abstract class RawDataPlotter extends Plotter {
 	protected StringBuffer csvText;
 	protected int csvIndex = 0;
 	
+	protected boolean removeBias;
+	
 	/**
 	 * Default constructor
 	 */
@@ -72,6 +74,11 @@ public abstract class RawDataPlotter extends Plotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
+		try{
+			removeBias = component.getBoolean("rb");
+		} catch (Valve3Exception ex){
+			removeBias = false;
+		}
 	}
 	
 	/**

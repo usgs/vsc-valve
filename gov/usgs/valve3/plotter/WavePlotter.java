@@ -48,7 +48,7 @@ public class WavePlotter extends RawDataPlotter {
 	}
 	
 	private PlotType plotType;
-	private boolean removeBias;
+//	private boolean removeBias;
 	private FilterType filterType;
 	private SliceWave wave;
 	private double minHz;
@@ -88,11 +88,11 @@ public class WavePlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
 		
-		try{
-			removeBias = component.getBoolean("rb");
-		} catch (Valve3Exception ex){
-			removeBias = false;
-		}
+//		try{
+//			removeBias = component.getBoolean("rb");
+//		} catch (Valve3Exception ex){
+//			removeBias = false;
+//		}
 		
 		String ft = component.get("ftype");
 		if(ft!=null){

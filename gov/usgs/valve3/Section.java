@@ -16,6 +16,7 @@ public class Section implements Comparable<Section>
 	public int sortOrder;
 	public String name;
 	public String icon;
+	public boolean expanded;
 	
 	public List<MenuItem> menuItems;
 	
@@ -24,12 +25,14 @@ public class Section implements Comparable<Section>
 	 * @param n section name
 	 * @param i section icon file name
 	 * @param so section sort order
+	 * @param e section initally expanded?
 	 */
-	public Section(String n, String i, int so)
+	public Section(String n, String i, int so, boolean e)
 	{
 		name = n;
 		icon = i;
 		sortOrder = so;
+		expanded = e;
 		menuItems = new ArrayList<MenuItem>(5);
 	}
 	
@@ -56,6 +59,7 @@ public class Section implements Comparable<Section>
 		for (Iterator it = menuItems.iterator(); it.hasNext(); )
 			sb.append(((MenuItem)it.next()).toXML());
 		sb.append("</menuitems>\n");
+		sb.append("<expanded>" + expanded + "</expanded>");
 		sb.append("</section>\n");
 		return sb.toString();
 	}

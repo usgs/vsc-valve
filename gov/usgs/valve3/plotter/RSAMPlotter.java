@@ -60,7 +60,7 @@ public class RSAMPlotter extends RawDataPlotter {
 
 	int compCount;
 	private Map<Integer, RSAMData> channelDataMap;
-	private boolean removeBias;
+	//private boolean removeBias;
 	private int period;
 	private double threshold;
 	private double ratio;
@@ -95,11 +95,11 @@ public class RSAMPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
 	
-		try{
-			removeBias = component.getBoolean("rb");
-		} catch (Valve3Exception ex){
-			removeBias = false;
-		}
+//		try{
+//			removeBias = component.getBoolean("rb");
+//		} catch (Valve3Exception ex){
+//			removeBias = false;
+//		}
 		
 		switch(plotType) {
 		

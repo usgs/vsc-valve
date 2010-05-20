@@ -54,7 +54,12 @@ public class MenuHandler implements HttpHandler
 		List<String> ss = config.getList("section");
 		for (String sec : ss)
 		{
-			Section section = new Section(sec, "", Integer.parseInt(config.getString(sec + ".sortOrder")));
+			boolean expanded = false;
+			try {
+				expanded = config.getBoolean(sec + ".expanded");
+			} catch (Exception e) {
+			}
+			Section section = new Section(sec, "", Integer.parseInt(config.getString(sec + ".sortOrder")), expanded);
 			sections.put(sec, section);
 		}
 		
