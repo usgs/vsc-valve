@@ -209,6 +209,15 @@ function handlePlot(xml)
 	var ip = document.getElementById('contentInsertionPoint');
 	ip.insertBefore(t, ip.firstChild);
 		
+	/* Slide the zoom markers down by size of new plot */
+	if ( count > 0 ) {
+		var off = parseInt(height);
+		var markStyle = document.getElementById("greenMark").style
+		var oldTop = parseInt(markStyle.top.replace("px",""));
+		var newTop = oldTop + off + 32;
+		markStyle.top = newTop + "px";
+		document.getElementById("redMark").style.top = newTop + "px";
+	}
 	count++;
 }
 

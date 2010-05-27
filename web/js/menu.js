@@ -900,13 +900,42 @@ Menu.prototype.acceptMapClick = function(target, mx, my, lon, lat)
 	end times for the area clicked on (assuming X values are over time)
 	The first click sets the start time. The second click sets the end time.
 	(Then you can submit to zoom in on your new time range.)
+	Also sets markers for clicked times at top of plot (green=start,red=end).
  */
 Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 {
-	if (lastTimeClick++ % 2 == 0)
+	var scroll = getScroll();
+	var mark;
+	lastTimeClick = 1 - lastTimeClick;
+	/* mark = marker for this click */
+	if (lastTimeClick == 1) {
+		mark = document.getElementById("greenMark")
+		otherMark = document.getElementById("redMark")
+	} else {
+		mark = document.getElementById("redMark")
+		otherMark = document.getElementById("greenMark")
+	}
+	mark.style.top=(target.y + 16) + "px";
+	if ( mark.style.top != otherMark.style.top ) {
+		/* If marker's height has moved, user clicked on a different plot.
+			Force click to be treated as start time; hide end marker */
+		if ( lastTimeClick == 0 ) {
+			var t = mark;
+			mark = otherMark;
+			otherMark = t;
+			lastTimeClick = 1;
+		}
+		otherMark.style.visibility = "hidden";
+	}
+	if (lastTimeClick == 1) {
 		document.getElementById("startTime").value	= buildTimeString(gx);
-	else
+	} else {
 		document.getElementById("endTime").value	= buildTimeString(gx);
+	}
+	mark.style.visibility = "visible";
+	mark.style.left=(scroll[0] + mx -5) + "px";
+	mark.style.top=(target.y + 16) + "px";
+	otherMark.style.top=(target.y + 16) + "px";
 }
 
 /**

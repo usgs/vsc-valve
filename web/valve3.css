@@ -415,3 +415,16 @@ div.listbox p:hover
 	font-size: 1px;
 	visibility: hidden;
 }
+
+
+#redMark, #greenMark
+{
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 99;
+	font-size: 1px;
+	visibility: hidden;
+}

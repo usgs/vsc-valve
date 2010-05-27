@@ -198,6 +198,8 @@
 		
 		<div id="redLine1"></div>
 		<div id="redLine2"></div>
+		<img src="images/redMark.png" id="redMark">
+		<img src="images/greenMark.png" id="greenMark">
 		
 		<!--% if (config.getServletContext().getResource("/footer.html") != null) { %-->
 			<!--  jsp:include page="footer.html" /-->
