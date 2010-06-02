@@ -14,13 +14,35 @@
 			<p><input type="radio" name="plotType" id="mv:paneSelector_options_0" checked="checked" value="values"> <label for="mv">Values</label></p>
 			<p><input type="radio" name="plotType" id="cnts:paneSelector_options_1" value="cnts" disabled> <label for="cnts">Event Counts</label></p>
 		</div>
+		<div class="box w140">
+			<h1>Line Type</h1>
+			<p><select class="w100p" name="selector:lt" id="selector:lt">
+			<option value="l">Line</option>
+			<option value="o">Circle</option>
+			<option value="s">Square</option>
+			<option value="*">Star</option>
+			<option value="t">Triangle</option>
+			<option value="d">Dot</option>
+			</select></p>
+		</div>
+		<div class="box w140">
+			<h1>Downsampling</h1>
+			<p>
+				<select class="w100p" name="selector:ds" id="selector:ds">
+					<option selected="selected">None</option>
+					<option>Decimation</option>
+					<option>Mean filter</option>
+				</select>
+			</p>
+			<p>Interval:  <input type="text" size="9" name="dsInt" id="downSamplingInterval"></p>
+		</div>
 	</div>
 	
 	<div class="w310 fl">
 		<div id="pane_options_0-">
 			<div class="box w310">
 				<h1>Values Options</h1>
-				<p><select name="valuesPeriod">
+				<!--p><select name="valuesPeriod">
 					<option>1</option>
 					<option>10</option>
 					<option>30</option>
@@ -28,7 +50,7 @@
 					<option>300</option>
 					<option>600</option>
 					<option>3600</option>
-				</select> <label for="valuesPeriod">Period (seconds)</label></p>
+				</select> <label for="valuesPeriod">Period (seconds)</label></p-->
 				<p><input type="checkbox" name="rb" disabled> <label for="rb">Remove bias</label></p>
 			</div>
 			<div class="box w140 fl">
@@ -44,14 +66,14 @@
 				<p><input type="text" name="threshold" id="threshold" size=4 value=50> <label for="threshold">Threshold</label></p>
 				<p><input type="text" name="ratio" id="ratio" size=4 value=1.3> <label for="ratio">Ratio</label></p>
 				<p><input type="text" name="maxEventLength" id="maxEventLength" size=4 value=300> <label for="maxEventLength">Maximum Event Length (seconds)</label></p>
-				<p><select name="countsPeriod">
+				<!--p><select name="countsPeriod">
 					<option>1</option>
 					<option>10</option>
 					<option>30</option>
 					<option selected="selected">60</option>
 					<option>300</option>
 					<option>600</option>
-				</select> <label for="countsPeriod">Period (seconds)</label></p>
+				</select> <label for="countsPeriod">Period (seconds)</label></p-->
 				<p><select name="value:cntsBin">
 					<option value="I">Minute</option>
 					<option value="a">Ten Minute</option>

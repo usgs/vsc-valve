@@ -31,6 +31,28 @@
 			<p><select class="w100p" name="selector:rk">
 			</select></p>
 		</div>
+		<div class="box w140">
+			<h1>Line Type</h1>
+			<p><select class="w100p" name="selector:lt" id="selector:lt">
+			<option value="l">Line</option>
+			<option value="o">Circle</option>
+			<option value="s">Square</option>
+			<option value="*">Star</option>
+			<option value="t">Triangle</option>
+			<option value="d">Dot</option>
+			</select></p>
+		</div>
+		<div class="box w140">
+			<h1>Downsampling</h1>
+			<p>
+				<select class="w100p" name="selector:ds" id="selector:ds">
+					<option selected="selected">None</option>
+					<option>Decimation</option>
+					<option>Mean filter</option>
+				</select>
+			</p>
+			<p>Interval:  <input type="text" size="9" name="dsInt" id="downSamplingInterval"></p>
+		</div>
 	</div>
 	
 	<div class="w310 fl">

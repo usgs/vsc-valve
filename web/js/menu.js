@@ -34,9 +34,17 @@ function loadMenu(id) {
 		menus[id].div.style.display = 'block';
 		lastDiv = menus[id].div;
 		setCurrentMenu(menus[id]);
+		var selector_lt = document.getElementById("selector:lt");
+		if(selector_lt){
+			for (var i = 0; i < selector_lt.options.length; i++)  {
+				if(selector_lt.options[i].value==menus[id].lineType){
+					selector_lt.options[i].selected=true;
+					break;
+				}
+			}
+		}	
 		return;
 	}
-		
 	var url = "menu/" + menus[id].file + ".html";
 	loadXML(menus[id].file + " javascript", url, 
 		function(req) {	
@@ -61,6 +69,15 @@ function loadMenu(id) {
 					setCurrentMenu(menus[id]);
 				}
 			});
+			var selector_lt = document.getElementById("selector:lt");
+			if(selector_lt){
+				for (var i = 0; i < selector_lt.options.length; i++)  {
+					if(selector_lt.options[i].value==menus[id].lineType){
+						selector_lt.options[i].selected=true;
+						break;
+					}
+				}
+			}	
 	});
 }
 
@@ -95,6 +112,7 @@ function handleMenu(xml) {
 			var menuid			= items[j].getElementsByTagName("menuid")[0].firstChild.data;
 			var name			= items[j].getElementsByTagName("name")[0].firstChild.data;
 			var file			= items[j].getElementsByTagName("file")[0].firstChild.data;
+			var lineType		= items[j].getElementsByTagName("lineType")[0].firstChild.data;
 			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
@@ -104,6 +122,7 @@ function handleMenu(xml) {
 			m.id			= menuid;
 			m.file			= file;
 			m.timeShortcuts	= timeShortcuts.split(",");
+			m.lineType		= lineType;
 			m.plotSeparately = plotSeparately;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
@@ -1009,12 +1028,19 @@ Menu.prototype.initialize = function() {
 }
 
 Menu.prototype.presubmit = function() {
-	var returnValue = true;
 	var colDiv	= document.getElementById(this.id + "_columns");
-	if (colDiv) {
-		returnValue = validateColumns(this);
+	if (colDiv && !validateColumns(this)) {
+		return false;
 	}
-	return returnValue;
+	var decimationType = document.getElementById(this.id + "_selector:ds");
+	if(decimationType!=null && decimationType.selectedIndex > 0){
+		var decimationInterval = parseInt(document.getElementById(this.id + '_downSamplingInterval').value);
+		if(isNaN(decimationInterval) || decimationInterval<=0){
+			alert("Wrong value for decimation interval.");
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
