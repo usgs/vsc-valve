@@ -74,11 +74,21 @@ public class MenuHandler implements HttpHandler
 				if (section != null)
 				{
 					boolean plotSeparately = cf.getBoolean("plotter.plotComponentsSeparately");
+					char lt;
+					String value = cf.getString("plotter.lineType");
+					if(value==null){
+						lt = 'l';
+					} else {
+						if(value.length() != 1)
+							lt = 'l';
+						else
+							lt = value.charAt(0);
+					}
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, plotSeparately);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lt, plotSeparately);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}

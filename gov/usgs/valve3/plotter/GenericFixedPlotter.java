@@ -52,8 +52,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);
 		rk = component.getInt("rk");
-		shape = component.getString("lt");
-		
 		detrendCols			= new boolean [columnsList.size()];
 		normalzCols			= new boolean [columnsList.size()];
 		legendsCols			= new String  [columnsList.size()];
@@ -118,6 +116,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();

@@ -36,7 +36,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.TreeSet;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -186,6 +185,7 @@ public class TiltPlotter extends RawDataPlotter {
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();

@@ -65,6 +65,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		try{
 			data = (GenericDataMatrix)client.getBinaryData(params);
 		}

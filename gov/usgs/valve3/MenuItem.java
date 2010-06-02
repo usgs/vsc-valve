@@ -14,6 +14,7 @@ public class MenuItem implements Comparable<MenuItem>
 	public String file;
 	public int sortOrder;
 	public String shortcuts;
+	public char lineType;
 	public boolean plotSeparately;
 	
 	/**
@@ -24,7 +25,7 @@ public class MenuItem implements Comparable<MenuItem>
 	 * @param f menu file
 	 * @param so menu item sort order
 	 */
-	public MenuItem(String id, String n, String i, String f, int so, String sc, boolean plotSeparately)
+	public MenuItem(String id, String n, String i, String f, int so, String sc, char lt, boolean plotSeparately)
 	{
 		menuId		= id;
 		name		= n;
@@ -32,6 +33,7 @@ public class MenuItem implements Comparable<MenuItem>
 		file		= f;
 		sortOrder	= so;
 		shortcuts	= sc;
+		this.lineType = lt;
 		this.plotSeparately = plotSeparately;
 	}
 	
@@ -47,6 +49,7 @@ public class MenuItem implements Comparable<MenuItem>
 			  "<icon>" + icon + "</icon>\n" +
 			  "<file>" + file + "</file>\n" +
 			  "<timeShortcuts>" + shortcuts + "</timeShortcuts>\n" +
+			  "<lineType>" + lineType + "</lineType>\n" +
 			  "<plotSeparately>" + new Boolean(plotSeparately) + "</plotSeparately>\n" +
 			  "</menuitem>\n";
 		return xml;

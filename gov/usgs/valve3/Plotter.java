@@ -98,6 +98,21 @@ abstract public class Plotter
 			return true;
 		}
 	}
+	
+	/**
+	 * Getter for plotter line type
+	 * @return
+	 */
+	public char getLineType() throws Valve3Exception{
+		String value = plotterConfig.getString("lineType");
+		if(value==null){
+			return 'l';
+		} else {
+			if(value.length() != 1)
+				throw new Valve3Exception("Wrong line type: " + value);
+			return value.charAt(0);
+		}
+	}
 
 	/**
 	 * renders PlotComponent in given plot

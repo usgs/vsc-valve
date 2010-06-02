@@ -183,6 +183,7 @@ public class GPSPlotter extends RawDataPlotter {
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();

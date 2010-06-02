@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
@@ -56,7 +57,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 	private static Map<Integer, Channel> channelsMap;
 	private int cid1, cid2;
 	private boolean removeBias;
-	private double period;
 	private double threshold;
 	private double ratio;
 	private double maxEventLength;
@@ -100,21 +100,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 		switch(plotType) {
 		
 		case VALUES:
-			period = component.getDouble("valuesPeriod");
-			if (period == 0)
-				throw new Valve3Exception("Illegal period.");
-				
 			break;
 			
 		case COUNTS:
-			try{
-				period = component.getDouble("countsPeriod");			
-			} catch(Valve3Exception e){
-				period = 600;
-			}
-			if (period == 0)
-				throw new Valve3Exception("Illegal period.");
-				
 			if (component.get("threshold") != null) {
 				threshold = component.getDouble("threshold");
 				if (threshold == 0)
@@ -157,11 +145,11 @@ public class RatSAMPlotter extends RawDataPlotter {
 		params.put("ch", ch);
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		params.put("period", Double.toString(period));
 		params.put("plotType", plotType.toString());
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -236,7 +224,15 @@ public class RatSAMPlotter extends RawDataPlotter {
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);		
 		mr.setAllVisible(true);
-		mr.createDefaultLineRenderers();
+		if(shape==null){
+			mr.createDefaultPointRenderers();
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers();
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0));
+			}
+		}
 		mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
 		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
@@ -281,11 +277,21 @@ public class RatSAMPlotter extends RawDataPlotter {
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
-			mr.createDefaultLineRenderers();
-			
-			Renderer[] r = mr.getLineRenderers();
-			((ShapeRenderer)r[0]).color		= Color.red;
-			((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
+			Renderer[] r = null;
+			if(shape==null){
+				mr.createDefaultPointRenderers();
+			} else {
+				if (shape.equals("l")) {
+					mr.createDefaultLineRenderers();
+					r = mr.getLineRenderers();
+					((ShapeRenderer)r[0]).color		= Color.red;
+					((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
+				} else {
+					mr.createDefaultPointRenderers(shape.charAt(0));
+					r = mr.getPointRenderers();
+					((DataPointRenderer)r[0]).color		= Color.red;
+				}
+			}
 			AxisRenderer ar = new AxisRenderer(mr);
 			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
 			mr.setAxis(ar);

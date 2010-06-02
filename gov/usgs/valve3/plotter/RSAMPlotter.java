@@ -4,10 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeSet;
 
 import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.HistogramRenderer;
+import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
@@ -29,7 +28,6 @@ import gov.usgs.vdx.data.HistogramExporter;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.rsam.RSAMData;
-import gov.usgs.vdx.ExportConfig;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -61,14 +59,11 @@ public class RSAMPlotter extends RawDataPlotter {
 	int compCount;
 	private Map<Integer, RSAMData> channelDataMap;
 	//private boolean removeBias;
-	private int period;
 	private double threshold;
 	private double ratio;
 	private double maxEventLength;
 	private BinSize bin;
-	private RSAMData rd;
 	private PlotType plotType;
-	private GenericDataMatrix gdm;
 	
 	protected String label;
 
@@ -104,21 +99,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		switch(plotType) {
 		
 		case VALUES:
-			period = component.getInt("valuesPeriod");
-			if (period == 0)
-				throw new Valve3Exception("Illegal period.");
-				
 			break;
 			
 		case COUNTS:
-			if (component.get("countsPeriod") != null) {
-				period = component.getInt("countsPeriod");
-				if (period == 0)
-					throw new Valve3Exception("Illegal period.");
-			} else {
-				period = 600;
-			}
-			
 			if (component.get("threshold") != null) {
 				threshold = component.getDouble("threshold");
 				if (threshold == 0)
@@ -161,10 +144,10 @@ public class RSAMPlotter extends RawDataPlotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("plotType", plotType.toString());
-		params.put("period", Integer.toString(period));
 		if(maxrows!=0){
 			params.put("maxrows", Integer.toString(maxrows));
 		}
+		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -260,7 +243,15 @@ public class RSAMPlotter extends RawDataPlotter {
 		mr.createDefaultAxis(8, 8, false, allowExpand);
 		mr.setXAxisToTime(8);		
 		mr.setAllVisible(true);
-		mr.createDefaultLineRenderers();
+		if(shape==null){
+			mr.createDefaultPointRenderers();
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers();
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0));
+			}
+		}
 		mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
 		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
@@ -314,11 +305,21 @@ public class RSAMPlotter extends RawDataPlotter {
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
-			mr.createDefaultLineRenderers();
-			
-			Renderer[] r = mr.getLineRenderers();
-			((ShapeRenderer)r[0]).color		= Color.red;
-			((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
+			Renderer[] r = null;
+			if(shape==null){
+				mr.createDefaultPointRenderers();
+			} else {
+				if (shape.equals("l")) {
+					mr.createDefaultLineRenderers();
+					r = mr.getLineRenderers();
+					((ShapeRenderer)r[0]).color		= Color.red;
+					((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
+				} else {
+					mr.createDefaultPointRenderers(shape.charAt(0));
+					r = mr.getPointRenderers();
+					((DataPointRenderer)r[0]).color		= Color.red;
+				}
+			}
 			AxisRenderer ar = new AxisRenderer(mr);
 			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
 			mr.setAxis(ar);

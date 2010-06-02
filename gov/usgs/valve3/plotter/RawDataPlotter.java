@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import java.util.Date;
-
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.SmartTick;
@@ -19,6 +17,7 @@ import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.client.VDXClient.DownsamplingType;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
@@ -32,6 +31,8 @@ public abstract class RawDataPlotter extends Plotter {
 	protected String ch;
 	protected int rk;
 	public boolean ranks = true;
+	protected DownsamplingType downsamplingType = DownsamplingType.NONE;
+	protected int downsamplingInterval = 0;
 	
 	protected int leftTicks;
 	protected int leftLines;
@@ -73,12 +74,27 @@ public abstract class RawDataPlotter extends Plotter {
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
-		
+		try{
+			downsamplingType = DownsamplingType.fromString(component.getString("ds"));
+			downsamplingInterval = component.getInt("dsInt");
+		} catch(Valve3Exception e){
+			//Do nothing, default values without downsampling
+		}
+		try{
+			shape = component.getString("lt");
+		} catch(Valve3Exception e){
+			shape="l";
+		}
 		try{
 			removeBias = component.getBoolean("rb");
 		} catch (Valve3Exception ex){
 			removeBias = false;
 		}
+	}
+	
+	protected void addDownsamplingInfo(Map<String, String> params){
+		params.put("ds", downsamplingType.toString());
+		params.put("dsInt", Integer.toString(downsamplingInterval));
 	}
 	
 	/**

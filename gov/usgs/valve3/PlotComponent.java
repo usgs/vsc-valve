@@ -100,7 +100,7 @@ public class PlotComponent
 		String value = get(key);
 		int pv = Util.stringToInt(value, Integer.MIN_VALUE);
 		if (pv == Integer.MIN_VALUE) {
-			throw new Valve3Exception("Illegal " + key + ":" + value==null?"null":value);
+			throw new Valve3Exception("Illegal " + key + ":" + (value==null?"null":value));
 		}
 		return pv;
 	}
@@ -115,7 +115,7 @@ public class PlotComponent
 		String value = get(key);
 		double pv = Util.stringToDouble(value, Double.NaN);
 		if (pv == Double.NaN) {
-			throw new Valve3Exception("Illegal " + key + ":" + value==null?"null":value);
+			throw new Valve3Exception("Illegal " + key + ":" + (value==null?"null":value));
 		}
 		return pv;
 	}
@@ -129,7 +129,7 @@ public class PlotComponent
 	public String getString(String key) throws Valve3Exception {
 		String value = get(key);
 		if (value == null || value.length()==0) {
-			throw new Valve3Exception("Illegal " + key + ":" + value==null?"null":value);
+			throw new Valve3Exception("Illegal " + key + ":" + (value==null?"null":value));
 		}
 		return value;
 	}
