@@ -923,10 +923,16 @@ Menu.prototype.acceptMapClick = function(target, mx, my, lon, lat)
  */
 Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 {
+	/* Clicks on minimized plots don't translate properly, so we'll ignore them */
+	if ( target.width < target.fullWidth )
+		return;
+		
 	var scroll = getScroll();
-	var mark;
+	var mark;			/* marker for this click */
+	var otherMark;		/* the other marker */
+
+	/* Toggle between green & red markers */
 	lastTimeClick = 1 - lastTimeClick;
-	/* mark = marker for this click */
 	if (lastTimeClick == 1) {
 		mark = document.getElementById("greenMark")
 		otherMark = document.getElementById("redMark")
@@ -934,10 +940,15 @@ Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 		mark = document.getElementById("redMark")
 		otherMark = document.getElementById("greenMark")
 	}
-	mark.style.top=(target.y + 16) + "px";
-	if ( mark.style.top != otherMark.style.top ) {
-		/* If marker's height has moved, user clicked on a different plot.
-			Force click to be treated as start time; hide end marker */
+	
+	if ( mark.parentNode != target.parentNode ) {
+		/* If click isn't in marker's parent, user clicked on a different plot.
+			Force click to be treated as start time & hide end marker */
+		var oldParent = mark.parentNode;
+		mark = oldParent.removeChild(mark);
+		otherMark = oldParent.removeChild(otherMark);
+		target.parentNode.appendChild(mark);
+		target.parentNode.appendChild(otherMark);
 		if ( lastTimeClick == 0 ) {
 			var t = mark;
 			mark = otherMark;
@@ -946,15 +957,20 @@ Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 		}
 		otherMark.style.visibility = "hidden";
 	}
+	
+	/* Set the appropriate time field */
 	if (lastTimeClick == 1) {
 		document.getElementById("startTime").value	= buildTimeString(gx);
 	} else {
 		document.getElementById("endTime").value	= buildTimeString(gx);
 	}
+	
+	/* Make mark visible, and align its horizontal position w/ the click */
 	mark.style.visibility = "visible";
-	mark.style.left=(scroll[0] + mx -5) + "px";
-	mark.style.top=(target.y + 16) + "px";
-	otherMark.style.top=(target.y + 16) + "px";
+	var imgs = mark.parentNode.getElementsByTagName("img");
+	var i;
+	for ( i = 0; imgs[i].className != "pointer"; i++ );
+	mark.style.left=(scroll[0] + mx - imgs[i].x - 5) + "px";
 }
 
 /**

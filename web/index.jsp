@@ -32,7 +32,7 @@
 			addListener(document.getElementById('minMaxUI'), 'click', toggleUI, false);
 			addListener(document.getElementById('submit'), 'click', doSubmit, false);
 			addListener(document.getElementById('deleteAll'), 'click', deleteAll, false);
-			addListener(document.getElementById('nowLink'), 'click', function() { document.getElementById('endTime').value = 'Now'; }, false);
+			addListener(document.getElementById('nowLink'), 'click', function() { document.getElementById('endTime').value = 'Now'; fixZoomMarksInside(null,0);}, false);
 
 			var b = document.getElementById("channelMapButton");
 			b.disabled = true;
@@ -115,11 +115,13 @@
 			<div id="timePanel">
 				<div class="box">
 					<img src="images/clock_down.gif" class="fl" id="timeShortcutButton"><h1>Start Time</h1>
-					<p><input class="mono" type="text" value="" id="startTime" size="17"></p>
+					<p><input class="mono" type="text" value="" id="startTime" size="17"
+						onchange=fixZoomMarksInside(null,0)></p>
 				</div>
 				<div class="box">
 					<h1>End Time</h1>
-					<p><input class="mono" type="text" value="Now" id="endTime" size="17"></p>
+					<p><input class="mono" type="text" value="Now" id="endTime" size="17"
+						onchange=fixZoomMarksInside(null,0)></p>
 				</div>
 				<!-- p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>', in <a id="timeZoneAbbr">.</p-->
 				<p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>'.</p>
@@ -194,12 +196,12 @@
 			<iframe id="dataFrame"></iframe>
 		</div>
 		
+		<img src="images/redMark.png" id="redMark">
+		<img src="images/greenMark.png" id="greenMark">
 		</div>
 		
 		<div id="redLine1"></div>
 		<div id="redLine2"></div>
-		<img src="images/redMark.png" id="redMark">
-		<img src="images/greenMark.png" id="greenMark">
 		
 		<!--% if (config.getServletContext().getResource("/footer.html") != null) { %-->
 			<!--  jsp:include page="footer.html" /-->

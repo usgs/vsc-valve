@@ -49,6 +49,48 @@ function createPopupPlot(xml, px, py)
 	popup.style.display = "block";
 }
 
+/** 
+ *  This function will fix the zoom marks if they are currently
+ *  within the plot t, or if t is null.
+ *	adj =  0: reset marks
+ *	    = -1: fix for a minimized plot
+ *	    =  1: fix for a maximized plot
+ *  
+ *  @param {t} If t is null or contains the marks, they will be fixed
+ */
+function fixZoomMarksInside(t,adj)
+{
+	var gmark = document.getElementById("greenMark");
+	function reset( mark, newHome )
+	{
+		mark.style.visibility = "hidden";
+		mark.parentNode.removeChild( mark );
+		newHome.appendChild( mark );
+	}
+	function shrink( mark )
+	{
+		mark.style.visibility = "hidden";
+	}
+	function grow( mark )
+	{
+		mark.style.visibility = "visible";
+	}
+	if ( (t == null) || (gmark.parentNode == t) ) {
+		var rmark = document.getElementById("redMark");
+		if ( adj == 0 ) {
+			var newHome = document.getElementById("container");
+			reset( gmark, newHome );
+			reset( rmark, newHome );
+		} else if ( adj == 1 ) {
+			grow( gmark );
+			grow( rmark );
+		} else {
+			shrink( gmark );
+			shrink( rmark );
+		}
+	}
+}
+
 var count = 0;
 var dataCount = 0;
 /** 
@@ -116,6 +158,7 @@ function handlePlot(xml)
 	addListener(imgs[0], 'click', 
 		function()
 		{
+			fixZoomMarksInside(t,0);
 			t.parentNode.removeChild(t);
 			count--;
 		}, false);
@@ -126,6 +169,7 @@ function handlePlot(xml)
 		{
 			if (minImg.src.indexOf("min.gif") != -1)
 			{
+				fixZoomMarksInside(t,-1);
 				img.width = img.fullWidth / 4;
 				img.height = img.fullHeight / 4;
 				img.container.style.width = (img.fullWidth / 4) + "px";
@@ -134,6 +178,7 @@ function handlePlot(xml)
 			}
 			else
 			{
+				fixZoomMarksInside(t,+1);
 				img.width = img.fullWidth;
 				img.height = img.fullHeight;
 				img.header.className = "";
@@ -209,15 +254,6 @@ function handlePlot(xml)
 	var ip = document.getElementById('contentInsertionPoint');
 	ip.insertBefore(t, ip.firstChild);
 		
-	/* Slide the zoom markers down by size of new plot */
-	if ( count > 0 ) {
-		var off = parseInt(height);
-		var markStyle = document.getElementById("greenMark").style
-		var oldTop = parseInt(markStyle.top.replace("px",""));
-		var newTop = oldTop + off + 32;
-		markStyle.top = newTop + "px";
-		document.getElementById("redMark").style.top = newTop + "px";
-	}
 	count++;
 }
 
