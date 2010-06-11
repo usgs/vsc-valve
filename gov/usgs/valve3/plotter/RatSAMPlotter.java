@@ -233,7 +233,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
+		if(isDrawLegend) mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
 		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
@@ -300,7 +300,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 			hr.getAxis().setRightLabelAsText("Cumulative Counts");
 		}
 		
-		hr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " Events"});
+		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");

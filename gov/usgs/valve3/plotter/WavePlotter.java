@@ -16,7 +16,6 @@ import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.SliceWaveExporter;
 import gov.usgs.vdx.data.wave.SliceWave;
 import gov.usgs.vdx.data.wave.Wave;
-import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
 import gov.usgs.vdx.data.wave.plot.SpectraRenderer;
 import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
@@ -291,7 +290,6 @@ public class WavePlotter extends RawDataPlotter {
 		wr.setMaxY(yMax);
 		
 		if (labels == 1) {
-			// wr.setDisplayLabels(false);
 			wr.setYLabel("");
 			wr.update();
 		} else {			
@@ -300,7 +298,9 @@ public class WavePlotter extends RawDataPlotter {
 				wr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
 			}
 		}
-
+		channelLegendsCols	= new String  [1];
+		channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+		if(isDrawLegend) wr.createDefaultLegendRenderer(channelLegendsCols);
 		component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(wr);
@@ -321,7 +321,7 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.update(0);
-		
+		if(isDrawLegend) sr.createDefaultLegendRenderer(channelLegendsCols);
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("xy");
 		v3Plot.getPlot().addRenderer(sr);
@@ -376,7 +376,7 @@ public class WavePlotter extends RawDataPlotter {
 		if (displayCount + 1 == compCount) {
 			sr.getAxis().setBottomLabelAsText(xString);	
 		}
-
+		if(isDrawLegend) sr.createDefaultLegendRenderer(channelLegendsCols);
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(sr);

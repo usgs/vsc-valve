@@ -79,7 +79,6 @@ public class TiltPlotter extends RawDataPlotter {
 	private Map<Integer, TiltData> channelDataMap;
 	private static Map<Integer, Double> azimuthsMap;
 
-	private int columnsCount;
 	private boolean detrendCols[];
 	private String legendsCols[];
 	
@@ -89,10 +88,6 @@ public class TiltPlotter extends RawDataPlotter {
 	private double azimuthValue;
 	private double azimuthRadial;
 	private double azimuthTangential;
-	
-
-	
-
 	
 	/**
 	 * Default constructor

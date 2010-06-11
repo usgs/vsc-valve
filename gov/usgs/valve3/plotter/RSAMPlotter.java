@@ -252,7 +252,7 @@ public class RSAMPlotter extends RawDataPlotter {
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
+		if(isDrawLegend) mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
 		mr.getAxis().setLeftLabelAsText(label);
 		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
@@ -340,7 +340,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		if ( forExport )
 			return;
 			
-		hr.createDefaultLegendRenderer(new String[] {channelCode + " Events"});
+		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {channelCode + " Events"});
 		v3Plot.getPlot().addRenderer(hr);
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));

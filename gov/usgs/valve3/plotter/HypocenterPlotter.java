@@ -482,7 +482,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			csvText.append("\n");	//
 			return;
 		}
-		hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
+		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");

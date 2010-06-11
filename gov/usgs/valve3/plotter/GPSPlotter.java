@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.Plot;
@@ -39,7 +35,6 @@ import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
-import gov.usgs.vdx.ExportConfig;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;

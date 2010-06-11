@@ -3,6 +3,7 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
@@ -150,6 +151,14 @@ public class GenericVariablePlotter extends RawDataPlotter
 				rightColumns = tempColumns;
 			}
 		}
+		// set up the legend 
+		channelLegendsCols	= new String  [leftColumns.size() + rightColumns.size()];
+		for (int i = 0; i < leftColumns.size(); i++) {
+			channelLegendsCols[i] = String.format("%s", leftColumns.get(i).description);
+		}
+		for (int i = leftColumns.size(); i < channelLegendsCols.length; i++) {
+			channelLegendsCols[i] = String.format("%s", rightColumns.get(i-leftColumns.size()).description);
+		}
 	}
 
 	/**
@@ -179,11 +188,19 @@ public class GenericVariablePlotter extends RawDataPlotter
 		}
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);		
 		mr.createDefaultAxis(8, 8, false, true);
-		mr.createDefaultLineRenderers();
+		if(shape==null){
+			mr.createDefaultPointRenderers();
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers();
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0));
+			}
+		}
 		mr.setXAxisToTime(8);
-
 		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
 		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}
 
@@ -218,11 +235,23 @@ public class GenericVariablePlotter extends RawDataPlotter
 		AxisRenderer ar = new AxisRenderer(mr);
 		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
 		mr.setAxis(ar);
-		mr.createDefaultLineRenderers();
-		ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
-		r[1].color = Color.red;
-
+		if(shape==null){
+			mr.createDefaultPointRenderers();
+			PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
+			r[1].color = Color.red;
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers();
+				ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
+				r[1].color = Color.red;
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0));
+				PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
+				r[1].color = Color.red;
+			}
+		}
 		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}
 

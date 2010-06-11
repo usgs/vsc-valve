@@ -21,7 +21,6 @@ import gov.usgs.vdx.data.Rank;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeSet;
 
 /**
  * Generate images for generic data plot to files

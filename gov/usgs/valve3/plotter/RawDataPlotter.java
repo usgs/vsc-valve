@@ -29,6 +29,7 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double startTime;
 	protected double endTime;
 	protected String ch;
+	protected boolean isDrawLegend;
 	protected int rk;
 	public boolean ranks = true;
 	protected DownsamplingType downsamplingType = DownsamplingType.NONE;
@@ -41,12 +42,13 @@ public abstract class RawDataPlotter extends Plotter {
 	protected int compCount;
 	protected String shape="l";
 	
+	protected int columnsCount;
+	protected List<Column> columnsList;
 	protected String channelLegendsCols[];
 	
 	protected Map<Integer, String> axisMap;
 	protected Map<Integer, Channel> channelsMap;
 	protected Map<Integer, Rank> ranksMap;
-	protected List<Column> columnsList;
 	
 	protected Logger logger;
 	
@@ -79,6 +81,11 @@ public abstract class RawDataPlotter extends Plotter {
 			downsamplingInterval = component.getInt("dsInt");
 		} catch(Valve3Exception e){
 			//Do nothing, default values without downsampling
+		}
+		try{
+			isDrawLegend = component.getBoolean("lg");
+		} catch(Valve3Exception e){
+			isDrawLegend=true;
 		}
 		try{
 			shape = component.getString("lt");
@@ -193,7 +200,7 @@ public abstract class RawDataPlotter extends Plotter {
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		mr.createDefaultLegendRenderer(channelLegendsCols);
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		leftTicks = mr.getAxis().leftTicks.length;
 		
 		if (displayCount + 1 == compCount) {
@@ -231,7 +238,7 @@ public abstract class RawDataPlotter extends Plotter {
 				mr.createDefaultPointRenderers(leftLines, shape.charAt(0));
 			}
 		}
-		mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
 		return mr;
 	}
 	
