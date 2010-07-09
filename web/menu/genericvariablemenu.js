@@ -15,8 +15,26 @@ create_nwismenu = function(menu) {
 			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m", "-2m", "-6m");
 		}
 		
-		var sel = document.getElementById(this.id + '_nwisSelector');
-		sel.myId = this.id;
+		var selnwis = document.getElementById(this.id + '_nwisSelector');
+		selnwis.myId = this.id;
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

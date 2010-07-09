@@ -123,14 +123,13 @@
 					<p><input class="mono" type="text" value="Now" id="endTime" size="17"
 						onchange=fixZoomMarksInside(null,0)></p>
 				</div>
-				<!-- p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>', in <a id="timeZoneAbbr">.</p-->
 				<p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>'.</p>
 				<div class="box">
 					<h1>Time Zone</h1>
 					<p>
 					<select id="timeZoneAbbr" name="selector:tz" class="w100p">
-					<option>UTC</option>
-					<option selected="selected"><%=Valve3.getInstance().getTimeZoneAbbr()%></option>
+						<option selected="selected"><%=Valve3.getInstance().getTimeZoneAbbr()%></option>
+						<option>UTC </option>
 					</select>
 					</p>
 					<input type="hidden" value="<%=Valve3.getInstance().getTimeZoneOffset(new Date())%>" id="timeZoneOffset">

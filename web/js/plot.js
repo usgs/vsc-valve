@@ -191,8 +191,27 @@ function handlePlot(xml)
 	addListener(imgs[2], 'click',
 		function()
 		{
-			document.getElementById("startTime").value = buildTimeString(img.translation[4]);
-			document.getElementById("endTime").value = buildTimeString(img.translation[5]);
+			var timeZoneOffset = 0;
+			
+			if(title.indexOf("Winston Helicorders")>=0){
+				var tzselect  = document.getElementById('timeZoneAbbr');
+				if(tzselect){
+					// at least one time zone must be selected
+					if (tzselect.selectedIndex == -1) {
+						alert("You must select a time zone.");
+						return;
+					}
+				} else {
+					alert("Time zone not defined.");
+					return;
+				}
+				if(tzselect[tzselect.selectedIndex].text != "UTC"){
+					timeZoneOffset = parseFloat(document.getElementById('timeZoneOffset').value);
+				}
+			}
+			
+			document.getElementById("startTime").value = buildTimeString(img.translation[4] + timeZoneOffset);
+			document.getElementById("endTime").value = buildTimeString(img.translation[5] + timeZoneOffset);
 		});
 	
 	// xml

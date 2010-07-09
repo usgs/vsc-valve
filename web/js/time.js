@@ -243,22 +243,8 @@ function validateDate(textField, start)
  */
 function buildTimeString(tIn)
 {
+
 	var t = Math.round(1000*tIn) + 946728000000;
-	var tzselect  = document.getElementById('timeZoneAbbr');
-	if(tzselect){
-		// at least one time zone must be selected
-		if (tzselect.selectedIndex == -1) {
-			alert("You must select a time zone.");
-			return;
-		}
-	} else {
-		alert("Time zone not defined.");
-		return;
-	}
-	if(tzselect[tzselect.selectedIndex].text != "UTC"){
-		t = t + (document.getElementById('timeZoneOffset').value * 1000.0);
-	}
-	
 	var time = new Date(t);
 	var mo = (time.getUTCMonth() + 1 < 10 ? "0" + (time.getUTCMonth() + 1) : (time.getUTCMonth() + 1));
 	var da = (time.getUTCDate() < 10 ? "0" + time.getUTCDate() : time.getUTCDate());

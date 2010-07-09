@@ -33,6 +33,24 @@ create_genericfixedmenu = function(menu) {
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1h","-1d","-1w","-1m","-1y");
 		}
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	// override the default presubmit function

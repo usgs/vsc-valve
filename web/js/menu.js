@@ -149,7 +149,6 @@ function handleMenu(xml) {
 	document.title = inst;
 	
 	document.getElementById('appTitle').appendChild(document.createTextNode(inst));
-	document.getElementById('timeZoneAbbr').appendChild(document.createTextNode(getXMLField(xml, "timeZoneAbbr")));
 	setAdmin(getXMLField(xml, "administrator"), getXMLField(xml, "administrator-email"));
 	document.getElementById('version').appendChild(document.createTextNode("Valve " + getXMLField(xml, "version")));
 }
