@@ -1,6 +1,7 @@
 package gov.usgs.valve3.data;
 
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Util;
 import gov.usgs.valve3.Plotter;
 
 /**
@@ -93,10 +94,6 @@ public class DataSourceDescriptor
 			plotter.setVDXClient(vdxClientName);
 			plotter.setVDXSource(vdxSource);
 			plotter.setPlotterConfig(config.getSubConfig("plotter"));
-			if(config.get("maxrows")!=null){
-				int maxrows = Integer.parseInt(config.getString("maxrows"));
-				plotter.setMaxRows(maxrows);
-			}
 			return plotter;
 		}
 		catch (Exception ex)

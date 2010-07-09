@@ -5,6 +5,7 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.plotter.CombinedPlot;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 
@@ -64,6 +65,8 @@ public class Valve3Plot extends Result
 	
 	protected int width;
 	protected int height;
+	//filled during initiating, from http request, not during plotting like "components"
+	private int componentCount = 0;
 
 	protected String url;
 	
@@ -72,12 +75,13 @@ public class Valve3Plot extends Result
 	
 	protected boolean exportable;
 	
+
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters
 	 * @throws Valve3Exception
 	 */
-	public Valve3Plot(HttpServletRequest request) throws Valve3Exception
+	public Valve3Plot(HttpServletRequest request, int componentCount) throws Valve3Exception
 	{
 		logger = Log.getLogger("gov.usgs.valve3");
 		String w = request.getParameter("w");
@@ -119,9 +123,16 @@ public class Valve3Plot extends Result
 		title = "Valve Plot";
 		url = request.getQueryString();
 		components = new ArrayList<PlotComponent>(2);
-		
-		plot = new Plot(width, height);
-		
+		boolean isCombined = false;
+		String combined = request.getParameter("combine");
+		if(combined !=null){
+			isCombined = combined.toLowerCase().equals("true");
+		}
+		if(isCombined){
+			plot = new CombinedPlot(width, height, componentCount);
+		} else {
+			plot = new Plot(width, height);
+		}
 		exportable = false;
 	}
 

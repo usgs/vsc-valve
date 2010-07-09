@@ -144,9 +144,6 @@ public class RSAMPlotter extends RawDataPlotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("plotType", plotType.toString());
-		if(maxrows!=0){
-			params.put("maxrows", Integer.toString(maxrows));
-		}
 		addDownsamplingInfo(params);
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);

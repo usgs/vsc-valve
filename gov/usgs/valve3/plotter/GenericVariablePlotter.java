@@ -63,9 +63,6 @@ public class GenericVariablePlotter extends RawDataPlotter
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("selectedTypes", component.getString("selectedTypes"));
-		if(maxrows!=0){
-			params.put("maxrows", Integer.toString(maxrows));
-		}
 		addDownsamplingInfo(params);
 		try{
 			data = (GenericDataMatrix)client.getBinaryData(params);

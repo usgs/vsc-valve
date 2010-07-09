@@ -105,7 +105,7 @@ public class PlotHandler implements HttpHandler
 	 * @return list of generated PlotComponents
 	 * @throws Valve3Exception
 	 */
-	protected List<PlotComponent> parseRequest(HttpServletRequest request, Valve3Plot plot) throws Valve3Exception
+	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
 		int n = Util.stringToInt(request.getParameter("n"), -1);
 		if (n == -1){
@@ -148,15 +148,8 @@ public class PlotHandler implements HttpHandler
 				ec = new ExportConfig( ecs );
 				v3.putExportConfig(source, ec);
 			}
-			
 			int x = Util.stringToInt(request.getParameter("x." + i), 0);
-			if (x < 0 || x > plot.getWidth()){
-				throw new Valve3Exception("Illegal x." + i + " value.");
-			}
 			int y = Util.stringToInt(request.getParameter("y." + i), 0);
-			if (y < 0 || y > plot.getHeight())
-				throw new Valve3Exception("Illegal y." + i + " value.");
-			
 			int w = Util.stringToInt(request.getParameter("w." + i), -1);
 			if(w==-1){
 				w=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.w"), -1);
@@ -190,6 +183,20 @@ public class PlotHandler implements HttpHandler
 		return list;
 	}
 	
+	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception{
+		int i=0;
+		for(PlotComponent component: components){
+			int x = component.getBoxX();
+			if (x < 0 || x > plot.getWidth()){
+				throw new Valve3Exception("Illegal x." + i + " value.");
+			}
+			int y = component.getBoxY();
+			if (y < 0 || y > plot.getHeight())
+				throw new Valve3Exception("Illegal y." + i + " value.");
+			i++;
+		}
+	}
+	
 	/**
 	 * Handle the given http request and generate a plot. 
 	 * @see HttpHandler#handle 
@@ -198,11 +205,12 @@ public class PlotHandler implements HttpHandler
 	{
 		try
 		{
-			Valve3Plot plot = new Valve3Plot(request);
-			List<PlotComponent> components = parseRequest(request, plot);
-			boolean exportable = false;
+			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
+			Valve3Plot plot = new Valve3Plot(request, components.size());
+			checkComponents(components, plot);
+			boolean exportable = false;
 			for (PlotComponent component : components)
 			{
 				String source = component.getSource();

@@ -261,9 +261,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
 		params.put("rmk", (rmk));
-		if(maxrows!=0){
-			params.put("maxrows", Integer.toString(maxrows));
-		}
 
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);

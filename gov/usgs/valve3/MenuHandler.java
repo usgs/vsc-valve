@@ -73,7 +73,7 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
-					boolean plotSeparately = cf.getBoolean("plotter.plotComponentsSeparately");
+					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotComponentsSeparately"), false);
 					char lt;
 					String value = cf.getString("plotter.lineType");
 					if(value==null){
