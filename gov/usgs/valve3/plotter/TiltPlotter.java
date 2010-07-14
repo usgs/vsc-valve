@@ -1,5 +1,7 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
@@ -32,10 +34,12 @@ import gov.usgs.proj.TransverseMercator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -79,7 +83,7 @@ public class TiltPlotter extends RawDataPlotter {
 	private Map<Integer, TiltData> channelDataMap;
 	private static Map<Integer, Double> azimuthsMap;
 
-	private boolean detrendCols[];
+	//private boolean detrendCols[];
 	private String legendsCols[];
 	
 	private PlotType plotType;
@@ -117,18 +121,21 @@ public class TiltPlotter extends RawDataPlotter {
 			}
 		
 			columnsCount		= columnsList.size();
-			detrendCols			= new boolean [columnsCount];
+			//detrendCols			= new boolean [columnsCount];
 			legendsCols			= new String  [columnsCount];
 			channelLegendsCols	= new String  [columnsCount];
+			bypassManipCols     = new boolean [columnsList.size()];
 			
 			leftLines		= 0;
 			axisMap			= new LinkedHashMap<Integer, String>();
+			
+			validateDataManipOpts(component);
 			
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
 				column.checked	= Util.stringToBoolean(component.get(column.name));
-				detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
+				//detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
 				legendsCols[i]	= column.description;
 				if (column.checked) {
 					if(isPlotComponentsSeparately()){
@@ -399,7 +406,59 @@ public class TiltPlotter extends RawDataPlotter {
 					
 					// detrend the data that the user requested to be detrended					
 					for (int i = 0; i < columnsCount; i++) {
-						if (detrendCols[i]) { data.detrend(i + 2); }
+						if ( bypassManipCols[i] )
+							continue;
+						if (doDespike) { data.despike(i + 2, despikePeriod ); }
+						if (doDetrend) { data.detrend(i + 2); }
+						if (filterPick != 0) {
+							switch(filterPick) {
+								case 1: // Bandpass
+									Butterworth bw = new Butterworth();
+									FilterType ft = FilterType.BANDPASS;
+									Double singleBand = 0.0;
+									if ( !Double.isNaN(filterMax) ) {
+										if ( filterMax <= 0 )
+											throw new Valve3Exception("Illegal max hertz value.");
+									} else {
+										ft = FilterType.HIGHPASS;
+										singleBand = filterMin;
+									}
+									if ( !Double.isNaN(filterMin) ) {
+										if ( filterMin <= 0 )
+											throw new Valve3Exception("Illegal min hertz value.");
+									} else {
+										ft = FilterType.LOWPASS;
+										singleBand = filterMax;
+									}
+									/* SBH
+									if ( ft == FilterType.BANDPASS )
+										bw.set(ft, 4, data.getSamplingRate(), filterMin, filterMax);
+									else
+										bw.set(ft, 4, data.getSamplingRate(), singleBand, 0);
+									data.filter(bw, true); */
+									break;
+								case 2: // Running median
+									data.set2median( i+2, filterPeriod );
+									break;
+								case 3: // Running mean
+									data.set2mean( i+2, filterPeriod );
+							}
+						}
+						if (debiasPick != 0 ) {
+							double bias = 0.0;
+							switch ( debiasPick ) {
+								case 1: // remove mean 
+									bias = data.mean(i+2);
+									break;
+								case 2: // remove initial value
+									bias = data.first(i+2);
+									break;
+								case 3: // remove user value
+									bias = debiasValue;
+									break;
+							}
+							data.add(i + 2, -bias);
+						}
 					}
 					
 					// set up the legend 
@@ -422,7 +481,7 @@ public class TiltPlotter extends RawDataPlotter {
 						// Add the headers to the CSV file
 						for (int i = 0; i < columnsList.size(); i++) {
 							if ( !axisMap.get(i).equals("") ) {
-								csvText.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
+								csvHdrs.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
 							}
 						}
 						// Initialize data for export; add to set for CSV
@@ -474,9 +533,7 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		switch(plotType) {
 			case TIME_SERIES:
-				if ( forExport )
-					csvText.append("\n");  // close the header line
-				else
+				if ( !forExport )
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 				break;
 			case TILT_VECTORS:

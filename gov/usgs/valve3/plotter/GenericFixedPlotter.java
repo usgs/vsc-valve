@@ -1,5 +1,7 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.util.Pool;
@@ -20,7 +22,10 @@ import gov.usgs.vdx.data.Rank;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Generate images for generic data plot to files
@@ -32,8 +37,8 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	private Map<Integer, GenericDataMatrix> channelDataMap;	
 
 	private int columnsCount;
-	private boolean detrendCols[];
-	private boolean normalzCols[];
+	//private boolean detrendCols[];
+	//private boolean normalzCols[];
 	private String legendsCols[];
 	
 	/**
@@ -51,20 +56,24 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);
 		rk = component.getInt("rk");
-		detrendCols			= new boolean [columnsList.size()];
-		normalzCols			= new boolean [columnsList.size()];
+		//detrendCols			= new boolean [columnsList.size()];
+		//normalzCols			= new boolean [columnsList.size()];
 		legendsCols			= new String  [columnsList.size()];
 		channelLegendsCols	= new String  [columnsList.size()];
+		bypassManipCols     = new boolean [columnsList.size()];
 		
 		leftLines		= 0;
 		axisMap			= new LinkedHashMap<Integer, String>();
+		
+		validateDataManipOpts(component);
 		
 		// iterate through all the active columns and place them in a map if they are displayed
 		for (int i = 0; i < columnsList.size(); i++) {
 			Column column	= columnsList.get(i);
 			column.checked	= Util.stringToBoolean(component.get(column.name));
-			detrendCols[i]	= Util.stringToBoolean(component.getString("d_" + column.name));
-			normalzCols[i]	= Util.stringToBoolean(component.getString("n_" + column.name));
+			//detrendCols[i]	= Util.stringToBoolean(component.getString("d_" + column.name));
+			//normalzCols[i]	= Util.stringToBoolean(component.getString("n_" + column.name));
+			bypassManipCols[i] = column.bypassmanipulations;
 			legendsCols[i]	= column.description;
 			if (column.checked) {
 				if(isPlotComponentsSeparately()){
@@ -188,15 +197,69 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			
 			// detrend and normalize the data that the user requested to be detrended		
 			for (int i = 0; i < columnsCount; i++) {
-				if (detrendCols[i]) { gdm.detrend(i + 2); }
-				if (normalzCols[i]) { gdm.add(i + 2, -gdm.mean(i + 2)); }
+				//if (detrendCols[i]) { gdm.detrend(i + 2); }
+				//if (normalzCols[i]) { gdm.add(i + 2, -gdm.mean(i + 2)); }
+				if ( bypassManipCols[i] )
+					continue;
+				if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
+				if (doDetrend) { gdm.detrend(i + 2); }
+				if (filterPick != 0) {
+					Butterworth bw = new Butterworth();
+					FilterType ft = FilterType.BANDPASS;
+					Double singleBand = 0.0;
+					switch(filterPick) {
+						case 1: // Bandpass
+							if ( !Double.isNaN(filterMax) ) {
+								if ( filterMax <= 0 )
+									throw new Valve3Exception("Illegal max hertz value.");
+							} else {
+								ft = FilterType.HIGHPASS;
+								singleBand = filterMin;
+							}
+							if ( !Double.isNaN(filterMin) ) {
+								if ( filterMin <= 0 )
+									throw new Valve3Exception("Illegal min hertz value.");
+							} else {
+								ft = FilterType.LOWPASS;
+								singleBand = filterMax;
+							}
+							/* SBH
+							if ( ft == FilterType.BANDPASS )
+								bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
+							else
+								bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
+							data.filter(bw, true); */
+							break;
+						case 2: // Running median
+							gdm.set2median( i+2, filterPeriod );
+							break;
+						case 3: // Running mean
+							gdm.set2mean( i+2, filterPeriod );
+							break;
+					}
+				}
+				if (debiasPick != 0 ) {
+					double bias = 0.0;
+					switch ( debiasPick ) {
+						case 1: // remove mean 
+							bias = gdm.mean(i+2);
+							break;
+						case 2: // remove initial value
+							bias = gdm.first(i+2);
+							break;
+						case 3: // remove user value
+							bias = debiasValue;
+							break;
+					}
+					gdm.add(i + 2, -bias);
+				}
 			}
 			
 			if ( forExport ) {
-				// Add column headers to csvText
+				// Add column headers to csvHdrs
 				for (int i = 0; i < columnsList.size(); i++) {
 					if ( !axisMap.get(i).equals("") ) {
-						csvText.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
+						csvHdrs.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
 					}
 				}
 				// Initialize data for export; add to set for CSV
@@ -244,9 +307,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				}
 			}
 		}
-		if ( forExport )
-			csvText.append("\n"); // close the header line
-		else
+		if ( !forExport )
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
 	}
 	

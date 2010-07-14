@@ -75,7 +75,6 @@ public class Valve3Plot extends Result
 	
 	protected boolean exportable;
 	
-
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters

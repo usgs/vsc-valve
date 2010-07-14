@@ -84,11 +84,21 @@ public class MenuHandler implements HttpHandler
 						else
 							lt = value.charAt(0);
 					}
+					char bt;
+					value = cf.getString("biastype");
+					if ( value == null )
+						bt = '0';
+					else if ( value.equals("mean") )
+						bt = '1';
+					else if ( value.equals("initial") )
+						bt = '2';
+					else
+						bt = '0';
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lt, plotSeparately);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lt, plotSeparately, bt);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}

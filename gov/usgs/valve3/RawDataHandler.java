@@ -1,12 +1,16 @@
 package gov.usgs.valve3;
 
 import gov.usgs.util.Log;
+import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.RawData;
+import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.vdx.client.VDXClient;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,12 +19,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
+import gov.usgs.vdx.data.Rank;
 
 /**
  * Generates raw data from http request.
@@ -162,6 +168,25 @@ public class RawDataHandler implements HttpHandler
 		return component;
 	}
 	
+	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
+		Map<Integer, Rank> ranks;
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", source);
+		params.put("action", "ranks");
+		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
+		VDXClient cl = pool.checkout();
+		List<String> rks = null;
+		try{
+			rks = cl.getTextData(params);
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
+		pool.checkin(cl);
+		ranks = Rank.fromStringsToMap(rks);
+		return ranks;
+	}
+	
 	/**
 	 * Handle the given http request and generate raw data type result. 
 	 * @see HttpHandler#handle 
@@ -177,7 +202,18 @@ public class RawDataHandler implements HttpHandler
 			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 			df.setTimeZone(TimeZone.getTimeZone("GMT"));
 			StringBuffer sb = new StringBuffer();
-			String fn_source = null, fn_rank = null;
+			String fn_source = null, fn_rank = "";
+			int fn_rankID = -1;
+			String timeZone = null;
+			SimpleDateFormat dfc = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			Date now = new Date();
+			String cmtDate = "";
+			String cmtURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+			String cmtTimes = "";
+			String cmtDataType = null;
+			double cmtSampleRate = 0.0;
+			Map<Integer, Rank> ranksMap = null;
+
 			for (PlotComponent component : components)
 			{
 				String source = component.getSource();
@@ -185,19 +221,11 @@ public class RawDataHandler implements HttpHandler
 					fn_source = source;
 				else if ( !fn_source.equals(source) )
 					throw new Valve3Exception( "Multi-source export not supported" );
-				String rank = component.getString( "selectedStation" );
-				if ( rank != null )
-					if ( fn_rank == null ) {
-						if ( rank.equals( "Best Possible Rank" ) )
-							throw new Valve3Exception( "Mixed-rank export not supported" );
-						fn_rank = rank;
-					} else if ( !fn_rank.equals(rank) )
-						throw new Valve3Exception( "Multi-rank export not supported" );
-						
 				Plotter plotter = null;
+				DataSourceDescriptor dsd = null;
 				if (source.equals("channel_map"))
 				{
-					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
 					if (dsd == null)
 						throw new Valve3Exception("Unknown data source.");
 					
@@ -207,15 +235,66 @@ public class RawDataHandler implements HttpHandler
 				}
 				else
 				{
-					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
+					dsd = dataHandler.getDataSourceDescriptor(component.getSource());
+					plotter = dsd.getPlotter();
 				}
-				if (plotter != null)
-					sb.append(plotter.toCSV(component));
+				if (plotter != null) {
+					if ( cmtDataType == null ) {
+						cmtSampleRate = plotter.getSampleRate();
+						cmtDataType = plotter.getDataType();
+					}
+				}
+				String rk = component.get( "rk" );
+				String ss = component.getString( "selectedStation" );
+				if ( rk == null && ss == null ) {
+					ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+					for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
+						Rank r = me.getValue();
+						if ( r.getUserDefault() == 1 ) {
+							rk = "" + me.getKey();
+							component.put( "rk", rk );
+							break;
+						}
+					}
+					logger.info("Ranks acquired");
+				}
+				if ( rk != null ) {
+					int rankID = component.getInt( "rk" );
+					if ( rankID != fn_rankID )
+						if ( fn_rankID == -1 ) {
+							if ( rankID == 0 )
+								throw new Valve3Exception( "Mixed-rank export not supported" );
+							fn_rankID = rankID;
+						} else
+							throw new Valve3Exception( "Multi-rank export not supported" );
+				}
+				if ( fn_rankID != -1 && fn_rank.equals("") ) {
+					if ( dsd == null ) {
+						fn_rank = "RankNbr" + fn_rankID;
+					} else {
+						if ( ranksMap == null ) {
+							ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+						}
+						fn_rank = ranksMap.get(fn_rankID).getName();
+					}
+				}
+				timeZone = component.getTimeZone().getID();
+				dfc.setTimeZone(TimeZone.getTimeZone(timeZone));
+				cmtDate = dfc.format(now);
+				cmtDate = "" + String.format( "%14.3f,%s,%s", (now.getTime()*0.001), cmtDate, timeZone);
+				double endtime = component.getEndTime();
+				cmtTimes = String.format( "%14.3f,%14.3f", component.getStartTime(endtime), endtime );
+				StringBuffer cmt = new StringBuffer("# " + cmtDate + "\n#" + cmtURL + "\n#" + fn_source + "\n# " + cmtTimes + "\n");
+				if (plotter != null) {
+					sb.append(plotter.toCSV(component, cmt.toString()));
+				} else
+					sb.append( cmt.toString() );
 			}
 			
-			String fn = df.format(new Date()) + "-" 
-				+ fn_source + "-" 
-				+ (fn_rank==null ? "NO_RANK" : fn_rank) 
+			
+			String fn = df.format(now) + "_" 
+				+ fn_source.replaceAll( "-", "_")
+				+ (fn_rank==null ? "_NoRank" : fn_rank.replaceAll("-","_")) 
 				+ ".csv";
 			String filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
 			try
@@ -226,6 +305,7 @@ public class RawDataHandler implements HttpHandler
 			}
 			catch (IOException e)
 			{
+				logger.info("RDH file error" );
 				throw new Valve3Exception(e.getMessage());
 			}
 
@@ -238,6 +318,7 @@ public class RawDataHandler implements HttpHandler
 		}
 		catch (Valve3Exception e)
 		{
+			logger.info("RDH error " + e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}

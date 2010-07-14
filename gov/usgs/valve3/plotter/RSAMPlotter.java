@@ -205,9 +205,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		*/
 
 		if ( forExport ) {
-			// Add column header to csvText
-			csvText.append(",");
-			csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + "_RSAM");
+			// Add column header to csvHdrs
+			csvHdrs.append(",");
+			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + "_RSAM");
 			// Initialize data for export; add to set for CSV
 			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
 			csvData.add( ed );
@@ -283,9 +283,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
 		
 		if ( forExport ) {
-			// Add column header to csvText
-			csvText.append(",");
-			csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_EventsPer%s", bin ));
+			// Add column header to csvHdrs
+			csvHdrs.append(",");
+			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_EventsPer%s", bin ));
 			// Initialize data for export; add to set for CSV
 			csvData.add( new ExportData( csvIndex, hr ) );
 			csvIndex++;
@@ -325,9 +325,9 @@ public class RSAMPlotter extends RawDataPlotter {
 			hr.getAxis().setRightLabelAsText("Cumulative Counts");
 			
 			if ( forExport ) {
-				// Add column header to csvText
-				csvText.append(",");
-				csvText.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_CumulativeCount", bin ));
+				// Add column header to csvHdrs
+				csvHdrs.append(",");
+				csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_CumulativeCount", bin ));
 				// Initialize data for export; add to set for CSV
 				csvData.add( new ExportData( csvIndex, mr ) );
 				csvIndex++;
@@ -391,9 +391,6 @@ public class RSAMPlotter extends RawDataPlotter {
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
 					break;
 			}
-		else
-			csvText.append("\n");  // close the header line
-
 	}
 
 	/**

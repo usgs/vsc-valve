@@ -346,20 +346,4 @@ public class RatSAMPlotter extends RawDataPlotter {
 		plot.writePNG(v3p.getLocalFilename());
 	}
 
-	/**
-	 * @return CSV string of RSAM values data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-		getInputs(c);
-		getData(c);
-		
-		switch(plotType) {
-			case VALUES:
-				return gdm.toCSV();
-			case COUNTS:
-				rd.countEvents(threshold, ratio, maxEventLength);
-				return rd.getCountsCSV();
-		}
-		return null;
-	}
 }

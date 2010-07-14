@@ -30,6 +30,7 @@ import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
+import gov.usgs.vdx.data.HypocenterExporter;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.ExportConfig;
 
@@ -419,8 +420,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		leftTicks = hr.getAxis().leftTicks.length;
 
 		if ( forExport ) {
-			// Add column headers to csvText (second one incomplete)
-			csvText.append(String.format( ",%s_EventsPer%s", rank.getName(), bin ));
+			// Add column headers to csvHdrs (second one incomplete)
+			csvHdrs.append(String.format( ",%s_EventsPer%s", rank.getName(), bin ));
 			csvData.add( new ExportData( csvIndex, hr ) );
 			csvIndex++;
 		}
@@ -459,7 +460,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			if ( forExport ) {
 				// Add coulmn to header; add Exporter to set for CSV
-				csvText.append(String.format( headerFmt, rank.getName() ));
+				csvHdrs.append(String.format( headerFmt, rank.getName() ));
 				csvData.add( new ExportData( csvIndex, mr ) );
 				csvIndex++;
 			} else {
@@ -475,10 +476,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 			}
 		}
 		
-		if ( forExport ) {
-			csvText.append("\n");	//
+		if ( forExport )
 			return;
-		}
 		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
 		
 		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
@@ -504,10 +503,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		switch (plotType) {
 		case MAP:
-			if ( forExport )
-				throw new Valve3Exception( "Hypocenter map cannot be exported" );
-			plotMap(v3Plot, component, rank);
-			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
+			if ( forExport ) {
+				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
+				csvData.add( new ExportData( csvIndex, new HypocenterExporter( hypos ) ) );
+				csvIndex++;
+			} else {
+				plotMap(v3Plot, component, rank);
+				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
+			}
 			break;
 		case COUNTS:
 			plotCounts(v3Plot, component, rank);

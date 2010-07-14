@@ -21,7 +21,9 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -61,6 +63,8 @@ public class WavePlotter extends RawDataPlotter {
 	private int xLabel;
 	private String color;
 	private Map<Integer, SliceWave> channelDataMap;	
+	private double samplingRate = 0.0;
+	private String dataType = null;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -183,30 +187,65 @@ public class WavePlotter extends RawDataPlotter {
 				throw new Valve3Exception(e.getMessage()); 
 			}
 			if (data != null) {
+				String toadd = "#sr=" + data.getSamplingRate() + "\n#datatype=" + data.getDataType() + "\n";
+				csvHdrs.insert( 0, toadd );
 				gotData = true;
+				samplingRate = data.getSamplingRate();
+				dataType = data.getDataType();
 				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
-				if (filterType != null) {
-					Butterworth bw = new Butterworth();
-					switch(filterType) {
-						case LOWPASS:
-							if (maxHz <= 0)
-								throw new Valve3Exception("Illegal max hertz value.");
-							bw.set(FilterType.LOWPASS, 4, data.getSamplingRate(), maxHz, 0);
+				if (doDespike) { data.despike(despikePeriod); }
+				if (doDetrend) { data.detrend(); }
+				if (filterPick != 0) {
+					switch(filterPick) {
+						case 1: // Bandpass
+							FilterType ft = FilterType.BANDPASS;
+							Double singleBand = 0.0;
+							if ( !Double.isNaN(filterMax) ) {
+								if ( filterMax <= 0 )
+									throw new Valve3Exception("Illegal max hertz value.");
+							} else {
+								ft = FilterType.HIGHPASS;
+								singleBand = filterMin;
+							}
+							if ( !Double.isNaN(filterMin) ) {
+								if ( filterMin <= 0 )
+									throw new Valve3Exception("Illegal min hertz value.");
+							} else {
+								ft = FilterType.LOWPASS;
+								singleBand = filterMax;
+							}
+							Butterworth bw = new Butterworth();
+							if ( ft == FilterType.BANDPASS )
+								bw.set(ft, 4, data.getSamplingRate(), filterMin, filterMax);
+							else
+								bw.set(ft, 4, data.getSamplingRate(), singleBand, 0);
 							data.filter(bw, true);
 							break;
-						case HIGHPASS:
-							if (minHz <= 0)
-								throw new Valve3Exception("Illegal minimum hertz value.");
-							bw.set(FilterType.HIGHPASS, 4, data.getSamplingRate(), minHz, 0);
-							data.filter(bw, true);
+						case 2: // Running median
+							data.set2median( filterPeriod );
 							break;
-						case BANDPASS:
-							if (minHz <= 0 || maxHz <= 0 || minHz > maxHz)
-								throw new Valve3Exception("Illegal minimum/maximum hertz values.");
-							bw.set(FilterType.BANDPASS, 4, data.getSamplingRate(), minHz, maxHz);
-							data.filter(bw, true);
+						case 3: // Running mean
+							data.set2mean( filterPeriod );
 							break;
 					}
+				}
+				if (debiasPick != 0 ) {
+					int bias = 0;
+					Double dbias;
+					switch ( debiasPick ) {
+						case 1: // remove mean 
+							dbias = new Double(data.mean());
+							bias = dbias.intValue();
+							break;
+						case 2: // remove initial value
+							bias = data.first();
+							break;
+						case 3: // remove user value
+							dbias = new Double(debiasValue);
+							bias = dbias.intValue();
+							break;
+					}
+					data.subtract(bias);
 				}
 				wave = new SliceWave(data);
 				wave.setSlice(data.getStartTime(), data.getEndTime());
@@ -239,9 +278,9 @@ public class WavePlotter extends RawDataPlotter {
 			bias = wave.mean();
 		
 		if ( v3Plot == null ) {
-			csvText.append(",");
-			csvText.append(channel.getCode().replace('$', '_').replace(',', '/'));
-			csvText.append("_Count");
+			csvHdrs.append(",");
+			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
+			csvHdrs.append("_Count");
 			ExportData ed = new ExportData( csvIndex, wr );
 			csvIndex++;
 			csvData.add( ed );
@@ -434,8 +473,6 @@ public class WavePlotter extends RawDataPlotter {
 			case WAVEFORM:
 				if ( !forExport )
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Waveform");
-				else
-					csvText.append("\n");  // close the header line
 				break;
 			case SPECTRA:
 				v3Plot.setExportable( false ); // Can't export vectors
@@ -466,6 +503,14 @@ public class WavePlotter extends RawDataPlotter {
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
+	}
+	
+	public double getSampleRate() {
+		return samplingRate;
+	}
+	
+	public String getDataType() {
+		return dataType;
 	}
 	
 }

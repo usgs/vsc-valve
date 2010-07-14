@@ -72,6 +72,11 @@ abstract public class Plotter
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
+		return toCSV( comp, null );
+	}
+	
+	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception
+	{
 		throw new Valve3Exception("Data export not available for this data source.");
 	}
 	
@@ -139,6 +144,14 @@ abstract public class Plotter
 			v3.putExportConfig(source, ec);
 		}
 		return ec;
+	}
+
+	public double getSampleRate() {
+		return 0.0;
+	}
+	
+	public String getDataType() {
+		return null;
 	}
 
 }

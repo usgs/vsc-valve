@@ -147,8 +147,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 			}
 			
 			if ( forExport ) {
-				// Add column headers to csvText
-				csvText.append("," + channel.getCode().replace("$","_") + "_Data");
+				// Add column headers to csvHdrs
+				csvHdrs.append("," + channel.getCode().replace("$","_") + "_Data");
 				// Initialize data for export; add to set for CSV
 				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, component.getOffset(startTime)) );
 				csvIndex++;
@@ -202,9 +202,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 			v3Plot.addComponent(component);
 		}
 		
-		if ( forExport )
-			csvText.append("\n");  // close the header line
-		else
+		if ( !forExport )
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
 	}
 

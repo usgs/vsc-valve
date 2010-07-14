@@ -1,8 +1,10 @@
 package gov.usgs.valve3.plotter;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
@@ -53,16 +55,28 @@ public abstract class RawDataPlotter extends Plotter {
 	protected Logger logger;
 	
 	protected TreeSet<ExportData> csvData;
-	protected StringBuffer csvText;
+	protected StringBuffer csvHdrs, csvCmts, csvText;
 	protected int csvIndex = 0;
 	
 	protected boolean removeBias;
+	
+	protected boolean bypassManipCols[];
+	protected boolean doDespike;
+	protected double despikePeriod;
+	protected boolean doDetrend;
+	protected int filterPick;
+	protected double filterMin, filterMax, filterPeriod;
+	protected int debiasPick;
+	protected double debiasValue;
+	
 	
 	/**
 	 * Default constructor
 	 */
 	public RawDataPlotter() {
 		logger		= Logger.getLogger("gov.usgs.vdx");		
+		csvCmts = new StringBuffer();
+		csvHdrs = new StringBuffer();
 	}
 	
 	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
@@ -267,34 +281,47 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
+		return toCSV(comp, "");
+	}
+
+
+	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		
 		if ( !ec.isExportable() )
 			throw new Valve3Exception( "Requested export not allowed" );
 	
-		// Add openeing comment line(s) to text
+		// Add opening comment line(s) to text
 		String[] comments = ec.getComments();
-		csvText = new StringBuffer();
 		if ( comments != null )
 			for ( String s: comments ) {
-				csvText.append("#");
-				csvText.append(s);
-				csvText.append("\n");
+				csvCmts.append("#");
+				csvCmts.append(s);
+				csvCmts.append("\n");
 			}
+		
+		// Add universal comment lines to text
+		csvCmts.append( cmt );
 		
 		// Add the common column headers
 		String timeZone = comp.getTimeZone().getID();
-		csvText.append("Seconds_since_1970 (");
-		csvText.append(timeZone);
-		csvText.append("), Date (");
-		csvText.append(timeZone);
-		csvText.append(")");
+		csvHdrs.append("Seconds_since_1970 (");
+		csvHdrs.append(timeZone);
+		csvHdrs.append("), Date (");
+		csvHdrs.append(timeZone);
+		csvHdrs.append(")");
 
 		// Fill csvData with data to be exported; also completes csvText
 		csvData = new TreeSet<ExportData>();
 		csvIndex = 0;
 		plot( null, comp );
+		csvText = new StringBuffer();
+		csvText.append( csvCmts );
+		csvCmts = new StringBuffer();
+		csvText.append( csvHdrs );
+		csvHdrs = new StringBuffer();
+		csvText.append("\n");
 		
 		// currLine is an array of the current row of data from each source, indexed by that source's ID
 		Double[][] currLine = new Double[ csvData.size() ][];
@@ -304,67 +331,69 @@ public abstract class RawDataPlotter extends Plotter {
 		if ( currLine.length == 1 ) {
 			// Since there's only 1 source, we can just loop through it
 			ExportData cd = csvData.first();
-			Double[] datum = cd.nextExportDatum();
+			Double[] datum = cd.currExportDatum();
 			while ( datum != null ) {
 				currLine[0] = datum;
 				addCSVline( currLine, datum[0], decFmt, nullField );
 				datum = cd.nextExportDatum();
 			}
-			return csvText.toString();
-		}
+		} else {
 
-		// An array of our data sources, indexed by ID
-		ExportData[] sources = new ExportData[ csvData.size() ];
-		for ( ExportData cd: csvData ) {
-			sources[ cd.exportDataID() ] = cd;
-			currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
-		}
-		
-		// prevTime is the time of the last row formatted into csvText
-		Double prevTime = null;
-		while ( true ) {
-			ExportData loED;
-			try {
-				// Grab the ExportData whose next datum has the earliest time
-				loED = csvData.first();
-			} catch (Exception e) {
-				loED = null;
+			// An array of our data sources, indexed by ID
+			ExportData[] sources = new ExportData[ csvData.size() ];
+			for ( ExportData cd: csvData ) {
+				sources[ cd.exportDataID() ] = cd;
+				currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
 			}
 			
-			if ( prevTime != null ) {
-				int cmp = -1;
-				if ( loED != null ) {
-					Double[] l = loED.currExportDatum();
-					Double l0 = l[0];
-					cmp = prevTime.compareTo(l0);
+			// prevTime is the time of the last row formatted into csvText
+			Double prevTime = null;
+			while ( true ) {
+				ExportData loED;
+				try {
+					// Grab the ExportData whose next datum has the earliest time
+					loED = csvData.first();
+				} catch (Exception e) {
+					loED = null;
 				}
-				if ( cmp < 0 ) {
-					// Add the current line to csvText
-					addCSVline( currLine, prevTime, decFmt, nullField );
-					
-					if ( loED == null )
-						// No new data; we're done!
-						break;
-					// "Erase" the current line
-					for ( ExportData cd: sources )
-						currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+				
+				if ( prevTime != null ) {
+					int cmp = -1;
+					if ( loED != null ) {
+						Double[] l = loED.currExportDatum();
+						Double l0 = l[0];
+						cmp = prevTime.compareTo(l0);
+					}
+					if ( cmp < 0 ) {
+						// Add the current line to csvText
+						addCSVline( currLine, prevTime, decFmt, nullField );
+						
+						if ( loED == null )
+							// No new data; we're done!
+							break;
+						// "Erase" the current line
+						for ( ExportData cd: sources )
+							currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+						prevTime = loED.currExportDatum()[0];
+					}
+				} else if ( loED != null ) {
+					// This is our first item
 					prevTime = loED.currExportDatum()[0];
+				} else {
+					throw new Valve3Exception( "No data to export" );
 				}
-			} else if ( loED != null ) {
-				// This is our first item
-				prevTime = loED.currExportDatum()[0];
-			} else {
-				throw new Valve3Exception( "No data to export" );
+				// Add current item to current line
+				currLine[ loED.exportDataID() ] = loED.currExportDatum();
+				
+				// Remove & add our ExportData back so that it gets placed based on its new data
+				csvData.remove( loED );
+				if ( loED.nextExportDatum() != null )
+					csvData.add( loED );
 			}
-			// Add current item to current line
-			currLine[ loED.exportDataID() ] = loED.currExportDatum();
-			
-			// Remove & add our ExportData back so that it gets placed based on its new data
-			csvData.remove( loED );
-			if ( loED.nextExportDatum() != null )
-				csvData.add( loED );
 		}
-		return csvText.toString();
+		String result = csvText.toString();
+		csvText = null;
+		return result;
 	}	
 	
 	class AxisParameters {
@@ -408,6 +437,43 @@ public abstract class RawDataPlotter extends Plotter {
 						throw new Valve3Exception("Illegal axis values.");
 				}
 			}
+		}
+	}
+	
+	protected void validateDataManipOpts(PlotComponent component) throws Valve3Exception {
+		doDespike = Util.stringToBoolean(component.get("despike"));
+		if ( doDespike ) {
+			despikePeriod = component.getDouble("despike_period");
+			if ( Double.isNaN(despikePeriod) )
+				throw new Valve3Exception("Illegal/missing period for despike");
+		}
+		doDetrend = Util.stringToBoolean(component.get("detrend"));
+		try {
+			filterPick = component.getInt("dmo_fl");
+		} catch(Valve3Exception e){
+			filterPick = 0;
+		}
+		if ( filterPick != 0 ) {
+			if ( filterPick != 1 ) {
+				filterPeriod = component.getDouble("filter_arg1");
+				if ( Double.isNaN(filterPeriod) )
+					throw new Valve3Exception("Illegal/missing period for filter");
+			} else {
+				filterMax = component.getDouble("filter_arg1");
+				filterMin = component.getDouble("filter_arg2");
+				if ( Double.isNaN(filterMax) && Double.isNaN(filterMax) )
+					throw new Valve3Exception("Illegal/missing bound(s) for bandpass");
+			}
+		}
+		try {
+			debiasPick = component.getInt("dmo_db");
+		} catch(Valve3Exception e){
+			debiasPick = 0;
+		}
+		if ( debiasPick == 3 ) {
+			debiasValue = component.getDouble("debias_period");
+			if ( Double.isNaN(debiasValue) )
+				throw new Valve3Exception("Illegal/missing value for bias removal");
 		}
 	}
 }

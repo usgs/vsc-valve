@@ -293,33 +293,4 @@ public class GenericVariablePlotter extends RawDataPlotter
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3p.getFilename());
 	}
 
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent comp) throws Valve3Exception
-	{
-		
-//		HashMap<String, String> params = new HashMap<String, String>();
-//		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-//		VDXClient client = pool.checkout();
-//		
-//		params.put("source", vdxSource);
-//		params.put("action", "genericMenu");
-//		menu = new GenericMenu(client.getTextData(params));
-//		pool.checkin(client);
-		
-		getInputs(comp);
-		getData(comp);
-		DoubleMatrix2D d = data.getData();
-		StringBuffer sb = new StringBuffer();
-		for (int i=0; i<d.rows(); i++)
-		{
-			sb.append(Util.j2KToDateString(d.get(i, 0)) + ",");
-			for (int j=1; j<d.columns(); j++)
-				sb.append(d.get(i,j) + ",");
-			sb.append("\n");
-		}
-			
-		return sb.toString();
-	}
 }

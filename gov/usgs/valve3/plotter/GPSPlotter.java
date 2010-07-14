@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.Plot;
@@ -95,22 +97,28 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);		
 		rk = component.getInt("rk");	
-		bl = component.getString("bl");
-		if (bl.equals("[none]")) {
+		bl = component.get("bl");
+		if (bl != null && bl.equals("[none]")) {
 			bl = null;
 		}
 		
-		String pt = component.getString("plotType");
+		String pt = component.get("plotType");
+		if ( pt == null ) // SBH--default
+			pt = "ts";
 		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
 			throw new Valve3Exception("Illegal plot type: " + pt);
 		}
+
+		validateDataManipOpts(component);
+
 		switch(plotType) {		
 		case TIME_SERIES:			
 			columnsCount		= columnsList.size();
 			selectedCols		= new boolean[columnsCount];
 			legendsCols			= new String[columnsCount];
 			channelLegendsCols	= new String[columnsCount];
+			bypassManipCols     = new boolean [columnsCount];
 			compCount			= 0;
 			
 			leftLines			= 0;
@@ -122,6 +130,7 @@ public class GPSPlotter extends RawDataPlotter {
 				column.checked	= Util.stringToBoolean(component.get(column.name));
 				selectedCols[i]	= column.checked;
 				legendsCols[i]	= column.description;
+				bypassManipCols[i] = column.bypassmanipulations;
 				if (column.checked) {
 					if(isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
@@ -432,15 +441,67 @@ public class GPSPlotter extends RawDataPlotter {
 					// convert the GPSData object to a generic data matrix and subtract out the mean
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.toTimeSeries(baselineData));
 					for (int i = 0; i < columnsCount; i++) {
-						gdm.add(i + 2, -gdm.mean(i + 2));
-						// gdm.add(2, -dm.getQuick(0, 2));
+						if ( bypassManipCols[i] )
+							continue;
+						if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
+						if (doDetrend) { gdm.detrend(i + 2); }
+						if (filterPick != 0) {
+							Butterworth bw = new Butterworth();
+							FilterType ft = FilterType.BANDPASS;
+							Double singleBand = 0.0;
+							switch(filterPick) {
+								case 1: // Bandpass
+									if ( !Double.isNaN(filterMax) ) {
+										if ( filterMax <= 0 )
+											throw new Valve3Exception("Illegal max hertz value.");
+									} else {
+										ft = FilterType.HIGHPASS;
+										singleBand = filterMin;
+									}
+									if ( !Double.isNaN(filterMin) ) {
+										if ( filterMin <= 0 )
+											throw new Valve3Exception("Illegal min hertz value.");
+									} else {
+										ft = FilterType.LOWPASS;
+										singleBand = filterMax;
+									}
+									/* SBH
+									if ( ft == FilterType.BANDPASS )
+										bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
+									else
+										bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
+									data.filter(bw, true); */
+									break;
+								case 2: // Running median
+									gdm.set2median( i+2, filterPeriod );
+									break;
+								case 3: // Running mean
+									gdm.set2mean( i+2, filterPeriod );
+									break;
+							}
+						}
+						if (debiasPick != 0 ) {
+							double bias = 0.0;
+							switch ( debiasPick ) {
+								case 1: // remove mean 
+									bias = gdm.mean(i+2);
+									break;
+								case 2: // remove initial value
+									bias = gdm.first(i+2);
+									break;
+								case 3: // remove user value
+									bias = debiasValue;
+									break;
+							}
+							gdm.add(i + 2, -bias);
+						}
 					}
 					
 					if ( forExport ) {
-						// Add column headers to csvText
+						// Add column headers to csvHdrs
 						for (int i = 0; i < columnsList.size(); i++) {
 							if ( !axisMap.get(i).equals("") ) {
-								csvText.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
+								csvHdrs.append(String.format( ",%s%s_%s", channel.getCode(), baselineLegend, legendsCols[i] ));
 							}
 						}
 						// Initialize data for export; add to set for CSV
@@ -486,15 +547,14 @@ public class GPSPlotter extends RawDataPlotter {
 				break;
 				
 			case VELOCITY_MAP:
+				v3Plot.setExportable( false );
 				plotVelocityMap(v3Plot, component);
 				break;
 		}
 		
 		switch(corePlotType) {
 			case TIME_SERIES:
-				if ( forExport )
-					csvText.append("\n"); // close the header line
-				else
+				if ( !forExport )
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 				break;
 			case VELOCITY_MAP:
