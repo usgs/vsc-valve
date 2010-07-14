@@ -40,6 +40,7 @@ div.content
 	background: white;
 	margin: 0 auto;
 	margin-bottom: 10px;
+	position: relative;
 }
 
 div.content img.button, img.button_off
@@ -423,7 +424,7 @@ div.listbox p:hover
 	padding: 0px;
 	position: absolute;
 	left: 0px;
-	top: 0px;
+	top: 32px;
 	z-index: 99;
 	font-size: 1px;
 	visibility: hidden;

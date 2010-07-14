@@ -43,6 +43,15 @@ function loadMenu(id) {
 				}
 			}
 		}	
+		var selector_bt = document.getElementById("dmo_debias_pick");
+		if(selector_bt){
+			for (var i = 0; i < selector_bt.options.length; i++)  {
+				if(selector_bt.options[i].value==menus[id].biasType){
+					selector_bt.options[i].selected=true;
+					break;
+				}
+			}
+		}	
 		return;
 	}
 	var url = "menu/" + menus[id].file + ".html";
@@ -74,6 +83,15 @@ function loadMenu(id) {
 				for (var i = 0; i < selector_lt.options.length; i++)  {
 					if(selector_lt.options[i].value==menus[id].lineType){
 						selector_lt.options[i].selected=true;
+						break;
+					}
+				}
+			}	
+			var selector_bt = document.getElementById("dmo_debias_pick");
+			if(selector_bt){
+				for (var i = 0; i < selector_bt.options.length; i++)  {
+					if(selector_bt.options[i].value==menus[id].biasType){
+						selector_bt.options[i].selected=true;
 						break;
 					}
 				}
@@ -114,6 +132,7 @@ function handleMenu(xml) {
 			var file			= items[j].getElementsByTagName("file")[0].firstChild.data;
 			var lineType		= items[j].getElementsByTagName("lineType")[0].firstChild.data;
 			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
+			var biasType		= items[j].getElementsByTagName("biasType")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
 			var timeShortcuts	= "";
@@ -124,6 +143,7 @@ function handleMenu(xml) {
 			m.timeShortcuts	= timeShortcuts.split(",");
 			m.lineType		= lineType;
 			m.plotSeparately = plotSeparately;
+			m.biasType      = biasType;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
 			li.id			= menuid;
@@ -359,15 +379,15 @@ function populateGenericColumns(menu) {
 			p.appendChild(l);
 			colDiv.appendChild(p);
 			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Detrend');
-			p.appendChild(l);
-			detDiv.appendChild(p);
+			//var p = document.createElement('p');
+			//var l = document.createTextNode('Detrend');
+			//p.appendChild(l);
+			//detDiv.appendChild(p);
 			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Remove Bias');
-			p.appendChild(l);
-			norDiv.appendChild(p);
+			//var p = document.createElement('p');
+			//var l = document.createTextNode('Remove Bias');
+			//p.appendChild(l);
+			//norDiv.appendChild(p);
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -399,6 +419,7 @@ function populateGenericColumns(menu) {
 				uniDiv.appendChild(p);
 				
 				// build the detrend checkbox
+				/*
 				var p		= document.createElement('p');
 				p.className	= 'center';
 				var el		= document.createElement('input');
@@ -407,8 +428,10 @@ function populateGenericColumns(menu) {
 				el.name		= "d_" + col[1];
 				p.appendChild(el);
 				detDiv.appendChild(p);
+				*/
 				
 				// build the normalize checkbox
+				/*
 				var p		= document.createElement('p');
 				p.className	= 'center';
 				var el		= document.createElement('input');
@@ -417,6 +440,7 @@ function populateGenericColumns(menu) {
 				el.name		= "n_" + col[1];
 				p.appendChild(el);
 				norDiv.appendChild(p);
+				*/
 			}
 			
 			mainColDiv.appendChild(detDiv);
@@ -425,6 +449,98 @@ function populateGenericColumns(menu) {
 			mainColDiv.appendChild(uniDiv);
 		}
 	);
+
+	/* loadXML(menu.id + " datamanip", url, 
+		function(req) {
+			var xml		= req.responseXML;
+			var cols	= xml.getElementsByTagName('list-item');
+			// var temp	= (new XMLSerializer()).serializeToString(xml);
+			
+			var argsDiv = document.createElement('div');
+			argsDiv.className = 'fr mlr4';
+			var lblsDiv = document.createElement('div');
+			lblsDiv.className = 'fr mlr4';
+			var menuDiv = document.createElement('div');
+			menuDiv.className = 'mlr4';
+
+			argsDiv.id = menu.id + 'dmo_args';
+			lblsDiv.id = menu.id + 'dmo_arglbls';
+			menuDiv.id = menu.id + 'dmo_menu';
+			
+			var p = document.createElement('p');
+			var l = document.createTextNode('Name');
+			p.appendChild(l);
+			colDiv.appendChild(p);
+			
+			//var p = document.createElement('p');
+			//var l = document.createTextNode('Detrend');
+			//p.appendChild(l);
+			//detDiv.appendChild(p);
+			
+			//var p = document.createElement('p');
+			//var l = document.createTextNode('Remove Bias');
+			//p.appendChild(l);
+			//norDiv.appendChild(p);
+			
+			for (var i = 0; i < cols.length; i++) {
+				
+				// split up the column entry into it's elements
+				var col		= cols[i].firstChild.data.split(":");
+				
+				// build the column checkbox
+				var p		= document.createElement('p');
+				
+				var el		= document.createElement('input');
+				el.type		= 'checkbox';
+				el.id		= menu.id + "_" + col[1];
+				if (col[4] == "T") { el.checked = "checked"; }
+				el.name		= col[1];				
+				p.appendChild(el);
+				
+				var el		= document.createElement('label');
+				el.setAttribute("for", menu.id + "_" + col[1]);
+				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				el.appendChild(tn);
+				p.appendChild(el);
+				
+				colDiv.appendChild(p);
+				
+				// build the units list
+				var p		= document.createElement('p');
+				var l		= document.createTextNode(col[3]);
+				p.appendChild(l);
+				uniDiv.appendChild(p);
+				
+				// build the detrend checkbox
+				//
+				//var p		= document.createElement('p');
+				//p.className	= 'center';
+				//var el		= document.createElement('input');
+				//el.type		= 'checkbox';
+				//el.id		= menu.id + "_d_" + col[1];
+				//el.name		= "d_" + col[1];
+				//p.appendChild(el);
+				//detDiv.appendChild(p);
+				
+				// build the normalize checkbox
+				//
+				//var p		= document.createElement('p');
+				//p.className	= 'center';
+				//var el		= document.createElement('input');
+				//el.type		= 'checkbox';
+				//el.id		= menu.id + "_n_" + col[1];
+				//el.name		= "n_" + col[1];
+				//p.appendChild(el);
+				//norDiv.appendChild(p);
+				
+			}
+			
+			mainColDiv.appendChild(detDiv);
+			mainColDiv.appendChild(norDiv);
+			mainColDiv.appendChild(colDiv);
+			mainColDiv.appendChild(uniDiv);
+		}
+	); */
 }
 
 function populateTiltColumns(menu) {
@@ -441,8 +557,8 @@ function populateTiltColumns(menu) {
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			var detDiv = document.createElement('div');
-			detDiv.className = 'fr mlr4';
+			//var detDiv = document.createElement('div');
+			//detDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
@@ -452,10 +568,10 @@ function populateTiltColumns(menu) {
 			p.appendChild(l);
 			colDiv.appendChild(p);
 			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Detrend');
-			p.appendChild(l);
-			detDiv.appendChild(p);
+			//p = document.createElement('p');
+			//l = document.createTextNode('DMO');
+			//p.appendChild(l);
+			//detDiv.appendChild(p);
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -474,7 +590,7 @@ function populateTiltColumns(menu) {
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3] + "");
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -487,17 +603,15 @@ function populateTiltColumns(menu) {
 				uniDiv.appendChild(p);
 				
 				// build the detrend checkbox
-				var p		= document.createElement('p');
-				p.className	= 'center';
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_d_" + col[1];
-				el.name		= "d_" + col[1];
-				if (col[5] == "T") { p.appendChild(el); }
-				detDiv.appendChild(p);
+				//var p		= document.createElement('p');
+				//p.className	= 'center';
+				//var el		= document.createElement('label');
+				//el.appendChild( document.createTextNode(col[5] == "F" ? "No" : "Yes"));
+				//p.appendChild(el);
+				//detDiv.appendChild(p);
 			}
 			
-			mainColDiv.appendChild(detDiv);
+			//mainColDiv.appendChild(detDiv);
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
@@ -966,10 +1080,17 @@ Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 	
 	/* Make mark visible, and align its horizontal position w/ the click */
 	mark.style.visibility = "visible";
+	var leftSide = 0;
 	var imgs = mark.parentNode.getElementsByTagName("img");
 	var i;
 	for ( i = 0; imgs[i].className != "pointer"; i++ );
-	mark.style.left=(scroll[0] + mx - imgs[i].x - 5) + "px";
+	/* leftSide = imgs[i].x; */
+	i = imgs[i];
+	while ( i != null ) {
+		leftSide = leftSide + i.offsetLeft;
+		i = i.offsetParent;
+	}
+	mark.style.left=(scroll[0] + mx - leftSide - 5) + "px";
 }
 
 /**

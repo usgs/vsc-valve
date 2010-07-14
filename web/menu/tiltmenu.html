@@ -44,12 +44,122 @@
 		</div>
 	</div>
 	
-	<div class="w310 fl">
+	<div class="w320 fl">
 		<div id="pane_options_0-">
 			<div class="box w310">
 				<h1>Time Series Options</h1>
 				<span id="columns"></span>
 			</div>
+			
+<div class="box w310">
+<h1>Data Manipulation Options</h1>
+<span id="datamanip">
+	<div id="dmo_args" class="fr mlr4">
+		<p>
+			<input style='visibility:hidden;' type="text" id="dmo_despike_period" name="despike_period" size="10">
+		</p>
+		<p>&nbsp;
+		</p>
+		<p> 
+			<input style="visibility: hidden;" type="text" id="dmo_filter_arg1" name="filter_arg1" size="10">
+		</p><p>
+			<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="10">
+		</p>
+		<p>
+			<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_period" size="10"">
+		</p>
+	</div>
+	<div id="dmo_arglbls" class="fr mlr4">
+		<p>
+			<label style='visibility:hidden;'for="dmo_despike_period" id="dmo_despike_lbl">Period:</label>
+		</p>
+		<p>&nbsp;
+		</p>
+		<p> 
+			<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Max freq:</label>
+		</p><p>
+			<label style="visibility: hidden;" id="dmo_filter_arg2_lbl" for="dmo_filter_arg2">Min freq:</label>
+		</p>
+		<p>
+			<label style='visibility:hidden;' id="dmo_debias_lbl" for="dmo_debias_period"">User value:</label>
+		</p>
+	</div>
+	<div id="dmo_menu" class="mlr4">
+		<p>
+			<input type="checkbox" id="dmo_despike" name="despike"
+			  onchange="var prefix = this.id.substring( 0, this.id.length-11 );
+			  	var fld = document.getElementById(prefix+'dmo_despike_period'); 
+			  	var lbl = document.getElementById(prefix+'dmo_despike_lbl'); 
+			  	if (this.checked) {
+			  		fld.style.visibility='visible';
+			  		lbl.style.visibility='visible';
+			  	} else {
+			  		fld.style.visibility='hidden';
+			  		lbl.style.visibility='hidden';
+			  	}">
+			<label for="dmo_despike">Despike (mean)</label>
+		</p>
+		<p>
+			<input type="checkbox" id="dmo_detrend" name="detrend">
+			<label for="dmo_detrend">Detrend (linear)</label>
+		</p>
+		<p>
+			<!-- <label for="dmo_filter">Filter</label> -->
+			<select id="dmo_filter_pick" name="selector:dmo_fl" onchange="var tos = this.options.selectedIndex;
+				var prefix = this.id.substring( 0, this.id.length-15 );
+				var lbl1 = document.getElementById(prefix+'dmo_filter_arg1_lbl');
+				var arg1 = document.getElementById(prefix+'dmo_filter_arg1');
+				var lbl2 = document.getElementById(prefix+'dmo_filter_arg2_lbl');
+				var arg2 = document.getElementById(prefix+'dmo_filter_arg2');
+				if ( tos == 0 ) {
+					lbl1.style.visibility='hidden';
+					arg1.style.visibility='hidden';
+					lbl2.style.visibility='hidden';
+					arg2.style.visibility='hidden';
+				} else {
+					lbl1.style.visibility='visible';
+					arg1.style.visibility='visible';
+					if (tos == 1 ) {
+						lbl1.innerHTML = 'Max freq:';
+						lbl2.innerHTML = 'Min freq:';
+						lbl2.style.visibility='visible';
+						arg2.style.visibility='visible';
+					} else {
+						lbl1.innerHTML = 'Period:';
+						lbl2.style.visibility='hidden';
+						arg2.style.visibility='hidden';
+					}
+				}">
+				<option selected value="0">No filter</option>
+				<option value="1">Bandpass</option>
+				<option value="2">Running median</option>
+				<option value="3">Running mean</option>
+			</select>
+		</p>
+		<p>&nbsp;
+		</p>
+		<p>
+			<!-- <label for="norm_debias">Remove bias</label> -->
+			<select id="dmo_debias_pick" name="selector:dmo_db" onchange="var tos = this.options.selectedIndex;
+				var prefix = this.id.substring( 0, this.id.length-15 );
+				var fld = document.getElementById(prefix+'dmo_debias_period');
+				var lbl = document.getElementById(prefix+'dmo_debias_lbl');			  	
+				if ( tos != 3 ) {
+					fld.style.visibility='hidden';
+					lbl.style.visibility='hidden';
+				} else {
+					fld.style.visibility='visible';
+					lbl.style.visibility='visible';
+				}">
+				<option selected value="0">No bias removal</option>
+				<option value="1">Remove Mean</option>
+				<option value="2">Remove Initial Value</option>
+				<option value="3">Remove User Value</option>
+			</select>
+		</p>
+	</div>
+</span>
+</div>
 			<div class="box w310">
 				<h1>Radial Options</h1>
 				<p>
