@@ -15,18 +15,6 @@
 			<p><input type="radio" name="plotType" value="tv" id="tv:paneSelector_options_1"> <label for="tv">Vectors</label></p>
 		</div>
 		<div class="box w140">
-			<h1 id="collapse_leftOptions-">Left Axis Options</h1>
-			<div id="collapseTarget_leftOptions">
-				<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
-			</div>
-		</div>
-		<div class="box w140">
-			<h1 id="collapse_rightOptions-">Right Axis Options</h1>
-			<div id="collapseTarget_rightOptions">
-				<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
-			</div>
-		</div>
-		<div class="box w140">
 			<h1>Ranks</h1>
 			<p><select class="w100p" name="selector:rk">
 			</select></p>
@@ -42,6 +30,17 @@
 			<option value="d">Dot</option>
 			</select></p>
 		</div>
+		<div class="box w140 fl">
+			<h1>Downsampling</h1>
+			<p>
+				<select class="w100p" name="selector:ds" id="selector:ds">
+					<option selected="selected">None</option>
+					<option>Decimation</option>
+					<option>Mean filter</option>
+				</select>
+			</p>
+			<p id="selector:ds_interval" >Interval:  <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
+		</div>
 	</div>
 	
 	<div class="w320 fl">
@@ -49,6 +48,26 @@
 			<div class="box w310">
 				<h1>Time Series Options</h1>
 				<span id="columns"></span>
+				<table>
+  				<tr>
+ 			   	<td>
+				<div class="box w135">
+					<h1 id="collapse_leftOptions-">Left Axis Options</h1>
+					<div id="collapseTarget_leftOptions">
+						<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+					</div>
+				</div>
+				</td>
+				<td>
+				<div class="box w135">
+					<h1 id="collapse_rightOptions-">Right Axis Options</h1>
+					<div id="collapseTarget_rightOptions">
+						<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+					</div>
+				</div>
+				</td>
+				</tr>
+				</table>
 			</div>
 			
 <div class="box w310">
@@ -176,17 +195,6 @@
 					<p><label for="vs">Scale: </label><input type="text" size="4" id="vs" name="vs" value="Auto" disabled></p>
 				</div>
 			</div>
-		</div>
-		<div class="box w140 fl">
-			<h1>Downsampling</h1>
-			<p>
-				<select class="w100p" name="selector:ds" id="selector:ds">
-					<option selected="selected">None</option>
-					<option>Decimation</option>
-					<option>Mean filter</option>
-				</select>
-			</p>
-			<p id="selector:ds_interval" >Interval:  <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
 		</div>
 	</div>
 	
