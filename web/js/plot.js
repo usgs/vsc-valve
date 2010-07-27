@@ -229,7 +229,7 @@ function handlePlot(xml)
 			function()
 			{ 
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
-				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
+				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=csv");
 			
 				loadXML("rawData", url, function(req)
 				{
@@ -257,7 +257,7 @@ function handlePlot(xml)
 		var e;
 		for ( e in ebs ) {
 			if ( ebs[e].getAttribute('name') == 'export_btn' ) {
-				ebs[e].setAttribute( 'src', 'images/nodata.gif' );
+				ebs[e].setAttribute( 'src', 'images/nocsv.gif' );
 				ebs[e].setAttribute( 'class', 'button_off' );
 				break;
 			}
