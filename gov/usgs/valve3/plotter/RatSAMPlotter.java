@@ -85,10 +85,14 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);
 		
-		String pt = component.getString("plotType");
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		String pt = component.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.VALUES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 	
 		try{

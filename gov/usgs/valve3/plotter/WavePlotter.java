@@ -65,6 +65,7 @@ public class WavePlotter extends RawDataPlotter {
 	private Map<Integer, SliceWave> channelDataMap;	
 	private double samplingRate = 0.0;
 	private String dataType = null;
+	private boolean forExport;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -85,10 +86,14 @@ public class WavePlotter extends RawDataPlotter {
 		if (endTime - startTime > MAX_DATA_REQUEST)
 			throw new Valve3Exception("Maximum waveform request is 24 hours.");
 		
-		String pt = component.getString("plotType");
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		String pt = component.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.WAVEFORM;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 		
 //		try{
@@ -111,7 +116,7 @@ public class WavePlotter extends RawDataPlotter {
 		try{
 			logPower = component.getBoolean("splp");
 		} catch (Valve3Exception ex){
-			logPower = false;
+			logPower = true;
 		}
 		
 		try{
@@ -121,8 +126,16 @@ public class WavePlotter extends RawDataPlotter {
 		}
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM) {
-			minFreq = component.getDouble("spminf");
-			maxFreq = component.getDouble("spmaxf");
+			try {
+				minFreq = component.getDouble("spminf");
+			} catch (Valve3Exception ex ) {
+				minFreq = 0.0;
+			}
+			try {
+				maxFreq = component.getDouble("spmaxf");
+			} catch (Valve3Exception ex ) {
+				maxFreq = 15.0;
+			}
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
 				throw new Valve3Exception("Illegal minimum/maximum frequencies: " + minFreq + " and " + maxFreq);
 		}
@@ -142,7 +155,7 @@ public class WavePlotter extends RawDataPlotter {
 		try{
 			labels = component.getInt("labels");
 		} catch (Valve3Exception ex){
-			labels = 0;
+			labels = 1;
 		}
 		
 		try{
@@ -187,12 +200,14 @@ public class WavePlotter extends RawDataPlotter {
 				throw new Valve3Exception(e.getMessage()); 
 			}
 			if (data != null) {
-				String toadd = "#sr=" + data.getSamplingRate() + "\n#datatype=" + data.getDataType() + "\n";
-				csvHdrs.insert( 0, toadd );
-				gotData = true;
-				samplingRate = data.getSamplingRate();
-				dataType = data.getDataType();
+				if ( forExport ) {
+					String toadd = "#sr=" + data.getSamplingRate() + "\n#datatype=" + data.getDataType() + "\n";
+					csvHdrs.insert( 0, toadd );
+					samplingRate = data.getSamplingRate();
+					dataType = data.getDataType();
+				}
 				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
+				gotData = true;
 				if (doDespike) { data.despike(despikePeriod); }
 				if (doDetrend) { data.detrend(); }
 				if (filterPick != 0) {
@@ -266,18 +281,12 @@ public class WavePlotter extends RawDataPlotter {
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		double timeOffset = component.getOffset(startTime);
 		SliceWaveExporter wr = new SliceWaveExporter();
-		wr.setRemoveBias(removeBias);
-		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+//		wr.setRemoveBias(removeBias);
+//		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		wr.setWave(wave);
 		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset);
-		if (color.equals("M"))
-			wr.setColor(Color.BLACK);
 		
-		double bias = 0;
-		if (removeBias)
-			bias = wave.mean();
-		
-		if ( v3Plot == null ) {
+		if ( forExport ) {
 			csvHdrs.append(",");
 			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
 			csvHdrs.append("_Count");
@@ -286,6 +295,15 @@ public class WavePlotter extends RawDataPlotter {
 			csvData.add( ed );
 			return;
 		}
+		
+		wr.setRemoveBias(removeBias);
+		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		if (color.equals("M"))
+			wr.setColor(Color.BLACK);
+		double bias = 0;
+		if (removeBias)
+			bias = wave.mean();
+		
 		/*
 		double max = wave.max() - bias;
 		double min = wave.min() - bias;
@@ -425,8 +443,6 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
-		
 		if ( forExport )
 			switch(plotType) {
 				case WAVEFORM:
@@ -492,13 +508,14 @@ public class WavePlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		forExport = (v3p == null);	// = "prepare data for export"
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		getInputs(comp);
 		getData(comp);
 		
 		plotData(v3p, comp);
 		
-		if ( v3p != null ) {
+		if ( !forExport ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

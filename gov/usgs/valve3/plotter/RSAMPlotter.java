@@ -84,10 +84,14 @@ public class RSAMPlotter extends RawDataPlotter {
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
 		parseCommonParameters(component);
 		
-		String pt = component.getString("plotType");
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		String pt = component.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.VALUES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 	
 //		try{
@@ -106,19 +110,22 @@ public class RSAMPlotter extends RawDataPlotter {
 				threshold = component.getDouble("threshold");
 				if (threshold == 0)
 					throw new Valve3Exception("Illegal threshold.");
-			}
+			} else
+				threshold = 50;
 			
 			if (component.get("ratio") != null) {
 				ratio = component.getDouble("ratio");
 				if (ratio == 0)
 					throw new Valve3Exception("Illegal ratio.");
-			}
+			} else
+				ratio = 1.3;
 			
 			if (component.get("maxEventLength") != null) {
 				maxEventLength = component.getDouble("maxEventLength");
-			}
+			} else
+				maxEventLength = 300;
 			
-			String bs	= Util.stringToString(component.get("cntsBin"), "day");
+			String bs	= Util.stringToString(component.get("cntsBin"), "hour");
 			bin			= BinSize.fromString(bs);
 			if (bin == null)
 				throw new Valve3Exception("Illegal bin size option.");

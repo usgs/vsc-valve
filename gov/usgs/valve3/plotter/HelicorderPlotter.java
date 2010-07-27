@@ -61,8 +61,17 @@ public class HelicorderPlotter extends RawDataPlotter {
 			showClip = false;
 		}
 		
-		barMult = new Double(component.getDouble("barMult")).floatValue();
-		timeChunk = component.getInt("tc") * 60; 
+		try {
+			barMult = new Double(component.getDouble("barMult")).floatValue();
+		} catch (Valve3Exception ex) {
+			barMult = 3;
+		}
+		
+		try {
+			timeChunk = component.getInt("tc") * 60; 
+		} catch (Valve3Exception ex) {
+			timeChunk = 15;
+		}
 		
 		try{
 			minimumAxis = component.getBoolean("min");

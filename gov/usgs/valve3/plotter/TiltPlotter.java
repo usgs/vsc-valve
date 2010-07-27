@@ -106,7 +106,9 @@ public class TiltPlotter extends RawDataPlotter {
 	
 		rk = component.getInt("rk");
 	
-		String pt = component.getString("plotType");
+		String pt = component.get("plotType");
+		if ( pt == null )
+			pt = "ts";
 		plotType	= PlotType.fromString(pt);
 		if (plotType == null) {
 			throw new Valve3Exception("Illegal plot type: " + pt);
@@ -114,7 +116,9 @@ public class TiltPlotter extends RawDataPlotter {
 		switch(plotType) {
 		case TIME_SERIES:
 			
-			String az = component.getString("az");
+			String az = component.get("az");
+			if ( az == null )
+				az = "n";
 			azimuth	= Azimuth.fromString(az);
 			if (azimuth == null) {
 				throw new Valve3Exception("Illegal azimuth: " + az);
@@ -134,11 +138,13 @@ public class TiltPlotter extends RawDataPlotter {
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				column.checked	= Util.stringToBoolean(component.get(column.name));
+				String col_arg = component.get(column.name);
+				if ( col_arg != null )
+					column.checked	= Util.stringToBoolean(component.get(column.name));
 				//detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
 				legendsCols[i]	= column.description;
 				if (column.checked) {
-					if(isPlotComponentsSeparately()){
+					if(forExport || isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
 						leftUnit	= column.unit;
 						leftLines++;
@@ -391,7 +397,11 @@ public class TiltPlotter extends RawDataPlotter {
 						azimuthValue = data.getOptimalAzimuth();
 						break;
 					case USERDEFINED:
-						azimuthValue = component.getDouble("azval");
+						String azval = component.get("azval");
+						if ( azval == null )
+							azimuthValue = 0.0;
+						else
+							azimuthValue = component.getDouble("azval");
 						break;
 					default:
 						azimuthValue = 0.0;
@@ -406,8 +416,13 @@ public class TiltPlotter extends RawDataPlotter {
 					
 					// detrend the data that the user requested to be detrended					
 					for (int i = 0; i < columnsCount; i++) {
-						if ( bypassManipCols[i] )
+						Column col = columnsList.get(i);
+						if ( !col.checked ) {
 							continue;
+						}
+						if ( bypassManipCols[i] ) {
+							continue;
+						}
 						if (doDespike) { data.despike(i + 2, despikePeriod ); }
 						if (doDetrend) { data.detrend(i + 2); }
 						if (filterPick != 0) {
@@ -549,6 +564,7 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception	{		
+		forExport = (v3p == null);	// = "prepare data for export"
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
@@ -558,7 +574,7 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 				
-		if ( v3p != null ) {
+		if ( !forExport ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

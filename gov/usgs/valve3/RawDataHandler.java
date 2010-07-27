@@ -83,6 +83,8 @@ public class RawDataHandler implements HttpHandler
 			logger.info("Parameter n was set to default value");
 		}
 		
+		String rkNameArg = request.getParameter( "rkName" );
+		
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
 		for (int i = 0; i < n; i++)
@@ -127,6 +129,10 @@ public class RawDataHandler implements HttpHandler
 			component.setBoxY(y);
 			component.setBoxWidth(w);
 			component.setBoxHeight(h);
+
+			if ( rkNameArg != null ) 
+				component.put( "rkName", rkNameArg );
+
 			list.add(component);
 		}
 		return list;
@@ -208,7 +214,7 @@ public class RawDataHandler implements HttpHandler
 			SimpleDateFormat dfc = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 			Date now = new Date();
 			String cmtDate = "";
-			String cmtURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+			String cmtURL = "#URL=" + request.getRequestURL().toString() + "?" + request.getQueryString() + "\n";
 			String cmtTimes = "";
 			String cmtDataType = null;
 			double cmtSampleRate = 0.0;
@@ -245,7 +251,7 @@ public class RawDataHandler implements HttpHandler
 					}
 				}
 				String rk = component.get( "rk" );
-				String ss = component.getString( "selectedStation" );
+				String ss = component.get( "selectedStation" );
 				if ( rk == null && ss == null ) {
 					ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
 					for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
@@ -281,10 +287,10 @@ public class RawDataHandler implements HttpHandler
 				timeZone = component.getTimeZone().getID();
 				dfc.setTimeZone(TimeZone.getTimeZone(timeZone));
 				cmtDate = dfc.format(now);
-				cmtDate = "" + String.format( "%14.3f,%s,%s", (now.getTime()*0.001), cmtDate, timeZone);
+				cmtDate = "#reqtime=" + String.format( "%14.3f,%s,%s\n", (now.getTime()*0.001), cmtDate, timeZone);
 				double endtime = component.getEndTime();
-				cmtTimes = String.format( "%14.3f,%14.3f", component.getStartTime(endtime), endtime );
-				StringBuffer cmt = new StringBuffer("# " + cmtDate + "\n#" + cmtURL + "\n#" + fn_source + "\n# " + cmtTimes + "\n");
+				cmtTimes = String.format( "#st=%14.3f, et=%14.3f\n", component.getStartTime(endtime), endtime );
+				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
 				if (plotter != null) {
 					sb.append(plotter.toCSV(component, cmt.toString()));
 				} else

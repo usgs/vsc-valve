@@ -69,6 +69,8 @@ public abstract class RawDataPlotter extends Plotter {
 	protected int debiasPick;
 	protected double debiasValue;
 	
+	protected boolean forExport;
+	
 	
 	/**
 	 * Default constructor
@@ -80,12 +82,84 @@ public abstract class RawDataPlotter extends Plotter {
 	}
 	
 	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
+		// Check for named channels, ranks
+		String nameArg = null;
+		if ( forExport ) {
+			nameArg = component.get( "chNames" );
+			if ( nameArg != null ) {
+				String[] names = nameArg.split(",");
+				int left = names.length;
+				ch = null;
+				for ( Channel c : channelsMap.values() ) {
+					String cname = c.getCode();
+					for ( int i=0; i<left; i++ )
+						if ( cname.equals(names[i]) ) {
+							names[i] = names[left-1];
+							if ( ch==null )
+								ch = "" + c.getCID();
+							else
+								ch = ch + "," + c.getCID();
+							left--;
+							break;
+						}
+					if ( left == 0 )
+						break;
+				}
+				logger.info( "CH names->ids: " + ch );
+			} else {
+				ch = component.getString("ch");
+			}
 		
-		ch = component.getString("ch");
+			nameArg = component.get( "rkName" );
+			if ( forExport && nameArg != null ) 
+				for ( Rank r : ranksMap.values() ) 
+					if ( nameArg.equals(r.getName()) ) {
+						component.put( "rk", ""+r.getId() );
+						logger.info( "RK name->id: " + r.getId() );
+						break;
+					}
+
+			nameArg = component.get( "colNames" );
+		} else {
+			ch = component.getString("ch");
+		}
+		String[] names;
+		if ( nameArg != null )
+			names = nameArg.split(",");
+		else
+			names = new String[0];
+		boolean useColDefaults = true;
+		int left = names.length;
+		int j = 0;
+		boolean newCheck[] = new boolean[columnsList.size()];
+		for ( Column c : columnsList ) {
+			String cname = c.name;
+			newCheck[j++] = false;
+			for ( int i=0; i<left; i++ )
+				if ( cname.equals(names[i]) ) {
+					useColDefaults = false;
+					names[i] = names[--left];
+					newCheck[j-1] = true;
+					break;
+				}
+			if ( left == 0 )
+				break;
+		}
+		j = 0;
+		for ( Column c : columnsList ) {
+			String newVal = (useColDefaults ? c.checked : newCheck[j]) ? "T" : "F";
+			logger.info( "Col " + c.name + ": UCD=" + useColDefaults + ", checked=" + c.checked + ", nC=" + newCheck[j] + ", val=" + newVal );
+			component.put( c.name, newVal );
+			j++;
+		}
+		logger.info( "Col names processed" );
 
 		endTime = component.getEndTime();
 		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
+			if ( forExport )
+				endTime = Double.MAX_VALUE;
+			else
+				throw new Valve3Exception("Illegal end time.");
 		
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
@@ -96,20 +170,22 @@ public abstract class RawDataPlotter extends Plotter {
 		} catch(Valve3Exception e){
 			//Do nothing, default values without downsampling
 		}
-		try{
-			isDrawLegend = component.getBoolean("lg");
-		} catch(Valve3Exception e){
-			isDrawLegend=true;
-		}
-		try{
-			shape = component.getString("lt");
-		} catch(Valve3Exception e){
-			shape="l";
-		}
-		try{
-			removeBias = component.getBoolean("rb");
-		} catch (Valve3Exception ex){
-			removeBias = false;
+		if ( !forExport ) {
+			try{
+				isDrawLegend = component.getBoolean("lg");
+			} catch(Valve3Exception e){
+				isDrawLegend=true;
+			}
+			try{
+				shape = component.getString("lt");
+			} catch(Valve3Exception e){
+				shape="l";
+			}
+			try{
+				removeBias = component.getBoolean("rb");
+			} catch (Valve3Exception ex){
+				removeBias = false;
+			} 
 		}
 	}
 	

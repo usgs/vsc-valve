@@ -36,6 +36,7 @@ public class ChannelMapPlotter extends Plotter
 	private Valve3Plot v3Plot;
 	private GeoRange range;
 	private GeoLabelSet labels;
+	private boolean forExport;
 
 	/**
 	 * Initialize internal data from PlotComponent 
@@ -157,6 +158,7 @@ public class ChannelMapPlotter extends Plotter
 	 */
 	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception
 	{
+		forExport = false;
 		v3Plot = plot;
 		component = comp;
 		getInputs();

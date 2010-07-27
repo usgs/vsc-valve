@@ -70,7 +70,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		// iterate through all the active columns and place them in a map if they are displayed
 		for (int i = 0; i < columnsList.size(); i++) {
 			Column column	= columnsList.get(i);
-			column.checked	= Util.stringToBoolean(component.get(column.name));
+			String col_arg = component.get(column.name);
+			if ( col_arg != null )
+				column.checked	= Util.stringToBoolean(component.get(column.name));
 			//detrendCols[i]	= Util.stringToBoolean(component.getString("d_" + column.name));
 			//normalzCols[i]	= Util.stringToBoolean(component.getString("n_" + column.name));
 			bypassManipCols[i] = column.bypassmanipulations;
@@ -132,7 +134,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		channelDataMap		= new LinkedHashMap<Integer, GenericDataMatrix>();
 		String[] channels	= ch.split(",");
 		
-		// iterate through each of the selected channeld and place the data in the map
+		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
 			GenericDataMatrix data = null;
@@ -321,6 +323,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {		
+		forExport = (v3p == null);	// = "prepare data for export"
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
@@ -329,7 +332,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 				
-		if ( v3p != null ) {
+		if ( !forExport ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

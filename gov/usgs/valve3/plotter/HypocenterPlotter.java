@@ -142,10 +142,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
-		String pt = component.getString("plotType");
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		String pt = component.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.MAP;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 		
 		double w = component.getDouble("west");
@@ -200,7 +204,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		switch (plotType) {
 		
 		case MAP:			
-			axes		= Axes.fromString(component.getString("axes"));
+			String a    = Util.stringToString(component.get("axis"), "M");
+			axes		= Axes.fromString(a);
 			if (axes == null)
 				throw new Valve3Exception("Illegal axes type.");
 
@@ -223,7 +228,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 			if ((endTime - startTime) / bin.toSeconds() > 10000)
 				throw new Valve3Exception("Bin size too small.");
 
-			rightAxis	= RightAxis.fromString(component.getString("cntsAxis"));
+			String ra   = Util.stringToString(component.get("cntsAxis"), "C");
+			rightAxis	= RightAxis.fromString(ra);
 			if (rightAxis == null)
 				throw new Valve3Exception("Illegal counts axis option.");
 			
@@ -527,13 +533,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		forExport = (v3p == null);	// = "prepare data for export"
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		getInputs(comp);
 		getData(comp);
 
 		plotData(v3p, comp);
 				
-		if ( v3p != null ) {
+		if ( !forExport ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

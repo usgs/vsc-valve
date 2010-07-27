@@ -103,11 +103,13 @@ public class GPSPlotter extends RawDataPlotter {
 		}
 		
 		String pt = component.get("plotType");
-		if ( pt == null ) // SBH--default
-			pt = "ts";
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		if ( pt == null )
+			plotType = PlotType.TIME_SERIES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 
 		validateDataManipOpts(component);
@@ -127,7 +129,6 @@ public class GPSPlotter extends RawDataPlotter {
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				column.checked	= Util.stringToBoolean(component.get(column.name));
 				selectedCols[i]	= column.checked;
 				legendsCols[i]	= column.description;
 				bypassManipCols[i] = column.bypassmanipulations;
@@ -571,6 +572,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		forExport = (v3p == null);	// = "prepare data for export"
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
@@ -579,7 +581,7 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		plotData(v3p, comp);
 		
-		if ( v3p != null ) {
+		if ( !forExport ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
