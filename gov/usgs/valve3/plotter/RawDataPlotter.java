@@ -105,7 +105,7 @@ public abstract class RawDataPlotter extends Plotter {
 					if ( left == 0 )
 						break;
 				}
-				logger.info( "CH names->ids: " + ch );
+				//logger.info( "CH names->ids: " + ch );
 			} else {
 				ch = component.getString("ch");
 			}
@@ -115,7 +115,7 @@ public abstract class RawDataPlotter extends Plotter {
 				for ( Rank r : ranksMap.values() ) 
 					if ( nameArg.equals(r.getName()) ) {
 						component.put( "rk", ""+r.getId() );
-						logger.info( "RK name->id: " + r.getId() );
+						//logger.info( "RK name->id: " + r.getId() );
 						break;
 					}
 
@@ -131,28 +131,30 @@ public abstract class RawDataPlotter extends Plotter {
 		boolean useColDefaults = true;
 		int left = names.length;
 		int j = 0;
-		boolean newCheck[] = new boolean[columnsList.size()];
-		for ( Column c : columnsList ) {
-			String cname = c.name;
-			newCheck[j++] = false;
-			for ( int i=0; i<left; i++ )
-				if ( cname.equals(names[i]) ) {
-					useColDefaults = false;
-					names[i] = names[--left];
-					newCheck[j-1] = true;
+		if ( columnsList != null ) {
+			boolean newCheck[] = new boolean[columnsList.size()];
+			for ( Column c : columnsList ) {
+				String cname = c.name;
+				newCheck[j++] = false;
+				for ( int i=0; i<left; i++ )
+					if ( cname.equals(names[i]) ) {
+						useColDefaults = false;
+						names[i] = names[--left];
+						newCheck[j-1] = true;
+						break;
+					}
+				if ( left == 0 )
 					break;
-				}
-			if ( left == 0 )
-				break;
+			}
+			j = 0;
+			for ( Column c : columnsList ) {
+				String newVal = (useColDefaults ? c.checked : newCheck[j]) ? "T" : "F";
+				//logger.info( "Col " + c.name + ": UCD=" + useColDefaults + ", checked=" + c.checked + ", nC=" + newCheck[j] + ", val=" + newVal );
+				component.put( c.name, newVal );
+				j++;
+			}
+			//logger.info( "Col names processed" );
 		}
-		j = 0;
-		for ( Column c : columnsList ) {
-			String newVal = (useColDefaults ? c.checked : newCheck[j]) ? "T" : "F";
-			logger.info( "Col " + c.name + ": UCD=" + useColDefaults + ", checked=" + c.checked + ", nC=" + newCheck[j] + ", val=" + newVal );
-			component.put( c.name, newVal );
-			j++;
-		}
-		logger.info( "Col names processed" );
 
 		endTime = component.getEndTime();
 		if (Double.isNaN(endTime))
