@@ -103,7 +103,7 @@ public class Valve3Plot extends Result
 		}
 		height = Util.stringToInt(h, -1);
 		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT){
-			width = DEFAULT_HEIGHT_PLOT;
+			height = DEFAULT_HEIGHT_PLOT;
 			logger.info("Illegal plot.h parameter value, was set to default");
 		}
 		
