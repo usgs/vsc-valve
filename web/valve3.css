@@ -57,6 +57,19 @@ div.content div.titleBar
 	height: 20px;
 }
 
+div.content div.combine
+{
+	width: 200px; 
+	height: 150px; 
+	border: solid 1px black; 
+	background-color: white;
+	float: left; 
+	position: relative; 
+	top: -152px; 
+	left: 0px; 
+	display: none;
+}
+
 div.content h1
 {
 	display: inline;
@@ -326,6 +339,7 @@ div.box p
 .w100 { width: 100px; }
 .w110 { width: 110px; }
 .w120 { width: 120px; }
+.w135 { width: 135px; }
 .w140 { width: 140px; }
 .w145 { width: 145px; }
 .w150 { width: 150px; }
