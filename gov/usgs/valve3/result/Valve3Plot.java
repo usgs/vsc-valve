@@ -5,7 +5,7 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.valve3.plotter.CombinedPlot;
+import gov.usgs.valve3.CombinedPlot;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 
@@ -60,7 +60,7 @@ public class Valve3Plot extends Result
 	
 	protected Plot plot;
 	protected String filename;
-	protected String title;
+	private String title;
 	protected OutputType outputType;
 	
 	protected int width;
@@ -74,6 +74,7 @@ public class Valve3Plot extends Result
 	private Logger logger;	
 	
 	protected boolean exportable;
+	private boolean isCombined = false;
 	
 	/**
 	 * Constructor
@@ -122,7 +123,6 @@ public class Valve3Plot extends Result
 		title = "Valve Plot";
 		url = request.getQueryString();
 		components = new ArrayList<PlotComponent>(2);
-		boolean isCombined = false;
 		String combined = request.getParameter("combine");
 		if(combined !=null){
 			isCombined = combined.toLowerCase().equals("true");
@@ -258,7 +258,15 @@ public class Valve3Plot extends Result
 	 */
 	public void setTitle(String t)
 	{
-		title = t;
+		if(isCombined){
+			if(title.equals("Valve Plot")){
+				title = t;
+			} else {
+				title = title + "+" + t;
+			}
+		} else {
+			title = t;
+		}
 	}
 
 	/**

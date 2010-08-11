@@ -2,8 +2,6 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.BasicFrameRenderer;
-import gov.usgs.plot.HistogramRenderer;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
@@ -32,7 +30,6 @@ import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
 import gov.usgs.vdx.data.HypocenterExporter;
 import gov.usgs.vdx.data.MatrixExporter;
-import gov.usgs.vdx.ExportConfig;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -42,9 +39,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeSet;
 
 import cern.colt.matrix.DoubleMatrix2D;
+
 
 /**
  * A class for making hypocenter map plots and histograms. 
