@@ -36,7 +36,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	
 	private Map<Integer, GenericDataMatrix> channelDataMap;	
 
-	private int columnsCount;
+	//private int columnsCount;
 	//private boolean detrendCols[];
 	//private boolean normalzCols[];
 	private String legendsCols[];
@@ -66,9 +66,10 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		axisMap			= new LinkedHashMap<Integer, String>();
 		
 		validateDataManipOpts(component);
+		columnsCount		= columnsList.size();
 		
 		// iterate through all the active columns and place them in a map if they are displayed
-		for (int i = 0; i < columnsList.size(); i++) {
+		for (int i = 0; i < columnsCount; i++) {
 			Column column	= columnsList.get(i);
 			String col_arg = component.get(column.name);
 			if ( col_arg != null )

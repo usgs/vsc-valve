@@ -311,7 +311,7 @@ public class RawDataHandler implements HttpHandler
 			}
 			catch (IOException e)
 			{
-				logger.info("RDH file error" );
+				logger.info("RawDataHandler file error" );
 				throw new Valve3Exception(e.getMessage());
 			}
 
@@ -324,7 +324,7 @@ public class RawDataHandler implements HttpHandler
 		}
 		catch (Valve3Exception e)
 		{
-			logger.info("RDH error " + e.getMessage());
+			logger.info("RawDataHandler error " + e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}

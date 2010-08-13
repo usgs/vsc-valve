@@ -77,7 +77,7 @@ public class GPSPlotter extends RawDataPlotter {
 	private GPSData baselineData;
 	private Map<Integer, GPSData> channelDataMap;	
 	
-	private int columnsCount;
+	//private int columnsCount;
 	private boolean selectedCols[];
 	private String legendsCols[];
 	

@@ -150,6 +150,39 @@ public class DataHandler implements HttpHandler
 			VDXClient client	= pool.checkout();
 			if (client != null) {
 				List<String> ls	= null;
+				if (action.equals("metadata") || action.equals("suppdata")) {
+					// Add the parameters needed for meta or supp data
+					// Also validate for required and duplicated parameters
+					String arg;
+					logger.info("Processing " + action );
+					char m_kind[] = {'?','!','?','?','x','x','x','x'};
+					char s_kind[] = {'?','?','?','?','!','?','?','?'};
+					char kind[];
+					int req_cnt = 1;
+					if ( action.equals("metadata") ) {
+						kind = m_kind;
+					} else {
+						kind = s_kind;
+					}
+					String args[] = {"byID","ch","col","rk","st","et","tz","type"};
+					for ( int i=0; i<8; i++ ) {
+						arg = request.getParameter( args[i] );
+						if ( arg==null || arg.equals(""))
+							continue;
+						logger.info( args[i] + " = " + arg );
+						switch ( kind[i] ) {
+							case 'x':
+								throw new Valve3Exception( "Illegal parameter: " + args[i] );
+							case 'r':
+								throw new Valve3Exception( "Duplicated paramneter: " + args[i] );
+							case '!':
+								req_cnt--;
+							case '?':
+								kind[i] = 'r';
+								params.put( args[i], arg );
+						}
+					}
+				}
 				try{
 					ls	= client.getTextData(params);
 				}

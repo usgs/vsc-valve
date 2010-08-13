@@ -414,6 +414,22 @@ public class TiltPlotter extends RawDataPlotter {
 					data.add(2, -data.mean(2));
 					data.add(3, -data.mean(3));
 					
+					// set up the legend 
+					String tiltLegend = null;
+					if ( !forExport )
+						for (int i = 0; i < legendsCols.length; i++) {
+							if (legendsCols[i].equals("Radial")) {
+								tiltLegend	= String.valueOf(azimuthRadial);
+							} else if (legendsCols[i].equals("Tangential")) {
+								tiltLegend	= String.valueOf(azimuthTangential);
+							} else {
+								tiltLegend	= legendsCols[i];
+							}
+							channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
+						}
+					
+					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
+
 					// detrend the data that the user requested to be detrended					
 					for (int i = 0; i < columnsCount; i++) {
 						Column col = columnsList.get(i);
@@ -423,8 +439,8 @@ public class TiltPlotter extends RawDataPlotter {
 						if ( bypassManipCols[i] ) {
 							continue;
 						}
-						if (doDespike) { data.despike(i + 2, despikePeriod ); }
-						if (doDetrend) { data.detrend(i + 2); }
+						if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
+						if (doDetrend) { gdm.detrend(i + 2); }
 						if (filterPick != 0) {
 							switch(filterPick) {
 								case 1: // Bandpass
@@ -447,51 +463,35 @@ public class TiltPlotter extends RawDataPlotter {
 									}
 									/* SBH
 									if ( ft == FilterType.BANDPASS )
-										bw.set(ft, 4, data.getSamplingRate(), filterMin, filterMax);
+										bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
 									else
-										bw.set(ft, 4, data.getSamplingRate(), singleBand, 0);
-									data.filter(bw, true); */
+										bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
+									gdm.filter(bw, true); */
 									break;
 								case 2: // Running median
-									data.set2median( i+2, filterPeriod );
+									gdm.set2median( i+2, filterPeriod );
 									break;
 								case 3: // Running mean
-									data.set2mean( i+2, filterPeriod );
+									gdm.set2mean( i+2, filterPeriod );
 							}
 						}
 						if (debiasPick != 0 ) {
 							double bias = 0.0;
 							switch ( debiasPick ) {
 								case 1: // remove mean 
-									bias = data.mean(i+2);
+									bias = gdm.mean(i+2);
 									break;
 								case 2: // remove initial value
-									bias = data.first(i+2);
+									bias = gdm.first(i+2);
 									break;
 								case 3: // remove user value
 									bias = debiasValue;
 									break;
 							}
-							data.add(i + 2, -bias);
+							gdm.add(i + 2, -bias);
 						}
 					}
 					
-					// set up the legend 
-					String tiltLegend = null;
-					if ( !forExport )
-						for (int i = 0; i < legendsCols.length; i++) {
-							if (legendsCols[i].equals("Radial")) {
-								tiltLegend	= String.valueOf(azimuthRadial);
-							} else if (legendsCols[i].equals("Tangential")) {
-								tiltLegend	= String.valueOf(azimuthTangential);
-							} else {
-								tiltLegend	= legendsCols[i];
-							}
-							channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
-						}
-					
-					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
-				
 					if ( forExport ) {
 						// Add the headers to the CSV file
 						for (int i = 0; i < columnsList.size(); i++) {
