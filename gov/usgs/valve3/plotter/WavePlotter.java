@@ -21,9 +21,7 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
 
 
 /**
@@ -352,9 +350,11 @@ public class WavePlotter extends RawDataPlotter {
 				wr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
 			}
 		}
-		channelLegendsCols	= new String  [1];
-		channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
-		if(isDrawLegend) wr.createDefaultLegendRenderer(channelLegendsCols);
+		if(isDrawLegend){
+			channelLegendsCols	= new String  [1];
+			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+			wr.createDefaultLegendRenderer(channelLegendsCols);
+		}
 		component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(wr);
@@ -375,7 +375,11 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.update(0);
-		if(isDrawLegend) sr.createDefaultLegendRenderer(channelLegendsCols);
+		if(isDrawLegend){
+			channelLegendsCols	= new String  [1];
+			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+			sr.createDefaultLegendRenderer(channelLegendsCols);
+		}
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("xy");
 		v3Plot.getPlot().addRenderer(sr);
@@ -430,7 +434,11 @@ public class WavePlotter extends RawDataPlotter {
 		if (displayCount + 1 == compCount) {
 			sr.getAxis().setBottomLabelAsText(xString);	
 		}
-		if(isDrawLegend) sr.createDefaultLegendRenderer(channelLegendsCols);
+		if(isDrawLegend){
+			channelLegendsCols	= new String  [1];
+			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+			sr.createDefaultLegendRenderer(channelLegendsCols);
+		}
 		component.setTranslation(sr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(sr);
