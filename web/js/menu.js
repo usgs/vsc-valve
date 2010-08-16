@@ -58,12 +58,6 @@ function loadMenu(id) {
 	loadXML(menus[id].file + " javascript", url, 
 		function(req) {	
 			menus[id].html	= req.responseText;
-			var plotSeparately			= document.createElement('input');
-			plotSeparately.id = "input:ps";
-			plotSeparately.name = "plotSeparately";
-			plotSeparately.type = "hidden";
-			plotSeparately.value = menus[id].plotSeparately;
-			document.getElementById('openPanel').appendChild(plotSeparately);
 			var div			= document.createElement('div');
 			div.innerHTML	= menus[id].html;
 			document.getElementById('openPanel').appendChild(div);
@@ -76,6 +70,11 @@ function loadMenu(id) {
 					eval('create_' + menus[id].file + '(menus[id], id)');
 					menus[id].initialize();
 					setCurrentMenu(menus[id]);
+					var plotSeparately			= document.createElement('input');
+					plotSeparately.name = "plotSeparately";
+					plotSeparately.type = "hidden";
+					plotSeparately.value = menus[id].plotSeparately;
+					document.getElementById(id + '_' + menus[id].formName).appendChild(plotSeparately);
 				}
 			});
 			var selector_lt = document.getElementById("selector:lt");
@@ -1192,7 +1191,7 @@ Menu.prototype.submit = function() {
 	var form		= this.getForm();
 	var chselect	= form.elements["selector:ch"];
 	var rkselect	= form.elements["selector:rk"];
-	var plotSeparately	= document.getElementById('input:ps').value;
+	var plotSeparately	= form.elements["plotSeparately"];
 	
 	// do validation on the channels input if it exists
 	if (chselect) {
@@ -1223,7 +1222,7 @@ Menu.prototype.submit = function() {
 	
 	// update the sizes on the plots based on how many channels were chosen
 	
-	if(plotSeparately == "true"){
+	if(plotSeparately !=null && plotSeparately.value == "true"){
 		pr.params.h	= (compCount*pc.chCnt * 150) + 60;
 	} else {
 		pr.params.h	= pc.chCnt * 150 + 60;

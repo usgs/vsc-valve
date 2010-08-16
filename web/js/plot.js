@@ -281,7 +281,7 @@ function handlePlot(xml)
     
     //Combination
     
-    if(components.length == 1){
+    if((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)){
     	addListener(imgs[5], 'click',
     		function()
     		{
@@ -503,7 +503,8 @@ function PlotRequest(popup)
 		this.components[index] = comp;
 
 		comp.setFromForm = function(form) {
-			var compCount = 0;
+			var compUnselected = 0;
+			var compSelected = 0;
 			// iterate through each element in the form
 			for (var i = 0; i < form.elements.length; i++) {
 				var elt = form.elements[i];
@@ -561,11 +562,14 @@ function PlotRequest(popup)
 					} else if (elt.type == "checkbox") {
 						if(elt.checked){
 							comp[elt.name] = "T";
-							if(elt.offsetHeight != 0){
-								compCount = compCount+1;
+							if((elt.offsetHeight != 0) && (elt.id.indexOf('_dmo_')==-1)){
+								compSelected = compSelected+1;
 							}
 						} else {
 							comp[elt.name] = "F";
+							if((elt.offsetHeight != 0) && (elt.id.indexOf('_dmo_')==-1)){
+								compUnselected = compUnselected+1;
+							}
 						}		
 					} else if (elt.type == "text") {
 						comp[elt.name] = elt.value;
@@ -579,7 +583,11 @@ function PlotRequest(popup)
 					}
 				}
 			}
-			return compCount;
+			//where isn't components in form at all
+			if((compSelected==0) && (compUnselected==0))
+				compSelected = 1;
+			
+			return compSelected;
 		}
 		return comp;
 	}
