@@ -276,6 +276,12 @@ img.button
 	float: right;
 }
 
+img.helpimg
+{
+	padding: 2px;
+	float: right;
+}	
+
 form
 {
 	margin: 0px;

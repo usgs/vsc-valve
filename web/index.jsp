@@ -11,6 +11,7 @@
 		<title>Valve Menu</title>
 		<link rel="stylesheet" href="valve3.css">
 		
+        <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-min.js"></script>
 		<script type="text/javascript" src="js/event.js"></script>		
 		<script type="text/javascript" src="js/time.js"></script>		
 		<script type="text/javascript" src="js/xml.js"></script>
@@ -20,6 +21,7 @@
 		<script type="text/javascript" src="js/popup.js"></script>
 		<script type="text/javascript" src="js/box.js"></script>
 		<script type="text/javascript" src="js/xlat.js"></script>
+        <script type="text/javascript" src="js/help.js"></script>
 		
 		<script type="text/javascript">
 		
@@ -33,6 +35,7 @@
 			addListener(document.getElementById('submit'), 'click', doSubmit, false);
 			addListener(document.getElementById('deleteAll'), 'click', deleteAll, false);
 			addListener(document.getElementById('nowLink'), 'click', function() { document.getElementById('endTime').value = 'Now'; fixZoomMarksInside(null,0);}, false);
+            help_init();
 
 			var b = document.getElementById("channelMapButton");
 			b.disabled = true;
@@ -89,15 +92,15 @@
 		<div id="container">
 		
 		<div class="topBar">
-			<img id="deleteAll" style="float: right" src="images/x.gif">
-			<img id="minMaxUI" style="float: right" src="images/min.gif">
-			<span id="appTitle"></span>
+			<img id="deleteAll" class="fr" src="images/x.gif">
+			<img id="minMaxUI" class="fr" src="images/min.gif">
+            <span id="appTitle" class="help"></span>
 		</div>
 
 		<div id="uiPanel">
 			<!-- TODO: rework the data panel to use boxes -->
 			<div id="dataPanel" class="dataPanel">
-				<img class="fl" src="images/folders.gif"><h2>Data Sources</h2>
+				<img class="fl" src="images/folders.gif"><h2 class="help">Data Sources</h2>
 				<ul class="menu">
 				</ul>
 				<div class="box" style="margin: 0px 0px 4px 0px">
@@ -147,7 +150,7 @@
 				</div>
 				<p><input id="submit" type="button" value="Submit"></p>
 				<hr>
-				<img id="throbber" style="float: right" src="images/throbber_still.png">
+				<img id="throbber" class="fr" src="images/throbber_still.png">
 				<h5 id="version"></h5>
 				<h5>Administrator: <a id='admin'></a></h5>
 			</div>
@@ -162,7 +165,7 @@
 		</div>
 
 		<div id='popupInsertionPoint'></div>
-		<!-- Invisibile elements -->		
+		<!-- Invisible elements -->		
 		<div id="contentTemplate" class="content">
 			<img class="button" src="images/x.gif">
 			<img class="button" src="images/min.gif">
@@ -172,7 +175,7 @@
 			<img name="combine_btn" class="button" src="images/add.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
 			<div class="titleBar">
-				<h1>Content Template</h1>
+				<h1 class="help">Content Template</h1>
 			</div>
 			<img class="pointer">	
 			<div id="combineMenuTemplate" class="combine">

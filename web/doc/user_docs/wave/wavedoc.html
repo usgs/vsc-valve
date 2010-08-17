@@ -1,0 +1,53 @@
+<!--
+  -- $Log: wavedoc.html,v $
+  -- Revision 1.1  2004/01/25 20:47:35  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve Waveform Section User's Guide</title>
+<link type="text/css" rel="stylesheet" href="../valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="../usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;Waveform User's Guide</h1><hr></div>
+
+<div class="content">
+<h1>Waveform Section User's Guide</h1>
+<p>The main Waveform UI looks something like this (depending on your Valve installation):</p>
+<p><center><img border="1" src="wavetab.png" alt="Waveform UI"></center></p>
+<p>There are two ways of picking seismometer components, either through the shortcuts on the left side of the tab, or directly from the list of all components (to the right of the shortcuts).  Once you have selected one or more components select an output type (if you want other than waveform) and a filter if desired.</p>
+
+<p>The first output type is the raw waveform:</p>
+<p><center><img border="1" src="waveexample1.png" alt="Raw Waveform Example"></center></p>
+
+<p>This next two involve looking at the strength of particular frequencies.  The two ways to do this are with Spectra plots and Spectrogram plots.  The first is a graph with power on the y-axis and frequency on the x-axis, here is an example:</p>
+<p><center><img border="1" src="waveexample2.png" alt="Spectra Waveform Example"></center></p>
+
+<p>The last plot is the spectrogram which shows the power of the frequency as a color.  The y-axis is the frequency band and the x-axis is time.  Here is an example:</p>
+<p><center><img border="1" src="waveexample3.png" alt="Spectrogram Waveform Example"></center></p>
+<p>Using the frequency range controls in the Output section of the tab allow you to look at certain frequency ranges specifically, essentially they allow you to control the size of the frequency axis.  Checking the log button takes the log of the power before plotting.
+
+<p>Lastly, you can apply a lowpass, highpass, or bandpass filter to the data before it is plotted.  The filter is an 4th order Butterworth filter.  A lowpass filter will eliminate all frequencies above the Max Hz setting, a highpass filter eliminates frequencies between the Min Hz setting, and a bandpass filter eliminates all frequencies outside the Min Hz-Max Hz range.  Note that when you specify a filter an extra few samples are requested prior to the time you actually request to help reduce any visual filter response.  Here is an example of the previous spectrogram with a bandpass filter between 15-22 Hz:</p>
+<p><center><img border="1" src="waveexample4.png" alt="Spectrogram Waveform Example"></center></p>
+</div>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/wavedoc.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-21 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>

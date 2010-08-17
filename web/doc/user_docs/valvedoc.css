@@ -1,0 +1,184 @@
+body
+{
+	background:	#006699;
+	margin:	0px;
+}
+
+div.header
+{
+	background: #006699;
+	width: 100%;
+	color: white;
+}
+
+div.header hr
+{
+	width: 100%;
+	background: #ece9d8;
+	height: 1px;
+}
+
+div.header div.footer
+{
+	margin: 0px 8px 4px 4px;
+	font-style: italic;
+	font-size: 11px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.header div.footer a
+{
+	color: white;
+}
+
+span.top
+{
+	vertical-align: top;
+}
+
+h1
+{
+	padding: 0px;
+	margin: 0px;
+	font-size: 18px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.indent
+{
+	margin: 4px;
+}
+
+div.content
+{
+	padding: 3px;
+	margin: 3px 3px 10px 3px;
+	border:	1px solid rgb( 145, 155, 156 );
+	width: 98%;
+	background:	rgb( 252, 252, 254 );
+}
+
+center
+{
+	font-size: 13px;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+ul
+{
+	margin-top: 0px;
+	margin-bottom: 0px;
+	font-size: 13px;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+ul.toc
+{
+	margin-left: -10px;
+}
+
+
+div.content pre
+{
+    font-size: 11px;
+}
+
+div.content h1
+{
+	margin: 2px 0px;
+	color: black;
+}
+
+div.content table
+{
+	font-size: 13px;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.content p
+{
+	margin: 0px 4px; 
+	padding: 1px 4px 4px 4px; 
+	color: black;
+	font-size: 13px;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.navPane
+{
+	padding: 3px;
+	margin: 3px;
+	border:	1px solid rgb( 145, 155, 156 );
+	background:	rgb( 252, 252, 254 );
+}
+
+div.navPane p
+{
+	margin: 2px;
+	padding: 0px 5px;
+	font-size: 13px;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.navPane p.selected 
+{
+	background: #006699;
+	color: white;
+}
+
+table.layout
+{
+	background:	#ece9d8;
+	padding: 0px;
+	margin: 0px;
+}
+
+table.layout td.navPane
+{
+	margin: 4px;
+	width: 15%;
+	vertical-align: top;
+	horizontal-align: left;
+}
+
+table.layout td.bodyPane
+{
+	margin: 4px;
+	width: 85%;
+	vertical-align: top;
+}
+
+table.schema
+{
+	width: 75%;
+	border: 1px solid black;
+}
+
+td.title
+{
+	background: #006699;
+	color: white;
+}
+
+tr.hl
+{
+	background: #eeeeee;
+}
+
+td.i1
+{
+	padding-left: 40px;
+	font-weight: bold;
+}
+
+td.i2
+{
+	padding-left: 80px;
+	font-weight: bold;
+}
+
+td.i3
+{
+	padding-left: 120px;
+	font-weight: bold;
+}
