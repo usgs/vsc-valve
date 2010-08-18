@@ -11,11 +11,15 @@
  * The design might seem a bit odd, but the following alternatives were 
  * discarded:
  * - A custom attribute that includes the URL (not sure custom attributes
- *   are a good idea for compatability; having the URLs spread over many
+ *   are a good idea for compatibility; having the URLs spread over many
  *   files seems like a bad idea)
  * - No class, just a CSS selector in the table below (unfortunately
  *   CSS selectors can't select on enclosed text - it's not xpath -
  *   and so the targets would be difficult to define).
+ *   
+ * Note that the firebux plugin in Firefox (particularly with the 
+ * Firefinder extension) is very useful in inspecting a page to find
+ * an appropriate CSS selector.
  *  
  * @author Andrew Cooke
  */
@@ -24,10 +28,14 @@ function help_init() {YUI().use('event', 'node', 'dom', function(Y) {
 
 	var DEBUG = true;
 	var BY_TEXT = {
-		'ISTI Valve':   'doc/user_docs/index.html'
+		'ISTI Valve': 'doc/user_docs/index.html',
+		'Start Time': 'doc/user_docs/index.html#commonPanel',
 	};
 	var BY_SELECTOR = {
-		'div#contentInsertionPoint div.titleBar h1.help': 'doc/user_docs/index.html#graphs'
+		'#contentInsertionPoint div.titleBar h1.help': 'doc/user_docs/index.html#graphs',
+		'#isti_deformation_gps_pane_options_0- h1.help': 'doc/user_docs/gps/gpsdoc.html',
+		'#isti_deformation_tilt_pane_options_0- h1.help': 'doc/user_docs/tilt/tiltdoc.html',
+		'#isti_deformation_strain_genericFixedForm h1.help': 'doc/user_docs/strain/straindoc.html',
 	}
 	
 	function debug(something) {

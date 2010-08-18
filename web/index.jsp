@@ -100,7 +100,7 @@
 		<div id="uiPanel">
 			<!-- TODO: rework the data panel to use boxes -->
 			<div id="dataPanel" class="dataPanel">
-				<img class="fl" src="images/folders.gif"><h2 class="help">Data Sources</h2>
+				<img class="fl" src="images/folders.gif"><h2>Data Sources</h2>
 				<ul class="menu">
 				</ul>
 				<div class="box" style="margin: 0px 0px 4px 0px">
@@ -117,7 +117,7 @@
 			
 			<div id="timePanel">
 				<div class="box">
-					<img src="images/clock_down.gif" class="fl" id="timeShortcutButton"><h1>Start Time</h1>
+					<img src="images/clock_down.gif" class="fl" id="timeShortcutButton"><h1 class="help">Start Time</h1>
 					<p><input class="mono" type="text" value="" id="startTime" size="17"
 						onchange=fixZoomMarksInside(null,0)></p>
 				</div>
