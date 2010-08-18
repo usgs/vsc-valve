@@ -11,7 +11,7 @@
 		<title>Valve Menu</title>
 		<link rel="stylesheet" href="valve3.css">
 		
-        <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-min.js"></script>
+        <script type="text/javascript" src="yui/3.1.1/yui/yui-min.js"></script>
 		<script type="text/javascript" src="js/event.js"></script>		
 		<script type="text/javascript" src="js/time.js"></script>		
 		<script type="text/javascript" src="js/xml.js"></script>

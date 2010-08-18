@@ -24,7 +24,8 @@
  * @author Andrew Cooke
  */
 
-function help_init() {YUI().use('event', 'node', 'dom', function(Y) {
+function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
+		'event', 'node', 'dom', function(Y) {
 
 	var DEBUG = true;
 	var BY_TEXT = {
