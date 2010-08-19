@@ -1,0 +1,6 @@
+<suite name="Selenium tests">
+  <parameter name="webSite" value="http://quiet:8080/" />
+  <parameter name="seleniumHost" value="quiet" />
+  <parameter name="seleniumPort" value="4444" />
+  <parameter name="browser" value="Firefox on Linux" />
+</suite>
