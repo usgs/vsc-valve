@@ -13,6 +13,7 @@ To run the Selenium tests:
     SG:
     - startup-hub.sh
     - startup-rc.sh
+    - the properties for Eclipse TestNG (output dir and testng.xml)
     
 3 - Run "startup-hub.sh" or otherwise start the Selenium hub.  Similarly,
     run "startup-rc.sh" to start Remote Control (RC) instances.  This script
