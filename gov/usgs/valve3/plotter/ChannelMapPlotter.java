@@ -17,6 +17,7 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.LinkedHashMap;
@@ -37,6 +38,15 @@ public class ChannelMapPlotter extends Plotter
 	private GeoRange range;
 	private GeoLabelSet labels;
 	private boolean forExport;
+	
+	protected boolean xTickMarks = true;
+    protected boolean xTickValues = true;
+    protected boolean xUnits = true;
+    protected boolean xLabel = false;
+    protected boolean yTickMarks = true;
+    protected boolean yTickValues = true;
+    protected boolean yUnits = true;
+    protected boolean yLabel = false;
 
 	/**
 	 * Initialize internal data from PlotComponent 
@@ -58,6 +68,46 @@ public class ChannelMapPlotter extends Plotter
 			throw new Valve3Exception("Illegal area of interest: n=" +n);
 		if(s>=n){
 			throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
+		}
+		try{
+			xTickMarks = component.getBoolean("xTickMarks");
+		} catch(Valve3Exception ex){
+			xTickMarks=true;
+		}
+		try{
+			xTickValues = component.getBoolean("xTickValues");
+		} catch(Valve3Exception ex){
+			xTickValues=true;
+		}
+		try{
+			xUnits = component.getBoolean("xUnits");
+		} catch(Valve3Exception ex){
+			xUnits=true;
+		}
+		try{
+			xLabel = component.getBoolean("xLabel");
+		} catch(Valve3Exception ex){
+			xLabel=false;
+		}
+		try{
+			yTickMarks = component.getBoolean("yTickMarks");
+		} catch(Valve3Exception ex){
+			yTickMarks=true;
+		}
+		try{
+			yTickValues = component.getBoolean("yTickValues");
+		} catch(Valve3Exception ex){
+			yTickValues=true;
+		}
+		try{
+			yUnits = component.getBoolean("yUnits");
+		} catch(Valve3Exception ex){
+			yUnits=true;
+		}
+		try{
+			yLabel = component.getBoolean("yLabel");
+		} catch(Valve3Exception ex){
+			yLabel=false;
 		}
 		range = new GeoRange(w, e, s, n);
 	}
@@ -123,7 +173,7 @@ public class ChannelMapPlotter extends Plotter
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, true);
+		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		v3Plot.setHeight(mr.getGraphHeight() + 60);
@@ -136,9 +186,12 @@ public class ChannelMapPlotter extends Plotter
 		component.setTranslationType("map");
 		
 		mr.createEmptyAxis();
-		mr.getAxis().setBottomLabelAsText("Longitude");
-		mr.getAxis().setLeftLabelAsText("Latitude");
-		
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText("Longitude");
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText("Latitude");
+		}
 		plot.addRenderer(mr);
 		plot.writePNG(v3Plot.getLocalFilename());
 		

@@ -11,13 +11,10 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.Exportable;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
 import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 import gov.usgs.vdx.data.MatrixExporter;
-import gov.usgs.vdx.ExportConfig;
-
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -165,7 +162,15 @@ public class HelicorderPlotter extends RawDataPlotter {
 				continue;
 			}
 			
-			HelicorderRenderer hr = new HelicorderRenderer();			
+			HelicorderRenderer hr = new HelicorderRenderer();
+			hr.xTickMarks =this.xTickMarks;
+			hr.xTickValues = this.xTickValues;
+			hr.xUnits = this.xUnits;
+			hr.xLabel = this.xLabel;
+			hr.yTickMarks = this.yTickMarks;
+			hr.yTickValues = this.yTickValues;
+			hr.yUnits = this.yUnits;
+			hr.yLabel = this.yLabel;
 			hr.setData(data);
 
 			HelicorderSettings settings		= new HelicorderSettings();

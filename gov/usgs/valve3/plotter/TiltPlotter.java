@@ -36,10 +36,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -259,7 +257,7 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, true);
+		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
 		v3Plot.getPlot().setSize(v3Plot.getPlot().getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(v3Plot.getPlot().getHeight());
@@ -268,8 +266,12 @@ public class TiltPlotter extends RawDataPlotter {
 		trans[6] = origin.x;
 		trans[7] = origin.y;
 		mr.createEmptyAxis();
-		mr.getAxis().setBottomLabelAsText("Longitude");
-		mr.getAxis().setLeftLabelAsText("Latitude");
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText("Longitude");
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText("Latitude");
+		}
 		v3Plot.getPlot().addRenderer(mr);
 		
 		double maxMag = -1E300;

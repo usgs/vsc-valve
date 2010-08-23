@@ -183,8 +183,8 @@ public class GenericVariablePlotter extends RawDataPlotter
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
 		}
-		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);		
-		mr.createDefaultAxis(8, 8, false, true);
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);	
+		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
 		if(shape==null){
 			mr.createDefaultPointRenderers();
 		} else {
@@ -194,9 +194,13 @@ public class GenericVariablePlotter extends RawDataPlotter
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
-		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
+		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		if(yLabel){
+			mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
+		}
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
+		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}
@@ -230,7 +234,9 @@ public class GenericVariablePlotter extends RawDataPlotter
 		}
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		if(yTickValues){
+			ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		}
 		mr.setAxis(ar);
 		if(shape==null){
 			mr.createDefaultPointRenderers();
@@ -247,7 +253,9 @@ public class GenericVariablePlotter extends RawDataPlotter
 				r[1].color = Color.red;
 			}
 		}
-		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
+		if(yLabel){
+			mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
+		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}

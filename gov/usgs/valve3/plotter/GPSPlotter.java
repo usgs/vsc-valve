@@ -21,7 +21,6 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -70,7 +69,7 @@ public class GPSPlotter extends RawDataPlotter {
 	// variables acquired from the PlotComponent
 	private PlotType	plotType;
 	private String		bl;
-	private boolean		se,vs,hs;
+	private boolean		se, vs, hs;
 
 	// variables used in this class	
 
@@ -273,7 +272,7 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, true);
+		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
@@ -285,8 +284,12 @@ public class GPSPlotter extends RawDataPlotter {
 		component.setTranslationType("map");
 		v3Plot.addComponent(component);
 		mr.createEmptyAxis();
-		mr.getAxis().setBottomLabelAsText("Longitude");
-		mr.getAxis().setLeftLabelAsText("Latitude");
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText("Longitude");
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText("Latitude");
+		}
 		plot.addRenderer(mr);
 		
 		double maxMag = -1E300;

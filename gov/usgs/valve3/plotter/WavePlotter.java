@@ -4,6 +4,7 @@ import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -21,7 +22,9 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -56,9 +59,6 @@ public class WavePlotter extends RawDataPlotter {
 	private double maxFreq;
 	private boolean logPower;
 	private boolean logFreq;
-	private int labels;
-	private int yLabel;
-	private int xLabel;
 	private String color;
 	private Map<Integer, SliceWave> channelDataMap;	
 	private double samplingRate = 0.0;
@@ -136,24 +136,6 @@ public class WavePlotter extends RawDataPlotter {
 			}
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
 				throw new Valve3Exception("Illegal minimum/maximum frequencies: " + minFreq + " and " + maxFreq);
-		}
-		
-		try{
-			yLabel = component.getInt("yLabel");
-		} catch (Valve3Exception ex){
-			yLabel = 1;
-		}
-
-		try{
-			xLabel = component.getInt("xLabel");
-		} catch (Valve3Exception ex){
-			xLabel = 1;
-		}
-		
-		try{
-			labels = component.getInt("labels");
-		} catch (Valve3Exception ex){
-			labels = 1;
 		}
 		
 		try{
@@ -279,10 +261,16 @@ public class WavePlotter extends RawDataPlotter {
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		double timeOffset = component.getOffset(startTime);
 		SliceWaveExporter wr = new SliceWaveExporter();
-//		wr.setRemoveBias(removeBias);
-//		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		wr.xTickMarks = this.xTickMarks;
+		wr.xTickValues = this.xTickValues;
+		wr.xUnits = this.xUnits;
+		wr.xLabel = this.xLabel;
+	    wr.yTickMarks = this.yTickMarks;
+	    wr.yTickValues = this.yTickValues;
+	    wr.yUnits = this.yUnits;
+	    wr.yLabel =this.yLabel;
 		wr.setWave(wave);
-		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset);
+		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , component.getTimeZone().getID());
 		
 		if ( forExport ) {
 			csvHdrs.append(",");
@@ -340,15 +328,8 @@ public class WavePlotter extends RawDataPlotter {
 		
 		wr.setMinY(yMin);
 		wr.setMaxY(yMax);
-		
-		if (labels == 1) {
-			wr.setYLabel("");
-			wr.update();
-		} else {			
-			wr.update();
-			if (displayCount + 1 == compCount) {
-				wr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
-			}
+		if (displayCount + 1 == compCount) {
+				wr.update();
 		}
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
@@ -367,6 +348,14 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
 		SpectraRenderer sr = new SpectraRenderer();
+		sr.xTickMarks = this.xTickMarks;
+		sr.xTickValues = this.xTickValues;
+		sr.xUnits = this.xUnits;
+		sr.xLabel = this.xLabel;
+	    sr.yTickMarks = this.yTickMarks;
+	    sr.yTickValues = this.yTickValues;
+	    sr.yUnits = this.yUnits;
+	    sr.yLabel =this.yLabel;
 		sr.setWave(wave);
 		sr.setAutoScale(true);
 		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
@@ -398,42 +387,18 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
 		sr.setViewEndTime(endTime+timeOffset);
+		sr.setTimeZone(component.getTimeZone().getID());
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
-		sr.setYLabel(yLabel);
-		sr.setXLabel(xLabel);
-		//sr.setFftSize();
-		//sr.setTimeZoneOffset(Valve.getTimeZoneAdj());
+		sr.xTickMarks = this.xTickMarks;
+		sr.xTickValues = this.xTickValues;
+		sr.xUnits = this.xUnits;
+		sr.xLabel = this.xLabel;
+	    sr.yTickMarks = this.yTickMarks;
+	    sr.yTickValues = this.yTickValues;
+	    sr.yUnits = this.yUnits;
+	    sr.yLabel =this.yLabel;
 		sr.update(0);
-		
-		int yTick = 0;
-		String yString = "";
-		if (yLabel == 1) {
-			yTick = 8;
-			yString = "";
-			//yString = "Frequency (Hz)";
-			
-		} else if (yLabel == 2) {
-			yTick = 5;
-			yString = channel.getCode().substring(0, channel.getCode().indexOf("$"));
-			sr.setYAxisLabel("");
-			sr.update(0);
-		}
-		
-		int xTick = 0;
-		String xString = "";
-		if (xLabel == 1) {
-			xTick = 8;
-			xString = "Time (" + component.getTimeZone().getID()+ ")";
-		}
-		
-		sr.createDefaultAxis(xTick, yTick, false, false);
-		sr.setXAxisToTime(xTick);
-		sr.getAxis().setLeftLabelAsText(yString);
-		
-		if (displayCount + 1 == compCount) {
-			sr.getAxis().setBottomLabelAsText(xString);	
-		}
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
 			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
@@ -451,6 +416,7 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+
 		if ( forExport )
 			switch(plotType) {
 				case WAVEFORM:

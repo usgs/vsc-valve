@@ -221,9 +221,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);		
-		mr.createDefaultAxis(8, 8, false, allowExpand);
-		mr.setXAxisToTime(8);		
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);
+		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, allowExpand, yTickValues);
+		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
 		mr.setAllVisible(true);
 		if(shape==null){
 			mr.createDefaultPointRenderers();
@@ -234,9 +234,15 @@ public class RatSAMPlotter extends RawDataPlotter {
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		if(isDrawLegend) mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
-		mr.getAxis().setLeftLabelAsText(label);
-		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
+		if(isDrawLegend){
+			mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText(label);
+		}
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+		}
 		
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
@@ -262,11 +268,14 @@ public class RatSAMPlotter extends RawDataPlotter {
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
-		hr.createDefaultAxis(8, 8, false, true);
-		hr.setXAxisToTime(8);
-		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
-		
+		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
+		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		if(yUnits){
+			hr.getAxis().setLeftLabelAsText("Events per " + bin);
+		}
+		if(xUnits){
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+		}
 		DoubleMatrix2D data	= null;		
 		data				= rd.getCumulativeCounts();
 		if (data != null && data.rows() > 0) {

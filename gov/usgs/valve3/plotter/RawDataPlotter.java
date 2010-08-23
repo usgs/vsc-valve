@@ -1,10 +1,8 @@
 package gov.usgs.valve3.plotter;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
@@ -36,9 +34,17 @@ public abstract class RawDataPlotter extends Plotter {
 	public boolean ranks = true;
 	protected DownsamplingType downsamplingType = DownsamplingType.NONE;
 	protected int downsamplingInterval = 0;
+	protected boolean xTickMarks = true;
+    protected boolean xTickValues = true;
+    protected boolean xUnits = true;
+    protected boolean xLabel = false;
+    protected boolean yTickMarks = true;
+    protected boolean yTickValues = true;
+    protected boolean yUnits = true;
+    protected boolean yLabel = false;
 	
-	protected int leftTicks;
-	protected int leftLines;
+	protected int leftTicks; //count of left ticks
+	protected int leftLines; //starting line color
 	protected String leftUnit;
 	protected String rightUnit;
 	protected int compCount;
@@ -171,7 +177,47 @@ public abstract class RawDataPlotter extends Plotter {
 				removeBias = component.getBoolean("rb");
 			} catch (Valve3Exception ex){
 				removeBias = false;
-			} 
+			}
+			try{
+				xTickMarks = component.getBoolean("xTickMarks");
+			} catch(Valve3Exception e){
+				xTickMarks=true;
+			}
+			try{
+				xTickValues = component.getBoolean("xTickValues");
+			} catch(Valve3Exception e){
+				xTickValues=true;
+			}
+			try{
+				xUnits = component.getBoolean("xUnits");
+			} catch(Valve3Exception e){
+				xUnits=true;
+			}
+			try{
+				xLabel = component.getBoolean("xLabel");
+			} catch(Valve3Exception e){
+				xLabel=false;
+			}
+			try{
+				yTickMarks = component.getBoolean("yTickMarks");
+			} catch(Valve3Exception e){
+				yTickMarks=true;
+			}
+			try{
+				yTickValues = component.getBoolean("yTickValues");
+			} catch(Valve3Exception e){
+				yTickValues=true;
+			}
+			try{
+				yUnits = component.getBoolean("yUnits");
+			} catch(Valve3Exception e){
+				yUnits=true;
+			}
+			try{
+				yLabel = component.getBoolean("yLabel");
+			} catch(Valve3Exception e){
+				yLabel=false;
+			}
 		}
 	}
 	
@@ -264,9 +310,11 @@ public abstract class RawDataPlotter extends Plotter {
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);	
-		mr.createDefaultAxis(8, 8, false, ap.allowExpand);
-		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(unit);
+		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, ap.allowExpand, yTickValues);
+		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText(unit);
+		}
 		if(shape==null){
 			mr.createDefaultPointRenderers();
 		} else {
@@ -277,10 +325,14 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
-		leftTicks = mr.getAxis().leftTicks.length;
+		if(mr.getAxis().leftTicks != null){
+			leftTicks = mr.getAxis().leftTicks.length;
+		}
 		
 		if (displayCount + 1 == compCount) {
-			mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");	
+			if(xUnits){
+				mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+			}
 		}
 		return mr;
 	}
@@ -301,10 +353,13 @@ public abstract class RawDataPlotter extends Plotter {
 		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(ap.yMin, ap.yMax, leftTicks, false), null);
-		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);
+		if(yTickMarks && yTickValues){
+			ar.createRightTickLabels(SmartTick.autoTick(ap.yMin, ap.yMax, leftTicks, false), null);
+		}
 		mr.setAxis(ar);
-		mr.getAxis().setRightLabelAsText(rightUnit);
+		if(yUnits){
+			mr.getAxis().setRightLabelAsText(rightUnit);
+		}
 		if(shape==null){
 			mr.createDefaultPointRenderers(leftLines);
 		} else{

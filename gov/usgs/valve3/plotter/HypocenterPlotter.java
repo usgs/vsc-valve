@@ -148,6 +148,46 @@ public class HypocenterPlotter extends RawDataPlotter {
 				throw new Valve3Exception("Illegal plot type: " + pt);
 			}
 		}
+		try{
+			xTickMarks = component.getBoolean("xTickMarks");
+		} catch(Valve3Exception e){
+			xTickMarks=true;
+		}
+		try{
+			xTickValues = component.getBoolean("xTickValues");
+		} catch(Valve3Exception e){
+			xTickValues=true;
+		}
+		try{
+			xUnits = component.getBoolean("xUnits");
+		} catch(Valve3Exception e){
+			xUnits=true;
+		}
+		try{
+			xLabel = component.getBoolean("xLabel");
+		} catch(Valve3Exception e){
+			xLabel=false;
+		}
+		try{
+			yTickMarks = component.getBoolean("yTickMarks");
+		} catch(Valve3Exception e){
+			yTickMarks=true;
+		}
+		try{
+			yTickValues = component.getBoolean("yTickValues");
+		} catch(Valve3Exception e){
+			yTickValues=true;
+		}
+		try{
+			yUnits = component.getBoolean("yUnits");
+		} catch(Valve3Exception e){
+			yUnits=true;
+		}
+		try{
+			yLabel = component.getBoolean("yLabel");
+		} catch(Valve3Exception e){
+			yLabel=false;
+		}
 		
 		double w = component.getDouble("west");
 		if (w > 360 || w < -360)
@@ -311,7 +351,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, true);
+		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = startTime;
@@ -359,8 +399,12 @@ public class HypocenterPlotter extends RawDataPlotter {
 		case MAP_VIEW:
 			base = plotMapView(v3Plot.getPlot(), component);
 			base.createEmptyAxis();
-			base.getAxis().setBottomLabelAsText("Longitude");
-			base.getAxis().setLeftLabelAsText("Latitude");
+			if(xUnits){
+				base.getAxis().setBottomLabelAsText("Longitude");
+			}
+			if(yUnits){
+				base.getAxis().setLeftLabelAsText("Latitude");
+			}
 			((MapRenderer) base).createScaleRenderer();
 			break;
 		case LON_DEPTH:
@@ -389,7 +433,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		}
-		base.getAxis().setTopLabelAsText(getTopLabel(rank));
+		if(xLabel){
+			base.getAxis().setTopLabelAsText(getTopLabel(rank));
+		}
 		v3Plot.getPlot().addRenderer(base);
 		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
@@ -410,16 +456,23 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
+		double timeOffset = component.getOffset(startTime);
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
 		hr.setMinX(startTime);
 		hr.setMaxX(endTime);
-		hr.createDefaultAxis(8, 8, false, true);
-		hr.setXAxisToTime(8);
-		hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
-		hr.getAxis().setTopLabelAsText(getTopLabel(rank));
+		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
+		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		if(yUnits){
+			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
+		}
+		if(xUnits){
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");
+		}
+		if(xLabel){
+			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
+		}
 		leftTicks = hr.getAxis().leftTicks.length;
 
 		if ( forExport ) {

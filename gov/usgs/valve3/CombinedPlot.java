@@ -339,7 +339,7 @@ public class CombinedPlot extends Plot {
 		renderer.setLocation(graphX, graphY, graphWidth, graphHeight);
 		renderer.setExtents(minX, maxX,	rendererDataset.minY, rendererDataset.maxY);
 		if(rendererDataset.type == 'L'){
-			renderer.createDefaultAxis(8, 8, false, true);
+			renderer.createDefaultAxis(8, 8, false, true, true);
 			renderer.setXAxisToTime(8);
 			renderer.getAxis().setLeftLabelAsText(rendererDataset.unit);
 		} else if (rendererDataset.type == 'R'){

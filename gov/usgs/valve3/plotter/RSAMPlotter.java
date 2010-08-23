@@ -243,9 +243,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);		
-		mr.createDefaultAxis(8, 8, false, allowExpand);
-		mr.setXAxisToTime(8);		
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);
+		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, allowExpand, yTickValues);
+		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
 		mr.setAllVisible(true);
 		if(shape==null){
 			mr.createDefaultPointRenderers();
@@ -256,10 +256,15 @@ public class RSAMPlotter extends RawDataPlotter {
 				mr.createDefaultPointRenderers(shape.charAt(0));
 			}
 		}
-		if(isDrawLegend) mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
-		mr.getAxis().setLeftLabelAsText(label);
-		mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
-		
+		if(isDrawLegend){
+		    mr.createDefaultLegendRenderer(new String[] {channelCode + " " + label});
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText(label);
+		}
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+		}
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(mr);
@@ -284,11 +289,14 @@ public class RSAMPlotter extends RawDataPlotter {
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
-		hr.createDefaultAxis(8, 8, false, true);
-		hr.setXAxisToTime(8);
-		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
-		
+		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
+		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
+		if(yUnits){
+			hr.getAxis().setLeftLabelAsText("Events per " + bin);
+		}
+		if(xUnits){
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+		}
 		if ( forExport ) {
 			// Add column header to csvHdrs
 			csvHdrs.append(",");
@@ -325,12 +333,15 @@ public class RSAMPlotter extends RawDataPlotter {
 				}
 			}
 			AxisRenderer ar = new AxisRenderer(mr);
-			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+			if(yTickValues){
+				ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+			}
 			mr.setAxis(ar);
 			
 			hr.addRenderer(mr);
-			hr.getAxis().setRightLabelAsText("Cumulative Counts");
-			
+			if(yUnits){
+				hr.getAxis().setRightLabelAsText("Cumulative Counts");
+			}
 			if ( forExport ) {
 				// Add column header to csvHdrs
 				csvHdrs.append(",");
