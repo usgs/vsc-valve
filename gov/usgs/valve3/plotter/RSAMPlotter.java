@@ -7,11 +7,13 @@ import java.util.Map;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.DataPointRenderer;
+import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -265,6 +267,9 @@ public class RSAMPlotter extends RawDataPlotter {
 		if(xUnits){
 			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
 		}
+		if(yLabel){
+			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
+		}
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(mr);
@@ -341,6 +346,9 @@ public class RSAMPlotter extends RawDataPlotter {
 			hr.addRenderer(mr);
 			if(yUnits){
 				hr.getAxis().setRightLabelAsText("Cumulative Counts");
+			}
+			if(yLabel){
+				DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
 			}
 			if ( forExport ) {
 				// Add column header to csvHdrs

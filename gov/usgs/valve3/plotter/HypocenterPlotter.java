@@ -433,9 +433,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		}
-		if(xLabel){
-			base.getAxis().setTopLabelAsText(getTopLabel(rank));
-		}
+		base.getAxis().setTopLabelAsText(getTopLabel(rank));
 		v3Plot.getPlot().addRenderer(base);
 		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);

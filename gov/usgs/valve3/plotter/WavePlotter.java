@@ -267,11 +267,14 @@ public class WavePlotter extends RawDataPlotter {
 		wr.xLabel = this.xLabel;
 	    wr.yTickMarks = this.yTickMarks;
 	    wr.yTickValues = this.yTickValues;
-	    wr.yUnits = this.yUnits;
-	    wr.yLabel =this.yLabel;
+	    if(yLabel){
+			wr.setYLabelText(channel.getCode());
+		}
 		wr.setWave(wave);
 		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , component.getTimeZone().getID());
-		
+		if(yLabel){
+			wr.setYLabelText(channel.getCode());
+		}
 		if ( forExport ) {
 			csvHdrs.append(",");
 			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
@@ -354,8 +357,6 @@ public class WavePlotter extends RawDataPlotter {
 		sr.xLabel = this.xLabel;
 	    sr.yTickMarks = this.yTickMarks;
 	    sr.yTickValues = this.yTickValues;
-	    sr.yUnits = this.yUnits;
-	    sr.yLabel =this.yLabel;
 		sr.setWave(wave);
 		sr.setAutoScale(true);
 		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
@@ -363,6 +364,12 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
+		if(yLabel){
+			sr.setYLabelText(channel.getCode());
+		}
+		if(yUnits){
+			sr.setYUnitText("Power");
+		}
 		sr.update(0);
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
@@ -396,8 +403,12 @@ public class WavePlotter extends RawDataPlotter {
 		sr.xLabel = this.xLabel;
 	    sr.yTickMarks = this.yTickMarks;
 	    sr.yTickValues = this.yTickValues;
-	    sr.yUnits = this.yUnits;
-	    sr.yLabel =this.yLabel;
+	    if(yUnits){
+	    	sr.setYUnitText("Frequency (Hz)");
+	    }
+	    if(yLabel){
+			sr.setYLabelText(channel.getCode());
+		}
 		sr.update(0);
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];

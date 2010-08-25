@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.util.Util;
@@ -328,10 +330,15 @@ public abstract class RawDataPlotter extends Plotter {
 		if(mr.getAxis().leftTicks != null){
 			leftTicks = mr.getAxis().leftTicks.length;
 		}
-		
+		if(yLabel){
+			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
+		}
 		if (displayCount + 1 == compCount) {
 			if(xUnits){
 				mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+			}
+			if(xLabel){
+				;
 			}
 		}
 		return mr;

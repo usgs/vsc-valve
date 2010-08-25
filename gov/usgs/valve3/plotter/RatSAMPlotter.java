@@ -7,12 +7,14 @@ import java.util.Map;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.DataPointRenderer;
+import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -243,7 +245,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 		if(xUnits){
 			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
 		}
-		
+		if(yLabel){
+			DefaultFrameDecorator.addLabel(mr, "channelCode1" + "-" + "channelCode2", Location.LEFT);
+		}
 		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
 		v3Plot.getPlot().addRenderer(mr);
@@ -275,6 +279,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 		}
 		if(xUnits){
 			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+		}
+		if(yLabel){
+			DefaultFrameDecorator.addLabel(hr, "channelCode1" + "-" + "channelCode2", Location.LEFT);
 		}
 		DoubleMatrix2D data	= null;		
 		data				= rd.getCumulativeCounts();
