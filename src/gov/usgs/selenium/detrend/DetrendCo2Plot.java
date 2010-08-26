@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
  */
 public class DetrendCo2Plot extends Support {
 
-    @Test(groups = {"all"})
+    @Test(groups = {"all", "compatibility"})
     public void simplePlot() throws Throwable {
     	session().open("/valve3/");
 		waitForXpathCount("//li[@id='isti_deformation_gps']", 1, 100, 10);
@@ -29,7 +29,7 @@ public class DetrendCo2Plot extends Support {
 		session().type("endTime", "20090529060151224");
 		session().check("detrend");
 		session().click("submit");
-		waitForXpathCount("//img[@class='pointer' and @src]", 1, 1000, LOAD_TIME);
+		waitForXpathCount("//img[@class='pointer']", 2, 1000, LOAD_TIME);
 		String bookmark = session().getAttribute("//div[@id='content0']//a@href");
 		BufferedImage img = ImageIO.read(new URL(session().getLocation() + bookmark));
 		BufferedImage reference = ImageIO.read(getClass().getResource("/img/detrend-co2.png"));

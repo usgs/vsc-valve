@@ -1,0 +1,43 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="all" thread-count="1">
+    <parameter name="webSite" value="http://quiet:8080/" />
+    <parameter name="seleniumHost" value="quiet" />
+    <parameter name="seleniumPort" value="4444" />
+    
+	<test name="Firefox on Linux">
+		<parameter name="browser" value="Firefox on Linux" />
+		<groups>
+            <run><include name="compatibility" /></run>
+		</groups>
+		<packages>
+            <package name="gov.usgs.selenium.detrend" />
+            <package name="gov.usgs.selenium.gps" />
+            <package name="gov.usgs.selenium.tilt" />
+		</packages>
+	</test>
+    
+    <test name="Safari on OS X">
+        <parameter name="browser" value="Safari on OS X" />
+        <groups>
+            <run><include name="compatibility" /></run>
+        </groups>
+        <packages>
+            <package name="gov.usgs.selenium.detrend" />
+            <package name="gov.usgs.selenium.gps" />
+            <package name="gov.usgs.selenium.tilt" />
+        </packages>
+    </test>
+    
+    <test name="IE on Windows">
+        <parameter name="browser" value="IE on Windows" />
+        <groups>
+            <run><include name="compatibility" /></run>
+        </groups>
+        <packages>
+            <package name="gov.usgs.selenium.detrend" />
+            <package name="gov.usgs.selenium.gps" />
+            <package name="gov.usgs.selenium.tilt" />
+        </packages>
+    </test>
+	
+</suite>

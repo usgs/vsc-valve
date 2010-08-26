@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
  */
 public class SingleGpsPlot extends BaseGpsPlot {
 
-    @Test(groups = {"all"})
+    @Test(groups = {"all", "compatibility"})
     public void simplePlot() throws Throwable {
     	super.simplePlot();
     }

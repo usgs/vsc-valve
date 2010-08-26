@@ -30,13 +30,13 @@ function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
 	var DEBUG = true;
 	var BY_TEXT = {
 		'ISTI Valve': 'doc/user_docs/index.html',
-		'Start Time': 'doc/user_docs/index.html#commonPanel',
+		'Start Time': 'doc/user_docs/index.html#commonPanel'
 	};
 	var BY_SELECTOR = {
 		'#contentInsertionPoint div.titleBar h1.help': 'doc/user_docs/index.html#graphs',
 		'#isti_deformation_gps_pane_options_0- h1.help': 'doc/user_docs/gps/gpsdoc.html',
 		'#isti_deformation_tilt_pane_options_0- h1.help': 'doc/user_docs/tilt/tiltdoc.html',
-		'#isti_deformation_strain_genericFixedForm h1.help': 'doc/user_docs/strain/straindoc.html',
+		'#isti_deformation_strain_genericFixedForm h1.help': 'doc/user_docs/strain/straindoc.html'
 	}
 	
 	function debug(something) {

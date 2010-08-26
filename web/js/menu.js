@@ -399,9 +399,9 @@ function populateGenericColumns(menu) {
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];				
 				p.appendChild(el);
+				el.checked  = (col[4] == "T");
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
@@ -583,9 +583,9 @@ function populateTiltColumns(menu) {
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
 				p.appendChild(el);
+				el.checked  = (col[4] == "T");
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
@@ -651,9 +651,9 @@ function populateGPSColumns(menu) {
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
 				p.appendChild(el);				
+				el.checked  = (col[4] == "T");
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);

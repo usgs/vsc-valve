@@ -1,4 +1,4 @@
-<suite name="Selenium tests">
+<suite name="Selenium tests" parallel="classes" thread-count="4">
   <parameter name="webSite" value="http://quiet:8080/" />
   <parameter name="seleniumHost" value="quiet" />
   <parameter name="seleniumPort" value="4444" />

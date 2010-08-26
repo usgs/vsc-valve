@@ -20,6 +20,6 @@ public class BaseTiltPlot extends Support {
 		session().type("startTime", "2009");
 		session().type("endTime", "20100101");
 		session().click("submit");
-		waitForXpathCount("//img[@class='pointer' and @src]", 1, 1000, LOAD_TIME);
+		waitForXpathCount("//img[@class='pointer']", 2, 1000, LOAD_TIME);
 	}
 }

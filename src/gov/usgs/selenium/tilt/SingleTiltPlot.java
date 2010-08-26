@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
  */
 public class SingleTiltPlot extends BaseTiltPlot {
 
-    @Test(groups = {"all"})
+    @Test(groups = {"all", "compatibility"})
     public void simplePlot() throws Throwable {
     	super.simplePlot();
     }
