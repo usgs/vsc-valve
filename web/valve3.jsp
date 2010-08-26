@@ -12,17 +12,12 @@ Added title to HTML output.
 Revision 1.1  2005/09/03 19:18:35  dcervelli
 Initial commit.
 
---%>
-
-<%@ page import="gov.usgs.valve3.*" %>
-<%@ page import="gov.usgs.valve3.result.*" %>
-<%@ page import="java.io.*" %>
-
-<%
+--%><%@ page import="gov.usgs.valve3.*" %><%@ page import="gov.usgs.valve3.result.*" %><%@ page import="java.io.*" %><%
+    /* The mess above is to make sure no newlines are generated for binary 
+       results - please do not "improve" the formatting. Thanks. */  
 	response.setHeader("Cache-Control", "no-cache");
 	response.setHeader("Pragma", "no-cache");
 	response.setDateHeader("Expires", 0);
-	
 	ActionHandler handler = Valve3.getInstance().getActionHandler();
 	Object result = handler.handle(request);
 	
@@ -85,4 +80,3 @@ Initial commit.
 	}
 	
 %>
-

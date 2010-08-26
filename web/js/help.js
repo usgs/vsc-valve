@@ -108,7 +108,7 @@ function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
  * @param url The url to display.
  */
 function help_popup(url) {
-	var new_window=window.open(url, 'name', 'height=600,width=800,top=100,left=100,scrollbars=yes');
+	var new_window=window.open(url, 'help', 'height=600,width=800,top=100,left=100,scrollbars=yes');
 	new_window.focus();
 	return false;
 }

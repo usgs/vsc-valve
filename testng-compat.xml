@@ -10,9 +10,10 @@
             <run><include name="compatibility" /></run>
 		</groups>
 		<packages>
-            <package name="gov.usgs.selenium.detrend" />
             <package name="gov.usgs.selenium.gps" />
             <package name="gov.usgs.selenium.tilt" />
+            <package name="gov.usgs.selenium.help" />
+            <package name="gov.usgs.selenium.co2" />
 		</packages>
 	</test>
     
@@ -22,9 +23,10 @@
             <run><include name="compatibility" /></run>
         </groups>
         <packages>
-            <package name="gov.usgs.selenium.detrend" />
             <package name="gov.usgs.selenium.gps" />
             <package name="gov.usgs.selenium.tilt" />
+            <package name="gov.usgs.selenium.help" />
+            <package name="gov.usgs.selenium.co2" />
         </packages>
     </test>
     
@@ -34,9 +36,10 @@
             <run><include name="compatibility" /></run>
         </groups>
         <packages>
-            <package name="gov.usgs.selenium.detrend" />
             <package name="gov.usgs.selenium.gps" />
             <package name="gov.usgs.selenium.tilt" />
+            <package name="gov.usgs.selenium.help" />
+            <package name="gov.usgs.selenium.co2" />
         </packages>
     </test>
 	
