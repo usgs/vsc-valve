@@ -350,7 +350,11 @@ public class GPSPlotter extends RawDataPlotter {
 			vr.ellipseOrientation = phi;
 			vr.ellipseWidth = Math.max(w, h) * 2;
 			vr.ellipseHeight = Math.min(w, h) * 2;
-			
+			vr.z = vt.getQuick(2, 0);
+			vr.displayHoriz = hs;
+			vr.displayVert = vs;
+			//error parameter for Z axis
+			vr.sigZ =  e.getQuick(2, 2);
 			maxMag = Math.max(vr.getMag(), maxMag);
 			plot.addRenderer(vr);
 			vrs.add(vr);
@@ -378,6 +382,8 @@ public class GPSPlotter extends RawDataPlotter {
 		svr.y = mr.getMinY() + 17 / mr.getYScale();
 		svr.u = desiredLength;
 		svr.v = 0;
+		svr.displayVert = false;
+		svr.sigZ = 0;
 		 
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
