@@ -1,5 +1,6 @@
 package gov.usgs.valve3.plotter;
 
+import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -318,12 +319,12 @@ public abstract class RawDataPlotter extends Plotter {
 			mr.getAxis().setLeftLabelAsText(unit);
 		}
 		if(shape==null){
-			mr.createDefaultPointRenderers();
+			mr.createDefaultPointRenderers(component.getColor());
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers();
+				mr.createDefaultLineRenderers(component.getColor());
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0));
+				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 			}
 		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
@@ -368,12 +369,12 @@ public abstract class RawDataPlotter extends Plotter {
 			mr.getAxis().setRightLabelAsText(rightUnit);
 		}
 		if(shape==null){
-			mr.createDefaultPointRenderers(leftLines);
+			mr.createDefaultPointRenderers(leftLines, component.getColor());
 		} else{
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(leftLines);
+				mr.createDefaultLineRenderers(leftLines, component.getColor());
 			} else {
-				mr.createDefaultPointRenderers(leftLines, shape.charAt(0));
+				mr.createDefaultPointRenderers(leftLines, shape.charAt(0), component.getColor());
 			}
 		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);

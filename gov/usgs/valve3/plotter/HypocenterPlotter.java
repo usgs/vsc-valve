@@ -452,7 +452,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * Otherwise, initialize HistogramRenderer and add it to plot.
 	 * 		Generate PNG image to local file.
 	 */
-	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
+	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		double timeOffset = component.getOffset(startTime);
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
@@ -510,7 +510,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 			mr.setExtents(startTime, endTime, cmin, cmax * 1.05);
-			mr.createDefaultLineRenderers();
+			mr.createDefaultLineRenderers(component.getColor());
 			
 			if ( forExport ) {
 				// Add coulmn to header; add Exporter to set for CSV

@@ -250,12 +250,12 @@ public class RSAMPlotter extends RawDataPlotter {
 		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
 		mr.setAllVisible(true);
 		if(shape==null){
-			mr.createDefaultPointRenderers();
+			mr.createDefaultPointRenderers(component.getColor());
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers();
+				mr.createDefaultLineRenderers(component.getColor());
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0));
+				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 			}
 		}
 		if(isDrawLegend){
@@ -280,7 +280,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * Initialize HistogramRenderer, add it to plot, and 
 	 * render event count histogram to PNG image in local file
 	 */
-	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) {
+	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 
 		if (threshold > 0) {
@@ -324,15 +324,15 @@ public class RSAMPlotter extends RawDataPlotter {
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
 			Renderer[] r = null;
 			if(shape==null){
-				mr.createDefaultPointRenderers();
+				mr.createDefaultPointRenderers(component.getColor());
 			} else {
 				if (shape.equals("l")) {
-					mr.createDefaultLineRenderers();
+					mr.createDefaultLineRenderers(component.getColor());
 					r = mr.getLineRenderers();
 					((ShapeRenderer)r[0]).color		= Color.red;
 					((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
 				} else {
-					mr.createDefaultPointRenderers(shape.charAt(0));
+					mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 					r = mr.getPointRenderers();
 					((DataPointRenderer)r[0]).color		= Color.red;
 				}

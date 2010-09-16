@@ -171,6 +171,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 			hr.yTickValues = this.yTickValues;
 			hr.yUnits = this.yUnits;
 			hr.yLabel = this.yLabel;
+			hr.setColor(component.getColor());
 			hr.setData(data);
 
 			HelicorderSettings settings		= new HelicorderSettings();

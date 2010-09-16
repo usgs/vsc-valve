@@ -4,7 +4,6 @@ import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -22,10 +21,7 @@ import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
-
 
 /**
  * Generate images of waveforms, spectras, and spectrograms 
@@ -59,7 +55,6 @@ public class WavePlotter extends RawDataPlotter {
 	private double maxFreq;
 	private boolean logPower;
 	private boolean logFreq;
-	private String color;
 	private Map<Integer, SliceWave> channelDataMap;	
 	private double samplingRate = 0.0;
 	private String dataType = null;
@@ -136,12 +131,6 @@ public class WavePlotter extends RawDataPlotter {
 			}
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
 				throw new Valve3Exception("Illegal minimum/maximum frequencies: " + minFreq + " and " + maxFreq);
-		}
-		
-		try{
-			color = component.getString("color");
-		} catch (Valve3Exception ex){
-			color = "A";
 		}
 	}
 
@@ -287,8 +276,10 @@ public class WavePlotter extends RawDataPlotter {
 		
 		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-		if (color.equals("M"))
-			wr.setColor(Color.BLACK);
+		Color color = component.getColor();
+		if(color != null){
+			wr.setColor(color);
+		}
 		double bias = 0;
 		if (removeBias)
 			bias = wave.mean();
@@ -349,7 +340,7 @@ public class WavePlotter extends RawDataPlotter {
 	 * Initialize SpectraRenderer and add it to plot
 	 * @throws Valve3Exception
 	 */
-	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
+	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		SpectraRenderer sr = new SpectraRenderer();
 		sr.xTickMarks = this.xTickMarks;
 		sr.xTickValues = this.xTickValues;
@@ -364,6 +355,7 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
+		sr.setColor(component.getColor());
 		if(yLabel){
 			sr.setYLabelText(channel.getCode());
 		}

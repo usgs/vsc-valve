@@ -2,6 +2,7 @@ package gov.usgs.valve3;
 
 import gov.usgs.util.Util;
 
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -358,6 +359,25 @@ public class PlotComponent
 	 */
 	public double getOffset(double time){
 		return df.getTimeZone().getOffset(Util.j2KToDate(time).getTime())/1000.0;
+	}
+	
+	public Color getColor() throws Valve3Exception {
+		String colorString = get("color");
+		if(colorString==null){
+			return null;
+		} else {
+			int colorInt = 0;
+			try{
+				colorInt = Integer.parseInt(colorString, 16);
+			}
+			catch(Exception e){
+				throw new Valve3Exception("Can't convert color string to hex integer: " + colorString);
+			}
+			if((colorInt > 0xFFFFFF) || (colorInt < 0)){
+				throw new Valve3Exception("Wrong color code: " + colorInt);
+			}
+			return new Color(colorInt);
+		}
 	}
 
 	/**

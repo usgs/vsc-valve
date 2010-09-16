@@ -162,7 +162,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * Initialize MatrixRenderer for left plot axis
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component)
+	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component) throws Valve3Exception
 	{
 		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
@@ -186,12 +186,12 @@ public class GenericVariablePlotter extends RawDataPlotter
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);	
 		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
 		if(shape==null){
-			mr.createDefaultPointRenderers();
+			mr.createDefaultPointRenderers(component.getColor());
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers();
+				mr.createDefaultLineRenderers(component.getColor());
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0));
+				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 			}
 		}
 		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);
@@ -209,7 +209,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * Initialize MatrixRenderer for right plot axis
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getRightMatrixRenderer(PlotComponent component)
+	private MatrixRenderer getRightMatrixRenderer(PlotComponent component) throws Valve3Exception
 	{
 		if (rightUnit == null)
 			return null;
@@ -239,16 +239,16 @@ public class GenericVariablePlotter extends RawDataPlotter
 		}
 		mr.setAxis(ar);
 		if(shape==null){
-			mr.createDefaultPointRenderers();
+			mr.createDefaultPointRenderers(component.getColor());
 			PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
 			r[1].color = Color.red;
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers();
+				mr.createDefaultLineRenderers(component.getColor());
 				ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
 				r[1].color = Color.red;
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0));
+				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 				PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
 				r[1].color = Color.red;
 			}
@@ -265,7 +265,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * adds them to plot
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component)
+	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception
 	{
 		MatrixRenderer leftMR = getLeftMatrixRenderer(component);
 		MatrixRenderer rightMR = getRightMatrixRenderer(component);
