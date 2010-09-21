@@ -3,8 +3,8 @@
  * 
  * To use these, add the class "help" to a heading element (h1 or h2)
  * and then in BY_TEXT below, give the mapping from the heading text
- * to the file URL that should be displayed.  Alternatively, add "help"
- * and then define a selector (which should include "help").  In both
+ * to the file URL that should be displayed.  Alternatively, add the "help"
+ * class and then define a selector (which should include "help").  In both
  * cases the "help" class is removed once the element is processed
  * (this makes the processing faster when repeated). 
  * 
@@ -33,10 +33,11 @@ function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
 		'Start Time': 'doc/user_docs/index.html#commonPanel'
 	};
 	var BY_SELECTOR = {
-		'#contentInsertionPoint div.titleBar h1.help': 'doc/user_docs/index.html#graphs',
-		'#isti_deformation_gps_pane_options_0- h1.help': 'doc/user_docs/gps/gpsdoc.html',
-		'#isti_deformation_tilt_pane_options_0- h1.help': 'doc/user_docs/tilt/tiltdoc.html',
-		'#isti_deformation_strain_genericFixedForm h1.help': 'doc/user_docs/strain/straindoc.html'
+		'#contentInsertionPoint div.titleBar h1.help': 'doc/user_docs/plot.html',
+		'#isti_deformation_gps_pane_options_0- h1.help': 'doc/user_docs/gps/index.html',
+		'#isti_deformation_tilt_pane_options_0- h1.help': 'doc/user_docs/tilt/index.html',
+		'#isti_deformation_strain_genericFixedForm h1.help': 'doc/user_docs/strain/index.html',
+		'#timePanel h5.help': 'doc/user_docs/index.html'
 	}
 	
 	function debug(something) {
@@ -108,7 +109,7 @@ function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
  * @param url The url to display.
  */
 function help_popup(url) {
-	var new_window=window.open(url, 'help', 'height=600,width=800,top=100,left=100,scrollbars=yes');
+	var new_window=window.open(url, 'help', 'height=600,width=800,top=100,left=100,scrollbars=yes,menubar=yes,titlebar=yes,toolbar=yes');
 	new_window.focus();
 	return false;
 }

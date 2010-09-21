@@ -152,7 +152,7 @@
 				<hr>
 				<img id="throbber" class="fr" src="images/throbber_still.png">
 				<h5 id="version"></h5>
-				<h5>Administrator: <a id='admin'></a></h5>
+				<div class="clear"><h5 class="help">Administrator: <a id='admin'></a></h5></div>
 			</div>
 			
 			<div class="box listbox" id="timeShortcutPanel">

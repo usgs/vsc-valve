@@ -280,7 +280,11 @@ img.helpimg
 {
 	padding: 2px;
 	float: right;
-}	
+}
+
+.clear img.helpimg {
+	padding-right: 0px;
+}
 
 form
 {
@@ -379,6 +383,7 @@ div.box p
 .left { text-align: left; }
 .fl { float: left; }
 .fr { float: right; }
+.clear {clear: both; border: 0px none; margin: 0px; padding: 0px; }
 .hide { display: none; }
 .pointer { cursor: crosshair; }
 .abs { position: absolute; }
