@@ -2,6 +2,8 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.BasicFrameRenderer;
+import gov.usgs.plot.HistogramRenderer;
+import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
@@ -11,6 +13,7 @@ import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
+import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -30,6 +33,7 @@ import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
 import gov.usgs.vdx.data.HypocenterExporter;
 import gov.usgs.vdx.data.MatrixExporter;
+import gov.usgs.vdx.ExportConfig;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -39,9 +43,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 import cern.colt.matrix.DoubleMatrix2D;
-
 
 /**
  * A class for making hypocenter map plots and histograms. 
@@ -55,12 +59,14 @@ import cern.colt.matrix.DoubleMatrix2D;
 public class HypocenterPlotter extends RawDataPlotter {
 	
 	private enum PlotType {
-		MAP, COUNTS;
+		MAP, COUNTS, DEPTH;
 		public static PlotType fromString(String s) {
 			if (s.equals("map")) {
 				return MAP;
 			} else if (s.equals("cnts")) {
 				return COUNTS;
+			} else if (s.equals("depth")) {
+				return DEPTH;
 			} else {
 				return null;
 			}
@@ -120,6 +126,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	public HypocenterPlotter() {
 		super();
 		dateFormat	= new SimpleDateFormat("yyyy-MM-dd");
+		logger = Log.getLogger("gov.usgs.valve3");
 	}
 
 	/**
@@ -139,6 +146,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
+		String pt = component.getString("plotType");
+		plotType	= PlotType.fromString(pt);
+
+		plotType = PlotType.DEPTH;
+		logger.info("plottype is " + plotType);
+		if (plotType == null) {
+			throw new Valve3Exception("Illegal plot type: " + pt);
 		String pt = component.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.MAP;
@@ -202,8 +216,18 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (n > 90)
 			throw new Valve3Exception("Illegal area of interest: n=" +n);
 		if(s>=n){
-			throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
-		}		
+			double t = s;
+			s=n;
+			n=t;
+			//throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
+
+		}	
+		if(w>=e){
+			double t = e;
+			e=w;
+			w=t;
+			//throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
+		}	
 		range	= new GeoRange(w, e, s, n);
 		
 		minMag		= Util.stringToDouble(component.get("minMag"), -Double.MAX_VALUE);
@@ -237,16 +261,30 @@ public class HypocenterPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal vertical error filter.");
 		
 		rmk			= Util.stringToString(component.get("rmk"), "");
-
+		String c = "";
 		switch (plotType) {
 		
 		case MAP:			
-			String a    = Util.stringToString(component.get("axis"), "M");
-			axes		= Axes.fromString(a);
+			axes		= Axes.fromString(component.getString("axes"));
 			if (axes == null)
 				throw new Valve3Exception("Illegal axes type.");
 
-			String c	= Util.stringToString(component.get("color"), "A");
+			 c	= Util.stringToString(component.get("color"), "A");
+			if (c.equals("A"))
+				color	= ColorOption.chooseAuto(axes);
+			else
+				color	= ColorOption.fromString(c);
+			if (color == null)
+				throw new Valve3Exception("Illegal color option.");
+			
+			break;
+			
+		case DEPTH:			
+			axes		= Axes.fromString(component.getString("axes"));
+			if (axes == null)
+				throw new Valve3Exception("Illegal axes type.");
+
+			 c	= Util.stringToString(component.get("color"), "A");
 			if (c.equals("A"))
 				color	= ColorOption.chooseAuto(axes);
 			else
@@ -265,8 +303,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			if ((endTime - startTime) / bin.toSeconds() > 10000)
 				throw new Valve3Exception("Bin size too small.");
 
-			String ra   = Util.stringToString(component.get("cntsAxis"), "C");
-			rightAxis	= RightAxis.fromString(ra);
+			rightAxis	= RightAxis.fromString(component.getString("cntsAxis"));
 			if (rightAxis == null)
 				throw new Valve3Exception("Illegal counts axis option.");
 			
@@ -351,7 +388,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
+		mr.createGraticule(8, true);
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
 		trans[4] = startTime;
@@ -399,12 +436,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		case MAP_VIEW:
 			base = plotMapView(v3Plot.getPlot(), component);
 			base.createEmptyAxis();
-			if(xUnits){
-				base.getAxis().setBottomLabelAsText("Longitude");
-			}
-			if(yUnits){
-				base.getAxis().setLeftLabelAsText("Latitude");
-			}
+			base.getAxis().setBottomLabelAsText("Longitude");
+			base.getAxis().setLeftLabelAsText("Latitude");
 			((MapRenderer) base).createScaleRenderer();
 			break;
 		case LON_DEPTH:
@@ -416,6 +449,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		case LAT_DEPTH:
+			base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
+			base.createDefaultAxis();
+			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+			component.setTranslationType("xy");
+			base.getAxis().setBottomLabelAsText("Latitude");
+			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
+		case ARB_DEPTH:
 			base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
 			base.createDefaultAxis();
 			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
@@ -452,25 +493,18 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * Otherwise, initialize HistogramRenderer and add it to plot.
 	 * 		Generate PNG image to local file.
 	 */
-	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
+	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
-		double timeOffset = component.getOffset(startTime);
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
 		hr.setMinX(startTime);
 		hr.setMaxX(endTime);
-		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
-		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);
-		if(yUnits){
-			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
-		}
-		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");
-		}
-		if(xLabel){
-			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
-		}
+		hr.createDefaultAxis(8, 8, false, true);
+		hr.setXAxisToTime(8);
+		hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
+		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
+		hr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		leftTicks = hr.getAxis().leftTicks.length;
 
 		if ( forExport ) {
@@ -510,7 +544,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 			mr.setExtents(startTime, endTime, cmin, cmax * 1.05);
-			mr.createDefaultLineRenderers(component.getColor());
+			mr.createDefaultLineRenderers();
 			
 			if ( forExport ) {
 				// Add coulmn to header; add Exporter to set for CSV
@@ -555,23 +589,46 @@ public class HypocenterPlotter extends RawDataPlotter {
 			rank	= ranksMap.get(rk);
 		}
 
+		logger.fine("forcing DEPTH");
+		plotType	= PlotType.fromString("depth");		
 		switch (plotType) {
 		case MAP:
-			if ( forExport ) {
+			if (forExport) {
 				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
-				csvData.add( new ExportData( csvIndex, new HypocenterExporter( hypos ) ) );
+				csvData.add(new ExportData(csvIndex, new HypocenterExporter(
+						hypos)));
 				csvIndex++;
 			} else {
 				plotMap(v3Plot, component, rank);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
+				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(
+						vdxSource).name
+						+ " Map");
 			}
+			break;
+		case DEPTH:
+			System.out.println("this should be depth!");
+			System.out.println("this should be depth!");
+			System.out.println("this should be depth!");
+			if (forExport) {
+				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
+				csvData.add(new ExportData(csvIndex, new HypocenterExporter(
+						hypos)));
+				csvIndex++;
+			} else {
+				plotMap(v3Plot, component, rank);
+				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(
+						vdxSource).name
+						+ " Map");
+			}
+			System.out.println("this should be depth!");
+			System.out.println("this should be depth!");
 			break;
 		case COUNTS:
 			plotCounts(v3Plot, component, rank);
 			if ( !forExport )
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
-			break;
-		}		
+			break;			
+		}			
 	}
 
 	/**
@@ -581,14 +638,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		forExport = (v3p == null);	// = "prepare data for export"
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		getInputs(comp);
 		getData(comp);
 
 		plotData(v3p, comp);
 				
-		if ( !forExport ) {
+		if ( v3p != null ) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

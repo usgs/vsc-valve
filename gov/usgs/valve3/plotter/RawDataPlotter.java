@@ -29,6 +29,7 @@ import gov.usgs.vdx.data.ExportData;
 
 public abstract class RawDataPlotter extends Plotter {
 	
+	
 	protected double startTime;
 	protected double endTime;
 	protected String ch;
