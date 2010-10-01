@@ -146,13 +146,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
-		String pt = component.getString("plotType");
-		plotType	= PlotType.fromString(pt);
-
-		plotType = PlotType.DEPTH;
-		logger.info("plottype is " + plotType);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+		
 		String pt = component.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.MAP;
