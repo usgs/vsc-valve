@@ -1,6 +1,5 @@
 package gov.usgs.valve3.plotter;
 
-import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,12 @@ import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.ExportData;
+
+/**
+ * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
+ *
+ * @author Max Kokoulin
+ */
 
 public abstract class RawDataPlotter extends Plotter {
 	
@@ -91,6 +96,9 @@ public abstract class RawDataPlotter extends Plotter {
 		csvHdrs = new StringBuffer();
 	}
 	
+	/**
+	 * Fill those component parameters which are common for all plotters
+	 */
 	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
 		// Check for named channels, ranks
 		String nameArg = null;
@@ -225,6 +233,9 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 	}
 	
+	/**
+	 * Used during request of data for this plotter, adds downsampling information to request's parameters
+	 */
 	protected void addDownsamplingInfo(Map<String, String> params){
 		params.put("ds", downsamplingType.toString());
 		params.put("dsInt", Integer.toString(downsamplingInterval));
@@ -382,7 +393,15 @@ public abstract class RawDataPlotter extends Plotter {
 		return mr;
 	}
 	
+	/**
+	 * This function should be overridden in each concrete plotter.
+	 * Configure plotter according component parameters.
+	 */
 	abstract void getInputs(PlotComponent component) throws Valve3Exception;
+	/**
+	 * This function should be overridden in each concrete plotter.
+	 * Request the data from vdx server.
+	 */
 	abstract void getData(PlotComponent component) throws Valve3Exception;
 	
 	/**
@@ -410,7 +429,11 @@ public abstract class RawDataPlotter extends Plotter {
 		return toCSV(comp, "");
 	}
 
-
+    /**
+     * @param comp plot component
+     * @param cmt  comment line to add after configured comments
+     * @return CSV dump of binary data described by given PlotComponent
+     */
 	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
@@ -566,6 +589,9 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 	}
 	
+	/**
+	 * Fills plotter's data manipulation configuration according component parameters
+	 */
 	protected void validateDataManipOpts(PlotComponent component) throws Valve3Exception {
 		doDespike = Util.stringToBoolean(component.get("despike"));
 		if ( doDespike ) {

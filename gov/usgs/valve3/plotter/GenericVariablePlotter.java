@@ -7,7 +7,6 @@ import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
@@ -25,8 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * Generate images for generic data plot to files

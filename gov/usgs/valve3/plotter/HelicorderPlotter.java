@@ -1,6 +1,7 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
@@ -18,6 +19,7 @@ import gov.usgs.vdx.data.MatrixExporter;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Generate helicorder images from raw wave data from vdx source
@@ -30,6 +32,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	private Map<Integer, HelicorderData> channelDataMap;
 	private HelicorderData data;
 	private static final double MAX_HELICORDER_TIME = 31 * 86400;
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.plotter.HelicorderPlotter"); 
 	
 	private boolean		showClip;
 	private float		barMult;
@@ -128,8 +131,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	}
 	
 	/**
-	 * If v3Plot is null, prepare data for exporting
-	 * Otherwise, Loop through the list of channels and create plots
+	 * Loop through the list of channels, initialize renderers and add them to plots
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -204,7 +206,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			settings.applySettings(hr, data);
 			
-			System.out.println("componentBoxHeight:"	+ component.getBoxHeight() +
+			logger.info("componentBoxHeight:"	+ component.getBoxHeight() +
 							  "/settingHeight:" 		+ settings.height + 
 							  "/graphHeight:"   		+ hr.getGraphHeight() + 
 					          "/graphWidth:"  			+ hr.getGraphWidth() + 

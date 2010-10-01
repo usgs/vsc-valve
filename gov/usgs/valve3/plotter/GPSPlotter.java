@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.MatrixRenderer;
@@ -20,6 +22,7 @@ import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
+import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
@@ -65,6 +68,7 @@ public class GPSPlotter extends RawDataPlotter {
 			}
 		}
 	}
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.plotter.GPSPlotter"); 
 	
 	// variables acquired from the PlotComponent
 	private PlotType	plotType;
@@ -312,7 +316,7 @@ public class GPSPlotter extends RawDataPlotter {
 			e = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t2, e), t2.viewDice());
 			DoubleMatrix2D v = m.viewPart(0, 0, 3, 1);
 	
-			System.out.println("XYZ Velocity: " + v.getQuick(0,0) + " " + v.getQuick(1,0) + " " + v.getQuick(2,0));
+			logger.info("XYZ Velocity: " + v.getQuick(0,0) + " " + v.getQuick(1,0) + " " + v.getQuick(2,0));
 			DoubleMatrix2D vt = Algebra.DEFAULT.mult(t, v);
 			if (vt.getQuick(0, 0) == 0 && vt.getQuick(1, 0) == 0 && vt.getQuick(2, 0) == 0) {
 				continue;
@@ -327,19 +331,19 @@ public class GPSPlotter extends RawDataPlotter {
 				e.assign(cern.jet.math.Mult.mult(chi2));
 			}
 			
-			System.out.println("Velocity: " + vt);
-			System.out.println("Error: " + e);
+			logger.info("Velocity: " + vt);
+			logger.info("Error: " + e);
 			
 			DoubleMatrix2D es = e.viewPart(0, 0, 2, 2);
 			EigenvalueDecomposition ese = new EigenvalueDecomposition(es);
 			DoubleMatrix1D evals = ese.getRealEigenvalues();
 			DoubleMatrix2D evecs = ese.getV();
-			System.out.println("evals: " + evals);
-			System.out.println("evecs: " + evecs);
+			logger.info("evals: " + evals);
+			logger.info("evecs: " + evecs);
 			double phi = Math.atan2(evecs.getQuick(0, 0), evecs.getQuick(1, 0));
 			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
 			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
-			System.out.printf("w: %f h: %f\n", w, h);
+			logger.info("w: " + w + ", h: " + h);
 			EllipseVectorRenderer vr = new EllipseVectorRenderer();
 			vr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(ch.getLonLat());
@@ -365,10 +369,10 @@ public class GPSPlotter extends RawDataPlotter {
 		}
 		
 		double scale = EllipseVectorRenderer.getBestScale(maxMag);
-		System.out.println("Scale: " + scale);
+		logger.info("Scale: " + scale);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
-		System.out.println("desiredLength: " + desiredLength);
-		System.out.println("desiredLength/scale: " + desiredLength / scale);
+		logger.info("desiredLength: " + desiredLength);
+		logger.info("desiredLength/scale: " + desiredLength / scale);
 		
 		for (int i = 0; i < vrs.size(); i++) {
 			EllipseVectorRenderer vr = (EllipseVectorRenderer)vrs.get(i);

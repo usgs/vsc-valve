@@ -183,6 +183,9 @@ public class PlotHandler implements HttpHandler
 		return list;
 	}
 	
+	/**
+	 * Check if component's boundaries compatible to this plot
+	 */
 	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception{
 		int i=0;
 		for(PlotComponent component: components){

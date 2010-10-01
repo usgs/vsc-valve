@@ -1,7 +1,6 @@
 package gov.usgs.valve3.data;
 
 import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Util;
 import gov.usgs.valve3.Plotter;
 
 /**

@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 /**
- * Keeps set of parameters to generate valve plot
+ * Keeps set of parameters to generate valve plot component - 
+ * separated area of plot with set of axis and one or several graphs.
+ * Plot can contain several components.
  * 
  * $Log: not supported by cvs2svn $
  * Revision 1.4  2005/11/03 19:40:27  tparker
@@ -361,6 +363,10 @@ public class PlotComponent
 		return df.getTimeZone().getOffset(Util.j2KToDate(time).getTime())/1000.0;
 	}
 	
+	/**
+	 * If option 'color' was set into request string for the component, this function returns color for it's hex representation
+	 * @return null if 'color' option wasn't set
+	 */
 	public Color getColor() throws Valve3Exception {
 		String colorString = get("color");
 		if(colorString==null){

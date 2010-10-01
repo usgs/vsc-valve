@@ -31,7 +31,7 @@ public class DataHandler implements HttpHandler
 {
 	private static final String CONFIG_FILE = "data.config";
 	private static final int DEFAULT_VDX_CLIENT_TIMEOUT = 60000;
-	
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.DataHandler"); 
 	protected Map<String, DataSourceDescriptor> dataSources;
 	protected Map<String, Pool<VDXClient>> vdxClients;
 	protected ConfigFile config;
@@ -56,7 +56,7 @@ public class DataHandler implements HttpHandler
 		List<String> vdxs = config.getList("vdx");
 		for (String vdx : vdxs)
 		{
-			System.out.println("VDX: " + vdx);
+			logger.severe("VDX: " + vdx);
 			ConfigFile sub = config.getSubConfig(vdx);
 			int num = Util.stringToInt(sub.getString("clients"), 4);
 			Pool<VDXClient> pool = new Pool<VDXClient>();
@@ -73,7 +73,7 @@ public class DataHandler implements HttpHandler
 		List<String> sources = config.getList("source");
 		for (String source : sources)
 		{
-			System.out.println("Data source: " + source);
+			logger.severe("Data source: " + source);
 			ConfigFile sub = config.getSubConfig(source);
 			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub);
 			dataSources.put(source, dsd);
@@ -128,7 +128,6 @@ public class DataHandler implements HttpHandler
 	 */
 	public Object handle(HttpServletRequest request) {
 		try{
-			Logger logger = Log.getLogger("gov.usgs.vdx");
 			logger.info("entering DataHandler.handle()");
 		
 			String source = request.getParameter("src");

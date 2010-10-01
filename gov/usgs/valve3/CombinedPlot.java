@@ -1,6 +1,7 @@
 package gov.usgs.valve3;
 
 import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.ColorCycler;
 import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.LegendRenderer;
@@ -11,18 +12,25 @@ import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.LegendRenderer.LegendEntry;
+import gov.usgs.util.Log;
 import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
+/**
+ * Special kind of plot which renders set of components as one component
+ * 
+ * @author Max Kokoulin
+ */
 public class CombinedPlot extends Plot {
 	public final static double fillValue = Double.NEGATIVE_INFINITY;
-	// private List<PlotComponent> components = null;
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.CombinedPlot"); 
 	private int componentCount;
 	private int callCount;
 	private int leftTicks;
@@ -34,15 +42,25 @@ public class CombinedPlot extends Plot {
 	private double maxX = Double.MIN_VALUE;
 	private String bottomLabel = null;
 	private LegendRenderer legendRenderer = null;
+	private ColorCycler cc = null;
 	private RendererDataset leftRendererDataset  = new RendererDataset('L');
 	private RendererDataset rightRendererDataset = new RendererDataset('R');
 	private RendererDataset waveRendererDataset = new RendererDataset('W');
 	private List<SliceWaveRenderer> waveRenderers = null; 
 
+	/**
+	 * Default constructor
+	 */
 	public CombinedPlot() {
 		this(0, 0, 1);
 	}
 
+	/**
+	 * Constructor
+	 * @param w  plot width 
+	 * @param h  plot height
+	 * @param componentCount count of components
+	 */
 	public CombinedPlot(int w, int h, int componentCount) {
 		super(w, h);
 		this.componentCount = componentCount;
@@ -51,7 +69,7 @@ public class CombinedPlot extends Plot {
 	}
 
 	/**
-	 * Renders the plot. This simply paints the background color, process
+	 * Renders the plot: paints the background color, process
 	 * renderers to combine and render resulting renderer.
 	 * 
 	 * @param g
@@ -60,6 +78,7 @@ public class CombinedPlot extends Plot {
 	public void render(Graphics2D g) {
 		callCount++;
 		if (callCount == componentCount) {
+			cc = new ColorCycler();
 			for (Renderer renderer : renderers) {
 				if (renderer instanceof MatrixRenderer) {
 					MatrixRenderer matrixRenderer = (MatrixRenderer) renderer;
@@ -116,6 +135,9 @@ public class CombinedPlot extends Plot {
 		}
 	}
 
+	/**
+	 * Combine two matrix renderers
+	 */
 	private void combineRenderers(MatrixRenderer matrixRenderer, RendererDataset rendererDataset) {
 		setBoundaries(matrixRenderer, rendererDataset);
 		// Merge data
@@ -159,6 +181,9 @@ public class CombinedPlot extends Plot {
 		}
 	}
 	
+	/**
+	 * Set max and min values, plot boundaries during renderers combination
+	 */
 	private void setBoundaries(FrameRenderer renderer, RendererDataset rendererDataset){
 		if (renderer.getGraphX() < graphX) {
 			graphX = renderer.getGraphX();
@@ -186,6 +211,9 @@ public class CombinedPlot extends Plot {
 		}
 	}
 
+	/**
+	 * Merge two data matrix according MatrixRenderers data storing rules
+	 */
 	private DoubleMatrix2D mergeData(DoubleMatrix2D matrix,
 			DoubleMatrix2D matrixToAdd) {
 		if (matrix == null) {
@@ -193,7 +221,7 @@ public class CombinedPlot extends Plot {
 		} else if (matrixToAdd == null) {
 			return matrix;
 		} else {
-			System.out.println("Result size: "
+			logger.info("Result size: "
 					+ (matrix.rows() + matrixToAdd.rows()) + "x"
 					+ (matrix.columns() + matrixToAdd.columns() - 2));
 			DoubleMatrix2D result = new DenseDoubleMatrix2D(matrix.rows()
@@ -217,7 +245,7 @@ public class CombinedPlot extends Plot {
 					} else if (column < matrix.columns()) {
 						result.set(row + matrix.rows(), column, fillValue);
 					} else {
-						// System.out.println("Setting cell: " +
+						// logger.info("Setting cell: " +
 						// (row+matrix.rows()) +"x" + (column) +
 						// ", got from cell " + row + "x" +
 						// (column-matrix.columns()+2));
@@ -230,6 +258,10 @@ public class CombinedPlot extends Plot {
 		}
 	}
 
+	/**
+	 * Merge LineRenderers according MatrixRenderers data storing rules
+	 * @param dataColumnsCount default count of resulting array - it used in the case of nulls as merged arrays
+	 */
 	// Maybe it is possible to write the following functions via generics. But I
 	// don't know how to create resulting T[] if both array arguments are nulls.
 	private ShapeRenderer[] mergeLineRenderers(ShapeRenderer[] array,
@@ -238,6 +270,7 @@ public class CombinedPlot extends Plot {
 			if (arrayToAdd == null) {
 				return new ShapeRenderer[dataColumnsCount];
 			} else {
+				setColors(arrayToAdd);
 				return arrayToAdd;
 			}
 		} else {
@@ -256,16 +289,22 @@ public class CombinedPlot extends Plot {
 					result[i + array.length] = arrayToAdd[i];
 				}
 			}
+			setColors(result);
 			return result;
 		}
 	}
 
+	/**
+	 * Merge DataPointRenderers according MatrixRenderers data storing rules
+	 * @param dataColumnsCount default count of resulting array - it used in the case of nulls as merged arrays
+	 */
 	private DataPointRenderer[] mergePointRenderers(DataPointRenderer[] array,
 			DataPointRenderer[] arrayToAdd, int dataColumnsCount) {
 		if (array == null) {
 			if (arrayToAdd == null) {
 				return new DataPointRenderer[dataColumnsCount];
 			} else {
+				setColors(arrayToAdd);
 				return arrayToAdd;
 			}
 		} else {
@@ -284,10 +323,14 @@ public class CombinedPlot extends Plot {
 					result[i + array.length] = arrayToAdd[i];
 				}
 			}
+			setColors(result);
 			return result;
 		}
 	}
 	
+	/**
+	 * Merge LegendRenderers according MatrixRenderers data storing rules
+	 */
 	private LegendRenderer mergeLegendRenderer(LegendRenderer lrOne, LegendRenderer lrTwo) {
 		if (lrOne == null) {
 			return lrTwo;
@@ -307,6 +350,9 @@ public class CombinedPlot extends Plot {
 		}
 	}
 
+	/**
+	 * Merge data column visibility flags according MatrixRenderers data storing rules
+	 */
 	private boolean[] mergeVisible(boolean[] arrayOne, boolean[] arrayTwo) {
 		if (arrayOne == null) {
 			return arrayTwo;
@@ -324,6 +370,31 @@ public class CombinedPlot extends Plot {
 		}
 	}
 
+	/**
+	 * Set color of shape renderers in the merged MatrixRenderer according ColorCycler settings 
+	 */
+	private void setColors(ShapeRenderer[] array){
+		for(ShapeRenderer renderer: array){
+			if(renderer != null){
+				renderer.color = cc.getNextColor();
+			}
+		}
+	}
+	
+	/**
+	 * Set color of point renderers in the merged MatrixRenderer according ColorCycler settings 
+	 */	
+	private void setColors(DataPointRenderer[] array){
+		for(DataPointRenderer renderer: array){
+			if(renderer != null){
+				renderer.color = cc.getNextColor();
+			}
+		}
+	}
+	
+	/**
+	 * Create combined MatrixRenderer from dataset computed from all processed separated MaxtrixRenderers
+	 */
 	private MatrixRenderer createRenderer(RendererDataset rendererDataset) {
 		MatrixRenderer renderer = new MatrixRenderer(rendererDataset.combinedData.viewSorted(0), true);
 		renderer.setLineRenderers(rendererDataset.lineRenderers);
@@ -352,6 +423,10 @@ public class CombinedPlot extends Plot {
 		return renderer;
 	}
 
+	/**
+	 * Class to store data about processed renderer
+	 * @author Max Kokoulin
+	 */
 	class RendererDataset {
 		char type = 'L';
 		String unit = null;

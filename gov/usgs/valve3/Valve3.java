@@ -5,15 +5,12 @@ import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
-import gov.usgs.util.Util;
 import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.data.DataHandler;
 
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;

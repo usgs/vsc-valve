@@ -12,8 +12,8 @@ public interface HttpHandler
 {
 	/**
 	 * Handle the given request and generate an appropriate response. 
-	 * @param request
-	 * @return
+	 * @param request Request got from js user interface or manually entered in the browser
+	 * @return constructed Java object - for example menu or plot.
 	 */
 	public Object handle(HttpServletRequest request) throws Valve3Exception;
 }

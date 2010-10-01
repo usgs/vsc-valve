@@ -1,6 +1,9 @@
 package gov.usgs.valve3.result;
 
+import gov.usgs.util.Log;
+
 import java.io.File;
+import java.util.logging.Logger;
 
 /**
  * Handles with computed raw data results, 
@@ -15,6 +18,7 @@ import java.io.File;
  */
 public class RawData extends Result
 {
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.result.RawData"); 
 	protected String url;
 	protected String filename;
 	
@@ -44,9 +48,9 @@ public class RawData extends Result
 	public void delete()
 	{
 		if (new File(getLocalFilename()).delete())
-			System.out.println("Deleted " + getLocalFilename());
+			logger.info("Deleted " + getLocalFilename());
 		else
-			System.out.println("Couldn't delete " + getLocalFilename());
+			logger.info("Couldn't delete " + getLocalFilename());
 	}
 	
 	/**

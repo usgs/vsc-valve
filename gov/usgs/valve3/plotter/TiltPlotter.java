@@ -178,6 +178,10 @@ public class TiltPlotter extends RawDataPlotter {
 		}
 	}
 
+	/**
+	 * Gets binary data from VDX
+	 * @throws Valve3Exception
+	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
@@ -225,7 +229,11 @@ public class TiltPlotter extends RawDataPlotter {
 	}
 	
 
-	
+	/**
+	 * Create MapRenderer for tilt vector, adds it to plot
+	 * @param v3Plot
+	 * @param component
+	 */
 	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component) {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();

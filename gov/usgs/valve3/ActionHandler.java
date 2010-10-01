@@ -16,10 +16,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ActionHandler implements HttpHandler
 {
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.ActionHandler"); 
 	protected Map<String, HttpHandler> handlers;
 	protected String key;
-	private Logger logger;	
-
 	
 	/**
 	 * Constructor
@@ -27,7 +26,6 @@ public class ActionHandler implements HttpHandler
 	 */
 	public ActionHandler(String k)
 	{
-		logger = Log.getLogger("gov.usgs.valve3");
 		key = k;
 		handlers = new HashMap<String, HttpHandler>();
 	}
@@ -44,10 +42,11 @@ public class ActionHandler implements HttpHandler
 	/**
 	 * apply action with name containing in the 'key' field to http requests.
 	 * See {@link HttpHandler}
+	 * @param request - got http request
 	 */
 	public Object handle(HttpServletRequest request) throws Valve3Exception
 	{
-		System.out.println(request.getQueryString());
+		logger.info(request.getQueryString());
 		String action = request.getParameter(key);
 		if (action == null){
 			action = Valve3.getInstance().getDefaults().getString("parameter."+key);

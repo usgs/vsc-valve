@@ -174,6 +174,11 @@ public class RawDataHandler implements HttpHandler
 		return component;
 	}
 	
+	/**
+	 * Get list of available ranks
+	 * @param source source name
+	 * @param client vdx name
+	 */
 	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
 		Map<Integer, Rank> ranks;
 		Map<String, String> params = new LinkedHashMap<String, String>();

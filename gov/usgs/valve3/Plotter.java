@@ -146,10 +146,16 @@ abstract public class Plotter
 		return ec;
 	}
 
+	/**
+	 * It seems never used
+	 */
 	public double getSampleRate() {
 		return 0.0;
 	}
-	
+
+	/**
+	 * It seems never used
+	 */
 	public String getDataType() {
 		return null;
 	}

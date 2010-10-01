@@ -288,6 +288,15 @@ public class Valve3Plot extends Result
 	}
 
 	/**
+	 * Getter for plot combined flag
+	 * @returns "plot is combined"
+	 */
+	public boolean getCombined()
+	{
+		return isCombined;
+	}
+	
+	/**
 	 * Delete file with generated plot image from file system
 	 */
 	public void delete()
@@ -308,6 +317,7 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<width>" + width + "</width>\n");
 		sb.append("\t\t<height>" + height + "</height>\n");
 		sb.append("\t\t<exportable>" + exportable + "</exportable>\n");
+		sb.append("\t\t<combined>" + isCombined + "</combined>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)

@@ -649,6 +649,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 		v3Plot.addComponent(component);	
 	}
 	
+	/**
+	 * Compute rank, calls appropriate function to init renderers
+	 * @throws Valve3Exception
+	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		
