@@ -116,6 +116,7 @@ function handlePlot(xml)
 	var translation = getXMLField(xml, "translation");
 	var url = getXMLField(xml, "url");
 	var raw_ok = (getXMLField(xml, "exportable") == "true");
+	var combined = (getXMLField(xml, "combined") == "true");
 	
 	var t = document.getElementById('contentTemplate').cloneNode(true);
 	t.id = "content" + count;
@@ -128,6 +129,7 @@ function handlePlot(xml)
 	var img = imgs[imgs.length - 1];
 	var minImg = imgs[1];
 	var components = xml.getElementsByTagName('component');
+	t.getElementsByTagName('input')[0].value = components.length;
 	img.header = header;
 	img.container = t;
 	img.src = src;
@@ -281,7 +283,7 @@ function handlePlot(xml)
     
     //Combination
     
-    if((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)){
+    if(((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)) || combined){
     	addListener(imgs[5], 'click',
     		function()
     		{
@@ -308,13 +310,18 @@ function handlePlot(xml)
          					plotSize[5] = plotSize[5]*yScaling; //comp height 
          					plotSize[6] = plotSize[6]*yScaling; //map height
          					var clickedId = mip.getElementsByTagName('input')[2].value;
-         					try{
-         						loadXML(title + '+' + mip.getElementsByTagName('input')[3].value, combineUrl(url, document.getElementById(clickedId).getElementsByTagName('a')[0].href, plotSize));
-         					} 
-         					catch(err)
-         				    {
-         				        alert(err);
-         				    }
+         					var componentCount = document.getElementById(clickedId).getElementsByTagName('input')[0].value;
+         					if(componentCount==1){
+         						try{
+         							loadXML(title + '+' + mip.getElementsByTagName('input')[3].value, combineUrl(url, document.getElementById(clickedId).getElementsByTagName('a')[0].href, plotSize));
+         						} 
+         						catch(err)
+         						{
+         							alert(err);
+         						}
+         					} else {
+         						alert("Selected plot has more than 1 component");
+         					}
 
          			});
         			var combineCancelButton = mip.getElementsByTagName('input')[0];
