@@ -321,7 +321,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		double tnorth = range.getNorth();
 		
 		Axes tmp = this.axes;
-		if (axes == Axes.ARB_DEPTH) {
+		if (axes == Axes.ARB_DEPTH || axes == Axes.ARB_TIME) {
 			// we need to get extra hypocenters for plotting the width
 			
 			
@@ -448,6 +448,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * 
 	 */
 	private void plotMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
+		ArbDepthCalculator adc = null;
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
@@ -457,6 +458,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		double lon1;
 		double lat2;
 		double lon2;
+		int count;
+		List<Hypocenter> myhypos;
 		switch (axes) {
 		case MAP_VIEW:
 			base = plotMapView(v3Plot.getPlot(), component);
@@ -505,7 +508,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			lat2 = endLoc.getY();
 			lon2 = endLoc.getX();
 
-			ArbDepthCalculator adc = new ArbDepthCalculator(lat1, lon1, lat2, lon2, hypowidth);
+			adc = new ArbDepthCalculator(lat1, lon1, lat2, lon2, hypowidth);
 
 			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);
 
@@ -518,8 +521,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.getAxis().setBottomLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 		
-			int count = 0;
-			List myhypos = hypos.getHypocenters();
+			count = 0;
+			myhypos = hypos.getHypocenters();
 			for (int i = 0; i < myhypos.size(); i++) {	
 				
 				Hypocenter hc = (Hypocenter) myhypos.get(i);
@@ -538,6 +541,56 @@ public class HypocenterPlotter extends RawDataPlotter {
 			component.setTranslationType("ty");
 			base.getAxis().setBottomLabelAsText("Time");
 			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
+		case ARB_TIME:
+			
+			// need to set the extents for along the line. km offset?
+
+			int mh = component.getInt("mh");
+			
+
+			
+			base = new ArbDepthFrameRenderer();
+			//base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+			base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), mh);
+			
+			v3Plot.getPlot().setSize(v3Plot.getPlot().getWidth(), mh + 60);
+			
+			lat1 = startLoc.getY();
+			lon1 = startLoc.getX();
+			lat2 = endLoc.getY();
+			lon2 = endLoc.getX();
+
+			adc = new ArbDepthCalculator(lat1, lon1, lat2, lon2, hypowidth);
+
+			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);
+
+		
+		
+			count = 0;
+			myhypos = hypos.getHypocenters();
+			for (int i = 0; i < myhypos.size(); i++) {	
+				
+				Hypocenter hc = (Hypocenter) myhypos.get(i);
+				if (adc.isInsideArea(hc.lat, hc.lon)) {
+					count++;
+				}
+			}
+			subCount = new String(count + " of ");
+					
+			//base.setExtents(0.0, adc.getMaxDist(), -maxDepth, -minDepth);
+
+			base.setExtents(startTime, endTime, 0.0, adc.getMaxDist());
+			base.createDefaultAxis();
+			base.setXAxisToTime(8);
+			
+					
+			base.getAxis().setLeftLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
+						
+			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+			component.setTranslationType("ty");
+			base.getAxis().setBottomLabelAsText("Time");
+			
 			break;
 		}
 						
@@ -649,10 +702,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		v3Plot.addComponent(component);	
 	}
 	
-	/**
-	 * Compute rank, calls appropriate function to init renderers
-	 * @throws Valve3Exception
-	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		
