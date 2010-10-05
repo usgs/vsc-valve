@@ -293,6 +293,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 		v3p.addComponent(comp);
 		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
+		addSuppData( vdxSource, vdxClient, v3p, comp );
 		v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
 		v3p.setFilename(PlotHandler.getRandomFilename());
 		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3p.getFilename());

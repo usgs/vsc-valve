@@ -219,8 +219,10 @@ public class HelicorderPlotter extends RawDataPlotter {
 			v3Plot.addComponent(component);
 		}
 		
-		if ( !forExport )
+		if ( !forExport ) {
+			addSuppData( vdxSource, vdxClient, v3Plot, component );
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
+		}
 	}
 
 	/**

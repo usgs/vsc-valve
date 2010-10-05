@@ -568,8 +568,10 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		switch(corePlotType) {
 			case TIME_SERIES:
-				if ( !forExport )
+				if ( !forExport ) {
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+					addSuppData( vdxSource, vdxClient, v3Plot, component );
+				}
 				break;
 			case VELOCITY_MAP:
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");

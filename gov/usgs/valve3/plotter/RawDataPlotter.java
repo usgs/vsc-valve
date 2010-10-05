@@ -11,11 +11,13 @@ import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Time;
 import gov.usgs.util.UtilException;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
+import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.vdx.client.VDXClient;
@@ -25,6 +27,7 @@ import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.SuppDatum;
 
 /**
  * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
@@ -33,7 +36,6 @@ import gov.usgs.vdx.data.ExportData;
  */
 
 public abstract class RawDataPlotter extends Plotter {
-	
 	
 	protected double startTime;
 	protected double endTime;
@@ -85,6 +87,7 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double debiasValue;
 	
 	protected boolean forExport;
+	protected SuppDatum sd_data[];
 	
 	
 	/**
@@ -627,5 +630,52 @@ public abstract class RawDataPlotter extends Plotter {
 			if ( Double.isNaN(debiasValue) )
 				throw new Valve3Exception("Illegal/missing value for bias removal");
 		}
+	}
+	
+	protected void addSuppData( String source, String client, Valve3Plot v3Plot, PlotComponent component ) throws Valve3Exception {
+		String sdTypes;
+		try{
+			sdTypes = component.getString("sdt");
+		} catch(Valve3Exception e){
+			sdTypes = "";
+		}
+		//if ( sdTypes.length() == 0 )
+		//	return;
+		Map<String, String> params = new LinkedHashMap<String, String>();		
+		params.put("source", source);
+		params.put("action", "suppdata");
+		params.put("st", Time.format(Time.STANDARD_TIME_FORMAT_MS,startTime).replaceAll("\\D",""));
+		params.put("et", Time.format(Time.STANDARD_TIME_FORMAT_MS,endTime).replaceAll("\\D",""));
+		params.put("rk", Integer.toString(rk));
+		params.put("byID","true");
+		params.put("ch", ch);
+		String cols = null;
+		if ( columnsList == null ) {
+			cols = "";
+		} else {
+			for (int i = 0; i < columnsList.size(); i++) {
+				Column column	= columnsList.get(i);
+				if ( column.checked )
+					if ( cols == null )
+						cols = "" + (i+1);
+					else
+						cols = cols + "," + (i+1);
+			}
+		}
+		params.put("col", cols);
+		params.put("type", sdTypes);
+		params.put("dl", "10");
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
+		VDXClient cl			= pool.checkout();
+		try{
+			List<String> sds = null;
+			sds = cl.getTextData(params);
+			for ( String sd: sds )
+				v3Plot.addSuppDatum( new SuppDatum( sd ) );
+		}
+		catch(UtilException e){
+			throw new Valve3Exception(e.getMessage()); 
+		}
+		pool.checkin(cl);
 	}
 }

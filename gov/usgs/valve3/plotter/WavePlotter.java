@@ -464,8 +464,10 @@ public class WavePlotter extends RawDataPlotter {
 		
 		switch(plotType) {
 			case WAVEFORM:
-				if ( !forExport )
+				if ( !forExport ) {
+					addSuppData( vdxSource, vdxClient, v3Plot, component );
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Waveform");
+				}
 				break;
 			case SPECTRA:
 				v3Plot.setExportable( false ); // Can't export vectors

@@ -558,8 +558,10 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		switch(plotType) {
 			case TIME_SERIES:
-				if ( !forExport )
+				if ( !forExport ) {
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+					addSuppData( vdxSource, vdxClient, v3Plot, component );
+				}
 				break;
 			case TILT_VECTORS:
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");

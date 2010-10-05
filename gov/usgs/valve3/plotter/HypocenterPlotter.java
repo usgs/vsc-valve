@@ -153,7 +153,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
 		
-		
 		String pt = component.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.MAP;
@@ -289,7 +288,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			break;
 		
-			
 		case COUNTS:
 			String bs	= Util.stringToString(component.get("cntsBin"), "day");
 			bin			= BinSize.fromString(bs);
@@ -702,6 +700,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 		v3Plot.addComponent(component);	
 	}
 	
+	/**
+	 * Compute rank, calls appropriate function to init renderers
+	 * @throws Valve3Exception
+	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		
@@ -719,7 +721,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		switch (plotType) {
 		case MAP:
-			if (forExport) {
+			if ( forExport ) {
 				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
 				csvData.add(new ExportData(csvIndex, new HypocenterExporter(
 						hypos)));

@@ -6,6 +6,7 @@ import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.CombinedPlot;
+import gov.usgs.vdx.data.SuppDatum;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 
@@ -76,6 +77,8 @@ public class Valve3Plot extends Result
 	protected boolean exportable;
 	private boolean isCombined = false;
 	
+	protected List<SuppDatum> suppdata;
+	
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters
@@ -133,6 +136,8 @@ public class Valve3Plot extends Result
 			plot = new Plot(width, height);
 		}
 		exportable = false;
+		
+		suppdata = new ArrayList<SuppDatum>();
 	}
 
 	/***
@@ -322,7 +327,19 @@ public class Valve3Plot extends Result
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)
 			sb.append(pc.toXML());
+		for (SuppDatum sd : suppdata)
+			sb.append(sd.toXML());
 		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
 	}
+
+	/**
+	 * Add SuppDatum.
+	 * @param sd SuppDatum SuppDatum to add
+	 */
+	public void addSuppDatum(SuppDatum sd)
+	{
+		suppdata.add(sd);
+	}
+
 }

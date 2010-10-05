@@ -307,8 +307,10 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				}
 			}
 		}
-		if ( !forExport )
+		if ( !forExport ) {
+			addSuppData( vdxSource, vdxClient, v3Plot, component );
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
+		}
 	}
 	
 	/**
