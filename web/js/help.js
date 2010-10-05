@@ -27,7 +27,7 @@
 function help_init() {YUI({base: 'yui/3.1.1/', combo: false}).use(
 		'event', 'node', 'dom', function(Y) {
 
-	var DEBUG = true;
+	var DEBUG = false;
 	var BY_TEXT = {
 		'ISTI Valve': 'doc/user_docs/index.html',
 		'Start Time': 'doc/user_docs/index.html#commonPanel'

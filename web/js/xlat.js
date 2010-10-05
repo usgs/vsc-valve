@@ -48,6 +48,13 @@ function translate_ty(event)
 	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
 }
 
+function translateT2X( t, targ )
+{
+	var xy = getTopLeftOffset(targ);
+	var tt = targ.translation;
+	return (t - tt[1]*1.0)/(tt[0]*1.0);
+}
+
 /**
  *  Get event and target element x/y coordinates. For example mouse coordinates
  *  and png image coordinates which mouse is rolling over. Ty can mean latitude

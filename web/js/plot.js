@@ -122,7 +122,7 @@ function handlePlot(xml)
 	t.id = "content" + count;
 	t.style.width = (width * 1) + "px";
 	var header = t.getElementsByTagName('h1')[0];
-	t.getElementsByTagName('div')[1].id = t.id + 'combine';
+	t.getElementsByTagName('div')[4].id = t.id + 'combine';
 	header.firstChild.nodeValue = title;
 	var links = t.getElementsByTagName('a');
 	var imgs = t.getElementsByTagName('img');
@@ -281,6 +281,17 @@ function handlePlot(xml)
 		}
 	}
     
+	// processing data
+	addListener(imgs[6], 'click',
+		(function(t)
+		{
+			return function() {
+				if ( t.style.visibility == "visible" )
+					t.style.visibility = "hidden";
+				else
+					t.style.visibility = "visible";
+			}
+		})(t.getElementsByClassName("suppnodl")[0]));
     //Combination
     
     if(((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)) || combined){
@@ -347,6 +358,93 @@ function handlePlot(xml)
 	ip.insertBefore(t, ip.firstChild);
 		
 	count++;
+
+	// gather/format supplemental data
+	var supp_data = xml.getElementsByTagName('suppdatum');
+	var sbar = document.createElement( "div" );
+	var node = 0;
+	sbar.className = "suppdataline";
+	var width = t.clientWidth*1;
+	var height = t.clientHeight*1 + img.fullHeight*1 - 10;
+	sbar.style.height = (height-30) + "px";
+	var sanchor = document.createElement( "div" );
+	sanchor.className = "suppdataanchor";
+	sanchor.style.top = (height-20) + "px";
+	var proctable = t.getElementsByClassName( "suppnodltable" )[0];
+	var procdata = proctable.getElementsByTagName('tbody')[0];
+	for ( i=0; i<supp_data.length; i++ ) {
+		var sd_text = supp_data[i].textContent;
+		var sd_bits = sd_text.split( "\"" );
+		if ( sd_bits[7] == "0" ) {
+			var new_tr = document.createElement( "tr" );
+			var new_td = document.createElement( "td" );
+			new_td.appendChild( document.createTextNode( sd_bits[8] ) );
+			new_tr.appendChild( new_td );
+			var new_td = document.createElement( "td" );
+			new_td.appendChild( document.createTextNode( timeToString(1.0*sd_bits[2]) + " thru " + timeToString(1.0*sd_bits[3]) ) );
+			new_tr.appendChild( new_td );
+			var new_td = document.createElement( "td" );
+			var buttonnode= document.createElement('input');
+			buttonnode.setAttribute('type','button');
+			buttonnode.setAttribute('value','Show');
+			new_td.appendChild(buttonnode);
+			buttonnode.onclick = (function(sd) {return function(){ show_sd(sd) }})(t.id+"\""+sd_text);
+			new_tr.appendChild( new_td );
+			procdata.appendChild( new_tr );
+			continue;
+		}
+		var color = "#" + sd_bits[14];
+		sbar.style.background = color;
+		sanchor.style.background = color;
+		var when = Math.round( translateT2X(sd_bits[3]*1.0, img) );
+		var theNewParagraph = document.createElement('suppdatum');
+		var theTextOfTheParagraph = document.createTextNode(supp_data[i].textContent);
+		theNewParagraph.appendChild(theTextOfTheParagraph);
+		theNewParagraph.style.visibility = "hidden";
+		if ( when < width ) {
+			sbar.style.left = when + "px";
+			node = sbar.cloneNode(true);
+			node.style.backgroundImage="url(images/supp_et.gif)";
+			t.insertBefore(node, t.firstChild);
+			sanchor.style.left = (when-10) + "px";
+			node = sanchor.cloneNode(true);
+			node.style.backgroundImage="url(images/supp_et.gif)";
+			node.appendChild(theNewParagraph);
+			node.show_data = t.id+"\""+sd_text;
+			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
+			t.insertBefore(node,t.firstChild);
+		}
+		when = Math.round( translateT2X(sd_bits[2]*1.0, img) );
+		if ( when > 0 ) {
+			sbar.style.left = when + "px";
+			t.insertBefore(sbar, t.firstChild);
+			sbar = sbar.cloneNode(true);
+			sanchor.style.left = (when-10) + "px";
+			node = sanchor.cloneNode(true);
+			node.appendChild(theNewParagraph);
+			node.show_data = t.id+"\""+sd_text;
+			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
+			t.insertBefore(node,t.firstChild);
+		}
+	}
+	var ig = new scrollableTable(proctable, 150, 200);
+//	if ( node != 0 ) {
+//		var ebs = t.getElementsByClassName('suppdataviewer');
+//		ebs[0].style.display = 'visible';
+//	}
+}
+
+function show_sd(me) {
+	var info = me;
+	var info_bits = info.split("\"");
+	var content = document.getElementById( info_bits[0] );
+	var viewer = content.getElementsByClassName( "suppviewer" )[0];
+	viewer.style.visibility = "visible";
+	var elts = viewer.getElementsByTagName("td");
+	elts[1].onclick = (function(sv) {return function(){ sv.style.visibility = "hidden"; }})(viewer);
+	elts[2].innerHTML = "<b>From</b> " + timeToString(1.0*info_bits[3]) + "<br><b>to</b> " + timeToString(1.0*info_bits[4])
+	elts[3].innerHTML = "<b>Type</b>: " + info_bits[14];
+	elts[4].innerHTML = "<b>Data</b>: " + info_bits[9] + "<br><textarea rows=\"3\" cols=\"40\">" + info_bits[10] + "</textarea></td>";
 }
 
 function combineUrl(url1, url2, size){
@@ -541,7 +639,8 @@ function PlotRequest(popup)
 								comp.chCnt = vals.length;
 							}	
 							
-							comp["selectedStation"] = elt.options[elt.selectedIndex].text;
+							if ( elt.selectedIndex != -1 )
+								comp["selectedStation"] = elt.options[elt.selectedIndex].text;
 							if (!comp[name])
 								comp[name] = "";
 							

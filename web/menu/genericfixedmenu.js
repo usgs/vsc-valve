@@ -29,6 +29,9 @@ create_genericfixedmenu = function(menu) {
 		// populate columns
 		populateGenericColumns(this);
 		
+		// populate suppdata types
+		populateSuppDataTypes(this);
+
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1h","-1d","-1w","-1m","-1y");

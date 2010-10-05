@@ -676,6 +676,38 @@ function populateGPSColumns(menu) {
 	);
 }
 
+/**
+ * Make an AJAX call via jsp to return the values for the supplemental datatype list
+ * The request to valve for select options returns a list of quote-separated items
+ * [0] sdtypeid
+ * [2] typename
+ * 
+ * @param {menu object} menu
+ */
+function populateSuppDataTypes(menu) {
+	var form	= document.getElementById(menu.id + '_' + menu.formName);
+	var select	= form.elements["selector:sdt"];
+	var url		= "valve3.jsp?a=data&src=" + menu.id + "&da=supptypes";
+	
+	loadXML(menu.id + " supptypes", url,
+		function(req) {
+			var xml		= req.responseXML;
+			var ch		= xml.getElementsByTagName('list-item');
+			var opts	= new Array(ch.length + 1);
+			// var temp	= (new XMLSerializer()).serializeToString(xml);
+			
+			for (var i = 0; i < ch.length; i++) {
+				var val	= ch[i].firstChild.nodeValue;
+				var ss	= val.split("\"");
+				var opt	= document.createElement('option');					
+				opt.value = ss[0];				
+				opt.appendChild(document.createTextNode(ss[2]));
+				select.appendChild(opt);
+				opts[i] = opt;
+			}
+		});
+}
+
 function countSelectedColumns(menu) {
 	var selectedColumns	= 0;
 	var namesElement	= document.getElementById(menu.id + "colNames");

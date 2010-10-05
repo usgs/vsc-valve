@@ -173,9 +173,35 @@
 			<img class="button" src="images/xml.gif">
 			<img name="export_btn" class="button" src="images/csv.gif">
 			<img name="combine_btn" class="button" src="images/add.gif">
+			<img name="procdata_btn" class="button" src="images/procdata.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
 			<div class="titleBar">
 				<h1 class="help">Content Template</h1>
+			</div>
+			<div class="suppviewer">
+				<table bgcolor="#CCCCCC">
+					<tr>
+						<td colspan="2"><b><i>Supplemental Data</i></b></td>
+						<td align="right"><img src="images/x.gif"/></td>
+					</tr>
+					<tr>
+						<td colspan="3" name="sd_span"><b>Timespan</b>:</td>
+					</tr>
+					<tr>
+						<td colspan="3"><b>Type:</b></td>
+					</tr>
+					<tr>
+						<td colspan="3"><b>Data:</b></td>
+					</tr>
+				</table>
+			</div>
+			<div class="suppnodl">
+				<div class="tableContainer">
+				<table class="suppnodltable" width="200px">
+				<thead class="fixedHeader"><tr><th>Processing Data</th></tr></thead>
+				<tbody class="scrollContent"></tbody>
+				</table>
+				</div>
 			</div>
 			<img class="pointer">
 			<input name="componentCount" type="hidden" value="">	

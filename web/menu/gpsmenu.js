@@ -30,6 +30,9 @@ create_gpsmenu = function(menu) {
 		// populate columns
 		populateGPSColumns(this);
 		
+		// populate suppdata types
+		populateSuppDataTypes(this);
+		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");

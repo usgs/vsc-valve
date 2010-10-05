@@ -142,6 +142,26 @@ function getMouseXY(e)
 }
 
 /**
+ *  Return target's upper left offset from screen's top left corner.
+ *  
+ *  @param {object} targ Target Element
+ *  @return array with two numeric values: x and y.
+ *  @type array
+ */
+function getTopLeftOffset(targ)
+{
+	var sX = 0;
+	var sY = 0;
+	do 
+	{
+		sX += targ.offsetLeft;
+		sY += targ.offsetTop;
+	}
+	while ((targ = targ.offsetParent)); // Returns a reference to the object that is the current element's offset positioning context.
+	return new Array(sX,sY);
+}
+
+/**
  *  getElement's X and Y where e is an event and targ is target, like a png image for example
  *  
  *  We'll return a useful x/y coordinate of the target's upper left offset.
@@ -153,26 +173,18 @@ function getMouseXY(e)
  */
 function getElementXY(e, targ)
 {
-	var sX = 0;
-	var sY = 0;
-	var el = targ;
-	do 
-	{
-		sX += el.offsetLeft;
-		sY += el.offsetTop;
-	}
-	while ((el = el.offsetParent)); // Returns a reference to the object that is the current element's offset positioning context.
+	var sXY = getTopLeftOffset(targ);
 	if (isIE)
 	{
-		sX = e.x - sX + document.documentElement.scrollLeft;
-		sY = e.y - sY + document.documentElement.scrollTop;
+		sXY[0] = e.x - sXY[0] + document.documentElement.scrollLeft;
+		sXY[1] = e.y - sXY[1] + document.documentElement.scrollTop;
 	}
 	else
 	{
-		sX = e.clientX - sX + window.pageXOffset; // clientX Indicate the horizontal (x) and vertical (y) coordinate of the mouse at the moment the current event fired. These coordinates are relative to the viewable document area of the browser window or frame.
-		sY = e.clientY - sY + window.pageYOffset;
+		sXY[0] = e.clientX - sXY[0] + window.pageXOffset; // clientX Indicate the horizontal (x) and vertical (y) coordinate of the mouse at the moment the current event fired. These coordinates are relative to the viewable document area of the browser window or frame.
+		sXY[1] = e.clientY - sXY[1] + window.pageYOffset;
 	}
-	return new Array(sX, sY);
+	return sXY;
 }
 
 /** 

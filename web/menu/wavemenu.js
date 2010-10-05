@@ -35,6 +35,9 @@ create_wavemenu = function(menu) {
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h");
 		}
+
+		// populate suppdata types
+		populateSuppDataTypes(this);
 	}
 	
 	menu.presubmit = function(pr, pc) {	
