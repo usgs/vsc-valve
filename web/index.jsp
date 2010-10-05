@@ -177,7 +177,8 @@
 			<div class="titleBar">
 				<h1 class="help">Content Template</h1>
 			</div>
-			<img class="pointer">	
+			<img class="pointer">
+			<input name="componentCount" type="hidden" value="">	
 			<div id="combineMenuTemplate" class="combine">
 			</div>
 		</div>
