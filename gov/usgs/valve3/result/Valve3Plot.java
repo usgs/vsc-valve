@@ -96,7 +96,7 @@ public class Valve3Plot extends Result
 		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH){
 			width = DEFAULT_WIDTH_PLOT;
 			logger.info("Illegal plot.w parameter value, was set to default");
-	}
+		}
 		height = -1;
 		if (h == null){
 			h= Valve3.getInstance().getDefaults().getString("parameter.plot.h");
