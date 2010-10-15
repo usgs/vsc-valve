@@ -177,6 +177,7 @@ public class WavePlotter extends RawDataPlotter {
 				}
 				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
 				gotData = true;
+				data.handleBadData();
 				if (doDespike) { data.despike(despikePeriod); }
 				if (doDetrend) { data.detrend(); }
 				if (filterPick != 0) {
