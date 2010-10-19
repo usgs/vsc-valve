@@ -44,7 +44,7 @@ abstract public class Result
 	}
 	
 	/**
-	 * 
+	 * Yield XML representation
 	 * @param type result type
 	 * @param nested String with xml representation of result's content
 	 * @return String with xml representation of generated result

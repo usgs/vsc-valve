@@ -25,6 +25,7 @@ public class GenericMenu extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return XML representation of this GenericMenu
 	 */
 	public String toXML()

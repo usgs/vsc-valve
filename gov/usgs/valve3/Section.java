@@ -38,6 +38,7 @@ public class Section implements Comparable<Section>
 	
 	/**
 	 * Adds menu item to display inside this section's menu
+	 * @param mi MenuItem
 	 */
 	public void addMenuItem(MenuItem mi)
 	{
@@ -45,6 +46,7 @@ public class Section implements Comparable<Section>
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return section xml representation 
 	 */
 	public String toXML()

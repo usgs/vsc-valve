@@ -82,6 +82,7 @@ public class DataHandler implements HttpHandler
 
 	/**
 	 * Getter for config file
+	 * @return config file
 	 */
 	public ConfigFile getConfig()
 	{
@@ -89,7 +90,7 @@ public class DataHandler implements HttpHandler
 	}
 	
 	/**
-	 * 
+	 * Yield VDXClient pool
 	 * @param key vdx parameter string in config file
 	 * @return Pool of initialized VDXClients configured in data.config file
 	 */
@@ -99,7 +100,7 @@ public class DataHandler implements HttpHandler
 	}
 	
 	/**
-	 * 
+	 * Yield named data source descriptor
 	 * @param key data source name ("source" parameter in data.config file)
 	 * @return initialized DataSourceDescriptor corresponding given name
 	 */
@@ -109,7 +110,7 @@ public class DataHandler implements HttpHandler
 	}
 	
 	/**
-	 * 
+	 * Yield list of data source descriptors
 	 * @return List of descriptors for all configured data sources
 	 */
 	public List<DataSourceDescriptor> getDataSources()
@@ -123,6 +124,7 @@ public class DataHandler implements HttpHandler
 	 * Implements HttpHandler.handle(). Computes data 
 	 * source and action from request, send query to server 
 	 * and construct appropriate returning object. 
+	 * @param request servlet request
 	 * @return returning type depends from data action parameter 
 	 * in the request - GenericMenu, ewRsamMenu or list of results.
 	 */

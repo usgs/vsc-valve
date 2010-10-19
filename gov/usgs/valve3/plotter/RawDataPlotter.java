@@ -101,6 +101,8 @@ public abstract class RawDataPlotter extends Plotter {
 	
 	/**
 	 * Fill those component parameters which are common for all plotters
+     * @param component plot component
+     * @throws Valve3Exception
 	 */
 	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
 		// Check for named channels, ranks
@@ -238,6 +240,7 @@ public abstract class RawDataPlotter extends Plotter {
 	
 	/**
 	 * Used during request of data for this plotter, adds downsampling information to request's parameters
+	 * @param params parameters to add to
 	 */
 	protected void addDownsamplingInfo(Map<String, String> params){
 		params.put("ds", downsamplingType.toString());
@@ -248,6 +251,8 @@ public abstract class RawDataPlotter extends Plotter {
 	 * Initialize list of channels for given vdx source
 	 * @param source	vdx source name
 	 * @param client	vdx name
+	 * @return list of columns
+	 * @throws Valve3Exception
 	 */
 	protected static List<Column> getColumns(String source, String client) throws Valve3Exception{
 		List<Column> columns;	
@@ -272,6 +277,8 @@ public abstract class RawDataPlotter extends Plotter {
 	 * Initialize list of channels for given vdx source
 	 * @param source	vdx source name
 	 * @param client	vdx name
+	 * @return map of ids to channels
+	 * @throws Valve3Exception
 	 */
 	protected static Map<Integer, Channel> getChannels(String source, String client) throws Valve3Exception {
 		Map<Integer, Channel> channels;	
@@ -296,6 +303,8 @@ public abstract class RawDataPlotter extends Plotter {
 	 * Initialize list of ranks for given vdx source
 	 * @param source	vdx source name
 	 * @param client	vdx name
+	 * @return map of ids to ranks
+	 * @throws Valve3Exception
 	 */
 	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
 		Map<Integer, Rank> ranks;
@@ -318,7 +327,14 @@ public abstract class RawDataPlotter extends Plotter {
 	
 	/**
 	 * Initialize MatrixRenderer for left plot axis
+     * @param component plot component
+     * @param channel Channel
+     * @param gdm data matrix
+     * @param displayCount 
+     * @param dh display height?
 	 * @param index number of column to plot inside renderer. -1 value means we need to render all columns from gdm matrix.
+	 * @param unit axis label
+	 * @return renderer
 	 * @throws Valve3Exception
 	 */
 	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, String unit) throws Valve3Exception {	
@@ -362,7 +378,13 @@ public abstract class RawDataPlotter extends Plotter {
 
 	/**
 	 * Initialize MatrixRenderer for right plot axis
+     * @param component plot component
+     * @param channel Channel
+     * @param gdm data matrix
+     * @param displayCount 
+     * @param dh display height?
 	 * @param index number of column to plot inside renderer. -1 value means we need to render all columns from gdm matrix.
+	 * @return renderer
 	 * @throws Valve3Exception
 	 */
 	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index) throws Valve3Exception {
@@ -399,17 +421,26 @@ public abstract class RawDataPlotter extends Plotter {
 	/**
 	 * This function should be overridden in each concrete plotter.
 	 * Configure plotter according component parameters.
+     * @param component plot component
+     * @throws Valve3Exception
 	 */
 	abstract void getInputs(PlotComponent component) throws Valve3Exception;
+	
 	/**
 	 * This function should be overridden in each concrete plotter.
 	 * Request the data from vdx server.
+     * @param component plot component
+     * @throws Valve3Exception
 	 */
 	abstract void getData(PlotComponent component) throws Valve3Exception;
 	
 	/**
 	 * Format time and data using decFmt (and nullField for empty fields); 
 	 * append to csvText 
+	 * @param data data for line
+	 * @param time time for data
+	 * @param decFmt how to format numbers
+	 * @param nullField what to use for missing fields
 	 */
 	private void addCSVline( Double[][] data, Double time, String decFmt, String nullField ) {
 		String line = String.format( "%14.3f,", time ) + Util.j2KToDateString(time);					
@@ -426,6 +457,8 @@ public abstract class RawDataPlotter extends Plotter {
 	}
 	
 	/**
+     * Yield contents as CSV w/o comment
+     * @param comp plot component
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
@@ -433,9 +466,11 @@ public abstract class RawDataPlotter extends Plotter {
 	}
 
     /**
+     * Yield contents as CSV
      * @param comp plot component
      * @param cmt  comment line to add after configured comments
      * @return CSV dump of binary data described by given PlotComponent
+     * @throws Valve3Exception
      */
 	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
 		// Get export configuration parameters
@@ -594,6 +629,8 @@ public abstract class RawDataPlotter extends Plotter {
 	
 	/**
 	 * Fills plotter's data manipulation configuration according component parameters
+     * @param comp plot component
+     * @throws Valve3Exception
 	 */
 	protected void validateDataManipOpts(PlotComponent component) throws Valve3Exception {
 		doDespike = Util.stringToBoolean(component.get("despike"));
@@ -632,6 +669,14 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 	}
 	
+	/**
+	 * Add to plotter's supplemental data
+     * @param source data source
+     * @param client name of VDX client
+     * @param v3Plot Valve3Plot
+     * @param component plot component
+     * @throws Valve3Exception
+	 */
 	protected void addSuppData( String source, String client, Valve3Plot v3Plot, PlotComponent component ) throws Valve3Exception {
 		String sdTypes;
 		try{

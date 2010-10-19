@@ -44,6 +44,7 @@ public class MenuItem implements Comparable<MenuItem>
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return menu item XML representation
 	 */
 	public String toXML()

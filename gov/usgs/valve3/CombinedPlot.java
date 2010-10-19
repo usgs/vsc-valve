@@ -137,6 +137,8 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Combine two matrix renderers
+	 * @param matrixRenderer MatrixRenderer to merge in
+	 * @param rendererDataset RendererDataset to merge in
 	 */
 	private void combineRenderers(MatrixRenderer matrixRenderer, RendererDataset rendererDataset) {
 		setBoundaries(matrixRenderer, rendererDataset);
@@ -183,6 +185,8 @@ public class CombinedPlot extends Plot {
 	
 	/**
 	 * Set max and min values, plot boundaries during renderers combination
+	 * @param renderer FrameRenderer to merge in
+	 * @param rendererDataset RendererDataset to merge in
 	 */
 	private void setBoundaries(FrameRenderer renderer, RendererDataset rendererDataset){
 		if (renderer.getGraphX() < graphX) {
@@ -213,6 +217,9 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Merge two data matrix according MatrixRenderers data storing rules
+	 * @param matrix DoubleMatrix2D to merge with
+	 * @param matrixToAdd DoubleMatrix2D to add
+	 * @return merged result
 	 */
 	private DoubleMatrix2D mergeData(DoubleMatrix2D matrix,
 			DoubleMatrix2D matrixToAdd) {
@@ -260,7 +267,10 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Merge LineRenderers according MatrixRenderers data storing rules
+	 * @param array array of ShapeRenderers to merge with
+	 * @param arrayToAdd array of ShapeRenderers to add
 	 * @param dataColumnsCount default count of resulting array - it used in the case of nulls as merged arrays
+	 * @return merged result
 	 */
 	// Maybe it is possible to write the following functions via generics. But I
 	// don't know how to create resulting T[] if both array arguments are nulls.
@@ -296,7 +306,10 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Merge DataPointRenderers according MatrixRenderers data storing rules
+	 * @param array array of DataPointRenderers to merge with
+	 * @param arrayToAdd array of DataPointRenderers to add
 	 * @param dataColumnsCount default count of resulting array - it used in the case of nulls as merged arrays
+	 * @return merged result
 	 */
 	private DataPointRenderer[] mergePointRenderers(DataPointRenderer[] array,
 			DataPointRenderer[] arrayToAdd, int dataColumnsCount) {
@@ -330,6 +343,9 @@ public class CombinedPlot extends Plot {
 	
 	/**
 	 * Merge LegendRenderers according MatrixRenderers data storing rules
+	 * @param lrOne first LegendRenderer
+	 * @param lrTwo second LegendRenderer
+	 * @return merged result
 	 */
 	private LegendRenderer mergeLegendRenderer(LegendRenderer lrOne, LegendRenderer lrTwo) {
 		if (lrOne == null) {
@@ -352,6 +368,9 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Merge data column visibility flags according MatrixRenderers data storing rules
+	 * @param arrayOne first visible array
+	 * @param arrayTwo second visible array
+	 * @return merged result
 	 */
 	private boolean[] mergeVisible(boolean[] arrayOne, boolean[] arrayTwo) {
 		if (arrayOne == null) {
@@ -372,6 +391,7 @@ public class CombinedPlot extends Plot {
 
 	/**
 	 * Set color of shape renderers in the merged MatrixRenderer according ColorCycler settings 
+	 * @param array ShapeRenderers to set color of
 	 */
 	private void setColors(ShapeRenderer[] array){
 		for(ShapeRenderer renderer: array){
@@ -383,6 +403,7 @@ public class CombinedPlot extends Plot {
 	
 	/**
 	 * Set color of point renderers in the merged MatrixRenderer according ColorCycler settings 
+	 * @param array DataPointRenderers to set color of
 	 */	
 	private void setColors(DataPointRenderer[] array){
 		for(DataPointRenderer renderer: array){
@@ -394,6 +415,7 @@ public class CombinedPlot extends Plot {
 	
 	/**
 	 * Create combined MatrixRenderer from dataset computed from all processed separated MaxtrixRenderers
+	 * @param rendererDataset dataset
 	 */
 	private MatrixRenderer createRenderer(RendererDataset rendererDataset) {
 		MatrixRenderer renderer = new MatrixRenderer(rendererDataset.combinedData.viewSorted(0), true);

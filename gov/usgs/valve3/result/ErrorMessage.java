@@ -20,6 +20,7 @@ public class ErrorMessage extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return String with xml representation of error message result
 	 */
 	public String toXML()

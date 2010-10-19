@@ -110,6 +110,7 @@ public class MenuHandler implements HttpHandler
 	// TODO: sortOrder
 	
 	/**
+	 * Getter for sections
 	 * @return list of Sections associated with this menu handler
 	 */
 	public List<Section> getSections()
@@ -122,6 +123,7 @@ public class MenuHandler implements HttpHandler
 	}
 	
 	/** 
+	 * Getter for menu item from ID
 	 * @param id menu item id
 	 * @return menu item from internal list found by it's id
 	 */

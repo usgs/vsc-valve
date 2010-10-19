@@ -127,6 +127,7 @@ public class Valve3 implements ServletContextListener
 	
 	/**
 	 * Getter for result deleter
+	 * @return result deleter
 	 */
 	public ResultDeleter getResultDeleter()
 	{
@@ -135,6 +136,7 @@ public class Valve3 implements ServletContextListener
 	
 	/**
 	 * Implementation of Singleton pattern
+	 * @return Valve3
 	 */
 	public static Valve3 getInstance()
 	{
@@ -142,7 +144,8 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * Getter for menu handle
+	 * Getter for menu handler
+	 * @return menu handler
 	 */
 	public MenuHandler getMenuHandler()
 	{
@@ -154,6 +157,7 @@ public class Valve3 implements ServletContextListener
 
 	/**
 	 * Getter for default values configuration
+	 * @return config file
 	 */
 	public ConfigFile getDefaults(){
 		return defaults;
@@ -161,6 +165,7 @@ public class Valve3 implements ServletContextListener
 	
 	/**
 	 * Getter for data handler
+	 * @return data handler
 	 */
 	public DataHandler getDataHandler()
 	{
@@ -172,6 +177,7 @@ public class Valve3 implements ServletContextListener
 
 	/**
 	 * Getter for action handler
+	 * @return action handler
 	 */
 	public ActionHandler getActionHandler()
 	{
@@ -190,6 +196,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/** 
+	 * Getter for config path
 	 * @return full directory name for application's configuration files
 	 */
 	public String getConfigPath()
@@ -198,6 +205,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Getter for application path
 	 * @return full real path to deployed application
 	 */
 	public String getApplicationPath()
@@ -206,6 +214,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/**
+	 * Getter for administrator's name
 	 * @return application's administrator name
 	 */
 	public String getAdministrator()
@@ -214,6 +223,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/**
+	 * Getter for admin email
 	 * @return application's administrator email
 	 */
 	public String getAdministratorEmail()
@@ -222,6 +232,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Getter for installation title
 	 * @return Title of installation displayed on start page
 	 */
 	public String getInstallationTitle()
@@ -230,6 +241,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Getter for time zone abbreviation
 	 * @return Abbreviated name of default time zone
 	 */
 	public String getTimeZoneAbbr()
@@ -238,6 +250,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Yield time zone offset for date
 	 * @param date Time moment to compute offset
 	 * @return offset between current time zone and UTC in seconds, on given time moment
 	 */
@@ -248,6 +261,7 @@ public class Valve3 implements ServletContextListener
 	
 	/**
 	 * Getter for geo image set
+	 * @return geo image set
 	 */
 	public GeoImageSet getGeoImageSet()
 	{
@@ -256,6 +270,7 @@ public class Valve3 implements ServletContextListener
 
 	/**
 	 * Getter for geo labels set
+	 * @return geo label set
 	 */
 	public GeoLabelSet getGeoLabelSet()
 	{
@@ -263,7 +278,9 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/**
-	 * Getter for export config
+	 * Getter for export config for data source
+	 * @param source data source name
+	 * @return export config
 	 */
 	public ExportConfig getExportConfig( String source ) 
 	{
@@ -271,6 +288,8 @@ public class Valve3 implements ServletContextListener
 	}
 	/**
 	 * Setter for export config
+	 * @param source data source name
+	 * @param ec export config
 	 */
 	public void putExportConfig( String source, ExportConfig ec ) 
 	{

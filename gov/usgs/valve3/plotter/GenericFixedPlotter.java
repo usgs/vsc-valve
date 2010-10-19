@@ -47,6 +47,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize internal data from PlotComponent component
+	 * @param component data to initialize from
 	 * @throws Valve3Exception
 	 */
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
@@ -108,6 +109,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 
 	/**
 	 * Gets binary data from VDX server.
+	 * @param component to get data for
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -158,6 +160,8 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	/**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, initialize MatrixRenderers for left and right axis, adds them to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -319,6 +323,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 * (plot may have 2 different value axis)
 	 * Generate PNG image to file with random file name if v3p isn't null.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param comp PlotComponent
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */

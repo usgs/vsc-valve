@@ -139,6 +139,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	/**
 	 * Initialize internal data from PlotComponent component
 	 * 
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
@@ -309,6 +310,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	/**
 	 * Gets hypocenter list binary data from VDX
 	 * 
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -383,7 +385,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	/**
 	 * Initialize MapRenderer and add it to given plot 
 	 * 
-	 * @param plot
+	 * @param plot Valve3Plot
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
 	 */
 	private BasicFrameRenderer plotMapView(Plot plot, PlotComponent component) throws Valve3Exception {
 		
@@ -443,7 +447,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 	/**
 	 * Initialize BasicFrameRenderer (init mode depends from axes type) and add it to plot.
 	 * Generate PNG image to local file.
-	 * 
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param rank Rank
+	 * @throws Valve3Exception
 	 */
 	private void plotMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		ArbDepthCalculator adc = null;
@@ -610,6 +617,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, initialize HistogramRenderer and add it to plot.
 	 * 		Generate PNG image to local file.
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param rank Rank
 	 * @throws Valve3Exception 
 	 */
 	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
@@ -702,6 +712,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	
 	/**
 	 * Compute rank, calls appropriate function to init renderers
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -746,6 +758,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image (hypocenters map or histogram, depends on plot type) to file with random name.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {

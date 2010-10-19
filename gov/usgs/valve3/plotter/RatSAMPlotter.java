@@ -81,6 +81,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */	
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
@@ -138,6 +139,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -179,6 +181,11 @@ public class RatSAMPlotter extends RawDataPlotter {
 	/**
 	 * Initialize DataRenderer, add it to plot, remove mean from rsam data if needed 
 	 * and render rsam values to PNG image in local file
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel1 Channel
+	 * @param channel2 Channel
+	 * @param rd RSAMData
 	 * @throws Valve3Exception
 	 */
 	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd) throws Valve3Exception {
@@ -257,6 +264,12 @@ public class RatSAMPlotter extends RawDataPlotter {
 	/**
 	 * Initialize HistogramRenderer, add it to plot, and 
 	 * render event count histogram to PNG image in local file
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel1 Channel
+	 * @param channel2 Channel
+	 * @param rd RSAMData
+	 * @throws Valve3Exception
 	 */
 	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd) throws Valve3Exception {
 
@@ -327,6 +340,8 @@ public class RatSAMPlotter extends RawDataPlotter {
 
 	/**
 	 * Loop through the list of channels and create plots
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -352,6 +367,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG images for values or event count histograms (depends from plot type) to file with random name.
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {

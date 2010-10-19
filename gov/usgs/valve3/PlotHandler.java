@@ -185,6 +185,9 @@ public class PlotHandler implements HttpHandler
 	
 	/**
 	 * Check if component's boundaries compatible to this plot
+	 * @param components List of PlotComponents to check
+	 * @param plot Valve3Plot to check against
+	 * @throws Valve3Exception raised if incompatible
 	 */
 	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception{
 		int i=0;
@@ -247,6 +250,7 @@ public class PlotHandler implements HttpHandler
 	}
 	
 	/**
+	 * Yield a random file name
 	 * @return random file name in the img/ directory with .png extension
 	 */
 	public static String getRandomFilename()

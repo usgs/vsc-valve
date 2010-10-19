@@ -65,7 +65,7 @@ abstract public class Plotter
 	}
 	
 	/**
-	 * Exports PlotComponent to CSV format
+	 * Exports PlotComponent to CSV format w/o comment
 	 * @param comp 
 	 * @return string with csv data
 	 * @throws Valve3Exception
@@ -75,6 +75,13 @@ abstract public class Plotter
 		return toCSV( comp, null );
 	}
 	
+	/**
+	 * Exports PlotComponent to CSV format
+	 * @param comp PlotComponent
+	 * @param cmt comment
+	 * @return string with csv data
+	 * @throws Valve3Exception
+	 */
 	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception
 	{
 		throw new Valve3Exception("Data export not available for this data source.");
@@ -96,7 +103,8 @@ abstract public class Plotter
 	
 	/**
 	 * Getter for plotter line type
-	 * @return
+	 * @return line type
+	 * @throws Valve3Exception
 	 */
 	public char getLineType() throws Valve3Exception{
 		String value = plotterConfig.getString("lineType");
@@ -111,6 +119,9 @@ abstract public class Plotter
 
 	/**
 	 * renders PlotComponent in given plot
+	 * @param plot Valve3Plot
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
 	 */
 	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception;
 	
@@ -118,6 +129,7 @@ abstract public class Plotter
 	 * Yield export configuration for specified source & client
 	 * @param source	vdx source name
 	 * @param client	vdx name
+	 * @return export config
 	 */
 	public ExportConfig getExportConfig(String source, String client) {
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -147,14 +159,16 @@ abstract public class Plotter
 	}
 
 	/**
-	 * It seems never used
+	 * Yield the sample rate
+	 * @return sample rate
 	 */
 	public double getSampleRate() {
 		return 0.0;
 	}
 
 	/**
-	 * It seems never used
+	 * Yield the data type
+	 * @return data type
 	 */
 	public String getDataType() {
 		return null;

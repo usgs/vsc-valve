@@ -82,6 +82,7 @@ public class Valve3Plot extends Result
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters
+	 * @param componentCount number of components
 	 * @throws Valve3Exception
 	 */
 	public Valve3Plot(HttpServletRequest request, int componentCount) throws Valve3Exception
@@ -141,7 +142,7 @@ public class Valve3Plot extends Result
 	}
 
 	/***
-	 * 
+	 * Getter for plot width
 	 * @return plot width
 	 */
 	public int getWidth()
@@ -159,7 +160,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for plot height
 	 * @return plot height
 	 */
 	public int getHeight()
@@ -177,7 +178,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for output type
 	 * @return output type to generate plot content
 	 */
 	public OutputType getOutputType()
@@ -194,7 +195,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for local file name
 	 * @return full file name to generate plot image. If not set return random file name.
 	 */
 	public String getLocalFilename()
@@ -206,7 +207,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for file name
 	 * @return short file name to generate plot image.
 	 */
 	public String getFilename()
@@ -215,7 +216,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for short file name
 	 * @return short file name to generate plot image as URL
 	 */
 	public String getURLFilename()
@@ -226,7 +227,7 @@ public class Valve3Plot extends Result
 	/**
 	 * Does nothing
 	 * @param rgb
-	 * @return
+	 * @return null
 	 */
 	public Color getRGB(String rgb)
 	{
@@ -234,8 +235,8 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
 	 * Getter for plot
+	 * @return plot
 	 */
 	public Plot getPlot()
 	{
@@ -243,7 +244,8 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * Add PlotComponent. (For what? It is never used)
+	 * Add PlotComponent.
+	 * @param comp PlotComponent
 	 */
 	public void addComponent(PlotComponent comp)
 	{
@@ -252,6 +254,7 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Getter for plot title
+	 * @return title
 	 */
 	public String getTitle()
 	{
@@ -260,6 +263,7 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Setter for plot title
+	 * @param t title
 	 */
 	public void setTitle(String t)
 	{
@@ -276,7 +280,7 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Getter for plot exportable flag
-	 * @returns "plot is exportable"
+	 * @return "plot is exportable"
 	 */
 	public boolean getExportable()
 	{
@@ -294,7 +298,7 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Getter for plot combined flag
-	 * @returns "plot is combined"
+	 * @return "plot is combined"
 	 */
 	public boolean getCombined()
 	{
@@ -310,6 +314,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return XML representation of object
 	 */
 	public String toXML()

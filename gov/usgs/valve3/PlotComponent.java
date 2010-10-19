@@ -59,6 +59,7 @@ public class PlotComponent
 	
 	/**
 	 * Getter for source
+	 * @return source
 	 */
 	public String getSource()
 	{
@@ -67,6 +68,7 @@ public class PlotComponent
 
 	/**
 	 * Setter for source
+	 * @param s source
 	 */
 	public void setSource(String s)
 	{
@@ -84,7 +86,7 @@ public class PlotComponent
 	}
 
 	/**
-	 * 
+	 * Get parameter by key
 	 * @param key parameter name
 	 * @return value of given parameter
 	 */
@@ -156,7 +158,7 @@ public class PlotComponent
 	}
 	
 	/**
-	 * 
+	 * Get whether or not autoscaling is allowed
 	 * @param pre prefix to query
 	 * @return flag if auto scaling allowed for given prefix
 	 */
@@ -202,6 +204,7 @@ public class PlotComponent
 
 	/**
 	 * Setter for translation type (map, heli, ty, xy)
+	 * @param t translation type
 	 */
 	public void setTranslationType(String t)
 	{
@@ -210,6 +213,7 @@ public class PlotComponent
 
 	/**
 	 * Setter for translation
+	 * @param t translation
 	 */
 	public void setTranslation(double[] t)
 	{
@@ -217,6 +221,7 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Getter for box's x coordinate
 	 * @return X coord of top left corner of graph's box
 	 */
 	public int getBoxX()
@@ -225,6 +230,7 @@ public class PlotComponent
 	}
 
 	/**
+	 * Getter for box's y coordinate
 	 * @return Y coord of top left corner of graph's box
 	 */
 	public int getBoxY()
@@ -251,6 +257,7 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Yield graph's box width
 	 * @return graph's box width
 	 */
 	public int getBoxWidth()
@@ -259,6 +266,7 @@ public class PlotComponent
 	}
 
 	/**
+	 * Yield graph's box height
 	 * @return graph's box height
 	 */
 	public int getBoxHeight()
@@ -268,6 +276,7 @@ public class PlotComponent
 	
 	/**
 	 * Setter for graph's box width
+	 * @param w width
 	 */
 	public void setBoxWidth(int w)
 	{
@@ -276,6 +285,7 @@ public class PlotComponent
 
 	/**
 	 * Setter for graph's box height
+	 * @param h box's height
 	 */	
 	public void setBoxHeight(int h)
 	{
@@ -286,6 +296,7 @@ public class PlotComponent
 	 * Compute start time from PlotComponent's parameters
 	 * @param end reference end time for relative parameter values (for example, "-1h")
 	 * @return start time in seconds, UTC
+	 * @throws Valve3Exception
 	 */
 	public double getStartTime(double end) throws Valve3Exception
 	{
@@ -301,6 +312,7 @@ public class PlotComponent
 	/**
 	 * Compute end time from PlotComponent's parameters
 	 * @return end time in seconds, UTC
+	 * @throws Valve3Exception
 	 */
 	public double getEndTime() throws Valve3Exception
 	{
@@ -316,6 +328,7 @@ public class PlotComponent
 	 * @param t the string representing the time
 	 * @param end the end time (for -[n][units] times)
 	 * @return the correct j2ksec, UTC
+	 * @throws Valve3Exception
 	 */
 	public double parseTime(String t, double end) throws Valve3Exception
 	{
@@ -349,6 +362,7 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Yield timezone
 	 * @return TimeZone which was used for initial time input by user
 	 */
 	public TimeZone getTimeZone(){
@@ -356,6 +370,7 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Get offset between current time zone and UTC in seconds
 	 * @param time Time moment in j2Ksec
 	 * @return offset between current time zone and UTC in seconds, on given time moment
 	 */
@@ -366,6 +381,7 @@ public class PlotComponent
 	/**
 	 * If option 'color' was set into request string for the component, this function returns color for it's hex representation
 	 * @return null if 'color' option wasn't set
+	 * @throws Valve3Exception
 	 */
 	public Color getColor() throws Valve3Exception {
 		String colorString = get("color");
@@ -387,6 +403,7 @@ public class PlotComponent
 	}
 
 	/**
+	 * Yield PlotComponent's xml representation
 	 * @return PlotComponent's xml representation
 	 */
 	public String toXML()
@@ -422,7 +439,7 @@ public class PlotComponent
 
 	/**
 	 * Setter for graph's exportability
-	 * @returns boolean "is exportable"
+	 * @return boolean "is exportable"
 	 */
 	public boolean getExportable()
 	{

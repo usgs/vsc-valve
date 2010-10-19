@@ -81,6 +81,7 @@ public class RSAMPlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */	
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
@@ -140,6 +141,7 @@ public class RSAMPlotter extends RawDataPlotter {
 
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -191,6 +193,12 @@ public class RSAMPlotter extends RawDataPlotter {
 	/**
 	 * Initialize DataRenderer, add it to plot, remove mean from rsam data if needed 
 	 * and render rsam values to PNG image in local file
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel Channel
+	 * @param rd RSAMData
+	 * @param displayCount ?
+	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
 	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
@@ -279,6 +287,13 @@ public class RSAMPlotter extends RawDataPlotter {
 	/**
 	 * Initialize HistogramRenderer, add it to plot, and 
 	 * render event count histogram to PNG image in local file
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel Channel
+	 * @param rd RSAMData
+	 * @param displayCount ?
+	 * @param dh display height
+	 * @throws Valve3Exception
 	 */
 	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int displayCount, int dh) throws Valve3Exception {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
@@ -374,6 +389,8 @@ public class RSAMPlotter extends RawDataPlotter {
 	/**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, Loop through the list of channels and create plots
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -423,6 +440,9 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Generate PNG images for values or event count histograms (depends from plot type) to file with random name.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {

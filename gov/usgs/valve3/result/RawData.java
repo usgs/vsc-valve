@@ -34,6 +34,7 @@ public class RawData extends Result
 	}
 	
 	/**
+	 * Yield local filename
 	 * @return file name for raw data results
 	 */
 	public String getLocalFilename()
@@ -54,6 +55,7 @@ public class RawData extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return xml representation of RawData
 	 */
 	public String toXML()

@@ -71,6 +71,7 @@ public class WavePlotter extends RawDataPlotter {
 	
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
@@ -136,6 +137,7 @@ public class WavePlotter extends RawDataPlotter {
 
 	/**
 	 * Gets binary data from VDX, performs filtering if needed
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -246,6 +248,12 @@ public class WavePlotter extends RawDataPlotter {
 	
 	/**
 	 * Initialize SliceWaveRenderer and add it to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel Channel
+	 * @param wave SliceWave
+	 * @param displayCount ?
+	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
@@ -339,6 +347,12 @@ public class WavePlotter extends RawDataPlotter {
 	
 	/**
 	 * Initialize SpectraRenderer and add it to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel Channel
+	 * @param wave SliceWave
+	 * @param displayCount ?
+	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
 	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
@@ -377,7 +391,12 @@ public class WavePlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize SpectrogramRenderer and add it to plot
-	 * @throws Valve3Exception
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel Channel
+	 * @param wave SliceWave
+	 * @param displayCount ?
+	 * @param dh display height
 	 */
 	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
 		double timeOffset = component.getOffset(startTime);
@@ -417,6 +436,8 @@ public class WavePlotter extends RawDataPlotter {
 	 /**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, Loop through the list of channels and create plots
+	 * @param v3p Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -485,6 +506,9 @@ public class WavePlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image to file with random name.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
@@ -502,10 +526,18 @@ public class WavePlotter extends RawDataPlotter {
 		}
 	}
 	
+	/**
+	 * Yield the sample rate
+	 * @return sample rate
+	 */
 	public double getSampleRate() {
 		return samplingRate;
 	}
 	
+	/**
+	 * Yield the data type
+	 * @return data type
+	 */
 	public String getDataType() {
 		return dataType;
 	}

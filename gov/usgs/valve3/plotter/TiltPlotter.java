@@ -98,6 +98,11 @@ public class TiltPlotter extends RawDataPlotter {
 		super();		
 	}
 		
+	/**
+	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
+	 */	
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
 		
 		parseCommonParameters(component);
@@ -180,6 +185,7 @@ public class TiltPlotter extends RawDataPlotter {
 
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -231,8 +237,8 @@ public class TiltPlotter extends RawDataPlotter {
 
 	/**
 	 * Create MapRenderer for tilt vector, adds it to plot
-	 * @param v3Plot
-	 * @param component
+	 * @param v3p Valve3Plot
+	 * @param component PlotComponent
 	 */
 	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component) {
 		
@@ -355,6 +361,8 @@ public class TiltPlotter extends RawDataPlotter {
 	/**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, Initialize MatrixRenderers for left and right axis, adds them to plot
+	 * @param v3p Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -573,6 +581,9 @@ public class TiltPlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Generate tilt PNG image to file with random name.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception	{		
@@ -597,6 +608,8 @@ public class TiltPlotter extends RawDataPlotter {
 	 * Initialize list of channels for given vdx source
 	 * @param source	vdx source name
 	 * @param client	vdx name
+	 * @return map od ids to azimuths
+	 * @throws Valve3Exception
 	 */
 	private static Map<Integer, Double> getAzimuths(String source, String client) throws Valve3Exception {
 		Map<Integer, Double> azimuths = new LinkedHashMap<Integer, Double>();	

@@ -47,6 +47,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 	/**
 	 * Gets binary data from VDX server.
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception
@@ -76,6 +77,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 	/**
 	 * Initialize internal data from PlotComponent component
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getInputs(PlotComponent component) throws Valve3Exception
@@ -157,6 +159,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 	/**
 	 * Initialize MatrixRenderer for left plot axis
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component) throws Valve3Exception
@@ -204,6 +207,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 
 	/**
 	 * Initialize MatrixRenderer for right plot axis
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	private MatrixRenderer getRightMatrixRenderer(PlotComponent component) throws Valve3Exception
@@ -260,6 +264,8 @@ public class GenericVariablePlotter extends RawDataPlotter
 	/**
 	 * Initialize MatrixRenderers for left and right axis,
 	 * adds them to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception
@@ -279,6 +285,9 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * Initialize MatrixRenderers for left and right axis
 	 * (plot may have 2 different value axis)
 	 * Generate PNG image to file with random file name.
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception

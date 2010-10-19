@@ -31,7 +31,7 @@ public class ActionHandler implements HttpHandler
 	}
 
 	/**
-	 * 
+	 * Yield map of action names to http handlers
 	 * @return map of pairs action name-http handler
 	 */
 	public Map<String, HttpHandler> getHandlers()
@@ -43,6 +43,8 @@ public class ActionHandler implements HttpHandler
 	 * apply action with name containing in the 'key' field to http requests.
 	 * See {@link HttpHandler}
 	 * @param request - got http request
+	 * @throws Valve3Exception
+	 * @return result of handling request
 	 */
 	public Object handle(HttpServletRequest request) throws Valve3Exception
 	{

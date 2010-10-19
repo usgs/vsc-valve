@@ -63,8 +63,6 @@ public class RawDataHandler implements HttpHandler
 		dataHandler = dh;
 	}
 	
-
-	
 	/**
 	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
 	 * @param request request to process
@@ -175,9 +173,11 @@ public class RawDataHandler implements HttpHandler
 	}
 	
 	/**
-	 * Get list of available ranks
+	 * Get map of available ranks
 	 * @param source source name
 	 * @param client vdx name
+	 * @return mapping from ids to ranks
+	 * @throws Valve3Exception
 	 */
 	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
 		Map<Integer, Rank> ranks;

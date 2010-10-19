@@ -48,6 +48,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void getInputs(PlotComponent component) throws Valve3Exception {
@@ -82,6 +83,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
@@ -132,6 +134,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 	
 	/**
 	 * Loop through the list of channels, initialize renderers and add them to plots
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -229,6 +233,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Initialize HelicorderRenderer, generate PNG image to local file.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */

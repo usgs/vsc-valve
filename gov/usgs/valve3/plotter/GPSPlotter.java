@@ -94,6 +94,7 @@ public class GPSPlotter extends RawDataPlotter {
 	
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void getInputs(PlotComponent component) throws Valve3Exception {
@@ -175,6 +176,7 @@ public class GPSPlotter extends RawDataPlotter {
 	
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void getData(PlotComponent component) throws Valve3Exception {
@@ -240,6 +242,8 @@ public class GPSPlotter extends RawDataPlotter {
 	/**
 	 * Initialize MapRenderer to plot map and list of EllipseVectorRenderer2 
 	 * elements which plot a station's movement
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 */
 	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
@@ -399,6 +403,8 @@ public class GPSPlotter extends RawDataPlotter {
 
 	/**
 	 * Initialize MatrixRenderers for left and right axis, adds them to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
@@ -583,6 +589,8 @@ public class GPSPlotter extends RawDataPlotter {
 	 * Concrete realization of abstract method. 
 	 * Generate PNG image to local file.
 	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
