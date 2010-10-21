@@ -636,7 +636,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd")+ ")");
 		}
 		if(xLabel){
 			hr.getAxis().setTopLabelAsText(getTopLabel(rank));

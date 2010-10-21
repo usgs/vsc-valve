@@ -367,7 +367,7 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		if (displayCount + 1 == compCount) {
 			if(xUnits){
-				mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+				mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd")+ ")");	
 			}
 			if(xLabel){
 				;

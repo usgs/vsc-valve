@@ -273,7 +273,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			mr.getAxis().setLeftLabelAsText(label);
 		}
 		if(xUnits){
-			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd")+ ")");	
 		}
 		if(yLabel){
 			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
@@ -315,7 +315,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Events per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy MM dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy MM dd")+ ")");	
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd")+ ")");	
 		}
 		if ( forExport ) {
 			// Add column header to csvHdrs
