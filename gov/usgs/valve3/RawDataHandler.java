@@ -149,8 +149,10 @@ public class RawDataHandler implements HttpHandler
 		if (source == null || source.length()==0)
 			throw new Valve3Exception("Illegal src." + i + " value.");
 		String tz = request.getParameter("tz");
-		if (tz == null)
-			throw new Valve3Exception("Can't find 'tz' parameter");
+//		if (tz == null)
+//			throw new Valve3Exception("Can't find 'tz' parameter");
+		if ( tz==null || tz.equals("") )
+			tz = "UTC";
 		TimeZone timeZone = TimeZone.getTimeZone(tz);
 		PlotComponent component = new PlotComponent(source, timeZone);
 
