@@ -48,8 +48,8 @@ public class PlotHandler implements HttpHandler
 {
 	public static final int MAX_PLOT_WIDTH = 6000;
 	public static final int MAX_PLOT_HEIGHT = 6000;
-	public static final int DEFAULT_WIDTH_COMPONENT = 610;
-	public static final int DEFAULT_HEIGHT_COMPONENT = 140;
+	public static final int DEFAULT_WIDTH_COMPONENT = 850;
+	public static final int DEFAULT_HEIGHT_COMPONENT = 150;
 	private DataHandler dataHandler;
 	private Logger logger;	
 
@@ -166,11 +166,11 @@ public class PlotHandler implements HttpHandler
 			
 			int h = Util.stringToInt(request.getParameter("h." + i), -1);
 			if(h==-1){
-				w=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.h"), -1);
+				h=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.h"), -1);
 				logger.info("Parameter h." + i + " was set to default value");
 			}
 			if(h==-1){
-				h=DEFAULT_WIDTH_COMPONENT;
+				h=DEFAULT_HEIGHT_COMPONENT;
 				logger.info("Illegal h." + i + " parameter value, was set to default");
 			}
 			if (h <= 0 || h > MAX_PLOT_HEIGHT)

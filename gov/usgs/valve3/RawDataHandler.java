@@ -82,6 +82,13 @@ public class RawDataHandler implements HttpHandler
 		}
 		
 		String rkNameArg = request.getParameter( "rkName" );
+		String outputType = request.getParameter( "o" );
+		if ( outputType == null || outputType.equals("") )
+			outputType = "csv";
+		else if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed") ) )
+			throw new Valve3Exception("Illegal output type");
+		else if ( outputType.equals("seed") )
+			throw new Valve3Exception("Miniseed unimplemented");
 		
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
@@ -130,6 +137,7 @@ public class RawDataHandler implements HttpHandler
 
 			if ( rkNameArg != null ) 
 				component.put( "rkName", rkNameArg );
+			component.put( "o", outputType );
 
 			list.add(component);
 		}
@@ -298,8 +306,9 @@ public class RawDataHandler implements HttpHandler
 				double endtime = component.getEndTime();
 				cmtTimes = String.format( "#st=%14.3f, et=%14.3f\n", component.getStartTime(endtime), endtime );
 				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
+				String outputType = component.get( "o" );
 				if (plotter != null) {
-					sb.append(plotter.toCSV(component, cmt.toString()));
+					sb.append(plotter.toCSV(component, cmt.toString(), outputType.equals("csv")));
 				} else
 					sb.append( cmt.toString() );
 			}

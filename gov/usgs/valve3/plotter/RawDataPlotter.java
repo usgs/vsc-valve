@@ -87,6 +87,8 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double debiasValue;
 	
 	protected boolean forExport;
+	protected String outputType;
+	protected boolean inclTime;
 	protected SuppDatum sd_data[];
 	
 	
@@ -108,6 +110,8 @@ public abstract class RawDataPlotter extends Plotter {
 		// Check for named channels, ranks
 		String nameArg = null;
 		if ( forExport ) {
+			outputType = component.get( "o" );
+			inclTime = outputType.equals( "csv" );
 			nameArg = component.get( "chNames" );
 			if ( nameArg != null ) {
 				String[] names = nameArg.split(",");
@@ -443,12 +447,20 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @param nullField what to use for missing fields
 	 */
 	private void addCSVline( Double[][] data, Double time, String decFmt, String nullField ) {
-		String line = String.format( "%14.3f,", time ) + Util.j2KToDateString(time);					
+		String line;
+		String firstDecFmt;
+		if ( inclTime ) {
+			line = String.format( "%14.3f,", Util.j2KToEW(time) ) + Util.j2KToDateString(time);	
+			firstDecFmt = decFmt;
+		} else {
+			line = "";
+			firstDecFmt = decFmt.substring(1);
+		}
 		for ( Double[] group : data )
 			for ( int i = 1; i < group.length; i++ ) {
 				Double v = group[i];
 				if ( v != null )
-					line += String.format( decFmt, v );
+					line += String.format( i==1 ? firstDecFmt : decFmt, v );
 				else
 					line += nullField;
 			}
@@ -462,7 +474,7 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		return toCSV(comp, "");
+		return toCSV(comp, "", true);
 	}
 
     /**
@@ -472,7 +484,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @return CSV dump of binary data described by given PlotComponent
      * @throws Valve3Exception
      */
-	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
+	public String toCSV(PlotComponent comp, String cmt, boolean inclTime) throws Valve3Exception {
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		
@@ -493,16 +505,20 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		// Add the common column headers
 		String timeZone = comp.getTimeZone().getID();
-		csvHdrs.append("Seconds_since_1970 (");
-		csvHdrs.append(timeZone);
-		csvHdrs.append("), Date (");
-		csvHdrs.append(timeZone);
-		csvHdrs.append(")");
+		if ( inclTime ) {
+			csvHdrs.append("Seconds_since_1970 (");
+			csvHdrs.append(timeZone);
+			csvHdrs.append("), Date (");
+			csvHdrs.append(timeZone);
+			csvHdrs.append(")");
+		}
 
 		// Fill csvData with data to be exported; also completes csvText
 		csvData = new TreeSet<ExportData>();
 		csvIndex = 0;
 		plot( null, comp );
+		if ( !inclTime ) 
+			csvHdrs.delete( 0, 1 ); // remove leading comma
 		csvText = new StringBuffer();
 		csvText.append( csvCmts );
 		csvCmts = new StringBuffer();
