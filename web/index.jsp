@@ -51,8 +51,21 @@
 				function()
 				{
 					var menu = "";
-					if (currentMenu && currentMenu.allowChannelMap)
-						menu = currentMenu.id;
+					if (currentMenu)
+					{
+						if (currentMenu.allowChannelMap)
+							menu = currentMenu.id;
+						else
+						{
+							alert("The selected data source does not allow channel map display.");
+							return;
+						}
+					}
+					else
+					{
+						alert( "You must select a data source whose channels you wish to map.");
+						return;
+					}
 					
 					var pr = new PlotRequest();
 					var pc = pr.createComponent(menu, 0, 1);
