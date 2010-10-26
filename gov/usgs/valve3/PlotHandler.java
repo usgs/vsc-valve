@@ -127,28 +127,36 @@ public class PlotHandler implements HttpHandler
 				continue;
 			
 			String source = request.getParameter("src." + i);
-			Map<String, String> params = new LinkedHashMap<String, String>();
-			params.put("source", source);
-			params.put("action", "exportinfo");
-			Valve3 v3 = Valve3.getInstance();
-			ExportConfig ec = v3.getExportConfig(source);
-			if ( ec == null ) {
-				DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(source);
-				if (dsd == null)
-					throw new Valve3Exception("Missing data source for " + source);
-				ec = v3.getExportConfig("");
-				ec.parameterize( params );
-				Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(dsd.getVDXClientName());
-				VDXClient cl = pool.checkout();
-				java.util.List<String> ecs = null;
-				try {
-					ecs = cl.getTextData(params);
-				} catch (UtilException e){
-					ecs = new ArrayList<String>();
+			if ( source.equals( "channel_map" ) ) {
+				String subsrc = request.getParameter("subsrc." + i);
+				if ( subsrc == null || subsrc.equals("") )
+					throw new Valve3Exception("Data source for channel map unspecified");
+				component.put( "subsrc", subsrc );
+			} else {
+				Valve3 v3 = Valve3.getInstance();
+				Map<String, String> params = new LinkedHashMap<String, String>();
+				params.put("source", source);
+				params.put("action", "exportinfo");
+				ExportConfig ec = v3.getExportConfig(source);
+				if ( ec == null ) {
+					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(source);
+					if (dsd == null)
+						throw new Valve3Exception("Missing data source for " + source);
+					ec = v3.getExportConfig("");
+					ec.parameterize( params );
+					Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(dsd.getVDXClientName());
+					VDXClient cl = pool.checkout();
+					java.util.List<String> ecs = null;
+					try {
+						ecs = cl.getTextData(params);
+					} catch (UtilException e){
+						ecs = new ArrayList<String>();
+					}
+					pool.checkin(cl);
+					ec = new ExportConfig( ecs );
+					v3.putExportConfig(source, ec);
 				}
-				pool.checkin(cl);
-				ec = new ExportConfig( ecs );
-				v3.putExportConfig(source, ec);
+				component.setExportable( ec.isExportable() );
 			}
 			int x = Util.stringToInt(request.getParameter("x." + i), 0);
 			int y = Util.stringToInt(request.getParameter("y." + i), 0);
@@ -179,7 +187,6 @@ public class PlotHandler implements HttpHandler
 			component.setBoxY(y);
 			component.setBoxWidth(w);
 			component.setBoxHeight(h);
-			component.setExportable( ec.isExportable() );
 			list.add(component);
 		}
 		return list;
