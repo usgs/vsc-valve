@@ -76,6 +76,7 @@ public class Valve3Plot extends Result
 	
 	protected boolean exportable;
 	private boolean isCombined = false;
+	protected boolean isWaveform = false;
 	
 	protected List<SuppDatum> suppdata;
 	
@@ -297,6 +298,24 @@ public class Valve3Plot extends Result
 	}
 
 	/**
+	 * Getter for waveform plot flag
+	 * @return "waveform plot"
+	 */
+	public boolean getWaveform()
+	{
+		return isWaveform;
+	}
+
+	/**
+	 * Setter for waveform plot flag
+	 * @param w boolean: "waveform plot"
+	 */
+	public void setWaveform(boolean w)
+	{
+		isWaveform = w;
+	}
+
+	/**
 	 * Getter for plot combined flag
 	 * @return "plot is combined"
 	 */
@@ -328,6 +347,7 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<height>" + height + "</height>\n");
 		sb.append("\t\t<exportable>" + exportable + "</exportable>\n");
 		sb.append("\t\t<combined>" + isCombined + "</combined>\n");
+		sb.append("\t\t<waveform>" + isWaveform + "</waveform>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)

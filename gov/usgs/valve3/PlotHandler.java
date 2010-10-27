@@ -9,6 +9,7 @@ import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.valve3.Valve3;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.ExportConfig;
 
@@ -76,10 +77,10 @@ public class PlotHandler implements HttpHandler
 		if (source == null || source.length()==0)
 			throw new Valve3Exception("Illegal src." + i + " value.");
 		String tz = request.getParameter("tz");
-//		if (tz == null)
-//			throw new Valve3Exception("Can't find 'tz' parameter");
-		if ( tz==null || tz.equals("") )
-			tz = "UTC";
+		if ( tz==null || tz.equals("") ) {
+			tz = Valve3.getInstance().getTimeZoneAbbr();
+			logger.info( "Illegal/missing tz parameter; using default value" );
+		}	
 		TimeZone timeZone = TimeZone.getTimeZone(tz);
 		PlotComponent component = new PlotComponent(source, timeZone);
 
@@ -129,8 +130,6 @@ public class PlotHandler implements HttpHandler
 			String source = request.getParameter("src." + i);
 			if ( source.equals( "channel_map" ) ) {
 				String subsrc = request.getParameter("subsrc." + i);
-				if ( subsrc == null || subsrc.equals("") )
-					throw new Valve3Exception("Data source for channel map unspecified");
 				component.put( "subsrc", subsrc );
 			} else {
 				Valve3 v3 = Valve3.getInstance();

@@ -112,6 +112,8 @@ public class Valve3 implements ServletContextListener
 		installationTitle = config.getString("title");
 		logger.config("title: " + installationTitle);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
+		if ( timeZoneAbbr == null )
+			timeZoneAbbr = "UTC";
 		logger.config("timeZoneAbbr: " + timeZoneAbbr);
 
 		ExportConfig ec = new ExportConfig( "", config );

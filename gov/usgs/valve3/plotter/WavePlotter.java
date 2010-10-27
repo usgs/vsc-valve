@@ -257,6 +257,7 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
+		v3Plot.setWaveform( true );
 		double timeOffset = component.getOffset(startTime);
 		SliceWaveExporter wr = new SliceWaveExporter();
 		wr.xTickMarks = this.xTickMarks;

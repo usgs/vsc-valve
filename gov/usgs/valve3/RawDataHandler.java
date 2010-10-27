@@ -157,10 +157,10 @@ public class RawDataHandler implements HttpHandler
 		if (source == null || source.length()==0)
 			throw new Valve3Exception("Illegal src." + i + " value.");
 		String tz = request.getParameter("tz");
-//		if (tz == null)
-//			throw new Valve3Exception("Can't find 'tz' parameter");
-		if ( tz==null || tz.equals("") )
-			tz = "UTC";
+		if ( tz==null || tz.equals("") ) {
+			tz = Valve3.getInstance().getTimeZoneAbbr();
+			logger.info( "Illegal/missing tz parameter; using default value" );
+		}	
 		TimeZone timeZone = TimeZone.getTimeZone(tz);
 		PlotComponent component = new PlotComponent(source, timeZone);
 
@@ -247,12 +247,11 @@ public class RawDataHandler implements HttpHandler
 				if (source.equals("channel_map"))
 				{
 					dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					if (dsd == null)
-						throw new Valve3Exception("Unknown data source.");
-					
 					plotter = new ChannelMapPlotter();
-					plotter.setVDXClient(dsd.getVDXClientName());
-					plotter.setVDXSource(dsd.getVDXSource());
+					if (dsd != null) {
+						plotter.setVDXClient(dsd.getVDXClientName());
+						plotter.setVDXSource(dsd.getVDXSource());
+					}
 				}
 				else
 				{
