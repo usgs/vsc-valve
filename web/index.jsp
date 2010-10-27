@@ -51,22 +51,8 @@
 				function()
 				{
 					var menu = "";
-					if (currentMenu)
-					{
-						if (currentMenu.allowChannelMap)
-							menu = currentMenu.id;
-						else
-						{
-							alert("The selected data source does not allow channel map display.");
-							return;
-						}
-					}
-					else
-					{
-						alert( "You must select a data source whose channels you wish to map.");
-						return;
-					}
-					
+					if (currentMenu && currentMenu.allowChannelMap)
+						menu = currentMenu.id;					
 					var pr = new PlotRequest();
 					var pc = pr.createComponent(menu, 0, 1);
 					pc.src = "channel_map";
@@ -185,6 +171,8 @@
 			<img class="button" src="images/clock.gif">
 			<img class="button" src="images/xml.gif">
 			<img name="export_btn" class="button" src="images/csv.gif">
+			<img name="export2_btn" class="button" src="images/csvnots.gif">
+			<img name="export3_btn" class="button" src="images/data.gif">
 			<img name="combine_btn" class="button" src="images/add.gif">
 			<img name="procdata_btn" class="button" src="images/procdata.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
