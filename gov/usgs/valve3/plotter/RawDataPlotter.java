@@ -474,7 +474,7 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return CSV dump of binary data described by given PlotComponent
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		return toCSV(comp, "", true);
+		return toCSV(comp, "");
 	}
 
     /**
@@ -484,9 +484,11 @@ public abstract class RawDataPlotter extends Plotter {
      * @return CSV dump of binary data described by given PlotComponent
      * @throws Valve3Exception
      */
-	public String toCSV(PlotComponent comp, String cmt, boolean inclTime) throws Valve3Exception {
+	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
+		outputType = comp.get( "o" );
+		inclTime = outputType.equals( "csv" );
 		
 		if ( !ec.isExportable() )
 			throw new Valve3Exception( "Requested export not allowed" );
@@ -517,8 +519,6 @@ public abstract class RawDataPlotter extends Plotter {
 		csvData = new TreeSet<ExportData>();
 		csvIndex = 0;
 		plot( null, comp );
-		if ( !inclTime ) 
-			csvHdrs.delete( 0, 1 ); // remove leading comma
 		csvText = new StringBuffer();
 		csvText.append( csvCmts );
 		csvCmts = new StringBuffer();

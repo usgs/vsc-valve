@@ -58,7 +58,6 @@ public class WavePlotter extends RawDataPlotter {
 	private Map<Integer, SliceWave> channelDataMap;	
 	private double samplingRate = 0.0;
 	private String dataType = null;
-	private boolean forExport;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -90,11 +89,7 @@ public class WavePlotter extends RawDataPlotter {
 			}
 		}
 		
-//		try{
-//			removeBias = component.getBoolean("rb");
-//		} catch (Valve3Exception ex){
-//			removeBias = false;
-//		}
+		validateDataManipOpts(component);
 		
 		String ft = component.get("ftype");
 		if(ft!=null){
@@ -257,7 +252,8 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
-		v3Plot.setWaveform( true );
+		if ( v3Plot != null )
+			v3Plot.setWaveform( true );
 		double timeOffset = component.getOffset(startTime);
 		SliceWaveExporter wr = new SliceWaveExporter();
 		wr.xTickMarks = this.xTickMarks;
@@ -275,7 +271,8 @@ public class WavePlotter extends RawDataPlotter {
 			wr.setYLabelText(channel.getCode());
 		}
 		if ( forExport ) {
-			csvHdrs.append(",");
+			if ( inclTime )
+				csvHdrs.append(",");
 			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
 			csvHdrs.append("_Count");
 			ExportData ed = new ExportData( csvIndex, wr );
