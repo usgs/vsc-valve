@@ -307,7 +307,7 @@ public class RawDataHandler implements HttpHandler
 				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
 				String outputType = component.get( "o" );
 				if (plotter != null) {
-					sb.append(plotter.toCSV(component, cmt.toString(), outputType.equals("csv")));
+					sb.append(plotter.toCSV(component, cmt.toString()));
 				} else
 					sb.append( cmt.toString() );
 			}
