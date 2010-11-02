@@ -1,5 +1,6 @@
 package gov.usgs.valve3;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -72,7 +73,7 @@ abstract public class Plotter
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
-		return toCSV( comp, null );
+		return toCSV( comp, "", null );
 	}
 	
 	/**
@@ -82,7 +83,7 @@ abstract public class Plotter
 	 * @return string with csv data
 	 * @throws Valve3Exception
 	 */
-	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception
+	public String toCSV(PlotComponent comp, String cmt, OutputStream seedOut) throws Valve3Exception
 	{
 		throw new Valve3Exception("Data export not available for this data source.");
 	}

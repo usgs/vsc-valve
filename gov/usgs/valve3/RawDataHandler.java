@@ -12,6 +12,7 @@ import gov.usgs.valve3.result.RawData;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.vdx.client.VDXClient;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.Date;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 import javax.servlet.http.HttpServletRequest;
 import gov.usgs.vdx.data.Rank;
@@ -87,8 +91,6 @@ public class RawDataHandler implements HttpHandler
 			outputType = "csv";
 		else if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed") ) )
 			throw new Valve3Exception("Illegal output type");
-		else if ( outputType.equals("seed") )
-			throw new Valve3Exception("Miniseed unimplemented");
 		
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
@@ -234,6 +236,8 @@ public class RawDataHandler implements HttpHandler
 			String cmtDataType = null;
 			double cmtSampleRate = 0.0;
 			Map<Integer, Rank> ranksMap = null;
+			boolean miniseed = false;
+			String fn = null, filePath = null, outFileName = null, outFilePath = null;
 
 			for (PlotComponent component : components)
 			{
@@ -306,33 +310,61 @@ public class RawDataHandler implements HttpHandler
 				cmtTimes = String.format( "#st=%14.3f, et=%14.3f\n", component.getStartTime(endtime), endtime );
 				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
 				String outputType = component.get( "o" );
+				fn = df.format(now) + "_" 
+					+ fn_source.replaceAll( "-", "_")
+					+ (fn_rank==null ? "_NoRank" : fn_rank.replaceAll("-","_"));
+				filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
+				if ( !miniseed && outputType.equals("seed") )
+					miniseed = true;
 				if (plotter != null) {
-					sb.append(plotter.toCSV(component, cmt.toString()));
+					if ( miniseed ) {
+						try {
+							outFilePath = filePath + ".zip";
+							outFileName = fn  + ".zip";
+							FileOutputStream zipdest = new FileOutputStream(outFilePath);
+							ZipOutputStream zipout = new ZipOutputStream(new BufferedOutputStream(zipdest));
+							ZipEntry zipentry = new ZipEntry(fn + ".msi");
+							zipout.putNextEntry(zipentry);
+							sb.append(plotter.toCSV(component, cmt.toString(), zipout));
+							zipentry = new ZipEntry(fn + ".mst");
+							zipout.putNextEntry(zipentry);
+							zipout.write(sb.toString().getBytes());
+							zipout.close();
+						}
+						catch (ZipException ez)
+						{
+							logger.info("RawDataHandler zipfile error" );
+							throw new Valve3Exception(ez.getMessage());
+						}	
+						catch (IOException eio)
+						{
+							logger.info("RawDataHandler file error" );
+							throw new Valve3Exception(eio.getMessage());
+						}
+					} else 
+						sb.append(plotter.toCSV(component, cmt.toString(), null));
 				} else
 					sb.append( cmt.toString() );
 			}
 			
-			
-			String fn = df.format(now) + "_" 
-				+ fn_source.replaceAll( "-", "_")
-				+ (fn_rank==null ? "_NoRank" : fn_rank.replaceAll("-","_")) 
-				+ ".csv";
-			String filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
-			try
-			{
-		        FileOutputStream out = new FileOutputStream(filePath);
-		        out.write(sb.toString().getBytes());
-		        out.close();
+			if ( outFilePath == null ) {
+				try
+				{
+					outFilePath = filePath + ".csv";
+					outFileName = fn + ".csv";
+					FileOutputStream out = new FileOutputStream(outFilePath);
+					out.write(sb.toString().getBytes());
+					out.close();
+				}
+				catch (IOException e)
+				{
+					logger.info("RawDataHandler file error" );
+					throw new Valve3Exception(e.getMessage());
+				}
 			}
-			catch (IOException e)
-			{
-				logger.info("RawDataHandler file error" );
-				throw new Valve3Exception(e.getMessage());
-			}
-
 			Pattern p = Pattern.compile(request.getContextPath());
-			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + fn;
-			RawData rd = new RawData(fileURL, filePath);
+			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + outFileName;
+			RawData rd = new RawData(fileURL, outFilePath);
 			
 			Valve3.getInstance().getResultDeleter().addResult(rd);
 			return rd;

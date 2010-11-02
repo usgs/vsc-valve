@@ -1,8 +1,14 @@
 package gov.usgs.valve3.plotter;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
@@ -90,6 +96,9 @@ public abstract class RawDataPlotter extends Plotter {
 	protected String outputType;
 	protected boolean inclTime;
 	protected SuppDatum sd_data[];
+	protected String scnl[];
+	protected double samplingRate = 0.0;
+	protected String dataType = null;
 	
 	
 	/**
@@ -472,9 +481,43 @@ public abstract class RawDataPlotter extends Plotter {
      * Yield contents as CSV w/o comment
      * @param comp plot component
 	 * @return CSV dump of binary data described by given PlotComponent
-	 */
+	 *
 	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		return toCSV(comp, "");
+		return toCSV(comp, "", null);
+	}*/
+	
+	private int vax_order = 0;
+	//private int enc_fmt = 1; // 16-bit ints
+	private int enc_fmt = 3; // 32-bit ints
+	//private int enc_fmt = 5; // IEEE double
+	private int drl_add = enc_fmt==3 ? 2 : (enc_fmt == 1 ? 1 : 3);
+
+	private void writeShort( OutputStream out, int val ) throws IOException {
+		out.write( val % 256 );
+		out.write( val / 256 );
+	}
+	
+	private void writeDouble( OutputStream out, double val ) throws IOException {
+		int i;
+		if ( enc_fmt == 5 ) {
+			long lval = Double.doubleToRawLongBits(val);
+			if ( vax_order == 0 )
+				for ( i=0; i<8; i++ )
+					out.write( (int)((lval >> (8*i)) & 0x00ffL) );
+			else
+				for ( i=7; i>=0; i-- )
+					out.write( (int)((lval >> (8*i)) & 0x00ffL) );
+		} else {
+			Double dVal = new Double(val);
+			int ival = (enc_fmt == 1 ? dVal.shortValue() : dVal.intValue());
+			int hi = (enc_fmt == 1 ? 2 : 4);
+			if ( vax_order == 0 )
+				for ( i=0; i<hi; i++ )
+					out.write( (ival >> (8*i)) & 0x00ff );
+			else
+				for ( i=hi-1; i>=0; i-- )
+					out.write( (ival >> (8*i)) & 0x00ff );
+		}	
 	}
 
     /**
@@ -484,7 +527,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @return CSV dump of binary data described by given PlotComponent
      * @throws Valve3Exception
      */
-	public String toCSV(PlotComponent comp, String cmt) throws Valve3Exception {
+	public String toCSV(PlotComponent comp, String cmt, OutputStream seedOut) throws Valve3Exception {
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		outputType = comp.get( "o" );
@@ -531,7 +574,122 @@ public abstract class RawDataPlotter extends Plotter {
 		String decFmt = ",%" + ec.getFixedWidth()[0] + "." + ec.getFixedWidth()[1] + "f";
 		String nullField = String.format( ",%" + ec.getFixedWidth()[0] + "s", "" );
 
-		if ( currLine.length == 1 ) {
+		if ( seedOut != null ) {
+			try {
+				// We're writing data to a miniseed file
+				ExportData cd = csvData.first();
+				Double[] datum = cd.currExportDatum();
+
+				int sample_count = cd.count();
+				int valsLeft = sample_count; //samples
+				int valsInBlockette = 4096;
+				int drl = 12;
+				int blockette_count = 0;
+				while ( valsLeft > 0 ) {
+					while ( valsLeft < valsInBlockette ) {
+						drl--;
+						valsInBlockette /= 2;
+					}
+					valsLeft -= valsInBlockette;
+					blockette_count++;
+				}
+				seedOut.write( "000000".getBytes() ); // seq nbr
+				seedOut.write( "D".getBytes() ); // QC
+				seedOut.write( 32 ); //reserved
+				
+				String scnl_out;
+				// These have to be extracted from source
+				if ( scnl != null ) 
+					scnl_out = String.format( "%-5s  %-3s%-2s", scnl[0], scnl[1], scnl[2] );
+				else 
+					scnl_out = "            ";
+				seedOut.write( scnl_out.getBytes() );
+				
+				// These get extracted from start time
+				Date jd = Util.j2KToDate( datum[0] );
+				Calendar cal = new GregorianCalendar();
+				cal.setTimeZone( TimeZone.getTimeZone( timeZone ) );
+				cal.setTime( jd );
+				
+				writeShort( seedOut, cal.get( Calendar.YEAR ) ); // year
+				writeShort( seedOut, cal.get( Calendar.DAY_OF_YEAR  ) ); // julian day
+				valsLeft = cal.get( Calendar.HOUR_OF_DAY );
+				seedOut.write( valsLeft ); // hour
+				valsLeft = cal.get( Calendar.MINUTE );
+				seedOut.write( valsLeft ); // minute
+				valsLeft = cal.get( Calendar.SECOND );
+				seedOut.write( valsLeft ); // second
+				seedOut.write( 0 ); // unused
+				valsLeft = cal.get( Calendar.MILLISECOND );
+				writeShort( seedOut, valsLeft ); // fraction
+				
+				// These get extracted from source
+				writeShort( seedOut, sample_count ); // # samples
+				valsLeft = (int)(Math.floor(samplingRate));
+				writeShort( seedOut, valsLeft ); // sampling rate factor
+				writeShort( seedOut, 1 ); // sampling rate multiplier
+				
+				seedOut.write( 0 ); // accuracy? flag
+				seedOut.write( 0 ); // IO clock? flag
+				seedOut.write( 0 ); // data quality flag
+				seedOut.write( blockette_count ); // num blockettes
+				seedOut.write( 0 ); // time correction
+				seedOut.write( 0 ); 
+				seedOut.write( 0 ); 
+				seedOut.write( 0 ); 
+				writeShort( seedOut, 48 + 8*blockette_count ); // start of data
+				writeShort( seedOut, 48 ); // first blockette
+				
+				
+				int offset = 48;
+				drl = 12;
+				valsInBlockette = 4096;
+				valsLeft = sample_count;
+				while ( valsLeft > 0 ) {
+					while ( valsLeft < valsInBlockette ) {
+						drl--;
+						valsInBlockette /= 2;
+					}
+					valsLeft -= valsInBlockette;
+										
+					// Write header for this blockette
+					// Blockette type 1000
+					writeShort( seedOut, 1000 );
+					// Next/last blockette
+					offset += 8;
+					writeShort( seedOut, valsLeft > 0 ? offset : 0 );
+					
+					// Encoding format
+					seedOut.write( enc_fmt );
+					// VAX order?
+					seedOut.write( vax_order );
+					// Data Record Length
+					seedOut.write( drl + drl_add );
+					// Reserved
+					seedOut.write( 0 );
+
+				}
+				// And now, the actual data
+				double min = datum[1];
+				double max = datum[1];
+				valsLeft = sample_count;
+				while ( datum != null ) {
+					valsLeft--;
+					if ( min > datum[1] )
+						min = datum[1];
+					if ( max < datum[1] )
+						max = datum[1];
+					writeDouble( seedOut, datum[1] );
+					datum = cd.nextExportDatum();
+				}
+				//logger.info( "# Samples = " + sample_count );
+				//logger.info( "Left = " + valsLeft );
+				//logger.info( "Max = " + max );
+				//logger.info( "Min = " + min );
+			} catch (IOException e) {
+				throw new Valve3Exception( "Error writing mseed file: " + e.getMessage() );
+			}
+		} else if ( currLine.length == 1 ) {
 			// Since there's only 1 source, we can just loop through it
 			ExportData cd = csvData.first();
 			Double[] datum = cd.currExportDatum();
@@ -541,7 +699,6 @@ public abstract class RawDataPlotter extends Plotter {
 				datum = cd.nextExportDatum();
 			}
 		} else {
-
 			// An array of our data sources, indexed by ID
 			ExportData[] sources = new ExportData[ csvData.size() ];
 			for ( ExportData cd: csvData ) {

@@ -56,8 +56,6 @@ public class WavePlotter extends RawDataPlotter {
 	private boolean logPower;
 	private boolean logFreq;
 	private Map<Integer, SliceWave> channelDataMap;	
-	private double samplingRate = 0.0;
-	private String dataType = null;
 	
 	private static final double MAX_DATA_REQUEST = 86400;
 	
@@ -167,10 +165,13 @@ public class WavePlotter extends RawDataPlotter {
 			}
 			if (data != null) {
 				if ( forExport ) {
-					String toadd = "#sr=" + data.getSamplingRate() + "\n#datatype=" + data.getDataType() + "\n";
-					csvHdrs.insert( 0, toadd );
 					samplingRate = data.getSamplingRate();
-					dataType = data.getDataType();
+					if ( inclTime )
+						dataType = data.getDataType();
+					else
+						dataType = "i4";
+					String toadd = "#sr=" + samplingRate + "\n#datatype=" + dataType + "\n";
+					csvHdrs.insert( 0, toadd );
 				}
 				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
 				gotData = true;
@@ -270,10 +271,13 @@ public class WavePlotter extends RawDataPlotter {
 		if(yLabel){
 			wr.setYLabelText(channel.getCode());
 		}
+		wr.setRemoveBias(removeBias);
+
 		if ( forExport ) {
 			if ( inclTime )
 				csvHdrs.append(",");
 			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
+			scnl = channel.getCode().split("[$]");
 			csvHdrs.append("_Count");
 			ExportData ed = new ExportData( csvIndex, wr );
 			csvIndex++;
@@ -281,7 +285,6 @@ public class WavePlotter extends RawDataPlotter {
 			return;
 		}
 		
-		wr.setRemoveBias(removeBias);
 		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		Color color = component.getColor();
 		if(color != null){
