@@ -246,7 +246,12 @@ public class PlotHandler implements HttpHandler
 					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 				}
 				if (plotter != null)
-					plotter.plot(plot, component);
+					try{
+						plotter.plot(plot, component);
+					}
+					catch (Exception e){
+						throw new Valve3Exception(e.getMessage());
+					}
 			}
 			Valve3.getInstance().getResultDeleter().addResult(plot);
 			return plot;

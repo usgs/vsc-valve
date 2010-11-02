@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.MatrixRenderer;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
@@ -561,7 +562,11 @@ public abstract class RawDataPlotter extends Plotter {
 		// Fill csvData with data to be exported; also completes csvText
 		csvData = new TreeSet<ExportData>();
 		csvIndex = 0;
-		plot( null, comp );
+		try{
+			plot( null, comp );
+		} catch (PlotException e){
+			logger.severe(e.getMessage());
+		}
 		csvText = new StringBuffer();
 		csvText.append( csvCmts );
 		csvCmts = new StringBuffer();

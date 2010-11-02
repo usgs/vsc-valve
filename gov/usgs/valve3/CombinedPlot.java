@@ -7,6 +7,7 @@ import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.LegendRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
@@ -75,26 +76,30 @@ public class CombinedPlot extends Plot {
 	 * @param g
 	 *            the Graphics2D object to plot upon
 	 */
-	public void render(Graphics2D g) {
+	public void render(Graphics2D g) throws PlotException {
 		callCount++;
 		if (callCount == componentCount) {
 			cc = new ColorCycler();
 			for (Renderer renderer : renderers) {
 				if (renderer instanceof MatrixRenderer) {
 					MatrixRenderer matrixRenderer = (MatrixRenderer) renderer;
-					String unit = ((TextRenderer) matrixRenderer.getAxis().getLeftLabel()).text;
-					if (leftRendererDataset.unit == null || unit.equals(leftRendererDataset.unit)) {
-						combineRenderers(matrixRenderer, leftRendererDataset);
-						//Merge legends
-						legendRenderer = mergeLegendRenderer(legendRenderer, matrixRenderer.getLegendRenderer());
-						if(matrixRenderer.getAxis().leftTicks.length > leftTicks){
-							leftTicks = matrixRenderer.getAxis().leftTicks.length;
+					String unit = getUnit(matrixRenderer);
+					if(unit != null){
+						if (leftRendererDataset.unit == null || unit.equals(leftRendererDataset.unit)) {
+							combineRenderers(matrixRenderer, leftRendererDataset);
+							//Merge legends
+							legendRenderer = mergeLegendRenderer(legendRenderer, matrixRenderer.getLegendRenderer());
+							if(matrixRenderer.getAxis().leftTicks.length > leftTicks){
+								leftTicks = matrixRenderer.getAxis().leftTicks.length;
+							}
+						} else if (rightRendererDataset.unit == null || unit.equals(rightRendererDataset.unit)) {
+							combineRenderers(matrixRenderer, rightRendererDataset);
+							legendRenderer = mergeLegendRenderer(legendRenderer, matrixRenderer.getLegendRenderer());
+						} else {
+							throw new PlotException("Count of units is more than 2");
 						}
-					} else if (rightRendererDataset.unit == null || unit.equals(rightRendererDataset.unit)) {
-						combineRenderers(matrixRenderer, rightRendererDataset);
-						legendRenderer = mergeLegendRenderer(legendRenderer, matrixRenderer.getLegendRenderer());
 					} else {
-						throw new RuntimeException("Count of units is more than 2");
+						throw new RuntimeException("Units not found");
 					}
 				} else if (renderer instanceof SliceWaveRenderer){
 					SliceWaveRenderer waveRenderer = (SliceWaveRenderer) renderer;
@@ -134,6 +139,21 @@ public class CombinedPlot extends Plot {
 			super.render(g);
 		}
 	}
+	
+	private String getUnit(MatrixRenderer renderer){
+		Renderer label = renderer.getAxis().getLeftLabel();
+		String unit = label==null?null:((TextRenderer) label).text;
+		if(unit==null){
+			label = renderer.getAxis().getRightLabel();
+			unit = label==null?null:((TextRenderer) label).text;
+		}
+		return unit;
+	}
+	
+	private String getBottom(MatrixRenderer renderer){
+		Renderer bottom = renderer.getAxis().getBottomLabel();
+		return bottom==null?null:((TextRenderer) bottom).text;
+	}
 
 	/**
 	 * Combine two matrix renderers
@@ -172,14 +192,14 @@ public class CombinedPlot extends Plot {
 		rendererDataset.visible = mergeVisible(rendererDataset.visible, matrixRenderer.getVisible());
 		
 		if(rendererDataset.unit == null){
-			rendererDataset.unit = ((TextRenderer) matrixRenderer.getAxis().getLeftLabel()).text;
+			rendererDataset.unit = getUnit(matrixRenderer);
 		}
 		if(bottomLabel == null){
-			bottomLabel = ((TextRenderer) matrixRenderer.getAxis().getBottomLabel()).text;
+			bottomLabel = getBottom(matrixRenderer);
 		} else {
-			if(!bottomLabel.equals(((TextRenderer) matrixRenderer.getAxis().getBottomLabel()).text)){
-				throw new RuntimeException("Different units for X axis");
-			}
+			//if(!bottomLabel.equals(getBottom(matrixRenderer))){
+			//	throw new RuntimeException("Different units for X axis");
+			//}
 		}
 	}
 	
@@ -247,8 +267,7 @@ public class CombinedPlot extends Plot {
 				for (int column = 0; column < result.columns(); column++) {
 					if (column <= 1) {
 						// fill time and rank
-						result.set(row + matrix.rows(), column, matrixToAdd
-								.get(row, column));
+						result.set(row + matrix.rows(), column, matrixToAdd.get(row, column));
 					} else if (column < matrix.columns()) {
 						result.set(row + matrix.rows(), column, fillValue);
 					} else {
@@ -256,8 +275,7 @@ public class CombinedPlot extends Plot {
 						// (row+matrix.rows()) +"x" + (column) +
 						// ", got from cell " + row + "x" +
 						// (column-matrix.columns()+2));
-						result.set(row + matrix.rows(), column, matrixToAdd
-								.get(row, column - matrix.columns() + 2));
+						result.set(row + matrix.rows(), column, matrixToAdd.get(row, column - matrix.columns() + 2));
 					}
 				}
 			}
@@ -280,7 +298,6 @@ public class CombinedPlot extends Plot {
 			if (arrayToAdd == null) {
 				return new ShapeRenderer[dataColumnsCount];
 			} else {
-				setColors(arrayToAdd);
 				return arrayToAdd;
 			}
 		} else {
@@ -299,7 +316,6 @@ public class CombinedPlot extends Plot {
 					result[i + array.length] = arrayToAdd[i];
 				}
 			}
-			setColors(result);
 			return result;
 		}
 	}
@@ -317,7 +333,6 @@ public class CombinedPlot extends Plot {
 			if (arrayToAdd == null) {
 				return new DataPointRenderer[dataColumnsCount];
 			} else {
-				setColors(arrayToAdd);
 				return arrayToAdd;
 			}
 		} else {
@@ -336,7 +351,6 @@ public class CombinedPlot extends Plot {
 					result[i + array.length] = arrayToAdd[i];
 				}
 			}
-			setColors(result);
 			return result;
 		}
 	}
@@ -388,30 +402,6 @@ public class CombinedPlot extends Plot {
 			return result;
 		}
 	}
-
-	/**
-	 * Set color of shape renderers in the merged MatrixRenderer according ColorCycler settings 
-	 * @param array ShapeRenderers to set color of
-	 */
-	private void setColors(ShapeRenderer[] array){
-		for(ShapeRenderer renderer: array){
-			if(renderer != null){
-				renderer.color = cc.getNextColor();
-			}
-		}
-	}
-	
-	/**
-	 * Set color of point renderers in the merged MatrixRenderer according ColorCycler settings 
-	 * @param array DataPointRenderers to set color of
-	 */	
-	private void setColors(DataPointRenderer[] array){
-		for(DataPointRenderer renderer: array){
-			if(renderer != null){
-				renderer.color = cc.getNextColor();
-			}
-		}
-	}
 	
 	/**
 	 * Create combined MatrixRenderer from dataset computed from all processed separated MaxtrixRenderers
@@ -419,10 +409,18 @@ public class CombinedPlot extends Plot {
 	 */
 	private MatrixRenderer createRenderer(RendererDataset rendererDataset) {
 		MatrixRenderer renderer = new MatrixRenderer(rendererDataset.combinedData.viewSorted(0), true);
+		for(ShapeRenderer sr: rendererDataset.lineRenderers){
+			if(sr != null){
+				sr.color = cc.getNextColor();
+				//System.out.println("ShapeRenderer color: " + sr.color);
+			}
+		}
 		renderer.setLineRenderers(rendererDataset.lineRenderers);
 		for (DataPointRenderer pointRenderer : rendererDataset.pointRenderers) {
 			if (pointRenderer != null) {
 				pointRenderer.transformer = renderer;
+				pointRenderer.color = cc.getNextColor();
+				//System.out.println("ShapeRenderer color: " + pointRenderer.color);
 			}
 		}
 		renderer.setPointRenderers(rendererDataset.pointRenderers);

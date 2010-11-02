@@ -7,6 +7,7 @@ import gov.usgs.plot.BasicFrameRenderer;
 import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
@@ -763,7 +764,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		forExport = (v3p == null);	// = "prepare data for export"
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		getInputs(comp);

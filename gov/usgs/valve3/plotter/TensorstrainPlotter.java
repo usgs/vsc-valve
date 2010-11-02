@@ -5,6 +5,7 @@ import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
@@ -378,7 +379,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	 * 
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		forExport = (v3p == null); // = "prepare data for export"
 		channelsMap = getChannels(vdxSource, vdxClient);
 		ranksMap = getRanks(vdxSource, vdxClient);

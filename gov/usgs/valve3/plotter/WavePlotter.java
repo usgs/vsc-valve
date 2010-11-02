@@ -3,6 +3,7 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
@@ -512,7 +513,7 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		forExport = (v3p == null);	// = "prepare data for export"
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		getInputs(comp);

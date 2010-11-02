@@ -1,6 +1,7 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
@@ -238,7 +239,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		getInputs(comp);
 		getData(comp);

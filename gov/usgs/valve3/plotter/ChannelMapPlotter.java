@@ -1,6 +1,7 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoLabelSet;
@@ -155,7 +156,7 @@ public class ChannelMapPlotter extends Plotter
 	 * Generate PNG map image to local file.
 	 * @throws Valve3Exception
 	 */
-	private void plotMap() throws Valve3Exception
+	private void plotMap() throws Valve3Exception, PlotException
 	{
 		Plot plot = v3Plot.getPlot();
 		TransverseMercator proj = new TransverseMercator();
@@ -209,7 +210,7 @@ public class ChannelMapPlotter extends Plotter
 	 * Generate PNG map image to local file.
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception
+	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception, PlotException
 	{
 		forExport = false;
 		v3Plot = plot;

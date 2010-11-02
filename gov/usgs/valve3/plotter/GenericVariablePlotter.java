@@ -3,6 +3,7 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
@@ -290,7 +291,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException
 	{
 		getInputs(comp);
 		getData(comp);

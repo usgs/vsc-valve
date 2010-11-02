@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
+import gov.usgs.plot.PlotException;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.vdx.ExportConfig;
 import gov.usgs.util.Pool;
@@ -124,7 +125,7 @@ abstract public class Plotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception;
+	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception, PlotException;
 	
 	/**
 	 * Yield export configuration for specified source & client
