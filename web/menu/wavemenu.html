@@ -71,7 +71,7 @@
 			<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="10">
 		</p>
 		<p>
-			<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_user_value" size="10"">
+			<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_period" size="10"">
 		</p>
 	</div>
 	<div id="dmo_arglbls" class="fr mlr4">
@@ -110,7 +110,7 @@
 		</p>
 		<p>
 			<!-- <label for="dmo_filter">Filter</label> -->
-			<select id="dmo_filter_pick" onchange="var tos = this.options.selectedIndex;
+			<select id="dmo_filter_pick"  name="selector:dmo_fl" onchange="var tos = this.options.selectedIndex;
 				var prefix = this.id.substring( 0, this.id.length-15 );
 				var lbl1 = document.getElementById(prefix+'dmo_filter_arg1_lbl');
 				var arg1 = document.getElementById(prefix+'dmo_filter_arg1');
@@ -145,7 +145,7 @@
 		</p>
 		<p>
 			<!-- <label for="norm_debias">Remove bias</label> -->
-			<select id="dmo_debias_pick" onchange="var tos = this.options.selectedIndex;
+			<select id="dmo_debias_pick" name="selector:dmo_db" onchange="var tos = this.options.selectedIndex;
 				var prefix = this.id.substring( 0, this.id.length-15 );
 				var fld = document.getElementById(prefix+'dmo_debias_period');
 				var lbl = document.getElementById(prefix+'dmo_debias_lbl');			  	
