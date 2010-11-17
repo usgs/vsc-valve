@@ -1,0 +1,24 @@
+Data Manipulation Options
+-------------------------
+
+A standard menu for data manipulation options has been added.  It presents 4 stages of processing:
+
+1) Despiking, using a running mean.  If selected, a period (in seconds) must be specified.
+2) Linear detrending.
+3) A filter stage, which can employ either a bandpass filter (with specified maximum and minimum frequencies, either of which can be unspecified and thus leave out the corresponding limit), a running median or a running mean (either of which would require a period, in seconds, to be supplied).
+4) Debiasing, which can either remove the mean, the initial value, or a user-supplied value.
+
+Any subset, from none to all and every combination in between, of the stages can be selected.  Stages will be applied in the order they are listed above.
+
+The following request parameters control these options:
+
+despike (T/F)
+despike_period (number, of seconds)
+detrend (T/F)
+dmo_fl (0-none, 1=bandpass, 2=median, 3=mean)
+dmo_filter_arg1 (max freq for bandpass, period for median & mean)
+dmo_filter_arg2 (min freq for bandpass)
+dmo_db (0=none, 1=mean, 2=inital, 3=user)
+debias_period (user value for debias)
+
+

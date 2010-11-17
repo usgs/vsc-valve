@@ -1,0 +1,3 @@
+A new section has been added to most datasource menus, "Supplementary Data".  This is information that is time-related data that is not part of the plottable information (typically because it is not numeric), but related to it.   Any supplementary data selected when a plot is requested will be indicated on the generated plot by dashed vertical bars (green for start, red for end); the value of that supplementary data can be viewed by clicking on the box at the bottom of the dashed line.
+
+Similar data which is not time-related is available for viewing from the generated plot by clicking on the "PD" (processing data) icon in the plot's title bar.
