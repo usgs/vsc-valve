@@ -1370,7 +1370,7 @@ Menu.prototype.filterChanged = function() {
 			var pt		= this.allChannels[i].value.split(":");
 			var lon		= pt[3];
 			var lat		= pt[4];
-			var ctid1	= pt[6];
+			var ctid1	= pt[7];
 			var gfCheck	= false;
 			var ctCheck	= false;
 			
