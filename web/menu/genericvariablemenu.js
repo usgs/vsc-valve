@@ -12,7 +12,7 @@ create_nwismenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m", "-2m", "-6m");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-1m","-1y");
 		}
 		
 		var selnwis = document.getElementById(this.id + '_nwisSelector');

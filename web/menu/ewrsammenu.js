@@ -25,7 +25,7 @@ create_ewrsammenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1m", "-6m", "-1y", "-2y", "-4y");
+			menu.timeShortcuts	= new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");
 		}	
 		
 		loadXML(this.id + " generic menu description", "valve3.jsp?a=data&da=ewRsamMenu&src=" + this.id, 

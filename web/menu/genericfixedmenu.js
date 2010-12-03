@@ -34,7 +34,7 @@ create_genericfixedmenu = function(menu) {
 
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1h","-1d","-1w","-1m","-1y");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-1m","-1y");
 		}
 		
 		var sel = document.getElementById(this.id + '_selector:ds');		

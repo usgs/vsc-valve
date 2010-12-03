@@ -31,7 +31,7 @@ create_tensorstrainmenu = function(menu) {
 
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1h", "-2h", "-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-2w","-1m");
 		}
 		var sel = document.getElementById(this.id + '_selector:ds');		
 		addListener(sel, 'change', 

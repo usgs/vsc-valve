@@ -33,7 +33,7 @@ create_helimenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w");
+			menu.timeShortcuts	= new Array("-1h","-6h","-12h","-1d","-3d","-1w");
 		}
 	}
 	
