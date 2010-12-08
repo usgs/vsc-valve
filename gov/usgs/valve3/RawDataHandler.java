@@ -269,8 +269,9 @@ public class RawDataHandler implements HttpHandler
 					}
 				}
 				String rk = component.get( "rk" );
-				String ss = component.get( "selectedStation" );
-				if ( rk == null && ss == null ) {
+				// String ss = component.get( "selectedStation" );
+				// if ( rk == null && ss == null ) {
+				if ( rk == null) {
 					ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
 					for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
 						Rank r = me.getValue();
