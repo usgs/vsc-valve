@@ -37,7 +37,6 @@ import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
 import gov.usgs.vdx.data.HypocenterExporter;
 import gov.usgs.vdx.data.MatrixExporter;
-import gov.usgs.vdx.ExportConfig;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -48,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -203,6 +201,11 @@ public class HypocenterPlotter extends RawDataPlotter {
 			yLabel = component.getBoolean("yLabel");
 		} catch(Valve3Exception e){
 			yLabel=false;
+		}
+		try{
+			isDrawLegend = component.getBoolean("lg");
+		} catch(Valve3Exception e){
+			isDrawLegend=true;
 		}
 		
 		double w = component.getDouble("west");
