@@ -704,8 +704,9 @@ function PlotRequest(popup)
 								comp.chCnt = vals.length;
 							}	
 							
-							if ( elt.selectedIndex != -1 )
-								comp["selectedStation"] = elt.options[elt.selectedIndex].text;
+							// if ( elt.selectedIndex != -1 )
+								// comp["selectedStation"] = elt.options[elt.selectedIndex].text;
+								
 							if (!comp[name])
 								comp[name] = "";
 							
