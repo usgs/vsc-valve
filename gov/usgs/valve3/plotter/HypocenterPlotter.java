@@ -4,8 +4,6 @@ import gov.usgs.plot.ArbDepthCalculator;
 import gov.usgs.plot.ArbDepthFrameRenderer;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.BasicFrameRenderer;
-import gov.usgs.plot.HistogramRenderer;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
@@ -124,7 +122,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private RightAxis rightAxis;
 	private HypocenterList hypos;
 	private DateFormat dateFormat;
-	private int leftTicks;
+
 	
 	/**
 	 * Default constructor
@@ -627,6 +625,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception 
 	 */
 	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
+		int leftLabels = 0;
+		
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		double timeOffset = component.getOffset(startTime);
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
@@ -634,8 +634,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		hr.setDefaultExtents();
 		hr.setMinX(startTime);
 		hr.setMaxX(endTime);
-		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
-		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		hr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
+		hr.setXAxisToTime(8, xTickMarks, xTickValues);
 		if(yUnits){
 			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		}
@@ -645,7 +645,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if(xLabel){
 			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		}
-		leftTicks = hr.getAxis().leftTicks.length;
+		if(hr.getAxis().getLeftLabels() != null){
+			leftLabels = hr.getAxis().getLeftLabels().length;
+		}
 
 		if ( forExport ) {
 			// Add column headers to csvHdrs (second one incomplete)
@@ -696,11 +698,15 @@ public class HypocenterPlotter extends RawDataPlotter {
 				((ShapeRenderer)r[0]).color		= Color.red;
 				((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
 				AxisRenderer ar = new AxisRenderer(mr);
-				ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftTicks, false), null);
+				if(yTickValues){
+					ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftLabels, false), null);
+				}
 				mr.setAxis(ar);
 			
 				hr.addRenderer(mr);
-				hr.getAxis().setRightLabelAsText(rightAxis.toString());
+				if(yUnits){
+					hr.getAxis().setRightLabelAsText(rightAxis.toString());
+				}
 			}
 		}
 		

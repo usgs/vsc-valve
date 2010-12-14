@@ -185,7 +185,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 			min -= Math.abs(max - min) * .1;
 		}
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);	
-		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
+		mr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
 		if(shape==null){
 			mr.createDefaultPointRenderers(component.getColor());
 		} else {
@@ -195,7 +195,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 			}
 		}
-		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		mr.setXAxisToTime(8, xTickMarks, xTickValues);
 		if(yLabel){
 			mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
 		}

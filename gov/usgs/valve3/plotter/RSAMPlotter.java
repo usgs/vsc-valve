@@ -255,8 +255,8 @@ public class RSAMPlotter extends RawDataPlotter {
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);
-		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, allowExpand, yTickValues);
-		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
+		mr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, allowExpand, xTickValues, yTickValues);
+		mr.setXAxisToTime(8, xTickMarks, xTickValues);	
 		mr.setAllVisible(true);
 		if(shape==null){
 			mr.createDefaultPointRenderers(component.getColor());
@@ -310,8 +310,8 @@ public class RSAMPlotter extends RawDataPlotter {
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
-		hr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, true, yTickValues);
-		hr.setXAxisToTime(xTickMarks?8:0, xTickValues);	
+		hr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
+		hr.setXAxisToTime(8, xTickMarks, xTickValues);	
 		if(yUnits){
 			hr.getAxis().setLeftLabelAsText("Events per " + bin);
 		}

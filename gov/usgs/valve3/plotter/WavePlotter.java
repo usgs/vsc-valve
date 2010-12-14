@@ -264,13 +264,10 @@ public class WavePlotter extends RawDataPlotter {
 		wr.xLabel = this.xLabel;
 	    wr.yTickMarks = this.yTickMarks;
 	    wr.yTickValues = this.yTickValues;
-	    if(yLabel){
-			wr.setYLabelText(channel.getCode());
-		}
 		wr.setWave(wave);
 		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , component.getTimeZone().getID());
 		if(yLabel){
-			wr.setYLabelText(channel.getCode());
+			wr.setYLabelText(channel.getName());
 		}
 		wr.setRemoveBias(removeBias);
 
@@ -374,7 +371,7 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setMaxFreq(maxFreq);
 		sr.setColor(component.getColor());
 		if(yLabel){
-			sr.setYLabelText(channel.getCode());
+			sr.setYLabelText(channel.getName());
 		}
 		if(yUnits){
 			sr.setYUnitText("Power");
@@ -421,7 +418,7 @@ public class WavePlotter extends RawDataPlotter {
 	    	sr.setYUnitText("Frequency (Hz)");
 	    }
 	    if(yLabel){
-			sr.setYLabelText(channel.getCode());
+			sr.setYLabelText(channel.getName());
 		}
 		sr.update(0);
 		if(isDrawLegend){

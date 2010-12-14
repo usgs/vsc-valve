@@ -61,7 +61,7 @@ public abstract class RawDataPlotter extends Plotter {
     protected boolean yUnits = true;
     protected boolean yLabel = false;
 	
-	protected int leftTicks; //count of left ticks
+	protected int leftTicks = 0; //count of left ticks
 	protected int leftLines; //starting line color
 	protected String leftUnit;
 	protected String rightUnit;
@@ -358,8 +358,8 @@ public abstract class RawDataPlotter extends Plotter {
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);	
-		mr.createDefaultAxis(xTickMarks?8:0, yTickMarks?8:0, false, ap.allowExpand, yTickValues);
-		mr.setXAxisToTime(xTickMarks?8:0, xTickValues);
+		mr.createDefaultAxis(8, 8, xTickMarks, yTickMarks, false, ap.allowExpand, xTickValues, yTickValues);
+		mr.setXAxisToTime(8, xTickMarks, xTickValues);
 		if(yUnits){
 			mr.getAxis().setLeftLabelAsText(unit);
 		}
@@ -412,7 +412,7 @@ public abstract class RawDataPlotter extends Plotter {
 		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
-		if(yTickMarks && yTickValues){
+		if(yTickValues){
 			ar.createRightTickLabels(SmartTick.autoTick(ap.yMin, ap.yMax, leftTicks, false), null);
 		}
 		mr.setAxis(ar);
