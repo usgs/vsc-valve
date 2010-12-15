@@ -48,7 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 public class PlotHandler implements HttpHandler
 {
 	public static final int MAX_PLOT_WIDTH = 6000;
-	public static final int MAX_PLOT_HEIGHT = 6000;
+	public static final int MAX_PLOT_HEIGHT = 50000;
 	public static final int DEFAULT_WIDTH_COMPONENT = 850;
 	public static final int DEFAULT_HEIGHT_COMPONENT = 150;
 	private DataHandler dataHandler;
