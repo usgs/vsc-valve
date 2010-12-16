@@ -117,6 +117,11 @@ public class CombinedPlot extends Plot {
 				}
 			}
 			renderers.clear();
+			for(SliceWaveRenderer waveRenderer: waveRenderers){
+				waveRenderer.setLocation(graphX, graphY, graphWidth, graphHeight);
+				waveRenderer.setExtents(minX, maxX,	waveRendererDataset.minY, waveRendererDataset.maxY);
+				addRenderer(waveRenderer);
+			}
 			MatrixRenderer leftRenderer = createRenderer(leftRendererDataset);
 			if (rightRendererDataset.unit == null){
 				leftRenderer.setLegendRenderer(legendRenderer);
@@ -130,12 +135,7 @@ public class CombinedPlot extends Plot {
 				rightRenderer.setLegendRenderer(legendRenderer);
 				addRenderer(leftRenderer);
 				addRenderer(rightRenderer);
-			}
-			for(SliceWaveRenderer waveRenderer: waveRenderers){
-				waveRenderer.setLocation(graphX, graphY, graphWidth, graphHeight);
-				waveRenderer.setExtents(minX, maxX,	waveRendererDataset.minY, waveRendererDataset.maxY);
-				addRenderer(waveRenderer);
-			}
+			}			
 			super.render(g);
 		}
 	}
@@ -166,13 +166,11 @@ public class CombinedPlot extends Plot {
 		DoubleMatrix2D data = null;
 		if (matrixRenderer.getOffset() == 1) {
 			// Shift to free column 1 for ranks
-			data = new DenseDoubleMatrix2D(matrixRenderer.getData().rows(),
-					matrixRenderer.getData().columns() + 1);
+			data = new DenseDoubleMatrix2D(matrixRenderer.getData().rows(),	matrixRenderer.getData().columns() + 1);
 			for (int row = 0; row < matrixRenderer.getData().rows(); row++) {
-				for (int column = 0; row < matrixRenderer.getData().columns(); column++) {
+				for (int column = 0; column < matrixRenderer.getData().columns(); column++) {
 					if (column == 0) {
-						data.set(row, column, matrixRenderer.getData().get(row,
-								column));
+						data.set(row, column, matrixRenderer.getData().get(row,	column));
 					} else {
 						data.set(row, column + 1, matrixRenderer.getData().get(row, column));
 					}
@@ -431,10 +429,12 @@ public class CombinedPlot extends Plot {
 		renderer.setExtents(minX, maxX,	rendererDataset.minY, rendererDataset.maxY);
 		if(rendererDataset.type == 'L'){
 			renderer.createDefaultAxis(8, 8, true, true, false, true, true, true);
+			renderer.getAxis().setBackgroundColor(null);
 			renderer.setXAxisToTime(8);
 			renderer.getAxis().setLeftLabelAsText(rendererDataset.unit);
 		} else if (rendererDataset.type == 'R'){
 			AxisRenderer ar = new AxisRenderer(renderer);
+			ar.setBackgroundColor(null);
 			ar.createRightTickLabels(SmartTick.autoTick(rendererDataset.minY, rendererDataset.maxY, leftTicks, false), null);
 			renderer.setAxis(ar);
 			renderer.getAxis().setRightLabelAsText(rendererDataset.unit);
