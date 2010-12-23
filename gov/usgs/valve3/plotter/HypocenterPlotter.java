@@ -380,6 +380,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		}
 		if (hypos == null)
 			hypos = new HypocenterList();
+		else
+			hypos.adjustTime(component.getOffset(startTime));
 		// check back in our connection to the database
 		pool.checkin(client);
 	}
@@ -392,7 +394,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private BasicFrameRenderer plotMapView(Plot plot, PlotComponent component) throws Valve3Exception {
-		
+		double timeOffset = component.getOffset(startTime);
 		// TODO: make projection variable
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
@@ -415,8 +417,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(plot.getHeight());
-		trans[4] = startTime;
-		trans[5] = endTime;
+		trans[4] = startTime+timeOffset;
+		trans[5] = endTime+timeOffset;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
 		component.setTranslation(trans);
@@ -459,7 +461,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		
+		double timeOffset = component.getOffset(startTime);
 		String subCount = "";
 		double lat1;
 		double lon1;
@@ -541,7 +543,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			break;
 		case DEPTH_TIME:
-			base.setExtents(startTime, endTime, -maxDepth, -minDepth);
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, -maxDepth, -minDepth);
 			base.createDefaultAxis();
 			base.setXAxisToTime(8);
 			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
@@ -587,7 +589,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 					
 			//base.setExtents(0.0, adc.getMaxDist(), -maxDepth, -minDepth);
 
-			base.setExtents(startTime, endTime, 0.0, adc.getMaxDist());
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, 0.0, adc.getMaxDist());
 			base.createDefaultAxis();
 			base.setXAxisToTime(8);
 			
@@ -607,7 +609,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
 		hr.setColorOption(color);
 		if (color == ColorOption.TIME)
-			hr.setColorTime(startTime, endTime);
+			hr.setColorTime(startTime+timeOffset, endTime+timeOffset);
 		hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY() + base.getGraphHeight());
 		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
 		v3Plot.getPlot().addRenderer(hr);
@@ -632,8 +634,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
-		hr.setMinX(startTime);
-		hr.setMaxX(endTime);
+		hr.setMinX(startTime+timeOffset);
+		hr.setMaxX(endTime+timeOffset);
 		hr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
 		hr.setXAxisToTime(8, xTickMarks, xTickValues);
 		if(yUnits){
@@ -685,7 +687,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			MatrixExporter mr = new MatrixExporter(data, false, null);
 			mr.setAllVisible(true);
 			mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-			mr.setExtents(startTime, endTime, cmin, cmax * 1.05);
+			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax * 1.05);
 			mr.createDefaultLineRenderers(component.getColor());
 			
 			if ( forExport ) {
