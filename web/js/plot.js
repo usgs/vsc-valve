@@ -446,7 +446,7 @@ function handlePlot(xml)
 			new_td.appendChild( document.createTextNode( sd_bits[8] ) );
 			new_tr.appendChild( new_td );
 			var new_td = document.createElement( "td" );
-			new_td.appendChild( document.createTextNode( timeToString(1.0*sd_bits[2]) + " thru " + timeToString(1.0*sd_bits[3]) ) );
+			new_td.appendChild( document.createTextNode( timeToString(parseFloat(sd_bits[2])) + " thru " + timeToString(parseFloat(sd_bits[3])) ) );
 			new_tr.appendChild( new_td );
 			var new_td = document.createElement( "td" );
 			var buttonnode= document.createElement('input');
@@ -461,7 +461,7 @@ function handlePlot(xml)
 		var color = "#" + sd_bits[14];
 		sbar.style.background = color;
 		sanchor.style.background = color;
-		var when = Math.round( translateT2X(sd_bits[3]*1.0, img) );
+		var when = Math.round( translateT2X(parseFloat(sd_bits[3]), img) );
 		var theNewParagraph = document.createElement('suppdatum');
 		var theTextOfTheParagraph = document.createTextNode(supp_data[i].textContent);
 		theNewParagraph.appendChild(theTextOfTheParagraph);
@@ -479,7 +479,7 @@ function handlePlot(xml)
 			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
 			t.insertBefore(node,t.firstChild);
 		}
-		when = Math.round( translateT2X(sd_bits[2]*1.0, img) );
+		when = Math.round( translateT2X(parseFloat(sd_bits[2]), img) );
 		if ( when > 0 ) {
 			sbar.style.left = when + "px";
 			t.insertBefore(sbar, t.firstChild);
@@ -507,7 +507,7 @@ function show_sd(me) {
 	viewer.style.visibility = "visible";
 	var elts = viewer.getElementsByTagName("td");
 	elts[1].onclick = (function(sv) {return function(){ sv.style.visibility = "hidden"; }})(viewer);
-	elts[2].innerHTML = "<b>From</b> " + timeToString(1.0*info_bits[3]) + "<br><b>to</b> " + timeToString(1.0*info_bits[4])
+	elts[2].innerHTML = "<b>From</b> " + timeToString(parseFloat(info_bits[3])) + "<br><b>to</b> " + timeToString(parseFloat(info_bits[4]))
 	elts[3].innerHTML = "<b>Type</b>: " + info_bits[14];
 	elts[4].innerHTML = "<b>Data</b>: " + info_bits[9] + "<br><textarea rows=\"3\" cols=\"40\">" + info_bits[10] + "</textarea></td>";
 }
