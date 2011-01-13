@@ -147,12 +147,17 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 		
 			nameArg = component.get( "rkName" );
-			if ( nameArg != null ) 
+			if ( nameArg != null ) {
+			    boolean found = false;
 				for ( Rank r : ranksMap.values() ) 
 					if ( nameArg.equals(r.getName()) ) {
 						component.put( "rk", ""+r.getId() );
+						found = true;
 						break;
 					}
+				if ( !found )
+				    throw new Valve3Exception( "Unknown rank name :" + nameArg );
+			}
 		} else {
 			ch = component.getString("ch");
 		}
