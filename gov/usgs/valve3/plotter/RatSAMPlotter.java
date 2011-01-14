@@ -170,10 +170,9 @@ public class RatSAMPlotter extends RawDataPlotter {
 		if (data != null && data.rows() > 0) {
 			gotData = true;
 			data.adjustTime(component.getOffset(startTime));
-		}
-		
+		}	
 		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
+			throw new Valve3Exception("No data.");
 		}
         // check back in our connection to the database
 		pool.checkin(client);

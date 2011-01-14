@@ -209,17 +209,16 @@ public class GPSPlotter extends RawDataPlotter {
 				data = (GPSData)client.getBinaryData(params);
 			}
 			catch(UtilException e){
-				throw new Valve3Exception(e.getMessage());
+				data = null;
 			}
 			if (data != null && data.observations() > 0) {
 				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
-				channelDataMap.put(Integer.valueOf(channel), data);
 			}
-		}
-		
+			channelDataMap.put(Integer.valueOf(channel), data);
+		}		
 		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
+			throw new Valve3Exception("No data for any station.");
 		}
 		
 		// if a baseline was selected then retrieve that data from the database

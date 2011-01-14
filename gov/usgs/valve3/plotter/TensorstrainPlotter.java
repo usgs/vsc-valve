@@ -172,17 +172,16 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			try {
 				data = (TensorstrainData) client.getBinaryData(params);
 			} catch (UtilException e) {
-				throw new Valve3Exception(e.getMessage());
+				data = null;
 			}
-
 			if (data != null) {
 				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
-				channelDataMap.put(Integer.valueOf(channel), data);
 			}
+			channelDataMap.put(Integer.valueOf(channel), data);
 		}
 		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
+			throw new Valve3Exception("No data for any station.");
 		}
 		// check back in our connection to the database
 		pool.checkin(client);

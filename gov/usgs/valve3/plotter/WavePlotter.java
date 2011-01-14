@@ -162,7 +162,7 @@ public class WavePlotter extends RawDataPlotter {
 				data = (Wave)client.getBinaryData(params);
 			}
 			catch(UtilException e){
-				throw new Valve3Exception(e.getMessage()); 
+				data = null; 
 			}
 			if (data != null) {
 				if ( forExport ) {
@@ -237,7 +237,7 @@ public class WavePlotter extends RawDataPlotter {
 			}
 		}
 		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
+			throw new Valve3Exception("No data for any station.");
 		}
 		// check back in our connection to the database
 		pool.checkin(client);
