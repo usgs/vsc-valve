@@ -12,9 +12,12 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.DefaultFrameDecorator;
+import gov.usgs.plot.LegendRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
@@ -406,7 +409,7 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return renderer
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index) throws Valve3Exception {
+	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, LegendRenderer leftLegendRenderer) throws Valve3Exception {
 		
 		if (rightUnit == null)
 			return null;
@@ -433,7 +436,9 @@ public abstract class RawDataPlotter extends Plotter {
 				mr.createDefaultPointRenderers(leftLines, shape.charAt(0), component.getColor());
 			}
 		}
-		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
+		if(isDrawLegend) {
+			mr.addToLegendRenderer(leftLegendRenderer, channelLegendsCols, leftLines);
+		}
 		return mr;
 	}
 	

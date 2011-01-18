@@ -532,7 +532,7 @@ public class TiltPlotter extends RawDataPlotter {
 								Column col = columnsList.get(i);
 								if(col.checked){
 									MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
-									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i);
+									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i, leftMR.getLegendRenderer());
 									v3Plot.getPlot().addRenderer(leftMR);
 									if (rightMR != null)
 										v3Plot.getPlot().addRenderer(rightMR);
@@ -545,7 +545,7 @@ public class TiltPlotter extends RawDataPlotter {
 						} else {
 							compCount = channelDataMap.size();
 							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
 							v3Plot.getPlot().addRenderer(leftMR);
 							if (rightMR != null)
 								v3Plot.getPlot().addRenderer(rightMR);
