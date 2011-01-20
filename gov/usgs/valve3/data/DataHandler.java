@@ -199,7 +199,14 @@ public class DataHandler implements HttpHandler
 						ewRsamMenu result = new ewRsamMenu(ls);
 						return result;
 					} else {
-						gov.usgs.valve3.result.List result	= new gov.usgs.valve3.result.List(ls);
+						List<String> lsx;
+						if (action.equals("suppdata")) {
+							lsx = new ArrayList<String>();
+							for ( String s: ls ) 
+								lsx.add( protectSpecialCharacters(s) );
+						} else
+							lsx = ls;
+						gov.usgs.valve3.result.List result	= new gov.usgs.valve3.result.List(lsx);
 						return result;
 					}
 				}
@@ -211,5 +218,43 @@ public class DataHandler implements HttpHandler
 		{
 			return new ErrorMessage(e.getMessage());
 		}
+	}
+	
+	/**
+	 * Returns the string where all non-ascii and <, &, > are encoded as numeric entities. I.e. "&lt;A &amp; B &gt;"
+	 * .... (insert result here). The result is safe to include anywhere in a text field in an XML-string. If there was
+	 * no characters to protect, the original string is returned.
+	 * 
+	 * @param originalUnprotectedString
+	 *            original string which may contain characters either reserved in XML or with different representation
+	 *            in different encodings (like 8859-1 and UFT-8)
+	 * @return properly encoded version of parameter
+	 */
+	private static String protectSpecialCharacters(String originalUnprotectedString) {
+	    if (originalUnprotectedString == null) {
+	        return null;
+	    }
+	    boolean anyCharactersProtected = false;
+
+	    StringBuffer stringBuffer = new StringBuffer();
+	    for (int i = 0; i < originalUnprotectedString.length(); i++) {
+	        char ch = originalUnprotectedString.charAt(i);
+
+	        boolean controlCharacter = ch < 32;
+	        boolean unicodeButNotAscii = ch > 126;
+	        boolean characterWithSpecialMeaningInXML = ch == '<' || ch == '&' || ch == '>';
+
+	        if (characterWithSpecialMeaningInXML || unicodeButNotAscii || controlCharacter) {
+	            stringBuffer.append("&#" + (int) ch + ";");
+	            anyCharactersProtected = true;
+	        } else {
+	            stringBuffer.append(ch);
+	        }
+	    }
+	    if (anyCharactersProtected == false) {
+	        return originalUnprotectedString;
+	    }
+
+	    return stringBuffer.toString();
 	}
 }
