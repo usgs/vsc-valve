@@ -63,8 +63,6 @@ create_tensorstrainmenu = function(menu) {
 	// override the default presubmit function
 	menu.presubmit = function(pr, pc) {
 		
-		// call the presubmit function		
-		Menu.prototype.presubmit.call(this);
 		var count		= 0;
 		var rotation_selected	= false;
 		var namesElement	= document.getElementById(menu.id + "colNames");
@@ -87,7 +85,7 @@ create_tensorstrainmenu = function(menu) {
 			alert("You must enter custom rotation azimuth.");
 			return false;
 		}
-		return true;
-		
+		// call the presubmit function	
+		return 	Menu.prototype.presubmit.call(this);;		
 	}
 }
