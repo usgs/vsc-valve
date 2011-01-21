@@ -292,36 +292,17 @@ public class WavePlotter extends RawDataPlotter {
 		if (removeBias)
 			bias = wave.mean();
 		
-		/*
-		double max = wave.max() - bias;
-		double min = wave.min() - bias;
-		if (component.isAutoScale("ys")) {
-			wr.setMinY(min);
-			wr.setMaxY(max);
-		} else {
-			double[] ys = component.getYScale("ys", min, max);
-			double yMin = ys[0];
-			double yMax = ys[1];
-			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-				throw new Valve3Exception("Illegal axis values.");
-
-			wr.setMinY(yMin);
-			wr.setMaxY(yMax);
-		}
-		*/
-		
 		double yMin = 1E300;
 		double yMax = -1E300;
-		if (component.isAutoScale("ys")) {
-			// double buff;
+		if (component.isAutoScale("ysL")) {
 			yMin	= wave.min() - bias;
 			yMax	= wave.max() - bias;
 			// i don't think that we need to setup a buffer for wave based plots
-			// buff	= (yMax - yMin) * 0.05;
+			// double buff = (yMax - yMin) * 0.05;
 			// yMin	= yMin - buff;
 			// yMax	= yMax + buff;
 		} else {
-			double[] ys = component.getYScale("ys", yMin, yMax);
+			double[] ys = component.getYScale("ysL", yMin, yMax);
 			yMin = ys[0];
 			yMax = ys[1];
 			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)

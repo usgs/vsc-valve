@@ -199,20 +199,12 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		
-		/*
-		double[] d	= component.getYScale("ys", gdm.min(1), gdm.max(1));
-		double yMin	= d[0];
-		double yMax	= d[1];
-		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-			throw new Valve3Exception("Illegal axis values.");
-		*/
 
 		double yMin = 1E300;
 		double yMax = -1E300;
 		boolean allowExpand = true;
 		double timeOffset = component.getOffset(startTime);
-		if (component.isAutoScale("ys")) {
+		if (component.isAutoScale("ysL")) {
 			double buff;
 			yMin	= Math.min(yMin, gdm.min(1));
 			yMax	= Math.max(yMax, gdm.max(1));
@@ -220,7 +212,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 			yMin	= yMin - buff;
 			yMax	= yMax + buff;
 		} else {
-			double[] ys = component.getYScale("ysR", yMin, yMax);
+			double[] ys = component.getYScale("ysL", yMin, yMax);
 			yMin = ys[0];
 			yMax = ys[1];
 			allowExpand = false;
