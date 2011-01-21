@@ -383,14 +383,17 @@ public class GPSPlotter extends RawDataPlotter {
 			vr.setScale(desiredLength / scale);
 		}
 		
+		//Scale vectors
 		EllipseVectorRenderer svr = new EllipseVectorRenderer();
 		svr.frameRenderer = mr;
 		svr.drawEllipse = false;
 		svr.x = mr.getMinX();
-		svr.y = mr.getMinY() + 17 / mr.getYScale();
+		svr.y = mr.getMinY();
 		svr.u = desiredLength;
 		svr.v = 0;
-		svr.displayVert = false;
+		svr.z = desiredLength;
+		svr.displayVert = vs;
+		svr.displayHoriz = hs;
 		svr.sigZ = 0;
 		 
 		TextRenderer tr = new TextRenderer();
