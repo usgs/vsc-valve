@@ -125,7 +125,7 @@
 					<p><input class="mono" type="text" value="Now" id="endTime" size="17"
 						onchange=fixZoomMarksInside(null,0)></p>
 				</div>
-				<p>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>'.</p>
+				<h5>'yyyy[MMdd[hhmm]]' or '<a id="nowLink">Now</a>'.</h5>
 				<div class="box">
 					<h1>Time Zone</h1>
 					<p>

@@ -2,7 +2,7 @@
 
 	<form id="gpsForm">
 	<input type="hidden" name="lg" value="true">
-	<div class="w100 fl">
+	<div class="w110 fl">
 	    <div class="box">
 		<h1>Channels</h1>
 		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
@@ -11,72 +11,94 @@
         <img class="fl helpimg" src="images/help.gif" onclick="help_popup('doc/user_docs/gps/index.html')"></img>
     </div>
 	
-	<div class="w300 fl">
-		<div class="w150 fl">		
+	<div class="w310 fl">
+		<div class="w155 fl">		
 			<div class="box w140">
-				<h1>Plot Type</h1>
-				<p><input type="radio" name="plotType" value="ts" id="ts:paneSelector_options_0" checked="checked"> <label for="ts">Time Series</label></p>
-				<p><input type="radio" name="plotType" value="vel" id="vel:paneSelector_options_1"> <label for="vel">Velocity Field</label></p>
-				<!-- <p><input type="radio" name="ploType" value="dis" id="dis:paneSelector_options_2"> <label for="dis">Displacement Field</label></p> -->
+				<h1 id="collapse_ptOptions">Plot Type</h1>
+				<div id="collapseTarget_ptOptions">
+					<p><input type="radio" name="plotType" value="ts" id="ts:paneSelector_options_0" checked="checked"> <label for="ts">Time Series</label></p>
+					<p><input type="radio" name="plotType" value="vel" id="vel:paneSelector_options_1"> <label for="vel">Velocity Field</label></p>
+					<!-- <p><input type="radio" name="ploType" value="dis" id="dis:paneSelector_options_2"> <label for="dis">Displacement Field</label></p> -->
+				</div>
+			</div>	
+			<div class="box w140">
+				<h1 id="collapse_rankOptions">Ranks</h1>
+				<div id="collapseTarget_rankOptions">
+					<p><select class="w100p" name="selector:rk">
+					</select></p>
+				</div>
 			</div>
 			<div class="box w140">
-				<h1>Channel Filter</h1>
-				<p><select class="w100p" name="selector:ct">
-				</select></p>
-			</div>
-			<div class="box w140">
-				<h1>Baseline Channel</h1>
-				<p><input type="text" value="[none]" id="baseline" name="bl" class="w90p"></p>
-				<p><input type="button" value="Set Baseline" id="baselineButton">
-				<input type="button" value="Clear" id="clearButton"></p>
-			</div>
-		</div>
-		<div class="w150 fl">
-			<div class="box w140">
-				<h1>Ranks</h1>
-				<p><select class="w100p" name="selector:rk">
-				</select></p>
-			</div>
-			<div class="box w140">
-				<h1>Downsampling</h1>
-				<p>
-					<select class="w100p" name="selector:ds" id="selector:ds">
+				<h1 id="collapse_dsOptions">Downsampling</h1>
+				<div id="collapseTarget_dsOptions">
+					<p><select class="w100p" name="selector:ds" id="selector:ds">
 						<option selected="selected">None</option>
 						<option>Decimation</option>
 						<option>Mean filter</option>
-					</select>
-				</p>
-				<p id="selector:ds_interval" >Interval:  <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
+					</select></p>
+					<p id="selector:ds_interval" >Interval:  <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
+				</div>
 			</div>
 			<div class="box w140">
-				<h1>Line Type</h1>
-				<p><select class="w100p" name="selector:lt" id="selector:lt">
-				<option value="l">Line</option>
-				<option value="o">Circle</option>
-				<option value="s">Square</option>
-				<option value="*">Star</option>
-				<option value="t">Triangle</option>
-				<option value="d">Dot</option>
-				</select></p>
+				<h1 id="collapse_suppOptions">Supplemental Data</h1>
+				<div id="collapseTarget_suppOptions">
+					<p><select class="w100p" name="selector:sdt" multiple="multiple" size="3"></select></p>
+				</div>
 			</div>
 		</div>
-		<div class="w300 fl">
-			<div class="box w290">
-				<h1>Data Manipulation Options</h1>
+		<div class="w155 fl">
+			<div class="box w140">
+				<h1 id="collapse_channelfilterOptions">Channel Filter</h1>
+				<div id="collapseTarget_channelfilterOptions">
+					<p><select class="w100p" name="selector:ct"></select></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_baselineOptions">Baseline Channel</h1>
+				<div id="collapseTarget_baselineOptions">
+					<p><input type="text" value="[none]" id="baseline" name="bl" class="w90p"></p>
+					<p><input type="button" value="Set Baseline" id="baselineButton">
+					<input type="button" value="Clear" id="clearButton"></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_lineOptions">Line Type</h1>
+				<div id="collapseTarget_lineOptions">
+					<p><select class="w100p" name="selector:lt" id="selector:lt">
+					<option value="l">Line</option>
+					<option value="o">Circle</option>
+					<option value="s">Square</option>
+					<option value="*">Star</option>
+					<option value="t">Triangle</option>
+					<option value="d">Dot</option>
+					</select></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_leftOptions">Left Axis Options</h1>
+				<div id="collapseTarget_leftOptions">
+					<p>Min <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> Max <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+				</div>
+			</div>
+		</div>
+		<div class="w310 fl">
+			<div class="box w295">
+				<h1 id="collapse_manipOptions">Data Manipulation Options</h1>
+				<div id="collapseTarget_manipOptions">
 				<span id="datamanip">
 					<div id="dmo_args" class="fr mlr4">
 						<p>
-							<input style='visibility:hidden;' type="text" id="dmo_despike_period" name="despike_period" size="10">
+							<input style='visibility:hidden;' type="text" id="dmo_despike_period" name="despike_period" size="8">
 						</p>
 						<p>&nbsp;
 						</p>
 						<p> 
-							<input style="visibility: hidden;" type="text" id="dmo_filter_arg1" name="filter_arg1" size="10">
+							<input style="visibility: hidden;" type="text" id="dmo_filter_arg1" name="filter_arg1" size="8">
 						</p><p>
-							<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="10">
+							<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="8">
 						</p>
 						<p>
-							<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_period" size="10"">
+							<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_period" size="8">
 						</p>
 					</div>
 					<div id="dmo_arglbls" class="fr mlr4">
@@ -169,38 +191,20 @@
 						</p>
 					</div>
 				</span>
+				</div>
 			</div>
 		</div>
 	</div>
 			
-	<div class="w180 fl">
+	<div class="w185 fl">
 		<div id="pane_options_0-">
-			<div class="box w180">
+			<div class="box w185">
 				<h1 class="help">Time Series Options</h1>
 				<span id="columns"></span>
 			</div>
-			<div class="box w180">
-				<h1 id="collapse_leftOptions-">Left Axis Options</h1>
-				<div id="collapseTarget_leftOptions">
-					<p>Scale: <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
-				</div>
-			</div>
-			<div class="box w180">
-				<h1 id="collapse_rightOptions-">Right Axis Options</h1>
-				<div id="collapseTarget_rightOptions">
-					<p>Scale: <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
-				</div>
-			</div>
-			<div class="box w180 fl">
-				<h1>Supplemental Data</h1>
-				<p>
-				<select class="w100p" name="selector:sdt" multiple="multiple" size="5">
-				</select>
-				</p>
-			</div>
 		</div>
 		<div id="pane_options_1">
-			<div class="box w180">
+			<div class="box w185">
 				<h1>Velocity Field Options</h1>
 				<div class="mlr4">
 					<p><input type="checkbox" id="se" name="se" checked="checked"> <label for="se">Scale Errors</label></p>
@@ -211,7 +215,7 @@
 		</div>
 		<!--
 		<div id="pane_options_2">
-			<div class="box w180">
+			<div class="box w185">
 				<h1>Displacement Options</h1>
 				<div class="mlr4">
 				</div>

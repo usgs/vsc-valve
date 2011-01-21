@@ -5,7 +5,7 @@ body
 	margin-top: 5px;
 	background-color: #efecda;
 	font-family: tahoma;
-	font-size: 10px;
+	font-size: 12px;
 	text-align: center;
 }
 
@@ -103,7 +103,7 @@ div.content h1
 	display: inline;
 	padding-left: 6px;
 	font-family: tahoma;
-	font-size: 12px;
+	font-size: 14px;
 	color: white;
 }
 
@@ -112,7 +112,7 @@ div.content h1.min
 	display: inline;
 	padding-left: 3px;
 	font-family: tahoma;
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: normal;
 	color: white;
 }
@@ -140,7 +140,7 @@ div.dataPanel
 	width: 160px;
 	padding: 4px;
 	font-family: tahoma;
-	font-size: 10px;
+	font-size: 12px;
 	padding-bottom: 0px;
 }
 
@@ -199,7 +199,7 @@ ul.menu li
 	list-style-type: none;
 	margin-bottom: 5px;
 	padding: 0px;
-	font-size: 12px;
+	font-size: 14px;
 	font-family: Tahoma;
 }
 
@@ -238,13 +238,14 @@ ul h1
 
 ul.subMenu li.selected
 {
-	background: #eee;
-	color: black;
+	background: #888888;
+	color: #FFFFFF;
 }
 
 ul.subMenu li.hover
 {
-	background-color: #e8f2fe;
+	background: url(images/bg.png) repeat-x;
+	color: #FFFFFF;
 	cursor: pointer;
 }
 
@@ -268,7 +269,7 @@ h1.filter
 	padding: 2px;
 	color: white;
 	background: url(images/bg.png);
-	font-size: 10px;
+	font-size: 12px;
 	font-family: Verdana;
 	padding-top: 2px;
 	margin: 0px;
@@ -342,7 +343,7 @@ div.box h1
 	padding: 2px;
 	color: white;
 	background: url(images/bg.png) repeat-x;
-	font-size: 10px;
+	font-size: 12px;
 	font-family: Verdana;
 	margin: 0px -3px 0px -3px;
 }
@@ -357,9 +358,11 @@ div.box p
 {
 	margin: 3px 0px 3px 0px;
 	padding: 0px;
-	font-size: 10px;
+	/*font-size: 12px;*/
 	font-family: Verdana;
 }
+
+.columns { font-size: 10px; }
 
 .p0 { padding: 0px; }
 .m0 { margin: 0px; }
@@ -380,14 +383,17 @@ div.box p
 .w140 { width: 140px; }
 .w145 { width: 145px; }
 .w150 { width: 150px; }
-.w160 { width: 159px; }
+.w155 { width: 155px; }
+.w160 { width: 160px; }
 .w180 { width: 180px; }
+.w185 { width: 185px; }
 .w200 { width: 200px; }
 .w220 { width: 220px; }
 .w240 { width: 240px; }
 .w260 { width: 260px; }
 .w280 { width: 280px; }
 .w290 { width: 290px; }
+.w295 { width: 295px; }
 .w300 { width: 300px; }
 .w310 { width: 310px; }
 .w320 { width: 320px; }

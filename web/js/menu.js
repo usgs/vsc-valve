@@ -365,28 +365,16 @@ function populateGenericColumns(menu) {
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			var detDiv = document.createElement('div');
-			detDiv.className = 'fr mlr4';
-			var norDiv = document.createElement('div');
-			norDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
-			
-			//var p = document.createElement('p');
-			//var l = document.createTextNode('Detrend');
-			//p.appendChild(l);
-			//detDiv.appendChild(p);
-			
-			//var p = document.createElement('p');
-			//var l = document.createTextNode('Remove Bias');
-			//p.appendChild(l);
-			//norDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -395,6 +383,7 @@ function populateGenericColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
@@ -405,7 +394,7 @@ function populateGenericColumns(menu) {
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
@@ -416,130 +405,11 @@ function populateGenericColumns(menu) {
 				var l		= document.createTextNode(col[3]);
 				p.appendChild(l);
 				uniDiv.appendChild(p);
-				
-				// build the detrend checkbox
-				/*
-				var p		= document.createElement('p');
-				p.className	= 'center';
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_d_" + col[1];
-				el.name		= "d_" + col[1];
-				p.appendChild(el);
-				detDiv.appendChild(p);
-				*/
-				
-				// build the normalize checkbox
-				/*
-				var p		= document.createElement('p');
-				p.className	= 'center';
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_n_" + col[1];
-				el.name		= "n_" + col[1];
-				p.appendChild(el);
-				norDiv.appendChild(p);
-				*/
 			}
-			
-			mainColDiv.appendChild(detDiv);
-			mainColDiv.appendChild(norDiv);
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
 	);
-
-	/* loadXML(menu.id + " datamanip", url, 
-		function(req) {
-			var xml		= req.responseXML;
-			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
-			
-			var argsDiv = document.createElement('div');
-			argsDiv.className = 'fr mlr4';
-			var lblsDiv = document.createElement('div');
-			lblsDiv.className = 'fr mlr4';
-			var menuDiv = document.createElement('div');
-			menuDiv.className = 'mlr4';
-
-			argsDiv.id = menu.id + 'dmo_args';
-			lblsDiv.id = menu.id + 'dmo_arglbls';
-			menuDiv.id = menu.id + 'dmo_menu';
-			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
-			p.appendChild(l);
-			colDiv.appendChild(p);
-			
-			//var p = document.createElement('p');
-			//var l = document.createTextNode('Detrend');
-			//p.appendChild(l);
-			//detDiv.appendChild(p);
-			
-			//var p = document.createElement('p');
-			//var l = document.createTextNode('Remove Bias');
-			//p.appendChild(l);
-			//norDiv.appendChild(p);
-			
-			for (var i = 0; i < cols.length; i++) {
-				
-				// split up the column entry into it's elements
-				var col		= cols[i].firstChild.data.split(":");
-				
-				// build the column checkbox
-				var p		= document.createElement('p');
-				
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
-				el.name		= col[1];				
-				p.appendChild(el);
-				
-				var el		= document.createElement('label');
-				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
-				el.appendChild(tn);
-				p.appendChild(el);
-				
-				colDiv.appendChild(p);
-				
-				// build the units list
-				var p		= document.createElement('p');
-				var l		= document.createTextNode(col[3]);
-				p.appendChild(l);
-				uniDiv.appendChild(p);
-				
-				// build the detrend checkbox
-				//
-				//var p		= document.createElement('p');
-				//p.className	= 'center';
-				//var el		= document.createElement('input');
-				//el.type		= 'checkbox';
-				//el.id		= menu.id + "_d_" + col[1];
-				//el.name		= "d_" + col[1];
-				//p.appendChild(el);
-				//detDiv.appendChild(p);
-				
-				// build the normalize checkbox
-				//
-				//var p		= document.createElement('p');
-				//p.className	= 'center';
-				//var el		= document.createElement('input');
-				//el.type		= 'checkbox';
-				//el.id		= menu.id + "_n_" + col[1];
-				//el.name		= "n_" + col[1];
-				//p.appendChild(el);
-				//norDiv.appendChild(p);
-				
-			}
-			
-			mainColDiv.appendChild(detDiv);
-			mainColDiv.appendChild(norDiv);
-			mainColDiv.appendChild(colDiv);
-			mainColDiv.appendChild(uniDiv);
-		}
-	); */
 }
 
 function populateTiltColumns(menu) {
@@ -550,27 +420,21 @@ function populateTiltColumns(menu) {
 		function(req) {
 			var xml		= req.responseXML;
 			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
 			
 			var colDiv = document.createElement('div');
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			//var detDiv = document.createElement('div');
-			//detDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
-			
-			//p = document.createElement('p');
-			//l = document.createTextNode('DMO');
-			//p.appendChild(l);
-			//detDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -579,6 +443,7 @@ function populateTiltColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
@@ -589,7 +454,7 @@ function populateTiltColumns(menu) {
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3] + "");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -600,17 +465,8 @@ function populateTiltColumns(menu) {
 				var l		= document.createTextNode(col[3]);
 				p.appendChild(l);
 				uniDiv.appendChild(p);
-				
-				// build the detrend checkbox
-				//var p		= document.createElement('p');
-				//p.className	= 'center';
-				//var el		= document.createElement('label');
-				//el.appendChild( document.createTextNode(col[5] == "F" ? "No" : "Yes"));
-				//p.appendChild(el);
-				//detDiv.appendChild(p);
 			}
-			
-			//mainColDiv.appendChild(detDiv);
+
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
@@ -625,27 +481,21 @@ function populateTensorstrainColumns(menu) {
 		function(req) {
 			var xml		= req.responseXML;
 			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
 			
 			var colDiv = document.createElement('div');
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			//var detDiv = document.createElement('div');
-			//detDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
-			
-			//p = document.createElement('p');
-			//l = document.createTextNode('DMO');
-			//p.appendChild(l);
-			//detDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -654,6 +504,7 @@ function populateTensorstrainColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
@@ -664,7 +515,7 @@ function populateTensorstrainColumns(menu) {
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3] + "");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -675,17 +526,8 @@ function populateTensorstrainColumns(menu) {
 				var l		= document.createTextNode(col[3]);
 				p.appendChild(l);
 				uniDiv.appendChild(p);
-				
-				// build the detrend checkbox
-				//var p		= document.createElement('p');
-				//p.className	= 'center';
-				//var el		= document.createElement('label');
-				//el.appendChild( document.createTextNode(col[5] == "F" ? "No" : "Yes"));
-				//p.appendChild(el);
-				//detDiv.appendChild(p);
 			}
-			
-			//mainColDiv.appendChild(detDiv);
+
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
@@ -700,7 +542,6 @@ function populateGPSColumns(menu) {
 		function(req) {
 			var xml		= req.responseXML;
 			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
 			
 			var colDiv = document.createElement('div');
 			colDiv.className = 'mlr4';
@@ -710,10 +551,12 @@ function populateGPSColumns(menu) {
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -722,6 +565,7 @@ function populateGPSColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
@@ -732,7 +576,7 @@ function populateGPSColumns(menu) {
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
