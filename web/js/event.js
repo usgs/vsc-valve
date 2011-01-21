@@ -23,20 +23,22 @@ var isIE = !window.opera && navigator.userAgent.indexOf('MSIE') != -1;
  */
 function addListener(elt, eventType, func, useCapture)
 {
-	if (elt.addEventListener)
-	{
-		elt.addEventListener(eventType, func, useCapture);
-		return true;
+	if (elt) {
+		if (elt.addEventListener)
+		{
+			elt.addEventListener(eventType, func, useCapture);
+			return true;
+		}
+		else if (elt.attachEvent)
+		{
+			//if (elt == window)
+			//	elt = document;
+			var r = elt.attachEvent('on' + eventType, func);
+			return r;
+		}
+		else
+			elt['on' + eventType] = func;
 	}
-	else if (elt.attachEvent)
-	{
-		//if (elt == window)
-		//	elt = document;
-		var r = elt.attachEvent('on' + eventType, func);
-		return r;
-	}
-	else
-		elt['on' + eventType] = func;
 }
 /** 
  *  Remove an event listener
