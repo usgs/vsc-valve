@@ -258,6 +258,8 @@ public class PlotHandler implements HttpHandler
 		}
 		catch (Valve3Exception e)
 		{
+			e.printStackTrace();
+			logger.severe(e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}

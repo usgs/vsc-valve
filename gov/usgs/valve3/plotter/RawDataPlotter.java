@@ -874,6 +874,7 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		//if ( sdTypes.length() == 0 )
 		//	return;
+		if(!ch.contains(",")){
 		Map<String, String> params = new LinkedHashMap<String, String>();		
 		params.put("source", source);
 		params.put("action", "suppdata");
@@ -910,5 +911,6 @@ public abstract class RawDataPlotter extends Plotter {
 			throw new Valve3Exception(e.getMessage()); 
 		}
 		pool.checkin(cl);
+		}
 	}
 }

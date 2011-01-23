@@ -394,6 +394,15 @@ public class TiltPlotter extends RawDataPlotter {
 					}
 					rankLegend	= rank.getName();
 				}
+				if(isPlotComponentsSeparately()){
+					for(Column col: columnsList){
+						if(col.checked){
+							compCount++;
+						}
+					}
+				} else {
+					compCount = 1;
+				}
 				for (int cid : channelDataMap.keySet()) {
 					
 					// get the relevant information for this channel
@@ -402,6 +411,9 @@ public class TiltPlotter extends RawDataPlotter {
 					
 					// verify their is something to plot
 					if (data == null || data.rows() == 0) {
+						v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
+						Plot plot = v3Plot.getPlot();
+						plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
 						continue;
 					}
 					
@@ -522,11 +534,6 @@ public class TiltPlotter extends RawDataPlotter {
 						csvData.add( ed );			
 					} else 
 						if(isPlotComponentsSeparately()){
-							for(Column col: columnsList){
-								if(col.checked){
-									compCount++;
-								}
-							}
 							// create an individual matrix renderer for each component selected
 							for (int i = 0; i < columnsList.size(); i++) {
 								Column col = columnsList.get(i);
@@ -543,7 +550,6 @@ public class TiltPlotter extends RawDataPlotter {
 								}
 							}
 						} else {
-							compCount = channelDataMap.size();
 							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
 							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
 							v3Plot.getPlot().addRenderer(leftMR);

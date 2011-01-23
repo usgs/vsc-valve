@@ -459,6 +459,9 @@ public class GPSPlotter extends RawDataPlotter {
 					
 					// verify their is something to plot
 					if (data == null || data.observations() == 0) {
+						v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
+						Plot plot = v3Plot.getPlot();
+						plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
 						continue;
 					}
 					// convert the GPSData object to a generic data matrix and subtract out the mean
@@ -554,7 +557,6 @@ public class GPSPlotter extends RawDataPlotter {
 								}
 							}
 						} else {
-							compCount = channelDataMap.size();
 							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
 							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
 							v3Plot.getPlot().addRenderer(leftMR);

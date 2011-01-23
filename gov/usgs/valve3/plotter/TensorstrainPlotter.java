@@ -213,12 +213,24 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			}
 			rankLegend = rank.getName();
 		}
+		if(isPlotComponentsSeparately()){
+			for(Column col: columnsList){
+				if(col.checked){
+					compCount++;
+				}
+			}
+		} else {
+			compCount = 1;
+		}
 		for (int cid : channelDataMap.keySet()) {
 			// get the relevant information for this channel
 			Channel channel = channelsMap.get(cid);
 			TensorstrainData data = channelDataMap.get(cid);
 			// verify their is something to plot
 			if (data == null || data.rows() == 0) {
+				v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
+				Plot plot = v3Plot.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
 				continue;
 			}
 			// instantiate the azimuth and tangential values based on the user
@@ -331,11 +343,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				csvIndex++;
 				csvData.add(ed);
 			} else if (isPlotComponentsSeparately()) {
-				for (Column col : columnsList) {
-					if (col.checked) {
-						compCount++;
-					}
-				}
 				// create an individual matrix renderer for each component
 				// selected
 				for (int i = 0; i < columnsList.size(); i++) {
@@ -353,7 +360,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 					}
 				}
 			} else {
-				compCount = channelDataMap.size();
 				MatrixRenderer leftMR = getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
 				MatrixRenderer rightMR = getRightMatrixRenderer(component,	channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
 				v3Plot.getPlot().addRenderer(leftMR);
