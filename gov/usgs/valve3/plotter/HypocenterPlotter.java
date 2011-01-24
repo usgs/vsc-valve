@@ -220,8 +220,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal area of interest: n=" +n);
 		
 
-		this.startLoc = new Point2D.Double(w,s);
-		this.endLoc = new Point2D.Double(e,n);
+//		this.startLoc = new Point2D.Double(w,s);
+//		this.endLoc = new Point2D.Double(e,n);
+		this.startLoc = new Point2D.Double(w,n);
+		this.endLoc = new Point2D.Double(e,s);
 		
 		if(s>=n){
 			double t = s;
