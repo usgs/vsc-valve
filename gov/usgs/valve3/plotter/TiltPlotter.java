@@ -35,6 +35,8 @@ import gov.usgs.proj.TransverseMercator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -82,7 +84,6 @@ public class TiltPlotter extends RawDataPlotter {
 	private Map<Integer, TiltData> channelDataMap;
 	private static Map<Integer, Double> azimuthsMap;
 
-	//private boolean detrendCols[];
 	private String legendsCols[];
 	
 	private PlotType plotType;
@@ -92,11 +93,14 @@ public class TiltPlotter extends RawDataPlotter {
 	private double azimuthRadial;
 	private double azimuthTangential;
 	
+	private DateFormat dateFormat;
+	
 	/**
 	 * Default constructor
 	 */
 	public TiltPlotter() {
-		super();		
+		super();
+		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");		
 	}
 		
 	/**
@@ -129,7 +133,6 @@ public class TiltPlotter extends RawDataPlotter {
 			}
 		
 			columnsCount		= columnsList.size();
-			//detrendCols			= new boolean [columnsCount];
 			legendsCols			= new String  [columnsCount];
 			channelLegendsCols	= new String  [columnsCount];
 			bypassManipCols     = new boolean [columnsList.size()];
@@ -145,7 +148,6 @@ public class TiltPlotter extends RawDataPlotter {
 				String col_arg = component.get(column.name);
 				if ( col_arg != null )
 					column.checked	= Util.stringToBoolean(component.get(column.name));
-				//detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
 				legendsCols[i]	= column.description;
 				if (column.checked) {
 					if(forExport || isPlotComponentsSeparately()){
@@ -192,6 +194,7 @@ public class TiltPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
 		boolean gotData = false;
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -200,6 +203,7 @@ public class TiltPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
@@ -239,7 +243,7 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @param v3p Valve3Plot
 	 * @param component PlotComponent
 	 */
-	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component) {
+	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		
@@ -285,6 +289,7 @@ public class TiltPlotter extends RawDataPlotter {
 		if(yUnits){
 			mr.getAxis().setLeftLabelAsText("Latitude");
 		}
+		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		v3Plot.getPlot().addRenderer(mr);
 		
 		double maxMag = -1E300;
@@ -368,31 +373,32 @@ public class TiltPlotter extends RawDataPlotter {
 		PlotType	corePlotType = plotType;
 		boolean     forExport = (v3Plot == null);
 		int         csvIndex = 0;
-		
+
+		// Export is treated as a time series, even if requested plot was a velocity map
 		if ( forExport )
 			corePlotType = PlotType.TIME_SERIES;
 		
+		// setup the display for the legend
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+			if ( !forExport )
+				v3Plot.setExportable( false );
+			else
+				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
+		} else {
+			rank	= ranksMap.get(rk);
+		}
+		String rankLegend		= rank.getName();
+		
 		int displayCount = 0, dh = 0;
-		Rank rank = null;
-		String rankLegend = null;
 		
 		switch (corePlotType) {
 			case TIME_SERIES:
 				if ( !forExport ) {
-					// setting up variables to decide where to plot this component
-				
+					// setting up variables to decide where to plot this component				
 					displayCount	= 0;
 					dh				= component.getBoxHeight();
-				
-					// setup the display for the legend
-					rank	= new Rank();
-					if (rk == 0) {
-						rank	= rank.bestPossible();
-						v3Plot.setExportable( false );
-					} else {
-						rank	= ranksMap.get(rk);
-					}
-					rankLegend	= rank.getName();
 				}
 				if(isPlotComponentsSeparately()){
 					for(Column col: columnsList){
@@ -533,8 +539,8 @@ public class TiltPlotter extends RawDataPlotter {
 						csvIndex++;
 						csvData.add( ed );			
 					} else 
+						// create an individual matrix renderer for each component selected
 						if(isPlotComponentsSeparately()){
-							// create an individual matrix renderer for each component selected
 							for (int i = 0; i < columnsList.size(); i++) {
 								Column col = columnsList.get(i);
 								if(col.checked){
@@ -565,7 +571,7 @@ public class TiltPlotter extends RawDataPlotter {
 				
 			case TILT_VECTORS:
 				v3Plot.setExportable( false ); // Can't export vectors
-				plotTiltVectors(v3Plot, component);
+				plotTiltVectors(v3Plot, component, rank);
 				break;
 		}
 		
@@ -607,7 +613,20 @@ public class TiltPlotter extends RawDataPlotter {
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
-	}	
+	}
+
+	/**
+	 * 
+	 * @return plot top label text
+	 */
+	private String getTopLabel(Rank rank) {
+		StringBuilder top = new StringBuilder(100);
+		top.append(rank.getName() + " Vectors between ");
+		top.append(dateFormat.format(Util.j2KToDate(startTime)));
+		top.append(" and ");
+		top.append(dateFormat.format(Util.j2KToDate(endTime)));
+		return top.toString();
+	}
 
 	/**
 	 * Initialize list of channels for given vdx source

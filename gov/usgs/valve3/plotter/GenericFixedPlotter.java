@@ -34,9 +34,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	
 	private Map<Integer, GenericDataMatrix> channelDataMap;	
 
-	//private int columnsCount;
-	//private boolean detrendCols[];
-	//private boolean normalzCols[];
 	private String legendsCols[];
 	
 	/**
@@ -55,8 +52,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);
 		rk = component.getInt("rk");
-		//detrendCols			= new boolean [columnsList.size()];
-		//normalzCols			= new boolean [columnsList.size()];
 		legendsCols			= new String  [columnsList.size()];
 		channelLegendsCols	= new String  [columnsList.size()];
 		bypassManipCols     = new boolean [columnsList.size()];
@@ -73,8 +68,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			String col_arg = component.get(column.name);
 			if ( col_arg != null )
 				column.checked	= Util.stringToBoolean(component.get(column.name));
-			//detrendCols[i]	= Util.stringToBoolean(component.getString("d_" + column.name));
-			//normalzCols[i]	= Util.stringToBoolean(component.getString("n_" + column.name));
 			bypassManipCols[i] = column.bypassmanipulations;
 			legendsCols[i]	= column.description;
 			if (column.checked) {
@@ -216,8 +209,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			
 			// detrend and normalize the data that the user requested to be detrended		
 			for (int i = 0; i < columnsCount; i++) {
-				//if (detrendCols[i]) { gdm.detrend(i + 2); }
-				//if (normalzCols[i]) { gdm.add(i + 2, -gdm.mean(i + 2)); }
 				if ( bypassManipCols[i] )
 					continue;
 				if (doDespike) { gdm.despike(i + 2, despikePeriod ); }

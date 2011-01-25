@@ -3,6 +3,8 @@ package gov.usgs.valve3.plotter;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +27,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -76,21 +79,22 @@ public class GPSPlotter extends RawDataPlotter {
 	private String		bl;
 	private boolean		se, vs, hs;
 
-	// variables used in this class	
-
+	// variables used in this class
 	private GPSData baselineData;
 	private Map<Integer, GPSData> channelDataMap;	
 	
-	//private int columnsCount;
 	private boolean selectedCols[];
 	private String legendsCols[];
+	
+	private DateFormat dateFormat;
 	
 	/**
 	 * Default constructor
 	 */
 	public GPSPlotter() {
 		super();
-		shape=null;
+		shape		= null;
+		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 	
 	/**
@@ -245,7 +249,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
 	 */
-	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		
@@ -298,6 +302,7 @@ public class GPSPlotter extends RawDataPlotter {
 		if(yUnits){
 			mr.getAxis().setLeftLabelAsText("Latitude");
 		}
+		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		plot.addRenderer(mr);
 		
 		double maxMag = -1E300;
@@ -414,14 +419,26 @@ public class GPSPlotter extends RawDataPlotter {
 		PlotType	corePlotType = plotType; 		// Copy of plotType used to decide how to process
 		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		//int         csvIndex = 0;
-		
+
+		// Export is treated as a time series, even if requested plot was a velocity map
 		if ( forExport )
-			// Export is treated as a time series, even if requested plot was a velocity map
 			corePlotType = PlotType.TIME_SERIES;
 		
+		// setup the display for the legend
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+			if ( !forExport )
+				v3Plot.setExportable( false );
+			else
+				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
+		} else {
+			rank	= ranksMap.get(rk);
+		}
+		String rankLegend		= rank.getName();
+		String baselineLegend	= null;
+		
 		int displayCount = 0, dh = 0;
-		Rank rank = null;
-		String rankLegend = null, baselineLegend = null;
 		
 		switch (corePlotType) {
 			case TIME_SERIES:
@@ -432,19 +449,6 @@ public class GPSPlotter extends RawDataPlotter {
 				// setting up variables to decide where to plot this component
 				displayCount	= 0;
 				dh				= component.getBoxHeight();
-				
-				// setup the display for the legend
-				rank	= new Rank();
-				if (rk == 0) {
-					rank	= rank.bestPossible();
-					if ( !forExport )
-						v3Plot.setExportable( false );
-					else
-						throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
-				} else {
-					rank	= ranksMap.get(rk);
-				}
-				rankLegend	= rank.getName();
 				
 				// if a baseline was chosen then setup the display for the legend
 				baselineLegend = "";
@@ -573,7 +577,7 @@ public class GPSPlotter extends RawDataPlotter {
 				
 			case VELOCITY_MAP:
 				v3Plot.setExportable( false );
-				plotVelocityMap(v3Plot, component);
+				plotVelocityMap(v3Plot, component, rank);
 				break;
 		}
 		
@@ -614,5 +618,18 @@ public class GPSPlotter extends RawDataPlotter {
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
+	}
+
+	/**
+	 * 
+	 * @return plot top label text
+	 */
+	private String getTopLabel(Rank rank) {
+		StringBuilder top = new StringBuilder(100);
+		top.append(rank.getName() + " Vectors between ");
+		top.append(dateFormat.format(Util.j2KToDate(startTime)));
+		top.append(" and ");
+		top.append(dateFormat.format(Util.j2KToDate(endTime)));
+		return top.toString();
 	}
 }

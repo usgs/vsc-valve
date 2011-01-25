@@ -129,7 +129,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	public HypocenterPlotter() {
 		super();
-		dateFormat	= new SimpleDateFormat("yyyy-MM-dd");
+		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		logger = Log.getLogger("gov.usgs.valve3");
 	}
 
@@ -644,7 +644,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd")+ ")");
+			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");
 		}
 		if(xLabel){
 			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
