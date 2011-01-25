@@ -240,7 +240,7 @@ public class TiltPlotter extends RawDataPlotter {
 
 	/**
 	 * Create MapRenderer for tilt vector, adds it to plot
-	 * @param v3p Valve3Plot
+	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
 	 */
 	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
@@ -365,7 +365,7 @@ public class TiltPlotter extends RawDataPlotter {
 	/**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, Initialize MatrixRenderers for left and right axis, adds them to plot
-	 * @param v3p Valve3Plot
+	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */

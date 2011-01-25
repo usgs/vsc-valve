@@ -28,7 +28,7 @@ abstract public class Result
 	
 	/**
 	 * Setter for URL
-	 * @param url to set
+	 * @param u to set
 	 */
 	public void setURL(String u)
 	{

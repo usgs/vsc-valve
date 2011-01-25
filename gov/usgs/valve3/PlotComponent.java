@@ -166,9 +166,7 @@ public class PlotComponent
 	{
 		String ysMin = params.get(pre + "Min");
 		String ysMax = params.get(pre + "Max");
-		return ysMin == null || ysMax == null || 
-		       ysMin.trim().isEmpty() || ysMax.trim().isEmpty() || 
-		       ysMin.toLowerCase().startsWith("a") || ysMax.toLowerCase().startsWith("a");
+		return ysMin == null || ysMax == null || ysMin.toLowerCase().startsWith("a") || ysMax.toLowerCase().startsWith("a");
 	}
 	
 	/**

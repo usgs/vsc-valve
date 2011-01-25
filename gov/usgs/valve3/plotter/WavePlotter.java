@@ -416,7 +416,7 @@ public class WavePlotter extends RawDataPlotter {
 	 /**
 	 * If v3Plot is null, prepare data for exporting
 	 * Otherwise, Loop through the list of channels and create plots
-	 * @param v3p Valve3Plot
+	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */

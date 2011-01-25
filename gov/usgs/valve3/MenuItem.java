@@ -27,7 +27,7 @@ public class MenuItem implements Comparable<MenuItem>
 	 * @param so menu item sort order
 	 * @param sc menu item shortcuts
 	 * @param lt menu item line type
-	 * @param splotSeparately plot items separately
+	 * @param plotSeparately plot items separately
 	 * @param biasType menu item type of bias removed
 	 */
 	public MenuItem(String id, String n, String i, String f, int so, String sc, char lt, boolean plotSeparately, char biasType)
