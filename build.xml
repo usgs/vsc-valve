@@ -11,6 +11,7 @@ Available targets:
 help    -- displays this help information
 init    --
 deploy  -- build usgs.jar file
+javadoc -- build javadoc documentation
 dist    -- creates a binary distribution
 		</echo>
 	</target>
@@ -22,6 +23,37 @@ dist    -- creates a binary distribution
 		<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />
 	</target>
 	
+	<target name="javadoc">
+		<!-- rebuild the javadoc dir -->
+		<delete dir="${javadoc-dir}"/>
+		<mkdir  dir="${javadoc-dir}"/>
+
+		<!-- Build javadocs -->
+	    <javadoc
+	          access="public"
+	           destdir="${javadoc-dir}"
+	           author="true"
+	           version="true"
+	           use="true"
+	           windowtitle="VALVE"
+	       >
+		    <fileset dir="../" defaultexcludes="yes">
+    			<include name="Earthworm/**/*.java"/>
+    			<include name="Math/**/*.java"/>
+    			<include name="Net/**/*.java"/>
+        		<include name="Math/**/*.java"/>
+        		<include name="Pinnacle/**/*.java"/>
+        		<include name="Plot/**/*.java"/>
+        		<include name="Swarm/**/*.java"/>
+        		<include name="USGS/**/*.java"/>
+        		<include name="Util/**/*.java"/>
+        		<include name="Valve3/**/*.java"/>
+        		<include name="VDX/**/*.java"/>
+        		<include name="Winston/**/*.java"/>
+ 	        </fileset>
+	    </javadoc>
+	</target>
+
 	<target name="dist" depends="deploy">
 		
 		<!-- rebuild the dist dir -->
