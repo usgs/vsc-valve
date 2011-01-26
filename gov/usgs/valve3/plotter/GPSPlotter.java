@@ -248,6 +248,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * elements which plot a station's movement
 	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
+	 * @param rank Rank
 	 */
 	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		

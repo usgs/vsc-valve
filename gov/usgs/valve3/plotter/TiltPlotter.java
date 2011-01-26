@@ -242,6 +242,7 @@ public class TiltPlotter extends RawDataPlotter {
 	 * Create MapRenderer for tilt vector, adds it to plot
 	 * @param v3Plot Valve3Plot
 	 * @param component PlotComponent
+	 * @param rank Rank
 	 */
 	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
 		
