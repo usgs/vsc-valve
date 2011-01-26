@@ -152,8 +152,9 @@ abstract public class Plotter
 				ecs = cl.getTextData(params);
 			} catch (UtilException e){
 				ecs = new ArrayList<String>();
+			} finally {
+				pool.checkin(cl);
 			}
-			pool.checkin(cl);
 			ec = new ExportConfig( ecs );
 			v3.putExportConfig(source, ec);
 		}

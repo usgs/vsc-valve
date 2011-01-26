@@ -2,12 +2,9 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -24,25 +21,10 @@ import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.tensorstrain.TensorstrainData;
-import gov.usgs.vdx.data.tilt.TiltData;
-
-import gov.usgs.proj.GeoRange;
-import gov.usgs.plot.map.GeoLabel;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.proj.TransverseMercator;
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
-import java.awt.image.RenderedImage;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-
-import cern.colt.matrix.DoubleFactory2D;
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * Generate tensorstrain images from raw data got from vdx source
@@ -102,10 +84,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			Column column = columnsList.get(i);
 			String col_arg = component.get(column.name);
 			if (col_arg != null)
-				column.checked = Util.stringToBoolean(component
-						.get(column.name));
-			// detrendCols[i] = Util.stringToBoolean(component.get("d_" +
-			// column.name));
+				column.checked = Util.stringToBoolean(component.get(column.name));
 			legendsCols[i] = column.description;
 			if (column.checked) {
 				if (forExport || isPlotComponentsSeparately()) {
@@ -144,8 +123,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
-
-		boolean gotData = false;
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -154,37 +132,45 @@ public class TensorstrainPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client = pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 
 		// create a map to hold all the channel data
 		channelDataMap = new LinkedHashMap<Integer, TensorstrainData>();
 		String[] channels = ch.split(",");
-
-		// iterate through each of the selected channels and get the data from
-		// the db=
+		
+		boolean gotData = false;
+		
+		// iterate through each of the selected channels and get the data from the db
 		for (String channel : channels) {
 			params.put("ch", channel);
 			TensorstrainData data = null;
 			try {
-				data = (TensorstrainData) client.getBinaryData(params);
+				data = (TensorstrainData)client.getBinaryData(params);
 			} catch (UtilException e) {
 				data = null;
 			}
-			if (data != null) {
-				gotData = true;
+			
+			// if data was collected
+			if (data != null && data.rows() > 0) {
 				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
 		}
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
-		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 
 	/**
@@ -400,37 +386,5 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
-	}
-	
-
-
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * 
-	 * @param source
-	 *            vdx source name
-	 * @param client
-	 *            vdx name
-	 */
-	private static Map<Integer, Double> getAzimuths(String source, String client) throws Valve3Exception {
-		Map<Integer, Double> azimuths = new LinkedHashMap<Integer, Double>();
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "azimuths");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> chs = null;
-		try {
-			chs = cl.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		}
-		pool.checkin(cl);
-		for (int i = 0; i < chs.size(); i++) {
-			String[] temp = chs.get(i).split(":");
-			azimuths.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
-		}
-		return azimuths;
 	}
 }

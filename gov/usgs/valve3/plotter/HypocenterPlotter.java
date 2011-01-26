@@ -319,18 +319,16 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		double twest =range.getWest();
-		double teast = range.getEast();
-		double tsouth = range.getSouth();
-		double tnorth = range.getNorth();
+		double twest	= range.getWest();
+		double teast	= range.getEast();
+		double tsouth	= range.getSouth();
+		double tnorth	= range.getNorth();
 		
 		Axes tmp = this.axes;
-		if (axes == Axes.ARB_DEPTH || axes == Axes.ARB_TIME) {
-			// we need to get extra hypocenters for plotting the width
-			
-			
-			double latDiff = ArbDepthCalculator.getLatDiff(hypowidth);
-			
+		
+		// we need to get extra hypocenters for plotting the width	
+		if (axes == Axes.ARB_DEPTH || axes == Axes.ARB_TIME) {		
+			double latDiff 		= ArbDepthCalculator.getLatDiff(hypowidth);			
 			double lonNorthDiff = ArbDepthCalculator.getLonDiff(hypowidth, tnorth);
 			double lonSouthDiff = ArbDepthCalculator.getLonDiff(hypowidth, tsouth);
 			
@@ -339,8 +337,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 			tsouth -= latDiff;
 			tnorth += latDiff;
 		}
-			
-			
 			
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -370,20 +366,24 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 
 		// get the data, if nothing is returned then create an empty list
-		try{
-			hypos = (HypocenterList) client.getBinaryData(params);
+		try {
+			hypos = (HypocenterList)client.getBinaryData(params);
+		} catch (UtilException e) {
+			hypos = null; 
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
-		}
-		if (hypos == null)
-			hypos = new HypocenterList();
-		else
+		
+		// we return an empty list if there is no data, because it is valid to have no hypocenters for a time period
+		if (hypos != null) {
 			hypos.adjustTime(component.getOffset(startTime));
+		} else {
+			hypos = new HypocenterList();
+		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
 	}

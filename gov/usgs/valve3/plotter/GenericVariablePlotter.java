@@ -18,6 +18,7 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
+import gov.usgs.vdx.data.tilt.TiltData;
 
 import java.awt.Color;
 import java.io.File;
@@ -44,36 +45,6 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 */
 	public GenericVariablePlotter(){
 		super();
-	}
-
-	/**
-	 * Gets binary data from VDX server.
-	 * @param component PlotComponent
-	 * @throws Valve3Exception
-	 */
-	protected void getData(PlotComponent component) throws Valve3Exception
-	{
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		params.put("source", vdxSource);
-		params.put("action", "data");
-		params.put("cid", ch);
-		params.put("st", Double.toString(startTime));
-		params.put("et", Double.toString(endTime));
-		params.put("selectedTypes", component.getString("selectedTypes"));
-		addDownsamplingInfo(params);
-		try{
-			data = (GenericDataMatrix)client.getBinaryData(params);
-		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
-		}
-		pool.checkin(client);
-		
-		if (data == null || data.rows() == 0)
-			throw new Valve3Exception("No data.");
-		data.adjustTime(component.getOffset(startTime));
 	}
 
 	/**
@@ -155,6 +126,54 @@ public class GenericVariablePlotter extends RawDataPlotter
 		}
 		for (int i = leftColumns.size(); i < channelLegendsCols.length; i++) {
 			channelLegendsCols[i] = String.format("%s", rightColumns.get(i-leftColumns.size()).description);
+		}
+	}
+
+	/**
+	 * Gets binary data from VDX server.
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
+	 */
+	protected void getData(PlotComponent component) throws Valve3Exception {
+		
+		// create a map of all the input parameters
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("action", "data");
+		params.put("ch", ch);	
+		params.put("st", Double.toString(startTime));
+		params.put("et", Double.toString(endTime));
+		params.put("rk", Integer.toString(rk));
+		params.put("selectedTypes", component.getString("selectedTypes"));
+		addDownsamplingInfo(params);
+		
+		// checkout a connection to the database
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		if (client == null) {
+			return;
+		}
+		
+		boolean gotData = false;
+		
+		try {
+			data = (GenericDataMatrix)client.getBinaryData(params);
+		} catch (UtilException e) {
+			data = null; 
+		}
+		
+		// if data was collected
+		if (data != null || data.rows() > 0) {
+			data.adjustTime(component.getOffset(startTime));
+			gotData = true;
+		}
+		
+		// check back in our connection to the database
+		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (!gotData) {
+			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 

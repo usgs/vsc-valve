@@ -150,8 +150,9 @@ public class PlotHandler implements HttpHandler
 						ecs = cl.getTextData(params);
 					} catch (UtilException e){
 						ecs = new ArrayList<String>();
+					} finally {
+						pool.checkin(cl);
 					}
-					pool.checkin(cl);
 					ec = new ExportConfig( ecs );
 					v3.putExportConfig(source, ec);
 				}
@@ -197,7 +198,7 @@ public class PlotHandler implements HttpHandler
 	 * @param plot Valve3Plot to check against
 	 * @throws Valve3Exception raised if incompatible
 	 */
-	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception{
+	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception {
 		int i=0;
 		for(PlotComponent component: components){
 			int x = component.getBoxX();
@@ -215,50 +216,39 @@ public class PlotHandler implements HttpHandler
 	 * Handle the given http request and generate a plot. 
 	 * @see HttpHandler#handle 
 	 */
-	public Object handle(HttpServletRequest request)
-	{
-		try
-		{
+	public Object handle(HttpServletRequest request) {
+		try {
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
 			Valve3Plot plot = new Valve3Plot(request, components.size());
 			checkComponents(components, plot);
 			boolean exportable = false;
-			for (PlotComponent component : components)
-			{
-				String source = component.getSource();
-				Plotter plotter = null;
-				if ( component.getExportable() )
+			for (PlotComponent component : components) {
+				String source	= component.getSource();
+				Plotter plotter	= null;
+				if (component.getExportable())
 					plot.setExportable( true );
-				if (source.equals("channel_map"))
-				{
+				if (source.equals("channel_map")) {
 					plotter = new ChannelMapPlotter();
 					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					if (dsd != null)
-					{
+					if (dsd != null) {
 						plotter.setVDXClient(dsd.getVDXClientName());
 						plotter.setVDXSource(dsd.getVDXSource());
 					}
-				}
-				else
-				{
+				} else {
 					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 				}
 				if (plotter != null)
-					try{
+					try {
 						plotter.plot(plot, component);
-					}
-					catch (Exception e){
+					} catch (Exception e) {
 						throw new Valve3Exception(e.toString());
 					}
 			}
 			Valve3.getInstance().getResultDeleter().addResult(plot);
 			return plot;
-		}
-		catch (Valve3Exception e)
-		{
-			e.printStackTrace();
+		} catch (Valve3Exception e) {
 			logger.severe(e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}

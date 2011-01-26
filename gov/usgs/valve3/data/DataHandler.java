@@ -184,13 +184,13 @@ public class DataHandler implements HttpHandler
 						}
 					}
 				}
-				try{
+				try {
 					ls	= client.getTextData(params);
-				}
-				catch(UtilException e){
+				} catch (UtilException e) {
 					throw new Valve3Exception(e.getMessage()); 
+				} finally {
+					pool.checkin(client);
 				}
-				pool.checkin(client);
 				if (ls != null) {
 					if (action.equals("genericMenu")) {
 						GenericMenu result = new GenericMenu(ls);

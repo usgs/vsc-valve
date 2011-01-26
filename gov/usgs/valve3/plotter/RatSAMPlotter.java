@@ -64,9 +64,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 	private double ratio;
 	private double maxEventLength;
 	private BinSize bin;
-	private RSAMData rd;
 	private PlotType plotType;
-	private GenericDataMatrix gdm;
 	RSAMData data;
 	
 	protected String label;
@@ -145,8 +143,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -156,26 +152,34 @@ public class RatSAMPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("plotType", plotType.toString());
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
+		
+		boolean gotData = false;
+		
 		try{
 			data = (RSAMData)client.getBinaryData(params);
+		} catch (UtilException e) {
+			data = null;
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
-		}
+		
 		if (data != null && data.rows() > 0) {
-			gotData = true;
 			data.adjustTime(component.getOffset(startTime));
-		}	
-		if (!gotData) {
-			throw new Valve3Exception("No data.");
+			gotData = true;
 		}
+		
         // check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (!gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**

@@ -81,7 +81,7 @@ public class GPSPlotter extends RawDataPlotter {
 
 	// variables used in this class
 	private GPSData baselineData;
-	private Map<Integer, GPSData> channelDataMap;	
+	private Map<Integer, GPSData> channelDataMap;
 	
 	private boolean selectedCols[];
 	private String legendsCols[];
@@ -186,8 +186,6 @@ public class GPSPlotter extends RawDataPlotter {
 	 */
 	public void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();		
 		params.put("source", vdxSource);
@@ -196,51 +194,67 @@ public class GPSPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
+		
 		// create a map to hold all the channel data
-		channelDataMap			= new LinkedHashMap<Integer, GPSData>();
-		String[] channels		= ch.split(",");
+		channelDataMap		= new LinkedHashMap<Integer, GPSData>();
+		String[] channels	= ch.split(",");
+		
+		boolean gotData			= false;
+		boolean gotBaselineData	= false;
 		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
-			GPSData data = null;
 			params.put("ch", channel);
-			try{
+			GPSData data = null;
+			try {
 				data = (GPSData)client.getBinaryData(params);
-			}
-			catch(UtilException e){
+			} catch (UtilException e) {
 				data = null;
 			}
+			
+			// if data was collected
 			if (data != null && data.observations() > 0) {
-				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
-		}		
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
 		}
 		
 		// if a baseline was selected then retrieve that data from the database
 		if (bl != null) {
 			params.put("ch", bl);
-			try{
+			try {
 				baselineData = (GPSData)client.getBinaryData(params);
+			} catch(UtilException e){
+				baselineData = null; 
 			}
-			catch(UtilException e){
-				throw new Valve3Exception(e.getMessage()); 
+			
+			// if data was collected
+			if (baselineData != null && baselineData.observations() > 0) {
+				baselineData.adjustTime(component.getOffset(startTime));
+				gotBaselineData = true;
 			}
-			if (baselineData == null || baselineData.observations() == 0) {
-				throw new Valve3Exception("No baseline data.");
-			}
-			baselineData.adjustTime(component.getOffset(startTime));
 		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
+		
+		// if no baseline data exists, then throw exception
+		if (bl != null && !gotBaselineData) {
+			throw new Valve3Exception("No baseline channel data.");
+		}
 	}
 	
 	/**

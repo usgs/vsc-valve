@@ -47,7 +47,6 @@ public class WavePlotter extends RawDataPlotter {
 	}
 	
 	private PlotType plotType;
-//	private boolean removeBias;
 	private FilterType filterType;
 	private SliceWave wave;
 	private double minHz;
@@ -136,34 +135,37 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 		
 		// create a map to hold all the channel data
 		channelDataMap			= new LinkedHashMap<Integer, SliceWave>();
 		String[] channels		= ch.split(",");
 		
+		boolean gotData = false;
+		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
 			Wave data = null;
-			try{
+			try {
 				data = (Wave)client.getBinaryData(params);
-			}
-			catch(UtilException e){
+			} catch (UtilException e) {
 				data = null; 
 			}
+			
+			// if data was collected
 			if (data != null) {
 				if ( forExport ) {
 					samplingRate = data.getSamplingRate();
@@ -236,11 +238,14 @@ public class WavePlotter extends RawDataPlotter {
 				channelDataMap.put(Integer.valueOf(channel), wave);
 			}
 		}
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
-		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**

@@ -199,13 +199,13 @@ public class RawDataHandler implements HttpHandler
 		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
 		VDXClient cl = pool.checkout();
 		List<String> rks = null;
-		try{
+		try {
 			rks = cl.getTextData(params);
-		}
-		catch(UtilException e){
+		} catch(UtilException e){
 			throw new Valve3Exception(e.getMessage()); 
+		} finally {
+			pool.checkin(cl);
 		}
-		pool.checkin(cl);
 		ranks = Rank.fromStringsToMap(rks);
 		return ranks;
 	}

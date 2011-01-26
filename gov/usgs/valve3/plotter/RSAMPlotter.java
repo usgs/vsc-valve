@@ -61,7 +61,6 @@ public class RSAMPlotter extends RawDataPlotter {
 
 	int compCount;
 	private Map<Integer, RSAMData> channelDataMap;
-	//private boolean removeBias;
 	private double threshold;
 	private double ratio;
 	private double maxEventLength;
@@ -97,12 +96,6 @@ public class RSAMPlotter extends RawDataPlotter {
 				throw new Valve3Exception("Illegal plot type: " + pt);
 			}
 		}
-	
-//		try{
-//			removeBias = component.getBoolean("rb");
-//		} catch (Valve3Exception ex){
-//			removeBias = false;
-//		}
 		
 		switch(plotType) {
 		
@@ -147,8 +140,6 @@ public class RSAMPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -157,37 +148,45 @@ public class RSAMPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("plotType", plotType.toString());
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 	
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, RSAMData>();
 		String[] channels	= ch.split(",");
 		
+		boolean gotData = false;
+		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
 			RSAMData data = null;
-			try{
+			try {
 				data = (RSAMData)client.getBinaryData(params);
-			}
-			catch(UtilException e){
+			} catch (UtilException e) {
 				data = null; 
 			}
+			
+			// if data was collected
 			if (data != null && data.rows() > 0) {
-				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
 		}
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
-		}
-        // check back in our connection to the database
+		
+		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**

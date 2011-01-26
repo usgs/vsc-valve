@@ -108,8 +108,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -118,38 +116,45 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
 		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, GenericDataMatrix>();
 		String[] channels	= ch.split(",");
 		
+		boolean gotData = false;
+		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
 			GenericDataMatrix data = null;
-			try{
+			try {
 				data = (GenericDataMatrix)client.getBinaryData(params);		
-			}
-			catch(UtilException e){
-				//throw new Valve3Exception(e.getMessage()); 
+			} catch(UtilException e) {
 				data = null;
 			}
+			
+			// if data was collected
 			if (data != null && data.rows() > 0) {
-				gotData = true;
 				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
 		}
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
-		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**

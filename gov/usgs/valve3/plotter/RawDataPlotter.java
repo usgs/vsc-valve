@@ -12,12 +12,10 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.LegendRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
@@ -270,81 +268,171 @@ public abstract class RawDataPlotter extends Plotter {
 	}
 	
 	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
+	 * Initialize list of columns for given vdx source
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx client name
 	 * @return list of columns
 	 * @throws Valve3Exception
 	 */
-	protected static List<Column> getColumns(String source, String client) throws Valve3Exception{
-		List<Column> columns;	
+	protected static List<Column> getColumns(String vdxSource, String vdxClient) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList = null;
+		List<Column> columnList	= null;
+		
+		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "columns");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> cols = null;
-		try{
-			cols = cl.getTextData(params);
+		
+		// checkout a connection to the database
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		if (client == null) {
+			return null;
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
+		
+		try {
+			stringList	= client.getTextData(params);
+		} catch (UtilException e) {
+			throw new Valve3Exception(e.getMessage());
+		} finally {
+			pool.checkin(client);
+		}		
+		
+		// if data was collected
+		if (stringList != null) {
+			columnList	= Column.fromStringsToList(stringList);
 		}
-		pool.checkin(cl);
-		columns					= Column.fromStringsToList(cols);
-		return columns;
+		
+		return columnList;
 	}
 	
 	/**
 	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx client name
 	 * @return map of ids to channels
 	 * @throws Valve3Exception
 	 */
-	protected static Map<Integer, Channel> getChannels(String source, String client) throws Valve3Exception {
-		Map<Integer, Channel> channels;	
+	protected static Map<Integer, Channel> getChannels(String vdxSource, String vdxClient) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList 			= null;
+		Map<Integer, Channel> channelMap	= null;
+		
+		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "channels");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= null;
-		try{
-			chs	= cl.getTextData(params);
+		
+		// checkout a connection to the database
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		if (client == null) {
+			return null;
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
+		
+		try {
+			stringList	= client.getTextData(params);
+		} catch (UtilException e) {
+			throw new Valve3Exception(e.getMessage());
+		} finally {
+			pool.checkin(client);
+		}		
+		
+		// if data was collected
+		if (stringList != null) {
+			channelMap	= Channel.fromStringsToMap(stringList);
 		}
-		pool.checkin(cl);
-		channels				= Channel.fromStringsToMap(chs);
-		return channels;
+		
+		return channelMap;
 	}
 	
 	/**
 	 * Initialize list of ranks for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx client name
 	 * @return map of ids to ranks
 	 * @throws Valve3Exception
 	 */
-	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
-		Map<Integer, Rank> ranks;
+	protected static Map<Integer, Rank> getRanks(String vdxSource, String vdxClient) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList 	= null;
+		Map<Integer, Rank> rankMap	= null;
+		
+		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "ranks");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> rks = null;
-		try{
-			rks = cl.getTextData(params);
+		
+		// checkout a connection to the database
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		if (client == null) {
+			return null;
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
+		
+		try {
+			stringList	= client.getTextData(params);
+		} catch (UtilException e) {
+			throw new Valve3Exception(e.getMessage());
+		} finally {
+			pool.checkin(client);
+		}		
+		
+		// if data was collected
+		if (stringList != null) {
+			rankMap	= Rank.fromStringsToMap(stringList);
 		}
-		pool.checkin(cl);
-		ranks = Rank.fromStringsToMap(rks);
-		return ranks;
+		
+		return rankMap;
+	}
+	
+	/**
+	 * Initialize list of azimuths for given vdx source
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx client name
+	 * @return map of ids to azimuths
+	 * @throws Valve3Exception
+	 */
+	protected static Map<Integer, Double> getAzimuths(String vdxSource, String vdxClient) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList 		= null;
+		Map<Integer, Double> azimuthMap	= null;	
+		
+		// create a map of all the input parameters
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("action", "azimuths");
+		
+		// checkout a connection to the database
+		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		VDXClient client		= pool.checkout();
+		if (client == null) {
+			return null;
+		}
+		
+		try {
+			stringList	= client.getTextData(params);
+		} catch (UtilException e) {
+			throw new Valve3Exception(e.getMessage());
+		} finally {
+			pool.checkin(client);
+		}		
+		
+		// if data was collected
+		if (stringList != null) {
+			azimuthMap	= new LinkedHashMap<Integer, Double>();
+			for (int i = 0; i < stringList.size(); i++) {
+				String[] temp = stringList.get(i).split(":");
+				azimuthMap.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
+			}
+		}
+		
+		return azimuthMap;
 	}
 	
 	/**

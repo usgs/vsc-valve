@@ -193,8 +193,6 @@ public class TiltPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
-		boolean gotData = false;
-		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -207,36 +205,42 @@ public class TiltPlotter extends RawDataPlotter {
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
+		}
 		
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, TiltData>();
 		String[] channels	= ch.split(",");
 		
-		// iterate through each of the selected channels and get the data from the db=
+		boolean gotData = false;
+		
+		// iterate through each of the selected channels and get the data from the db
 		for (String channel : channels) {
 			params.put("ch", channel);	
 			TiltData data = null;
-			try{
+			try {
 				data = (TiltData)client.getBinaryData(params);
-			}
-			catch(UtilException e){
+			} catch (UtilException e) {
 				data = null; 
-			}		
-			if (data != null) {
-				gotData = true;	
+			}
+			
+			// if data was collected
+			if (data != null && data.rows() > 0) {
 				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
-		}		
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
 		}
+		
 		// check back in our connection to the database
 		pool.checkin(client);
-	}
-	
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
+	}	
 
 	/**
 	 * Create MapRenderer for tilt vector, adds it to plot
@@ -376,40 +380,50 @@ public class TiltPlotter extends RawDataPlotter {
 		int         csvIndex = 0;
 
 		// Export is treated as a time series, even if requested plot was a velocity map
-		if ( forExport )
+		if (forExport) {
 			corePlotType = PlotType.TIME_SERIES;
-		
-		// setup the display for the legend
-		Rank rank	= new Rank();
-		if (rk == 0) {
-			rank	= rank.bestPossible();
-			if ( !forExport )
-				v3Plot.setExportable( false );
-			else
-				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
-		} else {
-			rank	= ranksMap.get(rk);
 		}
-		String rankLegend		= rank.getName();
+		
+		// lookup the requested rank
+		Rank rank = new Rank();
+		if (rk == 0) {
+			rank = rank.bestPossible();
+			if (!forExport) {
+				v3Plot.setExportable( false );
+			} else {
+				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
+			}
+		} else {
+			rank = ranksMap.get(rk);
+		}
+		String rankLegend = rank.getName();
 		
 		int displayCount = 0, dh = 0;
 		
 		switch (corePlotType) {
+		
 			case TIME_SERIES:
-				if ( !forExport ) {
-					// setting up variables to decide where to plot this component				
+				
+				// setting up variables to decide where to plot this component	
+				if (!forExport) {			
 					displayCount	= 0;
 					dh				= component.getBoxHeight();
 				}
-				if(isPlotComponentsSeparately()){
-					for(Column col: columnsList){
-						if(col.checked){
+				
+				// calculate the number of components to be plotted
+				if (isPlotComponentsSeparately()) {
+					for (Column col: columnsList) {
+						if (col.checked) {
 							compCount++;
 						}
 					}
 				} else {
 					compCount = 1;
 				}
+				
+				// resize the plot dimensions based on number of components to be plotted and channels with data
+				compCount = channelDataMap.size() * compCount;
+				
 				for (int cid : channelDataMap.keySet()) {
 					
 					// get the relevant information for this channel
@@ -599,14 +613,14 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException	{		
-		forExport = (v3p == null);	// = "prepare data for export"
+		forExport 	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
-		getInputs(comp);
-		getData(comp);
 		
+		getInputs(comp);
+		getData(comp);		
 		plotData(v3p, comp);
 				
 		if ( !forExport ) {
@@ -627,34 +641,5 @@ public class TiltPlotter extends RawDataPlotter {
 		top.append(" and ");
 		top.append(dateFormat.format(Util.j2KToDate(endTime)));
 		return top.toString();
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 * @return map od ids to azimuths
-	 * @throws Valve3Exception
-	 */
-	private static Map<Integer, Double> getAzimuths(String source, String client) throws Valve3Exception {
-		Map<Integer, Double> azimuths = new LinkedHashMap<Integer, Double>();	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "azimuths");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs = null;
-		try{
-			chs = cl.getTextData(params);
-		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
-		}
-		pool.checkin(cl);
-		for (int i = 0; i < chs.size(); i++) {
-			String[] temp = chs.get(i).split(":");
-			azimuths.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
-		}
-		return azimuths;
 	}
 }

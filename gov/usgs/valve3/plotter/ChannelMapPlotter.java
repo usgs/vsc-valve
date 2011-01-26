@@ -117,38 +117,49 @@ public class ChannelMapPlotter extends Plotter
 	 * Loads GeoLabelSet labels from VDX
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception
-	{
-		if (vdxSource == null || vdxClient == null)
-			return; 
+	private void getData() throws Valve3Exception {
 		
+		// initialize variables
+		List<String> stringList 			= null;
+		
+		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("action", "channels");
+		
+		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		List<String> channels	= null;
-		try{
-			channels = client.getTextData(params);
+		if (client == null) {
+			return;
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage());
-		}
-		Set<String> used		= new HashSet<String>();
-		labels					= new GeoLabelSet();
 		
-		// iterate through the list of channels and add a geo label
-		for (String ch : channels) {
-			Channel channel		= new Channel(ch);
-			String channelCode	= channel.getCode();
-			String channelCode0 = channelCode.split(" ")[0];
-			if (!used.contains(channelCode0)) {
-				GeoLabel gl = new GeoLabel(channelCode0, channel.getLon(), channel.getLat());
-				labels.add(gl);
-				used.add(channelCode0);
+		try {
+			stringList = client.getTextData(params);
+		} catch (UtilException e) {
+			throw new Valve3Exception(e.getMessage());
+		} finally {
+			pool.checkin(client);
+		}
+		
+		labels				= new GeoLabelSet();
+		
+		// if data was collected
+		if (stringList != null) {
+
+			// iterate through the list of channels and add a geo label
+			Set<String> used	= new HashSet<String>();
+			for (String ch : stringList) {
+				Channel channel		= new Channel(ch);
+				String channelCode	= channel.getCode();
+				String channelCode0 = channelCode.split(" ")[0];
+				if (!used.contains(channelCode0)) {
+					GeoLabel gl = new GeoLabel(channelCode0, channel.getLon(), channel.getLat());
+					labels.add(gl);
+					used.add(channelCode0);
+				}
 			}
 		}
-		pool.checkin(client);
 	}
 	
 	/**

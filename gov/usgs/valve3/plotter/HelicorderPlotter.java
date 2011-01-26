@@ -31,7 +31,6 @@ public class HelicorderPlotter extends RawDataPlotter {
 
 	int compCount;
 	private Map<Integer, HelicorderData> channelDataMap;
-	private HelicorderData data;
 	private static final double MAX_HELICORDER_TIME = 31 * 86400;
 	private final static Logger logger = Log.getLogger("gov.usgs.valve3.plotter.HelicorderPlotter"); 
 	
@@ -53,7 +52,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void getInputs(PlotComponent component) throws Valve3Exception {
-		
+
+		parseCommonParameters(component);
 		if (endTime - startTime >= MAX_HELICORDER_TIME)
 			throw new Valve3Exception("Illegal duration.");
 		
@@ -88,8 +88,6 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
-		parseCommonParameters(component);
-		boolean gotData = false;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -97,39 +95,45 @@ public class HelicorderPlotter extends RawDataPlotter {
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
+		
 		// checkout a connection to the database
 		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		VDXClient client		= pool.checkout();
-		if (client == null)
+		if (client == null) {
 			return;
-		
-		// double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+		}
 		
 		// create a map to hold all the channel data
 		channelDataMap		= new LinkedHashMap<Integer, HelicorderData>();
 		String[] channels	= ch.split(",");
 		
+		boolean gotData = false;
+		
 		// iterate through each of the selected channels and place the data in the map
 		for (String channel : channels) {
 			params.put("ch", channel);
 			HelicorderData data = null;
-			try{
+			try {
 				data = (HelicorderData)client.getBinaryData(params);
-			}
-			catch(UtilException e){
+			} catch (UtilException e) {
 				data = null; 
 			}
+			
+			// if data was collected
 			if (data != null && data.rows() > 0) {
+				// data.adjustTime(component.getOffset(startTime));
 				gotData = true;
 			}
 			channelDataMap.put(Integer.valueOf(channel), data);
-		}	
-		if (!gotData) {
-			throw new Valve3Exception("No data for any station.");
 		}
-
-        // check back in our connection to the database
+		
+		// check back in our connection to the database
 		pool.checkin(client);
+		
+		// if no data exists, then throw exception
+		if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**
