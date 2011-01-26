@@ -103,7 +103,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 	private static final double DEFAULT_WIDTH = 100.0;
 
-	private double hypowidth;; // the width is for the Arbitrary line vs depth plot (SBH)
+	private double hypowidth; // the width is for the Arbitrary line vs depth plot (SBH)
 	private GeoRange range;
 	private Point2D startLoc;
 	private Point2D endLoc;
