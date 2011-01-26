@@ -59,16 +59,17 @@ dist    -- creates a binary distribution
 		</copy>
 		
 		<!-- create javadoc dir -->
-		<mkdir dir="${dist-tempdir}/${dist-appdir}/menu/doc/" />
-		<mkdir dir="${dist-tempdir}/${dist-appdir}/menu/doc/javadoc/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/doc/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/doc/javadoc/" />
 
 		<!-- Build javadocs -->
 	    <javadoc
 	          access="public"
-	           destdir="${dist-tempdir}/${dist-appdir}/menu/doc/javadoc/"
+	           destdir="${dist-tempdir}/${dist-appdir}/doc/javadoc/"
 	           author="true"
 	           version="true"
 	           use="true"
+	    	   useexternalfile="true"
 	           windowtitle="VALVE"
 	       >
 		    <fileset dir="../" defaultexcludes="yes">
