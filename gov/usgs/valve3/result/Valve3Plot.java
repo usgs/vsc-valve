@@ -353,7 +353,7 @@ public class Valve3Plot extends Result
 		for (PlotComponent pc : components)
 			sb.append(pc.toXML());
 		for (SuppDatum sd : suppdata)
-			sb.append(sd.toXML());
+			sb.append(sd.toXML( true ));
 		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
 	}

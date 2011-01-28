@@ -962,7 +962,7 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		//if ( sdTypes.length() == 0 )
 		//	return;
-		if(!ch.contains(",")){
+		//if(!ch.contains(",")){
 		Map<String, String> params = new LinkedHashMap<String, String>();		
 		params.put("source", source);
 		params.put("action", "suppdata");
@@ -992,13 +992,35 @@ public abstract class RawDataPlotter extends Plotter {
 		try{
 			List<String> sds = null;
 			sds = cl.getTextData(params);
-			for ( String sd: sds )
-				v3Plot.addSuppDatum( new SuppDatum( sd ) );
+			Map<Integer,Integer> colMap = new LinkedHashMap<Integer,Integer>();
+			int i = 0;
+			for ( String c: cols.split(",") ) {
+				colMap.put( Integer.parseInt(c), i );
+				i++;
+			}
+			Map<Integer,Integer> chMap = new LinkedHashMap<Integer,Integer>();
+			i = 0;
+			for ( String c: ch.split(",") ) {
+				chMap.put( Integer.parseInt(c), i );
+				i++;
+			}
+			int dh = component.getBoxHeight();
+			for ( String sd: sds ) {
+				SuppDatum sdo = new SuppDatum( sd );
+				int offset;
+				if ( isPlotComponentsSeparately() ) {
+					offset = (Integer)chMap.get( sdo.cid ) * colMap.size() + (Integer)colMap.get(sdo.colid);
+				} else
+					offset = (Integer)chMap.get( sdo.cid );
+				sdo.frame_y = component.getBoxY() + (offset * dh) + 8;
+				sdo.frame_h = dh - 16;
+				v3Plot.addSuppDatum( sdo );
+			}
 		}
 		catch(UtilException e){
 			throw new Valve3Exception(e.getMessage()); 
 		}
 		pool.checkin(cl);
-		}
+		//}
 	}
 }
