@@ -129,20 +129,15 @@ public class DataHandler implements HttpHandler
 	 * in the request - GenericMenu, ewRsamMenu or list of results.
 	 */
 	public Object handle(HttpServletRequest request) {
-		try{
-			logger.info("entering DataHandler.handle()");
-		
+		try {
 			String source = request.getParameter("src");
-			logger.info("src = " + source);
 			DataSourceDescriptor dsd = dataSources.get(source);
 			if (dsd == null)
 				return null;  // TODO: throw Valve3Exception
 		
 			String action = request.getParameter("da");
-			logger.info("action = " + action);
 			if (action == null)
-				return null;  // TODO: throw Valve3Exception
-		
+				return null;  // TODO: throw Valve3Exception		
 		
 			Pool<VDXClient> pool		= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
 			Map<String, String> params	= new HashMap<String, String>();
