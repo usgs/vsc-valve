@@ -12,8 +12,6 @@
   *  @param {menu object} menu 
   */
 create_rsammenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "rsamForm";
 	menu.boxName			= "rsamBox";
 

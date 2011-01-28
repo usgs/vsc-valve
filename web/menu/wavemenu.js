@@ -20,8 +20,6 @@
   *  @param {menu object} menu 
   */
 create_wavemenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "waveForm";
 	menu.boxName			= "waveBox";
 

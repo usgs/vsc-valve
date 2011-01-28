@@ -16,8 +16,6 @@
  *  @param {menu object} menu 
  */
 create_gpsmenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "gpsForm";
 	menu.boxName			= "gpsBox";
 

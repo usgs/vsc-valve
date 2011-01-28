@@ -12,8 +12,6 @@
   *  @param {menu object} menu 
   */
 create_tiltmenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "tiltForm";
 	menu.boxName			= "tiltBox";
 

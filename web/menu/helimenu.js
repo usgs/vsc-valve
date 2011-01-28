@@ -19,8 +19,6 @@
  *  @param {menu object} menu 
  */
 create_helimenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "heliForm";
 	menu.boxName			= "heliBox";
 	menu.SIZES				= new Array(8, 10, 12, 14);

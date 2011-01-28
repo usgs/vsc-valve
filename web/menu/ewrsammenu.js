@@ -12,8 +12,6 @@
  *  @param {menu object} menu 
  */
 create_ewrsammenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "ewrsamForm";
 	menu.boxName			= "ewrsamBox";
 	

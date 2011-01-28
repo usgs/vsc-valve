@@ -15,8 +15,6 @@
  *  @param {menu object} menu 
  */
 create_genericfixedmenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "genericFixedForm";
 	menu.boxName			= "genericFixedBox";
 	

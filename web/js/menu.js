@@ -964,7 +964,7 @@ function getChannelTypeFilter(form) {
 function Menu()
 {}
 
-Menu.prototype.allowChannelMap = false;
+Menu.prototype.allowChannelMap = true;
 
 /**
 	Initialize the time shortcuts array (for all menus)

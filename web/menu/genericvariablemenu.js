@@ -1,7 +1,5 @@
 
 create_nwismenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "genericVariableForm";
 	menu.boxName			= "genericVariableBox";
 	

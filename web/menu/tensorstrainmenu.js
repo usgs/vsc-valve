@@ -12,8 +12,6 @@
   *  @param {menu object} menu 
   */
 create_tensorstrainmenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "tensorstrainForm";
 	menu.boxName			= "tensorstrainBox";
 
