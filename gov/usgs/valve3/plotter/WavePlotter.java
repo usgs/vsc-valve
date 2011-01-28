@@ -5,7 +5,6 @@ import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -135,6 +134,13 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		boolean gotData			= false;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		channelDataMap			= new LinkedHashMap<Integer, SliceWave>();
+		String[] channels		= ch.split(",");
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -143,104 +149,97 @@ public class WavePlotter extends RawDataPlotter {
 		params.put("et", Double.toString(endTime));
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
-		}
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
 		
-		// create a map to hold all the channel data
-		channelDataMap			= new LinkedHashMap<Integer, SliceWave>();
-		String[] channels		= ch.split(",");
-		
-		boolean gotData = false;
-		
-		// iterate through each of the selected channels and place the data in the map
-		for (String channel : channels) {
-			params.put("ch", channel);
-			Wave data = null;
-			try {
-				data = (Wave)client.getBinaryData(params);
-			} catch (UtilException e) {
-				data = null; 
+			// iterate through each of the selected channels and place the data in the map
+			for (String channel : channels) {
+				params.put("ch", channel);
+				Wave data = null;
+				try {
+					data = (Wave)client.getBinaryData(params);
+				} catch (Exception e) {
+					data = null; 
+				}
+				
+				// if data was collected
+				if (data != null) {
+					if ( forExport ) {
+						samplingRate = data.getSamplingRate();
+						if ( inclTime )
+							dataType = data.getDataType();
+						else
+							dataType = "i4";
+						String toadd = "#sr=" + samplingRate + "\n#datatype=" + dataType + "\n";
+						csvHdrs.insert( 0, toadd );
+					}
+					data.setStartTime(data.getStartTime() + component.getOffset(startTime));
+					gotData = true;
+					data.handleBadData();
+					if (doDespike) { data.despike(despikePeriod); }
+					if (doDetrend) { data.detrend(); }
+					if (filterPick != 0) {
+						switch(filterPick) {
+							case 1: // Bandpass
+								FilterType ft = FilterType.BANDPASS;
+								Double singleBand = 0.0;
+								if ( !Double.isNaN(filterMax) ) {
+									if ( filterMax <= 0 )
+										throw new Valve3Exception("Illegal max hertz value.");
+								} else {
+									ft = FilterType.HIGHPASS;
+									singleBand = filterMin;
+								}
+								if ( !Double.isNaN(filterMin) ) {
+									if ( filterMin <= 0 )
+										throw new Valve3Exception("Illegal min hertz value.");
+								} else {
+									ft = FilterType.LOWPASS;
+									singleBand = filterMax;
+								}
+								Butterworth bw = new Butterworth();
+								if ( ft == FilterType.BANDPASS )
+									bw.set(ft, 4, data.getSamplingRate(), filterMin, filterMax);
+								else
+									bw.set(ft, 4, data.getSamplingRate(), singleBand, 0);
+								data.filter(bw, true);
+								break;
+							case 2: // Running median
+								data.set2median( filterPeriod );
+								break;
+							case 3: // Running mean
+								data.set2mean( filterPeriod );
+								break;
+						}
+					}
+					if (debiasPick != 0 ) {
+						int bias = 0;
+						Double dbias;
+						switch ( debiasPick ) {
+							case 1: // remove mean 
+								dbias = new Double(data.mean());
+								bias = dbias.intValue();
+								break;
+							case 2: // remove initial value
+								bias = data.first();
+								break;
+							case 3: // remove user value
+								dbias = new Double(debiasValue);
+								bias = dbias.intValue();
+								break;
+						}
+						data.subtract(bias);
+					}
+					wave = new SliceWave(data);
+					wave.setSlice(data.getStartTime(), data.getEndTime());
+					channelDataMap.put(Integer.valueOf(channel), wave);
+				}
 			}
 			
-			// if data was collected
-			if (data != null) {
-				if ( forExport ) {
-					samplingRate = data.getSamplingRate();
-					if ( inclTime )
-						dataType = data.getDataType();
-					else
-						dataType = "i4";
-					String toadd = "#sr=" + samplingRate + "\n#datatype=" + dataType + "\n";
-					csvHdrs.insert( 0, toadd );
-				}
-				data.setStartTime(data.getStartTime() + component.getOffset(startTime));
-				gotData = true;
-				data.handleBadData();
-				if (doDespike) { data.despike(despikePeriod); }
-				if (doDetrend) { data.detrend(); }
-				if (filterPick != 0) {
-					switch(filterPick) {
-						case 1: // Bandpass
-							FilterType ft = FilterType.BANDPASS;
-							Double singleBand = 0.0;
-							if ( !Double.isNaN(filterMax) ) {
-								if ( filterMax <= 0 )
-									throw new Valve3Exception("Illegal max hertz value.");
-							} else {
-								ft = FilterType.HIGHPASS;
-								singleBand = filterMin;
-							}
-							if ( !Double.isNaN(filterMin) ) {
-								if ( filterMin <= 0 )
-									throw new Valve3Exception("Illegal min hertz value.");
-							} else {
-								ft = FilterType.LOWPASS;
-								singleBand = filterMax;
-							}
-							Butterworth bw = new Butterworth();
-							if ( ft == FilterType.BANDPASS )
-								bw.set(ft, 4, data.getSamplingRate(), filterMin, filterMax);
-							else
-								bw.set(ft, 4, data.getSamplingRate(), singleBand, 0);
-							data.filter(bw, true);
-							break;
-						case 2: // Running median
-							data.set2median( filterPeriod );
-							break;
-						case 3: // Running mean
-							data.set2mean( filterPeriod );
-							break;
-					}
-				}
-				if (debiasPick != 0 ) {
-					int bias = 0;
-					Double dbias;
-					switch ( debiasPick ) {
-						case 1: // remove mean 
-							dbias = new Double(data.mean());
-							bias = dbias.intValue();
-							break;
-						case 2: // remove initial value
-							bias = data.first();
-							break;
-						case 3: // remove user value
-							dbias = new Double(debiasValue);
-							bias = dbias.intValue();
-							break;
-					}
-					data.subtract(bias);
-				}
-				wave = new SliceWave(data);
-				wave.setSlice(data.getStartTime(), data.getEndTime());
-				channelDataMap.put(Integer.valueOf(channel), wave);
-			}
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
-		
-		// check back in our connection to the database
-		pool.checkin(client);
 		
 		// if no data exists, then throw exception
 		if (channelDataMap.size() == 0 || !gotData) {

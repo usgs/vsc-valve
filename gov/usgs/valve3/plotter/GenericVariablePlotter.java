@@ -8,7 +8,6 @@ import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
@@ -18,7 +17,6 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.tilt.TiltData;
 
 import java.awt.Color;
 import java.io.File;
@@ -136,6 +134,11 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		boolean gotData			= false;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -148,18 +151,14 @@ public class GenericVariablePlotter extends RawDataPlotter
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
-		}
-		
-		boolean gotData = false;
-		
-		try {
-			data = (GenericDataMatrix)client.getBinaryData(params);
-		} catch (UtilException e) {
-			data = null; 
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();		
+			try {
+				data = (GenericDataMatrix)client.getBinaryData(params);
+			} catch (Exception e) {
+				data = null; 
+			}
 		}
 		
 		// if data was collected

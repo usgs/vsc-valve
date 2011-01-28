@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Generate PNG map image to local file from vdx source data.
@@ -48,6 +49,15 @@ public class ChannelMapPlotter extends Plotter
     protected boolean yTickValues = true;
     protected boolean yUnits = true;
     protected boolean yLabel = false;
+	
+	protected Logger logger;
+	
+	/**
+	 * Default constructor
+	 */
+	public ChannelMapPlotter() {
+		logger		= Logger.getLogger("gov.usgs.vdx");		
+	}
 
 	/**
 	 * Initialize internal data from PlotComponent 
@@ -120,34 +130,31 @@ public class ChannelMapPlotter extends Plotter
 	private void getData() throws Valve3Exception {
 		
 		// initialize variables
-		List<String> stringList 			= null;
+		List<String> stringList = null;
+		labels = new GeoLabelSet();
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
 		params.put("action", "channels");
 		
-		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
+		// checkout a connection to the database, the vdxClient could be null or invalid
+		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			VDXClient client = pool.checkout();
+			if (client != null) {
+				try {
+					stringList = client.getTextData(params);
+				} catch (UtilException e) {
+					stringList = null;
+				} finally {
+					pool.checkin(client);
+				}
+			}
 		}
 		
-		try {
-			stringList = client.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		} finally {
-			pool.checkin(client);
-		}
-		
-		labels				= new GeoLabelSet();
-		
-		// if data was collected
+		// if data was collected, iterate through the list of channels and add a geo label
 		if (stringList != null) {
-
-			// iterate through the list of channels and add a geo label
 			Set<String> used	= new HashSet<String>();
 			for (String ch : stringList) {
 				Channel channel		= new Channel(ch);

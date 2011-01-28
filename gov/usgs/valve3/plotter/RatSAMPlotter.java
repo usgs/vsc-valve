@@ -18,7 +18,6 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -143,6 +142,11 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		boolean gotData			= false;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -154,27 +158,22 @@ public class RatSAMPlotter extends RawDataPlotter {
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
+		pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client = pool.checkout();	
+			try {
+				data = (RSAMData)client.getBinaryData(params);
+			} catch (Exception e) {
+				data = null;
+			}		
+			if (data != null && data.rows() > 0) {
+				data.adjustTime(component.getOffset(startTime));
+				gotData = true;
+			}
+			
+	        // check back in our connection to the database
+			pool.checkin(client);
 		}
-		
-		boolean gotData = false;
-		
-		try{
-			data = (RSAMData)client.getBinaryData(params);
-		} catch (UtilException e) {
-			data = null;
-		}
-		
-		if (data != null && data.rows() > 0) {
-			data.adjustTime(component.getOffset(startTime));
-			gotData = true;
-		}
-		
-        // check back in our connection to the database
-		pool.checkin(client);
 		
 		// if no data exists, then throw exception
 		if (!gotData) {

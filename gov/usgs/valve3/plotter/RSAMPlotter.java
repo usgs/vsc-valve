@@ -17,7 +17,6 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -140,6 +139,13 @@ public class RSAMPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		boolean gotData			= false;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		channelDataMap			= new LinkedHashMap<Integer, RSAMData>();
+		String[] channels		= ch.split(",");
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -150,38 +156,31 @@ public class RSAMPlotter extends RawDataPlotter {
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
-		}
-	
-		// create a map to hold all the channel data
-		channelDataMap		= new LinkedHashMap<Integer, RSAMData>();
-		String[] channels	= ch.split(",");
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
 		
-		boolean gotData = false;
-		
-		// iterate through each of the selected channels and place the data in the map
-		for (String channel : channels) {
-			params.put("ch", channel);
-			RSAMData data = null;
-			try {
-				data = (RSAMData)client.getBinaryData(params);
-			} catch (UtilException e) {
-				data = null; 
+			// iterate through each of the selected channels and place the data in the map
+			for (String channel : channels) {
+				params.put("ch", channel);
+				RSAMData data = null;
+				try {
+					data = (RSAMData)client.getBinaryData(params);
+				} catch (Exception e) {
+					data = null; 
+				}
+				
+				// if data was collected
+				if (data != null && data.rows() > 0) {
+					data.adjustTime(component.getOffset(startTime));
+					gotData = true;
+				}
+				channelDataMap.put(Integer.valueOf(channel), data);
 			}
 			
-			// if data was collected
-			if (data != null && data.rows() > 0) {
-				data.adjustTime(component.getOffset(startTime));
-				gotData = true;
-			}
-			channelDataMap.put(Integer.valueOf(channel), data);
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
-		
-		// check back in our connection to the database
-		pool.checkin(client);
 		
 		// if no data exists, then throw exception
 		if (channelDataMap.size() == 0 || !gotData) {

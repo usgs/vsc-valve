@@ -10,7 +10,6 @@ import gov.usgs.plot.Renderer;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -193,6 +192,13 @@ public class TiltPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		boolean gotData			= false;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		channelDataMap			= new LinkedHashMap<Integer, TiltData>();
+		String[] channels		= ch.split(",");
+		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		params.put("source", vdxSource);
@@ -203,38 +209,31 @@ public class TiltPlotter extends RawDataPlotter {
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
-		}
-		
-		// create a map to hold all the channel data
-		channelDataMap		= new LinkedHashMap<Integer, TiltData>();
-		String[] channels	= ch.split(",");
-		
-		boolean gotData = false;
-		
-		// iterate through each of the selected channels and get the data from the db
-		for (String channel : channels) {
-			params.put("ch", channel);	
-			TiltData data = null;
-			try {
-				data = (TiltData)client.getBinaryData(params);
-			} catch (UtilException e) {
-				data = null; 
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+				
+			// iterate through each of the selected channels and get the data from the db
+			for (String channel : channels) {
+				params.put("ch", channel);	
+				TiltData data = null;
+				try {
+					data = (TiltData)client.getBinaryData(params);
+				} catch (Exception e) {
+					data = null; 
+				}
+				
+				// if data was collected
+				if (data != null && data.rows() > 0) {
+					data.adjustTime(component.getOffset(startTime));
+					gotData = true;
+				}
+				channelDataMap.put(Integer.valueOf(channel), data);
 			}
-			
-			// if data was collected
-			if (data != null && data.rows() > 0) {
-				data.adjustTime(component.getOffset(startTime));
-				gotData = true;
-			}
-			channelDataMap.put(Integer.valueOf(channel), data);
-		}
 		
-		// check back in our connection to the database
-		pool.checkin(client);
+			// check back in our connection to the database
+			pool.checkin(client);
+		}
 		
 		// if no data exists, then throw exception
 		if (channelDataMap.size() == 0 || !gotData) {
@@ -248,10 +247,10 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @param rank Rank
 	 */
-	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) {
+	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
-		
+		logger.info("checkpoint a");
 		// add a location for each channel that is being plotted
 		for (int cid : channelDataMap.keySet()) {
 			TiltData data = channelDataMap.get(cid);
@@ -259,7 +258,7 @@ public class TiltPlotter extends RawDataPlotter {
 				locs.add(channelsMap.get(cid).getLonLat());
 			}
 		}
-		
+		logger.info("checkpoint b");
 		// create the dimensions of the plot based on these stations
 		GeoRange range = GeoRange.getBoundingBox(locs);
 		
@@ -268,15 +267,15 @@ public class TiltPlotter extends RawDataPlotter {
 		proj.setup(origin, 0, 0);
 		
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
-		
+		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
+		logger.info("checkpoint c");
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
 		mr.setGeoLabelSet(labels);
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
-		
+		logger.info("checkpoint d");
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
@@ -296,29 +295,30 @@ public class TiltPlotter extends RawDataPlotter {
 		}
 		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		v3Plot.getPlot().addRenderer(mr);
-		
+		logger.info("checkpoint e");
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
 		
 		for (int cid : channelDataMap.keySet()) {
-			Channel channel = channelsMap.get(cid);
-			TiltData data = channelDataMap.get(cid);
+			logger.info("checkpoint f");
+			Channel channel	= channelsMap.get(cid);
+			TiltData data	= channelDataMap.get(cid);
 			
-			if (data == null) {
+			if (data == null || data.rows() == 0) {
 				continue;
 			}
-			
+			logger.info("checkpoint g");
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
-			
+			logger.info("checkpoint h");
 			DoubleMatrix2D dm = data.getAllData(0.0);
-			
+			logger.info("checkpoint i");
 			double et1	= dm.getQuick(0, 2);
 			double et2	= dm.getQuick(dm.rows() - 1, 2);
 			double nt1	= dm.getQuick(0, 3);
 			double nt2	= dm.getQuick(dm.rows() - 1, 3);
 			double e	= et2 - et1;
 			double n	= nt2 - nt1;
-			
+			logger.info("checkpoint j");
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(channel.getLonLat());
@@ -326,10 +326,14 @@ public class TiltPlotter extends RawDataPlotter {
 			evr.y = ppt.y;
 			evr.u = e;
 			evr.v = n;
-			
+			evr.z = 0;
+			evr.displayHoriz	= true;
+			evr.displayVert		= false;
+			logger.info("checkpoint k");
 			maxMag = Math.max(evr.getMag(), maxMag);
 			v3Plot.getPlot().addRenderer(evr);
 			vrs.add(evr);
+			logger.info("checkpoint l");
 		}
 		
 		if (maxMag == -1E300) {
@@ -339,6 +343,9 @@ public class TiltPlotter extends RawDataPlotter {
 		// set the length of the legend vector to 1/5 of the width of the shortest side of the map
 		double scale = EllipseVectorRenderer.getBestScale(maxMag);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
+		// logger.info("Scale: " + scale);
+		// logger.info("desiredLength: " + desiredLength);
+		// logger.info("desiredLength/scale: " + desiredLength / scale);
 		
 		for (int i = 0; i < vrs.size(); i++) {
 			EllipseVectorRenderer evr = (EllipseVectorRenderer)vrs.get(i);
@@ -350,9 +357,12 @@ public class TiltPlotter extends RawDataPlotter {
 		svr.frameRenderer = mr;
 		svr.drawEllipse = false;
 		svr.x = mr.getMinX();
-		svr.y = mr.getMinY() + 17 / mr.getYScale();
+		svr.y = mr.getMinY();
 		svr.u = desiredLength;
 		svr.v = 0;
+		svr.z = 0;
+		svr.displayHoriz	= true;
+		svr.displayVert		= false;
 		v3Plot.getPlot().addRenderer(svr);
 		
 		// draw the legend vector units

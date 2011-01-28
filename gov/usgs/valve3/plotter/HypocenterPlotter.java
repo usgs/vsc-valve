@@ -17,7 +17,6 @@ import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -319,6 +318,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	protected void getData(PlotComponent component) throws Valve3Exception {
 		
+		// initialize variables
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		
 		double twest	= range.getWest();
 		double teast	= range.getEast();
 		double tsouth	= range.getSouth();
@@ -364,28 +367,27 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("rmk", (rmk));
 
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return;
-		}
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client		= pool.checkout();
 
-		// get the data, if nothing is returned then create an empty list
-		try {
-			hypos = (HypocenterList)client.getBinaryData(params);
-		} catch (UtilException e) {
-			hypos = null; 
-		}
+			// get the data, if nothing is returned then create an empty list
+			try {
+				hypos = (HypocenterList)client.getBinaryData(params);
+			} catch (Exception e) {
+				hypos = null; 
+			}
 		
-		// we return an empty list if there is no data, because it is valid to have no hypocenters for a time period
-		if (hypos != null) {
-			hypos.adjustTime(component.getOffset(startTime));
-		} else {
-			hypos = new HypocenterList();
+			// we return an empty list if there is no data, because it is valid to have no hypocenters for a time period
+			if (hypos != null) {
+				hypos.adjustTime(component.getOffset(startTime));
+			} else {
+				hypos = new HypocenterList();
+			}
+			
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
-		
-		// check back in our connection to the database
-		pool.checkin(client);
 	}
 
 	/**
