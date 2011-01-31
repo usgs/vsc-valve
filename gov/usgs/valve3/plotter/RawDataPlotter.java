@@ -994,16 +994,18 @@ public abstract class RawDataPlotter extends Plotter {
 			sds = cl.getTextData(params);
 			Map<Integer,Integer> colMap = new LinkedHashMap<Integer,Integer>();
 			int i = 0;
-			for ( String c: cols.split(",") ) {
-				colMap.put( Integer.parseInt(c), i );
-				i++;
-			}
+			if ( cols.length() > 0 )
+				for ( String c: cols.split(",") ) {
+					colMap.put( Integer.parseInt(c), i );
+					i++;
+				}
 			Map<Integer,Integer> chMap = new LinkedHashMap<Integer,Integer>();
 			i = 0;
-			for ( String c: ch.split(",") ) {
-				chMap.put( Integer.parseInt(c), i );
-				i++;
-			}
+			if ( ch.length() > 0 )
+				for ( String c: ch.split(",") ) {
+					chMap.put( Integer.parseInt(c), i );
+					i++;
+				}
 			int dh = component.getBoxHeight();
 			for ( String sd: sds ) {
 				SuppDatum sdo = new SuppDatum( sd );
