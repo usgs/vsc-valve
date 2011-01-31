@@ -431,10 +431,11 @@ function handlePlot(xml)
 	sbar.className = "suppdataline";
 	var width = t.clientWidth*1;
 	var height = t.clientHeight*1 + img.fullHeight*1 - 10;
-	sbar.style.height = (height-30) + "px";
+	//sbar.style.height = (height-30) + "px";
 	var sanchor = document.createElement( "div" );
 	sanchor.className = "suppdataanchor";
-	sanchor.style.top = (height-20) + "px";
+	//sanchor.style.top = (height-20) + "px";
+	sanchor.style.width = "10px";
 	var proctable = t.getElementsByClassName( "suppnodltable" )[0];
 	var procdata = proctable.getElementsByTagName('tbody')[0];
 	for ( i=0; i<supp_data.length; i++ ) {
@@ -460,12 +461,18 @@ function handlePlot(xml)
 		}
 		var color = "#" + sd_bits[14];
 		sbar.style.background = color;
-		sanchor.style.background = color;
+		//sanchor.style.background = color;
 		var when = Math.round( translateT2X(parseFloat(sd_bits[3]), img) );
 		var theNewParagraph = document.createElement('suppdatum');
 		var theTextOfTheParagraph = document.createTextNode(supp_data[i].textContent);
 		theNewParagraph.appendChild(theTextOfTheParagraph);
 		theNewParagraph.style.visibility = "hidden";
+		var bar_top = (sd_bits[15]*1 + 20) + "px";
+		sbar.style.top = bar_top;
+		var bar_height = (sd_bits[16]*1) + "px";
+		sbar.style.height = bar_height;
+		var anch_top = (sd_bits[15]*1 + sd_bits[16]*1) + "px";
+		sanchor.style.top = anch_top;
 		if ( when < width ) {
 			sbar.style.left = when + "px";
 			node = sbar.cloneNode(true);
@@ -473,7 +480,7 @@ function handlePlot(xml)
 			t.insertBefore(node, t.firstChild);
 			sanchor.style.left = (when-10) + "px";
 			node = sanchor.cloneNode(true);
-			node.style.backgroundImage="url(images/supp_et.gif)";
+			node.style.backgroundImage="url(images/sd_end.png)";
 			node.appendChild(theNewParagraph);
 			node.show_data = t.id+"\""+sd_text;
 			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
@@ -484,8 +491,9 @@ function handlePlot(xml)
 			sbar.style.left = when + "px";
 			t.insertBefore(sbar, t.firstChild);
 			sbar = sbar.cloneNode(true);
-			sanchor.style.left = (when-10) + "px";
+			sanchor.style.left = when + "px";
 			node = sanchor.cloneNode(true);
+			node.style.backgroundImage="url(images/sd_start.png)";
 			node.appendChild(theNewParagraph);
 			node.show_data = t.id+"\""+sd_text;
 			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
