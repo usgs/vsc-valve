@@ -119,7 +119,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
-					// data.adjustTime(component.getOffset(startTime));
+					// data.adjustTime(timeOffset);
 					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
@@ -165,21 +165,21 @@ public class HelicorderPlotter extends RawDataPlotter {
 				// Add column headers to csvHdrs
 				csvHdrs.append("," + channel.getCode().replace("$","_") + "_Data");
 				// Initialize data for export; add to set for CSV
-				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, component.getOffset(startTime)) );
+				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, timeOffset) );
 				csvIndex++;
 				csvData.add( ed );
 				continue;
 			}
 			
-			HelicorderRenderer hr = new HelicorderRenderer();
-			hr.xTickMarks =this.xTickMarks;
-			hr.xTickValues = this.xTickValues;
-			hr.xUnits = this.xUnits;
-			hr.xLabel = this.xLabel;
-			hr.yTickMarks = this.yTickMarks;
-			hr.yTickValues = this.yTickValues;
-			hr.yUnits = this.yUnits;
-			hr.yLabel = this.yLabel;
+			HelicorderRenderer hr	= new HelicorderRenderer();
+			hr.xTickMarks			= this.xTickMarks;
+			hr.xTickValues			= this.xTickValues;
+			hr.xUnits				= this.xUnits;
+			hr.xLabel				= this.xLabel;
+			hr.yTickMarks			= this.yTickMarks;
+			hr.yTickValues			= this.yTickValues;
+			hr.yUnits				= this.yUnits;
+			hr.yLabel				= this.yLabel;
 			hr.setColor(component.getColor());
 			hr.setData(data);
 
@@ -198,8 +198,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 			settings.width					= component.getBoxWidth();
 			settings.height					= component.getBoxHeight() / compCount;
 			settings.plotCount				= plotCount;
-			settings.timeZoneAbbr			= component.getTimeZone().getID();
-			settings.timeZoneOffset			= component.getOffset(startTime)/3600.0;
+			settings.timeZoneAbbr			= timeZoneID;
+			settings.timeZoneOffset			= timeOffset/3600.0;
 			settings.timeZone				= component.getTimeZone();
 			plotCount++;
 			if (plotCount == compCount) {

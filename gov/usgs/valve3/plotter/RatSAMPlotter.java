@@ -167,7 +167,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 				data = null;
 			}		
 			if (data != null && data.rows() > 0) {
-				data.adjustTime(component.getOffset(startTime));
+				data.adjustTime(timeOffset);
 				gotData = true;
 			}
 			
@@ -206,7 +206,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 		double yMin = 1E300;
 		double yMax = -1E300;
 		boolean allowExpand = true;
-		double timeOffset = component.getOffset(startTime);
 		if (component.isAutoScale("ysL")) {
 			double buff;
 			yMin	= Math.min(yMin, gdm.min(1));
@@ -245,7 +244,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 			mr.getAxis().setLeftLabelAsText(label);
 		}
 		if(xUnits){
-			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");	
+			mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
 		}
 		if(yLabel){
 			DefaultFrameDecorator.addLabel(mr, "channelCode1" + "-" + "channelCode2", Location.LEFT);
@@ -271,7 +270,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
 		}
-		double timeOffset = component.getOffset(startTime);
 		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
@@ -286,7 +284,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Events per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");	
+			hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
 		}
 		if(yLabel){
 			DefaultFrameDecorator.addLabel(hr, "channelCode1" + "-" + "channelCode2", Location.LEFT);

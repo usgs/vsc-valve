@@ -8,6 +8,7 @@ import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
@@ -163,7 +164,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		
 		// if data was collected
 		if (data != null || data.rows() > 0) {
-			data.adjustTime(component.getOffset(startTime));
+			data.adjustTime(timeOffset);
 			gotData = true;
 		}
 		
@@ -183,7 +184,6 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 */
 	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component) throws Valve3Exception
 	{
-		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		
@@ -218,7 +218,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 			mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
 		}
 		if(xUnits){
-			mr.getAxis().setBottomLabelAsText("Time (" + component.getTimeZone().getID()+ ")");
+			mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
 		}
 		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
@@ -233,7 +233,6 @@ public class GenericVariablePlotter extends RawDataPlotter
 	{
 		if (rightUnit == null)
 			return null;
-		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		

@@ -3,8 +3,6 @@ package gov.usgs.valve3.plotter;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +40,6 @@ import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
-import gov.usgs.vdx.data.tilt.TiltData;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -86,15 +83,12 @@ public class GPSPlotter extends RawDataPlotter {
 	private boolean selectedCols[];
 	private String legendsCols[];
 	
-	private DateFormat dateFormat;
-	
 	/**
 	 * Default constructor
 	 */
 	public GPSPlotter() {
 		super();
 		shape		= null;
-		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 	
 	/**
@@ -220,7 +214,7 @@ public class GPSPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (data != null && data.observations() > 0) {
-					data.adjustTime(component.getOffset(startTime));
+					data.adjustTime(timeOffset);
 					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
@@ -237,7 +231,7 @@ public class GPSPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (baselineData != null && baselineData.observations() > 0) {
-					baselineData.adjustTime(component.getOffset(startTime));
+					baselineData.adjustTime(timeOffset);
 					gotBaselineData = true;
 				}
 			}
@@ -647,9 +641,10 @@ public class GPSPlotter extends RawDataPlotter {
 	private String getTopLabel(Rank rank) {
 		StringBuilder top = new StringBuilder(100);
 		top.append(rank.getName() + " Vectors between ");
-		top.append(dateFormat.format(Util.j2KToDate(startTime)));
+		top.append(Util.j2KToDateString(startTime+timeOffset, dateFormatString));
 		top.append(" and ");
-		top.append(dateFormat.format(Util.j2KToDate(endTime)));
+		top.append(Util.j2KToDateString(endTime+timeOffset, dateFormatString));
+		top.append(" " + timeZoneID + " Time");
 		return top.toString();
 	}
 }

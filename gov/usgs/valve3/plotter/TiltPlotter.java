@@ -34,8 +34,6 @@ import gov.usgs.proj.TransverseMercator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -92,14 +90,11 @@ public class TiltPlotter extends RawDataPlotter {
 	private double azimuthRadial;
 	private double azimuthTangential;
 	
-	private DateFormat dateFormat;
-	
 	/**
 	 * Default constructor
 	 */
 	public TiltPlotter() {
-		super();
-		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");		
+		super();	
 	}
 		
 	/**
@@ -225,7 +220,7 @@ public class TiltPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
-					data.adjustTime(component.getOffset(startTime));
+					data.adjustTime(timeOffset);
 					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
@@ -250,7 +245,7 @@ public class TiltPlotter extends RawDataPlotter {
 	public void plotTiltVectors(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
-		logger.info("checkpoint a");
+
 		// add a location for each channel that is being plotted
 		for (int cid : channelDataMap.keySet()) {
 			TiltData data = channelDataMap.get(cid);
@@ -258,7 +253,7 @@ public class TiltPlotter extends RawDataPlotter {
 				locs.add(channelsMap.get(cid).getLonLat());
 			}
 		}
-		logger.info("checkpoint b");
+
 		// create the dimensions of the plot based on these stations
 		GeoRange range = GeoRange.getBoundingBox(locs);
 		
@@ -268,14 +263,13 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
-		logger.info("checkpoint c");
+
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
 		mr.setGeoLabelSet(labels);
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
-		logger.info("checkpoint d");
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
@@ -295,30 +289,26 @@ public class TiltPlotter extends RawDataPlotter {
 		}
 		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
 		v3Plot.getPlot().addRenderer(mr);
-		logger.info("checkpoint e");
+
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
 		
 		for (int cid : channelDataMap.keySet()) {
-			logger.info("checkpoint f");
 			Channel channel	= channelsMap.get(cid);
 			TiltData data	= channelDataMap.get(cid);
 			
 			if (data == null || data.rows() == 0) {
 				continue;
 			}
-			logger.info("checkpoint g");
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
-			logger.info("checkpoint h");
 			DoubleMatrix2D dm = data.getAllData(0.0);
-			logger.info("checkpoint i");
 			double et1	= dm.getQuick(0, 2);
 			double et2	= dm.getQuick(dm.rows() - 1, 2);
 			double nt1	= dm.getQuick(0, 3);
 			double nt2	= dm.getQuick(dm.rows() - 1, 3);
 			double e	= et2 - et1;
 			double n	= nt2 - nt1;
-			logger.info("checkpoint j");
+
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(channel.getLonLat());
@@ -329,11 +319,10 @@ public class TiltPlotter extends RawDataPlotter {
 			evr.z = 0;
 			evr.displayHoriz	= true;
 			evr.displayVert		= false;
-			logger.info("checkpoint k");
+
 			maxMag = Math.max(evr.getMag(), maxMag);
 			v3Plot.getPlot().addRenderer(evr);
 			vrs.add(evr);
-			logger.info("checkpoint l");
 		}
 		
 		if (maxMag == -1E300) {
@@ -647,9 +636,10 @@ public class TiltPlotter extends RawDataPlotter {
 	private String getTopLabel(Rank rank) {
 		StringBuilder top = new StringBuilder(100);
 		top.append(rank.getName() + " Vectors between ");
-		top.append(dateFormat.format(Util.j2KToDate(startTime)));
+		top.append(Util.j2KToDateString(startTime+timeOffset, dateFormatString));
 		top.append(" and ");
-		top.append(dateFormat.format(Util.j2KToDate(endTime)));
+		top.append(Util.j2KToDateString(endTime+timeOffset, dateFormatString));
+		top.append(" " + timeZoneID + " Time");
 		return top.toString();
 	}
 }

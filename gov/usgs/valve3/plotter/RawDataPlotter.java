@@ -102,14 +102,19 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double samplingRate = 0.0;
 	protected String dataType = null;
 	
+	protected double timeOffset;
+	protected String timeZoneID;
+	protected String dateFormatString;
+	
 	
 	/**
 	 * Default constructor
 	 */
 	public RawDataPlotter() {
-		logger		= Logger.getLogger("gov.usgs.vdx");		
+		logger	= Logger.getLogger("gov.usgs.vdx");		
 		csvCmts = new StringBuffer();
 		csvHdrs = new StringBuffer();
+		dateFormatString	= "yyyy-MM-dd HH:mm:ss";
 	}
 	
 	/**
@@ -118,12 +123,15 @@ public abstract class RawDataPlotter extends Plotter {
      * @throws Valve3Exception
 	 */
 	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
-		// Check for named channels, ranks
+		
+		// declare variables
 		String nameArg = null;
+		
+		// Check for named channels, ranks
 		if ( forExport ) {
-			outputType = component.get( "o" );
-			inclTime = outputType.equals( "csv" );
-			nameArg = component.get( "chNames" );
+			outputType	= component.get( "o" );
+			inclTime	= outputType.equals( "csv" );
+			nameArg		= component.get( "chNames" );
 			if ( nameArg != null ) {
 				String[] names = nameArg.split(",");
 				int left = names.length;
@@ -159,9 +167,13 @@ public abstract class RawDataPlotter extends Plotter {
 				if ( !found )
 				    throw new Valve3Exception( "Unknown rank name :" + nameArg );
 			}
+			
+		// channels are defined in the ch parameter if it is not for export
 		} else {
 			ch = component.getString("ch");
 		}
+		
+		// column parameters
 		boolean useColDefaults = true;
 		int j = 0;
 		if ( columnsList != null ) {
@@ -183,22 +195,34 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 		}
 
+		// end time
 		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			if ( forExport )
+		if (Double.isNaN(endTime)) {
+			if ( forExport ) {
 				endTime = Double.MAX_VALUE;
-			else
+			} else {
 				throw new Valve3Exception("Illegal end time.");
+			}
+		}
 		
+		// start time
 		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
+		if (Double.isNaN(startTime)) {
 			throw new Valve3Exception("Illegal start time.");
-		try{
+		}
+		
+		// DST and time zone parameters
+		timeOffset	= component.getOffset(startTime);
+		timeZoneID	= component.getTimeZone().getID();
+		
+		try {
 			downsamplingType = DownsamplingType.fromString(component.getString("ds"));
 			downsamplingInterval = component.getInt("dsInt");
-		} catch(Valve3Exception e){
+		} catch (Valve3Exception e) {
 			//Do nothing, default values without downsampling
 		}
+		
+		// plot related parameters
 		if ( !forExport ) {
 			try{
 				isDrawLegend = component.getBoolean("lg");
@@ -448,7 +472,6 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @throws Valve3Exception
 	 */
 	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, String unit) throws Valve3Exception {	
-		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		mr.setAllVisible(false);
@@ -477,7 +500,7 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		if (displayCount + 1 == compCount) {
 			if(xUnits){
-				mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");	
+				mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
 			}
 			if(xLabel){
 				;
@@ -501,7 +524,6 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		if (rightUnit == null)
 			return null;
-		double timeOffset = component.getOffset(startTime);
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
 		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		mr.setAllVisible(false);

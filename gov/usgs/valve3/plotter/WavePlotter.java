@@ -174,7 +174,7 @@ public class WavePlotter extends RawDataPlotter {
 						String toadd = "#sr=" + samplingRate + "\n#datatype=" + dataType + "\n";
 						csvHdrs.insert( 0, toadd );
 					}
-					data.setStartTime(data.getStartTime() + component.getOffset(startTime));
+					data.setStartTime(data.getStartTime() + timeOffset);
 					gotData = true;
 					data.handleBadData();
 					if (doDespike) { data.despike(despikePeriod); }
@@ -260,7 +260,6 @@ public class WavePlotter extends RawDataPlotter {
 	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
 		if ( v3Plot != null )
 			v3Plot.setWaveform( true );
-		double timeOffset = component.getOffset(startTime);
 		SliceWaveExporter wr = new SliceWaveExporter();
 		wr.xTickMarks = this.xTickMarks;
 		wr.xTickValues = this.xTickValues;
@@ -269,7 +268,7 @@ public class WavePlotter extends RawDataPlotter {
 	    wr.yTickMarks = this.yTickMarks;
 	    wr.yTickValues = this.yTickValues;
 		wr.setWave(wave);
-		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , component.getTimeZone().getID());
+		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , timeZoneID);
 		if(yLabel){
 			wr.setYLabelText(channel.getName());
 		}
@@ -383,14 +382,13 @@ public class WavePlotter extends RawDataPlotter {
 	 * @param dh display height
 	 */
 	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
-		double timeOffset = component.getOffset(startTime);
 		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
 		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
 		sr.setOverlap(0);
 		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
 		sr.setViewEndTime(endTime+timeOffset);
-		sr.setTimeZone(component.getTimeZone().getID());
+		sr.setTimeZone(timeZoneID);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.xTickMarks = this.xTickMarks;

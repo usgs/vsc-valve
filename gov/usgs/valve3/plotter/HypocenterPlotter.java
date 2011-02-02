@@ -39,8 +39,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +118,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private BinSize bin;
 	private RightAxis rightAxis;
 	private HypocenterList hypos;
-	private DateFormat dateFormat;
 
 	
 	/**
@@ -128,7 +125,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	public HypocenterPlotter() {
 		super();
-		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		logger = Log.getLogger("gov.usgs.valve3");
 	}
 
@@ -149,6 +145,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		startTime = component.getStartTime(endTime);
 		if (Double.isNaN(startTime))
 			throw new Valve3Exception("Illegal start time.");
+		
+		timeOffset	= component.getOffset(startTime);
+		timeZoneID	= component.getTimeZone().getID();
 		
 		String pt = component.get("plotType");
 		if ( pt == null )
@@ -380,7 +379,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 			// we return an empty list if there is no data, because it is valid to have no hypocenters for a time period
 			if (hypos != null) {
-				hypos.adjustTime(component.getOffset(startTime));
+				hypos.adjustTime(timeOffset);
 			} else {
 				hypos = new HypocenterList();
 			}
@@ -398,7 +397,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private BasicFrameRenderer plotMapView(Plot plot, PlotComponent component) throws Valve3Exception {
-		double timeOffset = component.getOffset(startTime);
 		// TODO: make projection variable
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
@@ -431,28 +429,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 	}
 
 	/**
-	 * 
-	 * @return plot top label text
-	 */
-	private String getTopLabel(Rank rank) {
-		StringBuilder top = new StringBuilder(100);
-		top.append(hypos.size() + " " + rank.getName());
-		if (hypos.size() == 1) {
-			top.append(" earthquake on ");
-			top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).j2ksec)));
-		} else {
-			top.append(" earthquakes");
-			if (hypos.size() > 1) {
-				top.append(" between ");
-				top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(0).j2ksec)));
-				top.append(" and ");
-				top.append(dateFormat.format(Util.j2KToDate(hypos.getHypocenters().get(hypos.size() - 1).j2ksec)));
-			}
-		}
-		return top.toString();
-	}
-
-	/**
 	 * Initialize BasicFrameRenderer (init mode depends from axes type) and add it to plot.
 	 * Generate PNG image to local file.
 	 * @param v3Plot Valve3Plot
@@ -465,7 +441,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
 		base.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
-		double timeOffset = component.getOffset(startTime);
 		String subCount = "";
 		double lat1;
 		double lon1;
@@ -552,7 +527,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.setXAxisToTime(8);
 			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 			component.setTranslationType("ty");
-			base.getAxis().setBottomLabelAsText("Time");
+			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		case ARB_TIME:
@@ -602,7 +577,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 						
 			component.setTranslation(base.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 			component.setTranslationType("ty");
-			base.getAxis().setBottomLabelAsText("Time");
+			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
 			
 			break;
 		}
@@ -634,7 +609,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		int leftLabels = 0;
 		
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
-		double timeOffset = component.getOffset(startTime);
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
@@ -646,7 +620,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");
+			hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
 		}
 		if(xLabel){
 			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
@@ -792,5 +766,34 @@ public class HypocenterPlotter extends RawDataPlotter {
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
+	}
+
+	/**
+	 * 
+	 * @return plot top label text
+	 */
+	private String getTopLabel(Rank rank) {
+		
+		StringBuilder top = new StringBuilder(100);		
+		top.append(hypos.size() + " " + rank.getName());
+		
+		// data coming from the hypocenters list have already been adjusted for the time offset
+		if (hypos.size() == 1) {
+			top.append(" earthquake on ");
+			top.append(Util.j2KToDateString(hypos.getHypocenters().get(0).j2ksec, dateFormatString));
+		} else {
+			top.append(" earthquakes between ");
+			if (hypos.size() == 0) {				
+				top.append(Util.j2KToDateString(startTime+timeOffset, dateFormatString));
+				top.append(" and ");
+				top.append(Util.j2KToDateString(endTime+timeOffset, dateFormatString));
+			} else if (hypos.size() > 1) {
+				top.append(Util.j2KToDateString(hypos.getHypocenters().get(0).j2ksec, dateFormatString));
+				top.append(" and ");
+				top.append(Util.j2KToDateString(hypos.getHypocenters().get(hypos.size() - 1).j2ksec, dateFormatString));
+			}
+		}
+		top.append(" " + timeZoneID + " Time");
+		return top.toString();
 	}
 }

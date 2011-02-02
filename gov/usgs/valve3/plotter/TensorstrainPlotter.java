@@ -156,7 +156,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
-					data.adjustTime(component.getOffset(startTime));
+					data.adjustTime(timeOffset);
 					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);

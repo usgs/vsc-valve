@@ -172,7 +172,7 @@ public class RSAMPlotter extends RawDataPlotter {
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
-					data.adjustTime(component.getOffset(startTime));
+					data.adjustTime(timeOffset);
 					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
@@ -203,7 +203,6 @@ public class RSAMPlotter extends RawDataPlotter {
 		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
-		double timeOffset = component.getOffset(startTime);
 		// Remove the mean from the first column (this needs to be user controlled)
 		if (removeBias) {
 			gdm.add(1, -gdm.mean(1));
@@ -263,7 +262,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			mr.getAxis().setLeftLabelAsText(label);
 		}
 		if(xUnits){
-			mr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");	
+			mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
 		}
 		if(yLabel){
 			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
@@ -291,7 +290,6 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (threshold > 0) {
 			rd.countEvents(threshold, ratio, maxEventLength);
 		}
-		double timeOffset = component.getOffset(startTime);
 		String channelCode = channel.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		
 		HistogramExporter hr = new HistogramExporter(rd.getCountsHistogram(bin));
@@ -305,7 +303,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			hr.getAxis().setLeftLabelAsText("Events per " + bin);
 		}
 		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(component.getTimeZone().getID() + " Time (" + Util.j2KToDateString(startTime+timeOffset, "yyyy-MM-dd HH:mm:ss") + " to " + Util.j2KToDateString(endTime+timeOffset, "yyyy-MM-dd HH:mm:ss")+ ")");	
+			hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
 		}
 		if ( forExport ) {
 			// Add column header to csvHdrs
