@@ -14,7 +14,6 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.vdx.client.VDXClient;
-import gov.usgs.util.UtilException;
 
 /**
  * Abstract base class for plotter, all concrete plotters
@@ -133,30 +132,39 @@ abstract public class Plotter
 	 * @param client	vdx name
 	 * @return export config
 	 */
-	public ExportConfig getExportConfig(String source, String client) {
+	public ExportConfig getExportConfig(String vdxSource, String vdxClient) {
+		
+		// declare variables
+		List<String> stringList = null;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "exportinfo");
+		
 		Valve3 v3 = Valve3.getInstance();
-		ExportConfig ec = v3.getExportConfig(source);
+		ExportConfig ec = v3.getExportConfig(vdxSource);
 		if ( ec == null ) {
-			// Build inital config from Valve parameters
+			
+			// Build initial config from Valve parameters
 			ec = v3.getExportConfig("");
 			ec.parameterize( params );
 			
 			// Fold in overrides from VDX for this source
-			Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(client);
-			VDXClient cl = pool.checkout();
-			List<String> ecs = null;
-			try {
-				ecs = cl.getTextData(params);
-			} catch (UtilException e){
-				ecs = new ArrayList<String>();
-			} finally {
-				pool.checkin(cl);
+			pool = v3.getDataHandler().getVDXClient(vdxClient);
+			if (pool != null) {
+				client = pool.checkout();
+				try {
+					stringList = client.getTextData(params);
+				} catch (Exception e){
+					stringList = new ArrayList<String>();
+				} finally {
+					pool.checkin(client);
+				}
+				ec = new ExportConfig(stringList);
+				v3.putExportConfig(vdxSource, ec);
 			}
-			ec = new ExportConfig( ecs );
-			v3.putExportConfig(source, ec);
 		}
 		return ec;
 	}

@@ -326,8 +326,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		double tsouth	= range.getSouth();
 		double tnorth	= range.getNorth();
 		
-		Axes tmp = this.axes;
-		
 		// we need to get extra hypocenters for plotting the width	
 		if (axes == Axes.ARB_DEPTH || axes == Axes.ARB_TIME) {		
 			double latDiff 		= ArbDepthCalculator.getLatDiff(hypowidth);			
@@ -368,7 +366,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// checkout a connection to the database
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
-			client		= pool.checkout();
+			client	= pool.checkout();
 
 			// get the data, if nothing is returned then create an empty list
 			try {
@@ -386,7 +384,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			// check back in our connection to the database
 			pool.checkin(client);
-		}
+		} 
 	}
 
 	/**

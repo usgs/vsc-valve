@@ -20,7 +20,6 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Time;
-import gov.usgs.util.UtilException;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.PlotComponent;
@@ -303,6 +302,8 @@ public abstract class RawDataPlotter extends Plotter {
 		// initialize variables
 		List<String> stringList = null;
 		List<Column> columnList	= null;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -310,23 +311,21 @@ public abstract class RawDataPlotter extends Plotter {
 		params.put("action", "columns");
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return null;
-		}
-		
-		try {
-			stringList	= client.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		} finally {
-			pool.checkin(client);
-		}		
-		
-		// if data was collected
-		if (stringList != null) {
-			columnList	= Column.fromStringsToList(stringList);
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();		
+			try {
+				stringList	= client.getTextData(params);
+			} catch (Exception e) {
+				stringList	= null;
+			} finally {
+				pool.checkin(client);
+			}		
+			
+			// if data was collected
+			if (stringList != null) {
+				columnList	= Column.fromStringsToList(stringList);
+			}
 		}
 		
 		return columnList;
@@ -344,6 +343,8 @@ public abstract class RawDataPlotter extends Plotter {
 		// initialize variables
 		List<String> stringList 			= null;
 		Map<Integer, Channel> channelMap	= null;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -351,23 +352,21 @@ public abstract class RawDataPlotter extends Plotter {
 		params.put("action", "channels");
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return null;
-		}
-		
-		try {
-			stringList	= client.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		} finally {
-			pool.checkin(client);
-		}		
-		
-		// if data was collected
-		if (stringList != null) {
-			channelMap	= Channel.fromStringsToMap(stringList);
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();		
+			try {
+				stringList	= client.getTextData(params);
+			} catch (Exception e) {
+				stringList	= null;
+			} finally {
+				pool.checkin(client);
+			}		
+			
+			// if data was collected
+			if (stringList != null) {
+				channelMap	= Channel.fromStringsToMap(stringList);
+			}
 		}
 		
 		return channelMap;
@@ -385,6 +384,8 @@ public abstract class RawDataPlotter extends Plotter {
 		// initialize variables
 		List<String> stringList 	= null;
 		Map<Integer, Rank> rankMap	= null;
+		Pool<VDXClient> pool		= null;
+		VDXClient client			= null;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -392,23 +393,21 @@ public abstract class RawDataPlotter extends Plotter {
 		params.put("action", "ranks");
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return null;
-		}
-		
-		try {
-			stringList	= client.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		} finally {
-			pool.checkin(client);
-		}		
-		
-		// if data was collected
-		if (stringList != null) {
-			rankMap	= Rank.fromStringsToMap(stringList);
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+			try {
+				stringList	= client.getTextData(params);
+			} catch (Exception e) {
+				stringList	= null;
+			} finally {
+				pool.checkin(client);
+			}
+			
+			// if data was collected
+			if (stringList != null) {
+				rankMap	= Rank.fromStringsToMap(stringList);
+			}
 		}
 		
 		return rankMap;
@@ -426,6 +425,8 @@ public abstract class RawDataPlotter extends Plotter {
 		// initialize variables
 		List<String> stringList 		= null;
 		Map<Integer, Double> azimuthMap	= null;	
+		Pool<VDXClient> pool			= null;
+		VDXClient client				= null;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -433,26 +434,24 @@ public abstract class RawDataPlotter extends Plotter {
 		params.put("action", "azimuths");
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null) {
-			return null;
-		}
-		
-		try {
-			stringList	= client.getTextData(params);
-		} catch (UtilException e) {
-			throw new Valve3Exception(e.getMessage());
-		} finally {
-			pool.checkin(client);
-		}		
-		
-		// if data was collected
-		if (stringList != null) {
-			azimuthMap	= new LinkedHashMap<Integer, Double>();
-			for (int i = 0; i < stringList.size(); i++) {
-				String[] temp = stringList.get(i).split(":");
-				azimuthMap.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();		
+			try {
+				stringList	= client.getTextData(params);
+			} catch (Exception e) {
+				stringList	= null;
+			} finally {
+				pool.checkin(client);
+			}
+			
+			// if data was collected
+			if (stringList != null) {
+				azimuthMap	= new LinkedHashMap<Integer, Double>();
+				for (int i = 0; i < stringList.size(); i++) {
+					String[] temp = stringList.get(i).split(":");
+					azimuthMap.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
+				}
 			}
 		}
 		
@@ -975,76 +974,97 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @throws Valve3Exception
 	 */
-	protected void addSuppData( String source, String client, Valve3Plot v3Plot, PlotComponent component ) throws Valve3Exception {
+	protected void addSuppData (String vdxSource, String vdxClient, Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList = null;
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
 		String sdTypes;
-		try{
+		
+		try {
 			sdTypes = component.getString("sdt");
-		} catch(Valve3Exception e){
+		} catch (Valve3Exception e) {
 			sdTypes = "";
 		}
-		//if ( sdTypes.length() == 0 )
-		//	return;
-		//if(!ch.contains(",")){
+		
+		// if ( sdTypes.length() == 0 )
+		// return;
+		// if(!ch.contains(",")){
+		
 		Map<String, String> params = new LinkedHashMap<String, String>();		
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "suppdata");
 		params.put("st", Time.format(Time.STANDARD_TIME_FORMAT_MS,startTime).replaceAll("\\D",""));
 		params.put("et", Time.format(Time.STANDARD_TIME_FORMAT_MS,endTime).replaceAll("\\D",""));
 		params.put("rk", Integer.toString(rk));
 		params.put("byID","true");
 		params.put("ch", ch);
+		params.put("type", sdTypes);
+		params.put("dl", "10");
+		
+		// calculate the columns parameters
 		String cols = null;
-		if ( columnsList == null ) {
+		if (columnsList == null) {
 			cols = "";
 		} else {
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				if ( column.checked )
-					if ( cols == null )
+				if (column.checked) {
+					if (cols == null) {
 						cols = "" + (i+1);
-					else
+					} else {
 						cols = cols + "," + (i+1);
+					}
+				}
 			}
 		}
-		params.put("col", cols);
-		params.put("type", sdTypes);
-		params.put("dl", "10");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		try{
-			List<String> sds = null;
-			sds = cl.getTextData(params);
-			Map<Integer,Integer> colMap = new LinkedHashMap<Integer,Integer>();
-			int i = 0;
-			if ( cols.length() > 0 )
-				for ( String c: cols.split(",") ) {
-					colMap.put( Integer.parseInt(c), i );
-					i++;
-				}
-			Map<Integer,Integer> chMap = new LinkedHashMap<Integer,Integer>();
-			i = 0;
-			if ( ch.length() > 0 )
-				for ( String c: ch.split(",") ) {
-					chMap.put( Integer.parseInt(c), i );
-					i++;
-				}
-			int dh = component.getBoxHeight();
-			for ( String sd: sds ) {
-				SuppDatum sdo = new SuppDatum( sd );
-				int offset;
-				if ( isPlotComponentsSeparately() ) {
-					offset = (Integer)chMap.get( sdo.cid ) * colMap.size() + (Integer)colMap.get(sdo.colid);
-				} else
-					offset = (Integer)chMap.get( sdo.cid );
-				sdo.frame_y = component.getBoxY() + (offset * dh) + 8;
-				sdo.frame_h = dh - 16;
-				v3Plot.addSuppDatum( sdo );
+		params.put("col", cols);		
+
+		// create a column map
+		Map<Integer,Integer> colMap = new LinkedHashMap<Integer,Integer>();
+		int i = 0;
+		if (cols.length() > 0) {
+			for (String c: cols.split(",")) {
+				colMap.put( Integer.parseInt(c), i );
+				i++;
 			}
 		}
-		catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
+		
+		// create a channel map
+		Map<Integer,Integer> chMap = new LinkedHashMap<Integer,Integer>();
+		i = 0;
+		if (ch.length() > 0)
+			for (String c: ch.split(",")) {
+				chMap.put(Integer.parseInt(c), i);
+				i++;
+			}
+		
+		// define the box height
+		int dh = component.getBoxHeight();
+
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+			try {
+				stringList	= client.getTextData(params);
+				for (String sd: stringList) {
+					SuppDatum sdo = new SuppDatum(sd);
+					int offset;
+					if (isPlotComponentsSeparately()) {
+						offset = (Integer)chMap.get(sdo.cid) * colMap.size() + (Integer)colMap.get(sdo.colid);
+					} else {
+						offset = (Integer)chMap.get( sdo.cid );
+					}
+					sdo.frame_y = component.getBoxY() + (offset * dh) + 8;
+					sdo.frame_h = dh - 16;
+					v3Plot.addSuppDatum( sdo );
+				}
+			} catch (Exception e) {
+				throw new Valve3Exception(e.getMessage()); 
+			} finally {
+				pool.checkin(client);
+			}
 		}
-		pool.checkin(cl);
-		//}
 	}
 }

@@ -185,29 +185,44 @@ public class RawDataHandler implements HttpHandler
 	}
 	
 	/**
-	 * Get map of available ranks
-	 * @param source source name
-	 * @param client vdx name
-	 * @return mapping from ids to ranks
+	 * Initialize list of ranks for given vdx source
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx client name
+	 * @return map of ids to ranks
 	 * @throws Valve3Exception
 	 */
-	protected static Map<Integer, Rank> getRanks(String source, String client) throws Valve3Exception {
-		Map<Integer, Rank> ranks;
+	protected static Map<Integer, Rank> getRanks(String vdxSource, String vdxClient) throws Valve3Exception {
+		
+		// initialize variables
+		List<String> stringList 	= null;
+		Map<Integer, Rank> rankMap	= null;
+		Pool<VDXClient> pool		= null;
+		VDXClient client			= null;
+		
+		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
+		params.put("source", vdxSource);
 		params.put("action", "ranks");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> rks = null;
-		try {
-			rks = cl.getTextData(params);
-		} catch(UtilException e){
-			throw new Valve3Exception(e.getMessage()); 
-		} finally {
-			pool.checkin(cl);
+		
+		// checkout a connection to the database
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+			try {
+				stringList	= client.getTextData(params);
+			} catch (Exception e) {
+				stringList	= null;
+			} finally {
+				pool.checkin(client);
+			}
+			
+			// if data was collected
+			if (stringList != null) {
+				rankMap	= Rank.fromStringsToMap(stringList);
+			}
 		}
-		ranks = Rank.fromStringsToMap(rks);
-		return ranks;
+		
+		return rankMap;
 	}
 	
 	/**

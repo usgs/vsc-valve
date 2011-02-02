@@ -420,9 +420,6 @@ public class TiltPlotter extends RawDataPlotter {
 					compCount = 1;
 				}
 				
-				// resize the plot dimensions based on number of components to be plotted and channels with data
-				compCount = channelDataMap.size() * compCount;
-				
 				for (int cid : channelDataMap.keySet()) {
 					
 					// get the relevant information for this channel
@@ -431,9 +428,9 @@ public class TiltPlotter extends RawDataPlotter {
 					
 					// verify their is something to plot
 					if (data == null || data.rows() == 0) {
-						v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
+						v3Plot.setHeight(v3Plot.getHeight() - compCount*component.getBoxHeight());
 						Plot plot = v3Plot.getPlot();
-						plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
+						plot.setSize(plot.getWidth(), plot.getHeight() - compCount*component.getBoxHeight());
 						continue;
 					}
 					

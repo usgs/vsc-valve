@@ -131,7 +131,9 @@ public class ChannelMapPlotter extends Plotter
 		
 		// initialize variables
 		List<String> stringList = null;
-		labels = new GeoLabelSet();
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		labels 					= new GeoLabelSet();
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -139,17 +141,15 @@ public class ChannelMapPlotter extends Plotter
 		params.put("action", "channels");
 		
 		// checkout a connection to the database, the vdxClient could be null or invalid
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
-			VDXClient client = pool.checkout();
-			if (client != null) {
-				try {
-					stringList = client.getTextData(params);
-				} catch (UtilException e) {
-					stringList = null;
-				} finally {
-					pool.checkin(client);
-				}
+			client = pool.checkout();
+			try {
+				stringList = client.getTextData(params);
+			} catch (UtilException e) {
+				stringList = null;
+			} finally {
+				pool.checkin(client);
 			}
 		}
 		

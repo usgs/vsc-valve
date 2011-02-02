@@ -160,16 +160,16 @@ public class GenericVariablePlotter extends RawDataPlotter
 			} catch (Exception e) {
 				data = null; 
 			}
-		}
 		
-		// if data was collected
-		if (data != null || data.rows() > 0) {
-			data.adjustTime(timeOffset);
-			gotData = true;
+			// if data was collected
+			if (data != null || data.rows() > 0) {
+				data.adjustTime(timeOffset);
+				gotData = true;
+			}
+			
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
-		
-		// check back in our connection to the database
-		pool.checkin(client);
 		
 		// if no data exists, then throw exception
 		if (!gotData) {

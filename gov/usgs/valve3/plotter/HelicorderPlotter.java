@@ -105,7 +105,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 		// checkout a connection to the database
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
-			client		= pool.checkout();
+			client	= pool.checkout();
 		
 			// iterate through each of the selected channels and place the data in the map
 			for (String channel : channels) {

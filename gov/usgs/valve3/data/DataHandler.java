@@ -139,11 +139,14 @@ public class DataHandler implements HttpHandler
 			if (action == null)
 				return null;  // TODO: throw Valve3Exception		
 		
-			Pool<VDXClient> pool		= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			
 			Map<String, String> params	= new HashMap<String, String>();
 			params.put("source", dsd.getVDXSource());
 			params.put("action", action);
-			VDXClient client	= pool.checkout();
+			
+			Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			VDXClient client		= pool.checkout();
+			
 			if (client != null) {
 				List<String> ls	= null;
 				if (action.equals("metadata") || action.equals("suppdata")) {
@@ -206,7 +209,8 @@ public class DataHandler implements HttpHandler
 					}
 				}
 			}
-			pool.checkin(client);
+			// this should not be necessary, as the pool was already checked back in if it wasn't null.
+			// pool.checkin(client);
 			return null;
 		}
 		catch (Valve3Exception e)
