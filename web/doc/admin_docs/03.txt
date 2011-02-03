@@ -1,1 +1,7 @@
-A menu has been added to the Valve web menu to allow the default timezone to be selected; the default for this can be sepcified in valve3.config by setting the timeZoneAbbr parameter to the abbreviation for the desired timezone.
+TZ Implementation
+-----------------
+
+A menu has been added to the Valve web menu to allow the default
+timezone to be selected; the default for this can be sepcified in
+valve3.config by setting the timeZoneAbbr parameter to the abbreviation
+for the desired timezone.

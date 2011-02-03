@@ -1,10 +1,17 @@
-There is now a "defaults" section in valve3.config, in which default values for a wide variety of parameters can be specified.  The format for such specifications will be:
-	
+Code Cleanup
+------------
+
+There is now a "defaults" section in valve3.config, in which default
+values for a wide variety of parameters can be specified.  The format
+for such specifications will be:
+
 defaults.parameter.PARAM = VALUE
 
-where PARAM is the full name of the parameter and VALUE is its default value.
+where PARAM is the full name of the parameter and VALUE is its default
+value.
 
-For parameters that do not have defaults specified in this manner, default values are as follows:
+For parameters that do not have defaults specified in this manner,
+default values are as follows:
 
 * For Hypocenter plots with Arbitrary-Depth or Arbitrary-Time axes, width=100
 * tz = UTC
@@ -19,47 +26,86 @@ For parameters that do not have defaults specified in this manner, default value
 
 Main Input Parameters
 
-Each parameter is followed by a description in parentheses, then a list of legal values; the one with a leading * is the default.
+Each parameter is followed by a description in parentheses, then a list
+of legal values; the one with a leading * is the default.
 
-a (action).	Values: *plot, rawData
-o (output type). Values: *png, xml, *csv, csvnots, seed	(png for plot, csv for rawData)
-w (width). Values: any positive integer, defaults to 1000
-h (height). Values: any	positive integer, defaults to 250
-n (number of subsections). Values: any positive integer, defaults to 1
+a (action). 
+    Values: *plot, rawData
+o (output type). 
+    Values: *png, xml, *csv, csvnots, seed  (png for plot, csv for rawData)
+w (width). 
+    Values: any positive integer, defaults to 1000
+h (height). 
+    Values: any positive integer, defaults to 250
+n (number of subsections). 
+    Values: any positive integer, defaults to 1
 
 if action == rawData, available output type flags are
 
-csv		csv with timestamps
-csvnots	csv without timestamps
-seed	mini seed
-(note: csvnots and seed requests to all Valve tables and Winston RSAM tables results in exception and error message)
+csv     csv with timestamps
+csvnots csv without timestamps
+seed    mini seed
+(note: csvnots and seed requests to all Valve tables and Winston RSAM
+tables results in exception and error message)
 
-Ranks are required for all plotters that use them. If they are not included then throw exception with error message. Applicable are gps, generic*, hypocenters and tilt.
+Ranks are required for all plotters that use them. If they are not
+included then throw exception with error message. Applicable are gps,
+generic*, hypocenters and tilt.
 
-Columns defaults to the checked column in the columns or columns_menu tableif that column is not explicitly specified
+Columns defaults to the checked column in the columns or columns_menu
+tableif that column is not explicitly specified
 
 Input Parameters Common to All Other Plotters
 
-Each parameter is followed by a description in parentheses; if no defaults are listed, there are none (that is, the parameter must be specified).
+Each parameter is followed by a description in parentheses; if no
+defaults are listed, there are none (that is, the parameter must be
+specified).
 
-dataSource 	(Data Source).
-ch 			(comma separated list of selected channels).
-chCnt 		(count of channels).
-st 			(Start Time).
-et 			(End Time).
-x 			(Box top left X Position).
-y			(Box top left Y Position).
-w			(Box Width), defaults to 1000.
-h			(Box Height), defaults to 250.
+dataSource  (Data Source).
+ch          (comma separated list of selected channels).
+chCnt       (count of channels).
+st          (Start Time).
+et          (End Time).
+x           (Box top left X Position).
+y           (Box top left Y Position).
+w           (Box Width), defaults to 1000.
+h           (Box Height), defaults to 250.
 
 All Other Input Parameters for Other Plotters
 
-Each parameter is followed in parentheses with its default; if none is specified, the parameter is required.
+Each parameter is followed in parentheses with its default; if none is
+specified, the parameter is required.
 
-GPSPlotter:			plotType (timeseries), baseline (), se (false), vs (false), hs (false)
-HelicorderPlotter:	showClip (true), barMult (3), timechunk (15), minimumAxis (false)
-HypocenterPlotter:	plottype (mapview), axes (M), color (A), cntsAxis (C), cntsBin (D). all other parameters should have defaults already
-RatSAMPlotter:		plottype (values)
-RSAMPlotter:		plottype (values), threshold (50), ratio (1.3), maxEventLength (300), cntsBin (H)
-TiltPlotter:		plottype (timeseries), azimuth (nominal), azval (0.0)
-WavePlotter:		plottype (waveform), minFreq (0.0), maxFreq (15.0), logPower (T), logFreq (F), yLabel (1), xLabel (1), labels (1), color (A)
+GPSPlotter:         plotType        (timeseries)
+                    baseline
+                    se              (false)
+                    vs              (false)
+                    hs              (false)
+HelicorderPlotter:  showClip        (true)
+                    barMult         (3)
+                    timechunk       (15)
+                    minimumAxis     (false)
+HypocenterPlotter:  plottype        (mapview)
+                    axes            (M)
+                    color           (A)
+                    cntsAxis        (C)
+                    cntsBin         (D)
+                    all other parameters should have defaults already
+RatSAMPlotter:      plottype        (values)
+RSAMPlotter:        plottype        (values)
+                    threshold       (50)
+                    ratio           (1.3)
+                    maxEventLength  (300)
+                    cntsBin         (H)
+TiltPlotter:        plottype        (timeseries)
+                    azimuth         (nominal)
+                    azval           (0.0)
+WavePlotter:        plottype        (waveform)
+                    minFreq         (0.0)
+                    maxFreq         (15.0)
+                    logPower        (T)
+                    logFreq         (F)
+                    yLabel          (1)
+                    xLabel          (1)
+                    labels          (1)
+                    color           (A)

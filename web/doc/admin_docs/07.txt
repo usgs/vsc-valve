@@ -1,43 +1,71 @@
-Plot Lines or Points
---------------------
+Plot Enhancements: Plot Lines or Points
+---------------------------------------
 
-Whether data in a plot is to be drawn using lines or points, and if points what shape of points to use, are now selectable from the menus.
+Whether data in a plot is to be drawn using lines or points, and if
+points what shape of points to use, are now selectable from the menus.
 
+This is represented in a plot request URL by the lt.N parameter, where N
+is the plot component number, and the values have the indicated
+meanings:
 
-Legends
--------
+    l:  Line
+    o:  Circle
+    s:  Square
+    *:  Star
+    t:  Triangle
+    d:  Dot
 
-Display of legends in a plot can be disabled by including an "lg=false" parameter to the plot request URL.
+Plot Enhancements: Legends
+--------------------------
 
-
-Axis Labels
------------
-
-Greater control of the display of axis labels has been added through the use of the following input parameters to the plot request URL; all are either 0 (absent) or 1 (present), and the listed value is the default.
-
-xTickMarks : 	1
-xTickValues : 	1
-xUnits : 		1
-xLabel : 		0
-yTickMarks : 	1
-yTickValues : 	1
-yUnits : 		1
-yLabel : 		0
+Display of legends in a plot can be disabled by including an "lg=false"
+parameter to the plot request URL.
 
 
-Time Series Combinations
-------------------------
+Plot Enhancements: Axis Labels
+------------------------------
 
-Two time-series plots can now be combined into a new plot with the data from the two originals.  To create such a combined plot, click on the + icon in the first plot's title bar, then click on the plot you wish to combine with the first.
+Greater control of the display of axis labels has been added through the
+use of the following input parameters to the plot request URL; all are
+either 0 (absent) or 1 (present), and the listed value is the default.
+
+xTickMarks :    1
+xTickValues :   1
+xUnits :        1
+xLabel :        0
+yTickMarks :    1
+yTickValues :   1
+yUnits :        1
+yLabel :        0
 
 
-Multi channel plotting
-----------------------
+Plot Enhancements: Time Series Combinations
+-------------------------------------------
 
-Time-series plots can now be requested for multiple channels in a single plot.  This is specified in the plot request by having a comma-separated list of channel IDs in the ch parameter.
+Two time-series plots can now be combined into a new plot with the data
+from the two originals.  To create such a combined plot, click on the +
+icon in the first plot's title bar, then click on the plot you wish to
+combine with the first.
+
+The plot request URL will contain all of the parameters for the two
+plots being combined, in addition to "combine=true".
 
 
-Zooming in on plots
--------------------
+Plot Enhancements: Multi channel plotting
+-----------------------------------------
 
-Clicking on a plot can be used to change the start and end times for the next plot request.  When a click is taken to set the time clicked on as a start time, a green arrow will be drawn at the top of the clicked plot; when the end time is ser, a red arrow will be drawn.  Clicks will alternate between setting the start and end times; no attempt is made to insure the start time preceeds the end time.  If a time-setting click is made in a different plot, the arrows from the old plot will be erased.
+Time-series plots can now be requested for multiple channels in a single
+plot.  This is specified in the plot request by having a comma-separated
+list of channel IDs in the ch parameter.
+
+
+Plot Enhancements: Zooming in on plots
+--------------------------------------
+
+Clicking on a plot can be used to change the start and end times for the
+next plot request.  When a click is taken to set the time clicked on as
+a start time, a green arrow will be drawn at the top of the clicked
+plot; when the end time is set, a red arrow will be drawn.  Clicks will
+alternate between setting the start and end times; no attempt is made to
+insure the start time preceeds the end time.  If a time-setting click is
+made in a different plot, the arrows from the old plot will be erased.

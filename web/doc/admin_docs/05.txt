@@ -1,3 +1,17 @@
-A new section has been added to most datasource menus, "Supplementary Data".  This is information that is time-related data that is not part of the plottable information (typically because it is not numeric), but related to it.   Any supplementary data selected when a plot is requested will be indicated on the generated plot by dashed vertical bars (green for start, red for end); the value of that supplementary data can be viewed by clicking on the box at the bottom of the dashed line.
+DB Structures for Processed Data
+--------------------------------
 
-Similar data which is not time-related is available for viewing from the generated plot by clicking on the "PD" (processing data) icon in the plot's title bar.
+A new section has been added to most datasource menus, "Supplementary
+Data".  This is information that is time-related data that is not part
+of the plottable information (typically because it is not numeric), but
+related to it.   Any supplementary data selected when a plot is
+requested will be indicated on the generated plot by vertical bars
+within the graph associated with that data; the bar for the start time
+will be solid with a right-pointing triangle at its base, while that at
+the end time will be dashed with a left-facing triangle at its base. 
+The value of that supplementary data can be viewed by clicking on the
+triangle at the bottom of either line.
+
+Similar data which is not time-related is available for viewing from the
+generated plot by clicking on the "PD" (processing data) icon in the
+plot's title bar; re-clicking that icon will trun off the viewer.

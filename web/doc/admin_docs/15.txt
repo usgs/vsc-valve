@@ -1,4 +1,6 @@
-Choice of Plot Colors
----------------------
+Improve Plotting of Strain Data
+-------------------------------
 
-Added 'color' parameter to url string. I.e '&color.0=FF0000' should be added to url to see first component in red.
+A new datasource, tensorstrain, and menu for plotting it is defined; it
+is similar to that for tilt data.  Primary difference is that the x-axis
+azimuth can be specified under the rotation options section.

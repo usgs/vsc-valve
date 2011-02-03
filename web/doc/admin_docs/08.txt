@@ -1,14 +1,23 @@
-Data Manipulation Options
--------------------------
+Data Manipulation
+-----------------
 
-A standard menu for data manipulation options has been added.  It presents 4 stages of processing:
+A standard menu for data manipulation options has been added.  It
+presents 4 stages of processing:
 
-1) Despiking, using a running mean.  If selected, a period (in seconds) must be specified.
-2) Linear detrending.
-3) A filter stage, which can employ either a bandpass filter (with specified maximum and minimum frequencies, either of which can be unspecified and thus leave out the corresponding limit), a running median or a running mean (either of which would require a period, in seconds, to be supplied).
-4) Debiasing, which can either remove the mean, the initial value, or a user-supplied value.
+1) Despiking, using a running mean.  If selected, a period (in seconds)
+must be specified. 
+2) Linear detrending. 
+3) A filter stage, which can employ either a bandpass filter (with
+specified maximum and minimum frequencies, either of which can be
+unspecified and thus leave out the corresponding limit), a running
+median or a running mean (either of which would require a period, in
+seconds, to be supplied).
+4) Debiasing, which can either remove the mean, the initial value, or a
+user-supplied value.
 
-Any subset, from none to all and every combination in between, of the stages can be selected.  Stages will be applied in the order they are listed above.
+Any subset, from none to all and every combination in between, of the
+stages can be selected.  Stages will be applied in the order they are
+listed above.
 
 The following request parameters control these options:
 

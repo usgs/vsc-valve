@@ -1,0 +1,9 @@
+GPS Vertical Velocities
+-----------------------
+
+Re-enabled the Vertical Velocity Field Option on GPS plots, which
+controls the display of a vertical velocity vector. Error bars are
+included on the vectors.
+
+This is controlled by the vs.N parameter of the request URL, where N is
+the number of the plot component, and the value is either true or false.

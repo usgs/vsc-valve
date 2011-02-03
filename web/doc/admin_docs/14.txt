@@ -1,4 +1,5 @@
-Choice of Plot Colors
----------------------
+Improve Web GUI Many Sensor Plot: Choice of Plot Colors
+-------------------------------------------------------
 
-Added 'color' parameter to url string. I.e '&color.0=FF0000' should be added to url to see first component in red.
+Added 'color' parameter to url string. I.e '&color.0=FF0000' should be
+added to url to see first component in red.
