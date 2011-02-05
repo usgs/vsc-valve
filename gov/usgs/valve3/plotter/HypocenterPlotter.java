@@ -48,9 +48,7 @@ import cern.colt.matrix.DoubleMatrix2D;
 /**
  * A class for making hypocenter map plots and histograms. 
  * 
- * TODO: display number of hypocenters on plot. 
  * TODO: implement triple view. 
- * TODO: implement arbitrary cross-sections. 
  * 
  * @author Dan Cervelli
  */
@@ -606,7 +604,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private void plotCounts(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		int leftLabels = 0;
 		
-		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
 		hr.setDefaultExtents();
@@ -687,15 +684,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 				}
 			}
 		}
-		
-		if ( forExport )
-			return;
 		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
 		
-		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(hr);
-		v3Plot.addComponent(component);	
+		if (!forExport) {
+			component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+			component.setTranslationType("ty");
+			v3Plot.getPlot().addRenderer(hr);
+			v3Plot.addComponent(component);	
+		}
 	}
 	
 	/**
@@ -705,13 +701,12 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		boolean     forExport = (v3Plot == null);	// = "prepare data for export"
 		
 		// setup the display for the legend
 		Rank rank	= new Rank();
 		if (rk == 0) {
 			rank	= rank.bestPossible();
-			if ( !forExport )
+			if (!forExport)
 				v3Plot.setExportable( false );
 			else
 				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
@@ -721,16 +716,16 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		switch (plotType) {
 		case MAP:
-			if ( forExport ) {
+			if (forExport) {
+				// Add column headers to csvHdrs
 				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
-				csvData.add(new ExportData(csvIndex, new HypocenterExporter(
-						hypos)));
+				// Initialize data for export; add to set for CSV
+				ExportData ed = new ExportData(csvIndex, new HypocenterExporter(hypos));
+				csvData.add(ed);
 				csvIndex++;
 			} else {
 				plotMap(v3Plot, component, rank);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(
-						vdxSource).name
-						+ " Map");
+				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			}
 			break;
 		
@@ -752,14 +747,16 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		forExport = (v3p == null);	// = "prepare data for export"
+		
+		forExport	= (v3p == null);
 		ranksMap	= getRanks(vdxSource, vdxClient);
+		
 		getInputs(comp);
 		getData(comp);
 
 		plotData(v3p, comp);
 				
-		if ( !forExport ) {
+		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

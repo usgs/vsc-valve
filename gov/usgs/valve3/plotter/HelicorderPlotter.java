@@ -142,9 +142,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		boolean      forExport = (v3Plot == null);	// = "prepare data for export"
 		
-		/// calculate how many graphs we are going to build (number of channels)
+		// calculate how many graphs we are going to build (number of channels)
 		compCount	= channelDataMap.size();
 		
 		// setting up variables to decide where to plot this component

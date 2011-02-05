@@ -82,8 +82,6 @@ public abstract class RawDataPlotter extends Plotter {
 	protected StringBuffer csvHdrs, csvCmts, csvText;
 	protected int csvIndex = 0;
 	
-	protected boolean removeBias;
-	
 	protected boolean bypassManipCols[];
 	protected boolean doDespike;
 	protected double despikePeriod;
@@ -232,11 +230,6 @@ public abstract class RawDataPlotter extends Plotter {
 				shape = component.getString("lt");
 			} catch(Valve3Exception e){
 				shape="l";
-			}
-			try{
-				removeBias = component.getBoolean("rb");
-			} catch (Valve3Exception ex){
-				removeBias = false;
 			}
 			try{
 				xTickMarks = component.getBoolean("xTickMarks");
@@ -463,25 +456,53 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @param channel Channel
      * @param gdm data matrix
-     * @param displayCount 
-     * @param dh display height?
+     * @param currentComp 
+     * @param compBoxHeight
 	 * @param index number of column to plot inside renderer. -1 value means we need to render all columns from gdm matrix.
 	 * @param unit axis label
 	 * @return renderer
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, String unit) throws Valve3Exception {	
+	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, 
+			int currentComp, int compBoxHeight, int index, String unit) throws Valve3Exception {
+		
+		// setup the matrix renderer with this data
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
+		
+		// define the axis and the extents
 		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, component, mr);
-		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);	
-		mr.createDefaultAxis(8, 8, xTickMarks, yTickMarks, false, ap.allowExpand, xTickValues, yTickValues);
-		mr.setXAxisToTime(8, xTickMarks, xTickValues);
-		if(yUnits){
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
+		
+		// x axis decorations
+		if (currentComp == compCount) {	
+			mr.createDefaultAxis(8, 8, xTickMarks, yTickMarks, false, ap.allowExpand, xTickValues, yTickValues);
+			mr.setXAxisToTime(8, xTickMarks, xTickValues);
+			if (xUnits) {
+				mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
+			}
+			if (xLabel) { }
+		
+		// don't display xTickValues for top and middle components, only for bottom component
+		} else {	
+			mr.createDefaultAxis(8, 8, xTickMarks, yTickMarks, false, ap.allowExpand, false, yTickValues);
+			mr.setXAxisToTime(8, xTickMarks, false);
+		}
+		
+		// y axis decorations
+		if (yUnits) {
 			mr.getAxis().setLeftLabelAsText(unit);
 		}
-		if(shape==null){
+		if (yLabel){
+			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
+		}
+		if (mr.getAxis().leftTicks != null) {
+			leftTicks = mr.getAxis().leftTicks.length;
+		}
+		
+		// data decorations
+		if (shape==null) {
 			mr.createDefaultPointRenderers(component.getColor());
 		} else {
 			if (shape.equals("l")) {
@@ -490,21 +511,12 @@ public abstract class RawDataPlotter extends Plotter {
 				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
 			}
 		}
-		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
-		if(mr.getAxis().leftTicks != null){
-			leftTicks = mr.getAxis().leftTicks.length;
+		
+		// legend decorations
+		if (isDrawLegend) {
+			mr.createDefaultLegendRenderer(channelLegendsCols);
 		}
-		if(yLabel){
-			DefaultFrameDecorator.addLabel(mr, channel.getCode(), Location.LEFT);
-		}
-		if (displayCount + 1 == compCount) {
-			if(xUnits){
-				mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
-			}
-			if(xLabel){
-				;
-			}
-		}
+		
 		return mr;
 	}
 
@@ -513,18 +525,18 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @param channel Channel
      * @param gdm data matrix
-     * @param displayCount 
-     * @param dh display height?
+     * @param currentComp 
+     * @param compBoxHeight
 	 * @param index number of column to plot inside renderer. -1 value means we need to render all columns from gdm matrix.
 	 * @return renderer
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int displayCount, int dh, int index, LegendRenderer leftLegendRenderer) throws Valve3Exception {
+	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int currentComp, int compBoxHeight, int index, LegendRenderer leftLegendRenderer) throws Valve3Exception {
 		
 		if (rightUnit == null)
 			return null;
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
@@ -900,6 +912,9 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		
 		private void setParameters(String axisType, String mapAxisType, GenericDataMatrix gdm, int index, PlotComponent component, MatrixRenderer mr) throws Valve3Exception {
+			int offset = 2;
+			if (!ranks) offset = 1;
+			
 			if (!(mapAxisType.equals("L") || mapAxisType.equals("R") || mapAxisType.equals(""))) 
 				throw new Valve3Exception("Illegal axis type in axis map: " + mapAxisType);
 			if (mapAxisType.equals(axisType) || isPlotComponentsSeparately()){
@@ -907,8 +922,8 @@ public abstract class RawDataPlotter extends Plotter {
 					mr.setVisible(index, true);
 				}
 				if (component.isAutoScale("ys"+axisType)) {
-					yMin	= Math.min(yMin, gdm.min(index + 2));
-					yMax	= Math.max(yMax, gdm.max(index + 2));
+					yMin	= Math.min(yMin, gdm.min(index + offset));
+					yMax	= Math.max(yMax, gdm.max(index + offset));
 					buff	= (yMax - yMin) * 0.05;
 					yMin	= yMin - buff;
 					yMax	= yMax + buff;

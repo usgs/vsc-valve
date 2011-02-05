@@ -110,12 +110,16 @@ public class TiltPlotter extends RawDataPlotter {
 	
 		String pt = component.get("plotType");
 		if ( pt == null )
-			pt = "ts";
-		plotType	= PlotType.fromString(pt);
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type: " + pt);
+			plotType = PlotType.TIME_SERIES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
+		
 		switch(plotType) {
+		
 		case TIME_SERIES:
 			
 			String az = component.get("az");
@@ -374,16 +378,15 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		PlotType	corePlotType = plotType;
-		boolean     forExport = (v3Plot == null);
-		int         csvIndex = 0;
+		
+		PlotType corePlotType	= plotType;
 
 		// Export is treated as a time series, even if requested plot was a velocity map
 		if (forExport) {
 			corePlotType = PlotType.TIME_SERIES;
 		}
 		
-		// lookup the requested rank
+		// setup the rank for the legend
 		Rank rank = new Rank();
 		if (rk == 0) {
 			rank = rank.bestPossible();
@@ -397,28 +400,28 @@ public class TiltPlotter extends RawDataPlotter {
 		}
 		String rankLegend = rank.getName();
 		
-		int displayCount = 0, dh = 0;
-		
 		switch (corePlotType) {
 		
 			case TIME_SERIES:
 				
-				// setting up variables to decide where to plot this component	
-				if (!forExport) {			
-					displayCount	= 0;
-					dh				= component.getBoxHeight();
-				}
-				
-				// calculate the number of components to be plotted
-				if (isPlotComponentsSeparately()) {
-					for (Column col: columnsList) {
-						if (col.checked) {
-							compCount++;
+				// calculate the number of plot components that will be displayed per channel
+				int channelCompCount = 0;
+				if(isPlotComponentsSeparately()){
+					for(Column col: columnsList){
+						if(col.checked){
+							channelCompCount++;
 						}
 					}
 				} else {
-					compCount = 1;
+					channelCompCount = 1;
 				}
+				
+				// total components is components per channel * number of channels
+				compCount = channelCompCount * channelDataMap.size();
+				
+				// setting up variables to decide where to plot this component
+				int currentComp		= 1;
+				int compBoxHeight	= component.getBoxHeight();
 				
 				for (int cid : channelDataMap.keySet()) {
 					
@@ -426,11 +429,12 @@ public class TiltPlotter extends RawDataPlotter {
 					Channel channel	= channelsMap.get(cid);
 					TiltData data	= channelDataMap.get(cid);
 					
-					// verify their is something to plot
+					// if there is no data for this channel, then resize the plot window 
 					if (data == null || data.rows() == 0) {
-						v3Plot.setHeight(v3Plot.getHeight() - compCount*component.getBoxHeight());
-						Plot plot = v3Plot.getPlot();
-						plot.setSize(plot.getWidth(), plot.getHeight() - compCount*component.getBoxHeight());
+						v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+						Plot plot	= v3Plot.getPlot();
+						plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+						compCount = compCount - channelCompCount;
 						continue;
 					}
 					
@@ -456,13 +460,14 @@ public class TiltPlotter extends RawDataPlotter {
 					azimuthValue 	   -= 90.0;
 					azimuthRadial		= (azimuthValue + 90.0) % 360.0;
 					azimuthTangential	= (azimuthValue + 180.0) % 360.0;
+					
 					// subtract the mean from the data to get it on a zero based scale (for east and north)
 					data.add(2, -data.mean(2));
 					data.add(3, -data.mean(3));
 					
 					// set up the legend 
 					String tiltLegend = null;
-					if ( !forExport )
+					if ( !forExport ) {
 						for (int i = 0; i < legendsCols.length; i++) {
 							if (legendsCols[i].equals("Radial")) {
 								tiltLegend	= String.valueOf(azimuthRadial);
@@ -473,7 +478,7 @@ public class TiltPlotter extends RawDataPlotter {
 							}
 							channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
 						}
-					
+					}
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
 
 					// detrend the data that the user requested to be detrended					
@@ -538,7 +543,8 @@ public class TiltPlotter extends RawDataPlotter {
 						}
 					}
 					
-					if ( forExport ) {
+					if (forExport) {
+						
 						// Add the headers to the CSV file
 						for (int i = 0; i < columnsList.size(); i++) {
 							if ( !axisMap.get(i).equals("") ) {
@@ -547,53 +553,49 @@ public class TiltPlotter extends RawDataPlotter {
 						}
 						// Initialize data for export; add to set for CSV
 						ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+						csvData.add( ed );
 						csvIndex++;
-						csvData.add( ed );			
-					} else 
+						
+					} else {
+						
 						// create an individual matrix renderer for each component selected
-						if(isPlotComponentsSeparately()){
+						if (isPlotComponentsSeparately()){
 							for (int i = 0; i < columnsList.size(); i++) {
 								Column col = columnsList.get(i);
 								if(col.checked){
-									MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
-									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i, leftMR.getLegendRenderer());
+									MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, col.unit);
+									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
 									v3Plot.getPlot().addRenderer(leftMR);
 									if (rightMR != null)
 										v3Plot.getPlot().addRenderer(rightMR);
 									component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 									component.setTranslationType("ty");
 									v3Plot.addComponent(component);
-									displayCount++;	
+									currentComp++;	
 								}
 							}
 						} else {
-							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
 							v3Plot.getPlot().addRenderer(leftMR);
 							if (rightMR != null)
 								v3Plot.getPlot().addRenderer(rightMR);
 							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 							component.setTranslationType("ty");
 							v3Plot.addComponent(component);
-							displayCount++;
+							currentComp++;
 						}
+					}
 				}
-				break;
-				
-			case TILT_VECTORS:
-				v3Plot.setExportable( false ); // Can't export vectors
-				plotTiltVectors(v3Plot, component, rank);
-				break;
-		}
-		
-		switch(plotType) {
-			case TIME_SERIES:
-				if ( !forExport ) {
+				if (!forExport) {
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 					addSuppData( vdxSource, vdxClient, v3Plot, component );
 				}
 				break;
+				
 			case TILT_VECTORS:
+				v3Plot.setExportable( false );
+				plotTiltVectors(v3Plot, component, rank);
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");
 				break;
 		}
@@ -608,7 +610,8 @@ public class TiltPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException	{		
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException	{
+		
 		forExport 	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
@@ -616,10 +619,11 @@ public class TiltPlotter extends RawDataPlotter {
 		columnsList	= getColumns(vdxSource, vdxClient);
 		
 		getInputs(comp);
-		getData(comp);		
+		getData(comp);
+
 		plotData(v3p, comp);
 				
-		if ( !forExport ) {
+		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

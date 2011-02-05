@@ -50,6 +50,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
 		
 		parseCommonParameters(component);
+		
 		rk = component.getInt("rk");
 		legendsCols			= new String  [columnsList.size()];
 		channelLegendsCols	= new String  [columnsList.size()];
@@ -164,19 +165,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		boolean     forExport = (v3Plot == null); // = "prepare data for export"
-		//int         csvIndex = 0;
 		
-		int displayCount = 0, dh = 0;
-		Rank rank = null;
-		String rankLegend = null;
-		
-		// setting up variables to decide where to plot this component
-		displayCount	= 0;
-		dh				= component.getBoxHeight();
-		
-		// setup the display for the legend
-		rank	= new Rank();
+		// setup the rank for the legend
+		Rank rank	= new Rank();
 		if (rk == 0) {
 			rank	= rank.bestPossible();
 			if ( !forExport )
@@ -186,28 +177,39 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		} else {
 			rank	= ranksMap.get(rk);
 		}
-		rankLegend	= rank.getName();
+		String rankLegend	= rank.getName();
+		
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 0;
 		if(isPlotComponentsSeparately()){
 			for(Column col: columnsList){
 				if(col.checked){
-					compCount++;
+					channelCompCount++;
 				}
 			}
 		} else {
-			compCount = 1;
+			channelCompCount = 1;
 		}
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount * channelDataMap.size();
+		
+		// setting up variables to decide where to plot this component
+		int currentComp		= 1;
+		int compBoxHeight	= component.getBoxHeight();
+		
 		for (int cid : channelDataMap.keySet()) {
 			
 			// get the relevant information for this channel
 			Channel channel			= channelsMap.get(cid);
-			GenericDataMatrix gdm	= channelDataMap.get(cid);
+			GenericDataMatrix gdm	= channelDataMap.get(cid);			
 			
-			
-			// verify their is something to plot
+			// if there is no data for this channel, then resize the plot window 
 			if (gdm == null || gdm.rows() == 0) {
-				v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
-				Plot plot = v3Plot.getPlot();
-				plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+				Plot plot	= v3Plot.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				compCount = compCount - channelCompCount;
 				continue;
 			}
 			
@@ -269,7 +271,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				}
 			}
 			
-			if ( forExport ) {
+			if (forExport) {
 				// Add column headers to csvHdrs
 				for (int i = 0; i < columnsList.size(); i++) {
 					if ( !axisMap.get(i).equals("") ) {
@@ -277,45 +279,47 @@ public class GenericFixedPlotter extends RawDataPlotter {
 					}
 				}
 				// Initialize data for export; add to set for CSV
-				ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+				ExportData ed = new ExportData(csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+				csvData.add(ed);
 				csvIndex++;
-				csvData.add( ed );			
 			} else {
 				// set up the legend 
 				for (int i = 0; i < legendsCols.length; i++) {
 					channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, legendsCols[i]);
 				}
-				
-				if(isPlotComponentsSeparately()){
-					// create an individual matrix renderer for each component selected
+
+				// create an individual matrix renderer for each component selected
+				if (isPlotComponentsSeparately()) {
 					for (int i = 0; i < columnsList.size(); i++) {
 						Column col = columnsList.get(i);
 						if(col.checked){
-							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i, col.unit);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i, leftMR.getLegendRenderer());
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, col.unit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
 							v3Plot.getPlot().addRenderer(leftMR);
 							if (rightMR != null)
 								v3Plot.getPlot().addRenderer(rightMR);
 							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 							component.setTranslationType("ty");
 							v3Plot.addComponent(component);
-							displayCount++;	
+							currentComp++;	
 						}
 					}
+					
+				// create a single matrix renderer for each component selected
 				} else {
-					MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
-					MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
+					MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
+					MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
 					v3Plot.getPlot().addRenderer(leftMR);
 					if (rightMR != null)
 						v3Plot.getPlot().addRenderer(rightMR);
 					component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 					component.setTranslationType("ty");
 					v3Plot.addComponent(component);
-					displayCount++;
+					currentComp++;
 				}
 			}
 		}
-		if ( !forExport ) {
+		if (!forExport) {
 			addSuppData( vdxSource, vdxClient, v3Plot, component );
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 		}
@@ -331,17 +335,19 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {		
-		forExport = (v3p == null);	// = "prepare data for export"
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
+		
 		getInputs(comp);
 		getData(comp);
 		
 		plotData(v3p, comp);
 				
-		if ( !forExport ) {
+		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

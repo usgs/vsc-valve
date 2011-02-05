@@ -61,8 +61,11 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	}
 
 	protected void getInputs(PlotComponent component) throws Valve3Exception {
+		
 		parseCommonParameters(component);
+		
 		rk = component.getInt("rk");
+		
 		String az = component.get("az");
 		if (az == null)
 			az = "n";
@@ -179,47 +182,56 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-		boolean forExport = (v3Plot == null);
-		int csvIndex = 0;
-		int displayCount = 0, dh = 0;
-		Rank rank = null;
-		String rankLegend = null;
-		if (!forExport) {
-			// setting up variables to decide where to plot this component
-			displayCount = 0;
-			dh = component.getBoxHeight();
-			// setup the display for the legend
-			rank = new Rank();
-			if (rk == 0) {
-				rank = rank.bestPossible();
-				v3Plot.setExportable(false);
+
+		// setup the rank for the legend
+		Rank rank = new Rank();
+		if (rk == 0) {
+			rank = rank.bestPossible();
+			if (!forExport) {
+				v3Plot.setExportable( false );
 			} else {
-				rank = ranksMap.get(rk);
+				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
 			}
-			rankLegend = rank.getName();
+		} else {
+			rank = ranksMap.get(rk);
 		}
+		String rankLegend = rank.getName();
+		
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 0;
 		if(isPlotComponentsSeparately()){
 			for(Column col: columnsList){
 				if(col.checked){
-					compCount++;
+					channelCompCount++;
 				}
 			}
 		} else {
-			compCount = 1;
+			channelCompCount = 1;
 		}
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount * channelDataMap.size();
+		
+		// setting up variables to decide where to plot this component
+		int currentComp		= 1;
+		int compBoxHeight	= component.getBoxHeight();
+
 		for (int cid : channelDataMap.keySet()) {
+			
 			// get the relevant information for this channel
-			Channel channel = channelsMap.get(cid);
-			TensorstrainData data = channelDataMap.get(cid);
-			// verify their is something to plot
+			Channel channel			= channelsMap.get(cid);
+			TensorstrainData data	= channelDataMap.get(cid);			
+			
+			// if there is no data for this channel, then resize the plot window 
 			if (data == null || data.rows() == 0) {
-				v3Plot.setHeight(v3Plot.getHeight()- compCount*component.getBoxHeight());
-				Plot plot = v3Plot.getPlot();
-				plot.setSize(plot.getWidth(), plot.getHeight()- compCount*component.getBoxHeight());
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+				Plot plot	= v3Plot.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				compCount = compCount - channelCompCount;
 				continue;
 			}
-			// instantiate the azimuth and tangential values based on the user
-			// selection
+
+			// instantiate the azimuth and tangential values based on the user selection
 			switch (azimuth) {
 			case NATURAL:
 				azimuthValue = azimuthsMap.get(channel.getCID());
@@ -235,19 +247,21 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				azimuthValue = 0.0;
 				break;
 			}
-			// subtract the mean from the data to get it on a zero based scale
-			// (for east and north)
+			
+			// subtract the mean from the data to get it on a zero based scale (for east and north)
 			data.add(2, -data.mean(2));
 			data.add(3, -data.mean(3));
 
 			// set up the legend
 			String tensorstrainLegend = null;
-			if (!forExport)
+			if (!forExport) {
 				for (int i = 0; i < legendsCols.length; i++) {
 					tensorstrainLegend = legendsCols[i];
 					channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tensorstrainLegend);
 				}
+			}
 			GenericDataMatrix gdm = new GenericDataMatrix(data.getAllData(90-azimuthValue));
+			
 			// detrend the data that the user requested to be detrended
 			for (int i = 0; i < columnsCount; i++) {
 				Column col = columnsList.get(i);
@@ -317,6 +331,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			}
 
 			if (forExport) {
+				
 				// Add the headers to the CSV file
 				for (int i = 0; i < columnsList.size(); i++) {
 					if (!axisMap.get(i).equals("")) {
@@ -327,35 +342,38 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				ExportData ed = new ExportData(csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap));
 				csvIndex++;
 				csvData.add(ed);
-			} else if (isPlotComponentsSeparately()) {
-				// create an individual matrix renderer for each component
-				// selected
-				for (int i = 0; i < columnsList.size(); i++) {
-					Column col = columnsList.get(i);
-					if (col.checked) {
-						MatrixRenderer leftMR = getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, i,	col.unit);
-						MatrixRenderer rightMR = getRightMatrixRenderer(component, channel, gdm, displayCount, dh, i, leftMR.getLegendRenderer());
-						v3Plot.getPlot().addRenderer(leftMR);
-						if (rightMR != null)
-							v3Plot.getPlot().addRenderer(rightMR);
-						component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-						component.setTranslationType("ty");
-						v3Plot.addComponent(component);
-						displayCount++;
-					}
-				}
+				
 			} else {
-				MatrixRenderer leftMR = getLeftMatrixRenderer(component, channel, gdm, displayCount, dh, -1, leftUnit);
-				MatrixRenderer rightMR = getRightMatrixRenderer(component,	channel, gdm, displayCount, dh, -1, leftMR.getLegendRenderer());
-				v3Plot.getPlot().addRenderer(leftMR);
-				if (rightMR != null)
-					v3Plot.getPlot().addRenderer(rightMR);
-				component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-				component.setTranslationType("ty");
-				v3Plot.addComponent(component);
-				displayCount++;
+				
+				// create an individual matrix renderer for each component selected
+				if (isPlotComponentsSeparately()){
+					for (int i = 0; i < columnsList.size(); i++) {
+						Column col = columnsList.get(i);
+						if(col.checked){
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, col.unit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
+							v3Plot.getPlot().addRenderer(leftMR);
+							if (rightMR != null)
+								v3Plot.getPlot().addRenderer(rightMR);
+							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+							component.setTranslationType("ty");
+							v3Plot.addComponent(component);
+							currentComp++;	
+						}
+					}
+				} else {
+					MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
+					MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
+					v3Plot.getPlot().addRenderer(leftMR);
+					if (rightMR != null)
+						v3Plot.getPlot().addRenderer(rightMR);
+					component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+					component.setTranslationType("ty");
+					v3Plot.addComponent(component);
+					currentComp++;
+				}
 			}
-		}
+		}		
 		if (!forExport) {
 			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 			addSuppData(vdxSource, vdxClient, v3Plot, component);
@@ -370,11 +388,13 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		forExport = (v3p == null); // = "prepare data for export"
+		
+		forExport	= (v3p == null);
 		channelsMap = getChannels(vdxSource, vdxClient);
-		ranksMap = getRanks(vdxSource, vdxClient);
-		azimuthsMap = getAzimuths(vdxSource, vdxClient);
-		columnsList = getColumns(vdxSource, vdxClient);
+		ranksMap	= getRanks(vdxSource, vdxClient);
+		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
+		columnsList	= getColumns(vdxSource, vdxClient);
+		
 		getInputs(comp);
 		getData(comp);
 

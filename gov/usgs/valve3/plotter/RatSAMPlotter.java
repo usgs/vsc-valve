@@ -1,23 +1,13 @@
 package gov.usgs.valve3.plotter;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.DataPointRenderer;
-import gov.usgs.plot.DefaultFrameDecorator;
-import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.ShapeRenderer;
-import gov.usgs.plot.SmartTick;
-import gov.usgs.plot.DefaultFrameDecorator.Location;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -25,11 +15,10 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
+import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.rsam.RSAMData;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * Get RSAM information from vdx server and  
@@ -55,25 +44,15 @@ public class RatSAMPlotter extends RawDataPlotter {
 		}
 	}
 
-	int compCount;
-	private static Map<Integer, Channel> channelsMap;
-	private int cid1, cid2;
-	private boolean removeBias;
-	private double threshold;
-	private double ratio;
-	private double maxEventLength;
-	private BinSize bin;
 	private PlotType plotType;
+	private static Map<Integer, Channel> channelsMap;
 	RSAMData data;
-	
-	protected String label;
 
 	/**
 	 * Default constructor
 	 */
 	public RatSAMPlotter() {
 		super();
-		label	= "RatSAM";
 		ranks	= false;
 	}
 
@@ -86,6 +65,8 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(component);
 		
+		channelLegendsCols	= new String  [1];
+		
 		String pt = component.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.VALUES;
@@ -95,42 +76,19 @@ public class RatSAMPlotter extends RawDataPlotter {
 				throw new Valve3Exception("Illegal plot type: " + pt);
 			}
 		}
-	
-		try{
-			removeBias = component.getBoolean("rb");
-		} catch (Valve3Exception ex){
-			removeBias = false;
-		}
 		
 		switch(plotType) {
 		
 		case VALUES:
+			leftLines	= 0;
+			axisMap		= new LinkedHashMap<Integer, String>();
+			// validateDataManipOpts(component);
+			axisMap.put(0, "L");
+			leftUnit	= "RatSAM";
+			leftLines++;
 			break;
 			
 		case COUNTS:
-			if (component.get("threshold") != null) {
-				threshold = component.getDouble("threshold");
-				if (threshold == 0)
-					throw new Valve3Exception("Illegal threshold.");
-			}
-			
-			if (component.get("ratio") != null) {
-				ratio = component.getDouble("ratio");
-				if (ratio == 0)
-					throw new Valve3Exception("Illegal ratio.");
-			}
-			
-			if (component.get("maxEventLength") != null) {
-				maxEventLength = component.getDouble("maxEventLength");
-			}
-			
-			String bs	= Util.stringToString(component.get("cntsBin"), "day");
-			bin			= BinSize.fromString(bs);
-			if (bin == null)
-				throw new Valve3Exception("Illegal bin size option.");
-			if ((endTime - startTime)/bin.toSeconds() > 1000)
-				throw new Valve3Exception("Bin size too small.");
-
 			break;
 		}
 	}
@@ -191,148 +149,35 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @param rd RSAMData
 	 * @throws Valve3Exception
 	 */
-	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd) throws Valve3Exception {
+	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
 		
-		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
+		String channelCode1		= channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
+		String channelCode2		= channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
+		channel1.setCode(channelCode1 + "-" + channelCode2);
+		GenericDataMatrix gdm	= new GenericDataMatrix(rd.getData());	
+		channelLegendsCols[0]	= String.format("%s %s", channel1.getCode(), leftUnit);	
 		
-		// Remove the mean from the first column (this needs to be user controlled)
-		if (removeBias) {
-			gdm.add(1, -gdm.mean(1));
-		}
-		
-		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-
-		double yMin = 1E300;
-		double yMax = -1E300;
-		boolean allowExpand = true;
-		if (component.isAutoScale("ysL")) {
-			double buff;
-			yMin	= Math.min(yMin, gdm.min(1));
-			yMax	= Math.max(yMax, gdm.max(1));
-			buff	= (yMax - yMin) * 0.05;
-			yMin	= yMin - buff;
-			yMax	= yMax + buff;
+		if (forExport) {
+			
+			// Add column header to csvHdrs
+			csvHdrs.append(",");
+			csvHdrs.append(channel1.getCode() + "_" + leftUnit);
+			
+			// Initialize data for export; add to set for CSV
+			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+			csvData.add( ed );
+			
 		} else {
-			double[] ys = component.getYScale("ysL", yMin, yMax);
-			yMin = ys[0];
-			yMax = ys[1];
-			allowExpand = false;
-			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-				throw new Valve3Exception("Illegal axis values.");
-		}
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		mr.setExtents(startTime+timeOffset, endTime+timeOffset, yMin, yMax);
-		mr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, allowExpand, xTickValues, yTickValues);
-		mr.setXAxisToTime(8,xTickMarks, xTickValues);	
-		mr.setAllVisible(true);
-		if(shape==null){
-			mr.createDefaultPointRenderers(component.getColor());
-		} else {
-			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(component.getColor());
-			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
+			try {
+				MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel1, gdm, currentComp, compBoxHeight, 0, leftUnit);
+				v3Plot.getPlot().addRenderer(leftMR);
+				component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+				component.setTranslationType("ty");
+				v3Plot.addComponent(component);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		if(isDrawLegend){
-			mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
-		}
-		if(yUnits){
-			mr.getAxis().setLeftLabelAsText(label);
-		}
-		if(xUnits){
-			mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
-		}
-		if(yLabel){
-			DefaultFrameDecorator.addLabel(mr, "channelCode1" + "-" + "channelCode2", Location.LEFT);
-		}
-		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(mr);
-		v3Plot.addComponent(component);
-	}
-	
-	/**
-	 * Initialize HistogramRenderer, add it to plot, and 
-	 * render event count histogram to PNG image in local file
-	 * @param v3Plot Valve3Plot
-	 * @param component PlotComponent
-	 * @param channel1 Channel
-	 * @param channel2 Channel
-	 * @param rd RSAMData
-	 * @throws Valve3Exception
-	 */
-	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd) throws Valve3Exception {
-
-		if (threshold > 0) {
-			rd.countEvents(threshold, ratio, maxEventLength);
-		}
-		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		
-		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
-		hr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		hr.setDefaultExtents();
-		hr.setMinX(startTime+timeOffset);
-		hr.setMaxX(endTime+timeOffset);
-		hr.createDefaultAxis(8,8,xTickMarks, yTickMarks, false, true, xTickValues, yTickValues);
-		hr.setXAxisToTime(8,xTickMarks, xTickValues);
-		if(yUnits){
-			hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		}
-		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");	
-		}
-		if(yLabel){
-			DefaultFrameDecorator.addLabel(hr, "channelCode1" + "-" + "channelCode2", Location.LEFT);
-		}
-		DoubleMatrix2D data	= null;		
-		data				= rd.getCumulativeCounts();
-		if (data != null && data.rows() > 0) {
-			
-			double cmin = data.get(0, 1);
-			double cmax = data.get(data.rows() - 1, 1);	
-			
-			MatrixRenderer mr = new MatrixRenderer(data, ranks);
-			mr.setAllVisible(true);
-			mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
-			Renderer[] r = null;
-			if(shape==null){
-				mr.createDefaultPointRenderers(component.getColor());
-			} else {
-				if (shape.equals("l")) {
-					mr.createDefaultLineRenderers(component.getColor());
-					r = mr.getLineRenderers();
-					((ShapeRenderer)r[0]).color		= Color.red;
-					((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
-				} else {
-					mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
-					r = mr.getPointRenderers();
-					((DataPointRenderer)r[0]).color		= Color.red;
-				}
-			}
-			AxisRenderer ar = new AxisRenderer(mr);
-			if(yTickValues){
-				ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
-			}
-			mr.setAxis(ar);
-			
-			hr.addRenderer(mr);
-			if(yUnits){
-				hr.getAxis().setRightLabelAsText("Cumulative Counts");
-			}
-		}
-		
-		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " Events"});
-		
-		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(hr);
-		v3Plot.addComponent(component);	
 	}
 
 	/**
@@ -344,19 +189,25 @@ public class RatSAMPlotter extends RawDataPlotter {
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 
 		String[] channels	= ch.split(",");
-		cid1				= Integer.valueOf(channels[0]);
-		cid2				= Integer.valueOf(channels[1]);
-		Channel channel1 = channelsMap.get(cid1);
-		Channel channel2 = channelsMap.get(cid2);
+		Channel channel1	= channelsMap.get(Integer.valueOf(channels[0]));
+		Channel channel2	= channelsMap.get(Integer.valueOf(channels[1]));
+		
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 1;
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount;
+		
+		// setting up variables to decide where to plot this component
+		int currentComp		= 1;
+		int compBoxHeight	= component.getBoxHeight();
 			
 		switch(plotType) {
 			case VALUES:
-				plotValues(v3Plot, component, channel1, channel2, data);
+				plotValues(v3Plot, component, channel1, channel2, data, currentComp, compBoxHeight);
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
 				break;
 			case COUNTS:
-				plotEvents(v3Plot, component, channel1, channel2, data);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
 				break;
 		}
 	}
@@ -370,15 +221,20 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
+		
 		getInputs(comp);
 		getData(comp);
 		
 		plotData(v3p, comp);
 
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3p.getLocalFilename());
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 
 }

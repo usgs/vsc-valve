@@ -257,22 +257,52 @@ public class WavePlotter extends RawDataPlotter {
 	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
-	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
-		if ( v3Plot != null )
-			v3Plot.setWaveform( true );
-		SliceWaveExporter wr = new SliceWaveExporter();
-		wr.xTickMarks = this.xTickMarks;
-		wr.xTickValues = this.xTickValues;
-		wr.xUnits = this.xUnits;
-		wr.xLabel = this.xLabel;
-	    wr.yTickMarks = this.yTickMarks;
-	    wr.yTickValues = this.yTickValues;
+	private void plotWaveform(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int currentComp, int compBoxHeight) throws Valve3Exception {
+		if (!forExport) v3Plot.setWaveform( true );
+		
+		double yMin = 1E300;
+		double yMax = -1E300;
+		if (component.isAutoScale("ysL")) {
+			yMin	= wave.min();
+			yMax	= wave.max();
+		} else {
+			double[] ys = component.getYScale("ysL", yMin, yMax);
+			yMin 	= ys[0];
+			yMax 	= ys[1];
+			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
+				throw new Valve3Exception("Illegal axis values.");
+		}
+
+		SliceWaveExporter wr	= new SliceWaveExporter();
+		
+		if (currentComp == compCount) {
+			wr.xTickMarks			= this.xTickMarks;
+			wr.xTickValues			= this.xTickValues;
+			wr.xUnits				= this.xUnits;
+			wr.xLabel				= this.xLabel;
+		} else {
+			wr.xTickMarks			= this.xTickMarks;
+			wr.xTickValues			= false;
+			wr.xUnits				= false;
+			wr.xLabel				= false;
+		}
+	    wr.yTickMarks			= this.yTickMarks;
+	    wr.yTickValues			= this.yTickValues;
 		wr.setWave(wave);
-		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , timeZoneID);
+		wr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , timeZoneID);		
+		wr.setMinY(yMin);
+		wr.setMaxY(yMax);
+		wr.setColor(component.getColor());		
 		if(yLabel){
 			wr.setYLabelText(channel.getName());
+		}		
+		wr.update();		
+		if (isDrawLegend) {
+			channelLegendsCols	= new String  [1];
+			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+			wr.createDefaultLegendRenderer(channelLegendsCols);
 		}
-		wr.setRemoveBias(removeBias);
 
 		if ( forExport ) {
 			if ( inclTime )
@@ -283,49 +313,13 @@ public class WavePlotter extends RawDataPlotter {
 			ExportData ed = new ExportData( csvIndex, wr );
 			csvIndex++;
 			csvData.add( ed );
-			return;
+			
+		} else {		
+			component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
+			component.setTranslationType("ty");
+			v3Plot.getPlot().addRenderer(wr);
+			v3Plot.addComponent(component);
 		}
-		
-		wr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-		Color color = component.getColor();
-		if(color != null){
-			wr.setColor(color);
-		}
-		double bias = 0;
-		if (removeBias)
-			bias = wave.mean();
-		
-		double yMin = 1E300;
-		double yMax = -1E300;
-		if (component.isAutoScale("ysL")) {
-			yMin	= wave.min() - bias;
-			yMax	= wave.max() - bias;
-			// i don't think that we need to setup a buffer for wave based plots
-			// double buff = (yMax - yMin) * 0.05;
-			// yMin	= yMin - buff;
-			// yMax	= yMax + buff;
-		} else {
-			double[] ys = component.getYScale("ysL", yMin, yMax);
-			yMin = ys[0];
-			yMax = ys[1];
-			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-				throw new Valve3Exception("Illegal axis values.");
-		}
-		
-		wr.setMinY(yMin);
-		wr.setMaxY(yMax);
-		if (displayCount + 1 == compCount) {
-				wr.update();
-		}
-		if(isDrawLegend){
-			channelLegendsCols	= new String  [1];
-			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
-			wr.createDefaultLegendRenderer(channelLegendsCols);
-		}
-		component.setTranslation(wr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(wr);
-		v3Plot.addComponent(component);
 	}
 	
 	/**
@@ -338,17 +332,26 @@ public class WavePlotter extends RawDataPlotter {
 	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
-	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) throws Valve3Exception {
-		SpectraRenderer sr = new SpectraRenderer();
-		sr.xTickMarks = this.xTickMarks;
-		sr.xTickValues = this.xTickValues;
-		sr.xUnits = this.xUnits;
-		sr.xLabel = this.xLabel;
-	    sr.yTickMarks = this.yTickMarks;
-	    sr.yTickValues = this.yTickValues;
+	private void plotSpectra(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int currentComp, int compBoxHeight) throws Valve3Exception {
+		
+		SpectraRenderer sr	= new SpectraRenderer();
+		
+		if (currentComp == compCount) {
+			sr.xTickMarks			= this.xTickMarks;
+			sr.xTickValues			= this.xTickValues;
+			sr.xUnits				= this.xUnits;
+			sr.xLabel				= this.xLabel;
+		} else {
+			sr.xTickMarks			= this.xTickMarks;
+			sr.xTickValues			= false;
+			sr.xUnits				= false;
+			sr.xLabel				= false;
+		}
+	    sr.yTickMarks		= this.yTickMarks;
+	    sr.yTickValues		= this.yTickValues;
 		sr.setWave(wave);
 		sr.setAutoScale(true);
-		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
 		sr.setLogPower(logPower);
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
@@ -381,9 +384,22 @@ public class WavePlotter extends RawDataPlotter {
 	 * @param displayCount ?
 	 * @param dh display height
 	 */
-	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int displayCount, int dh) {
-		SpectrogramRenderer sr = new SpectrogramRenderer(wave);
-		sr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+	private void plotSpectrogram(Valve3Plot v3Plot, PlotComponent component, Channel channel, SliceWave wave, int currentComp, int compBoxHeight) {
+		SpectrogramRenderer sr	= new SpectrogramRenderer(wave);
+		if (currentComp == compCount) {
+			sr.xTickMarks			= this.xTickMarks;
+			sr.xTickValues			= this.xTickValues;
+			sr.xUnits				= this.xUnits;
+			sr.xLabel				= this.xLabel;
+		} else {
+			sr.xTickMarks			= this.xTickMarks;
+			sr.xTickValues			= false;
+			sr.xUnits				= false;
+			sr.xLabel				= false;
+		}
+	    sr.yTickMarks			= this.yTickMarks;
+	    sr.yTickValues			= this.yTickValues;
+		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
 		sr.setOverlap(0);
 		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
@@ -391,12 +407,6 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setTimeZone(timeZoneID);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
-		sr.xTickMarks = this.xTickMarks;
-		sr.xTickValues = this.xTickValues;
-		sr.xUnits = this.xUnits;
-		sr.xLabel = this.xLabel;
-	    sr.yTickMarks = this.yTickMarks;
-	    sr.yTickValues = this.yTickValues;
 	    if(yUnits){
 	    	sr.setYUnitText("Frequency (Hz)");
 	    }
@@ -423,8 +433,8 @@ public class WavePlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-
-		if ( forExport )
+		
+		if (forExport)
 			switch(plotType) {
 				case WAVEFORM:
 					break;
@@ -434,36 +444,43 @@ public class WavePlotter extends RawDataPlotter {
 					throw new Valve3Exception( "Spectrograms cannot be exported" );
 			}
 		
-		/// calculate how many graphs we are going to build (number of channels)
-		compCount	= channelDataMap.size();
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 1;
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount * channelDataMap.size();
 		
 		// setting up variables to decide where to plot this component
-		int displayCount	= 0;
-		int dh				= component.getBoxHeight();
+		int currentComp		= 1;
+		int compBoxHeight	= component.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			
 			// get the relevant information for this channel
 			Channel channel	= channelsMap.get(cid);
-			SliceWave wave	= channelDataMap.get(cid);
+			SliceWave wave	= channelDataMap.get(cid);			
 			
-			// verify their is something to plot
+			// if there is no data for this channel, then resize the plot window 
 			if (wave == null) {
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+				Plot plot	= v3Plot.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				compCount = compCount - channelCompCount;
 				continue;
 			}
 			
 			switch(plotType) {
 				case WAVEFORM:
-					plotWaveform(v3Plot, component, channel, wave, displayCount, dh);
+					plotWaveform(v3Plot, component, channel, wave, currentComp, compBoxHeight);
 					break;
 				case SPECTRA:
-					plotSpectra(v3Plot, component, channel, wave, displayCount, dh);
+					plotSpectra(v3Plot, component, channel, wave, currentComp, compBoxHeight);
 					break;
 				case SPECTROGRAM:
-					plotSpectrogram(v3Plot, component, channel, wave, displayCount, dh);
+					plotSpectrogram(v3Plot, component, channel, wave, currentComp, compBoxHeight);
 					break;
 			}
-			displayCount++;
+			currentComp++;
 		}
 		
 		switch(plotType) {
@@ -494,14 +511,16 @@ public class WavePlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		forExport = (v3p == null);	// = "prepare data for export"
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
+		
 		getInputs(comp);
 		getData(comp);
 		
 		plotData(v3p, comp);
 		
-		if ( !forExport ) {
+		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
