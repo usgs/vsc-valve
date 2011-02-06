@@ -251,7 +251,7 @@ function handlePlot(xml)
 				else
 					t.style.visibility = "visible";
 			}
-		})(t.getElementsByClassName("suppnodl")[0]));
+		})(ieGetElementsByClassName( t, "suppnodl")[0]));
 
     //Combination
     if(((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)) || combined){
@@ -436,7 +436,7 @@ function handlePlot(xml)
 	sanchor.className = "suppdataanchor";
 	//sanchor.style.top = (height-20) + "px";
 	sanchor.style.width = "10px";
-	var proctable = t.getElementsByClassName( "suppnodltable" )[0];
+	var proctable = ieGetElementsByClassName( t, "suppnodltable" )[0];
 	var procdata = proctable.getElementsByTagName('tbody')[0];
 	for ( i=0; i<supp_data.length; i++ ) {
 		var sd_text = supp_data[i].textContent;
@@ -511,7 +511,7 @@ function show_sd(me) {
 	var info = me;
 	var info_bits = info.split("\"");
 	var content = document.getElementById( info_bits[0] );
-	var viewer = content.getElementsByClassName( "suppviewer" )[0];
+	var viewer = ieGetElementsByClassName( content, "suppviewer" )[0];
 	viewer.style.visibility = "visible";
 	var elts = viewer.getElementsByTagName("td");
 	elts[1].onclick = (function(sv) {return function(){ sv.style.visibility = "hidden"; }})(viewer);
@@ -795,4 +795,21 @@ function PlotRequest(popup)
 	this.setStandardSize();
 	
 	return this;
+}
+
+function ieGetElementsByClassName(oElm, strClassName){
+	if (oElm.getElementsByClassName)
+		return oElm.getElementsByClassName(strClassName);
+    var arrElements = oElm.all ? oElm.all : oElm.getElementsByTagName("*");
+    var arrReturnElements = new Array();
+    strClassName = strClassName.replace(/\-/g, "\\-");
+    var oRegExp = new RegExp("(^|\\s)" + strClassName + "(\\s|$)");
+    var oElement;
+    for(var i=0; i<arrElements.length; i++){
+        oElement = arrElements[i];      
+        if(oRegExp.test(oElement.className)){
+            arrReturnElements.push(oElement);
+        }   
+    }
+    return (arrReturnElements)
 }
