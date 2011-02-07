@@ -8,6 +8,13 @@
 
 var isIE = !window.opera && navigator.userAgent.indexOf('MSIE') != -1;
 
+/* If browser isn't IE, Safari or Firefox, pop up a warning */
+if ( !isIE 
+	&& navigator.userAgent.indexOf('Firefox') == -1 
+	&& navigator.userAgent.indexOf('Safari') == -1 ) {
+	alert("This browser is unsupported by VALVE");
+}
+
 /**	
  *  Attach the function func to an element elt, either by adding an event listener
  *  or attaching an event by onEventType preform func. addEventListener is a standard
