@@ -12,7 +12,7 @@ var isIE = !window.opera && navigator.userAgent.indexOf('MSIE') != -1;
 if ( !isIE 
 	&& navigator.userAgent.indexOf('Firefox') == -1 
 	&& navigator.userAgent.indexOf('Safari') == -1 ) {
-	alert("This browser is unsupported by VALVE");
+	alert("This browser is unsupported by VALVE; try using Firefox 3.X, Safari 5.X, or IE versions 7 or 8");
 }
 
 /**	
