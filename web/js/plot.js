@@ -211,7 +211,7 @@ function handlePlot(xml)
 		{
 			var timeZoneOffset = 0;
 			
-			if(title.indexOf("Winston Helicorders")>=0){
+			if((components.length == 1) && (getXMLField(components[0],'plotter') == 'gov.usgs.valve3.plotter.HelicorderPlotter')){
 				var tzselect  = document.getElementById('timeZoneAbbr');
 				if(tzselect){
 					// at least one time zone must be selected
@@ -254,7 +254,7 @@ function handlePlot(xml)
 		})(ieGetElementsByClassName( t, "suppnodl")[0]));
 
     //Combination
-    if(((components.length == 1) && (title.indexOf("Winston Helicorders")==-1) && (title.indexOf("Hypocenters")==-1)) || combined){
+    if(((components.length == 1) && (getXMLField(components[0],'plotter') != 'gov.usgs.valve3.plotter.HelicorderPlotter') && (getXMLField(components[0],'plotter') != 'gov.usgs.valve3.plotter.HypocenterPlotter')) || combined){
     	addListener(imgs[7], 'click',
     		function()
     		{
