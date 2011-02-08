@@ -243,6 +243,7 @@ public class PlotHandler implements HttpHandler
 					try {
 						plotter.plot(plot, component);
 					} catch (Exception e) {
+						e.printStackTrace();
 						throw new Valve3Exception(e.toString());
 					}
 			}

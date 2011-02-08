@@ -8,6 +8,7 @@ import gov.usgs.plot.LegendRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.Renderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
@@ -84,6 +85,8 @@ public class CombinedPlot extends Plot {
 				if (renderer instanceof MatrixRenderer) {
 					MatrixRenderer matrixRenderer = (MatrixRenderer) renderer;
 					String unit = getUnit(matrixRenderer);
+					setColors(matrixRenderer.getLineRenderers());
+					setColors(matrixRenderer.getPointRenderers());
 					if(unit != null){
 						if (leftRendererDataset.unit == null || unit.equals(leftRendererDataset.unit)) {
 							combineRenderers(matrixRenderer, leftRendererDataset);
@@ -103,13 +106,21 @@ public class CombinedPlot extends Plot {
 					}
 				} else if (renderer instanceof SliceWaveRenderer){
 					SliceWaveRenderer waveRenderer = (SliceWaveRenderer) renderer;
+					waveRenderer.setColor(cc.getNextColor());
+					for(LegendRenderer.LegendEntry le: waveRenderer.getLegendRenderer().entries){
+						if(le.lineRenderer != null){
+							le.lineRenderer.color = waveRenderer.getColor();
+						}
+						if(le.pointRenderer != null){
+							le.pointRenderer.color = waveRenderer.getColor();
+						}
+					}
 					legendRenderer = mergeLegendRenderer(legendRenderer, waveRenderer.getLegendRenderer());
 					waveRenderer.setLegendRenderer(null);
 					setBoundaries(waveRenderer, waveRendererDataset);
 					AxisRenderer ar = new AxisRenderer(waveRenderer);
 					ar.createRightTickLabels(SmartTick.autoTick(waveRenderer.getMinY(), waveRenderer.getMaxY(), 8, false), null);
 					waveRenderer.setAxis(ar);
-					waveRenderer.getAxis().setRightLabelAsText("Counts");
 					waveRenderers.add(waveRenderer);
 				}
 				else {	
@@ -122,20 +133,21 @@ public class CombinedPlot extends Plot {
 				waveRenderer.setExtents(minX, maxX,	waveRendererDataset.minY, waveRendererDataset.maxY);
 				addRenderer(waveRenderer);
 			}
-			MatrixRenderer leftRenderer = createRenderer(leftRendererDataset);
-			if (rightRendererDataset.unit == null){
-				leftRenderer.setLegendRenderer(legendRenderer);
-				
-				addRenderer(leftRenderer);
-			} else	{
-				if(waveRenderers.size()>0 ){
-					throw new RuntimeException("Count of units is more than 2");
+			if(leftRendererDataset.unit!=null){
+				MatrixRenderer leftRenderer = createRenderer(leftRendererDataset);
+				if (rightRendererDataset.unit == null){
+					leftRenderer.setLegendRenderer(legendRenderer);
+					addRenderer(leftRenderer);
+				} else	{
+					if(waveRenderers.size()>0 ){
+						throw new RuntimeException("Count of units is more than 2");
+					}
+					MatrixRenderer rightRenderer = createRenderer(rightRendererDataset);
+					rightRenderer.setLegendRenderer(legendRenderer);
+					addRenderer(leftRenderer);
+					addRenderer(rightRenderer);
 				}
-				MatrixRenderer rightRenderer = createRenderer(rightRendererDataset);
-				rightRenderer.setLegendRenderer(legendRenderer);
-				addRenderer(leftRenderer);
-				addRenderer(rightRenderer);
-			}			
+			}
 			super.render(g);
 		}
 	}
@@ -180,7 +192,7 @@ public class CombinedPlot extends Plot {
 			data = matrixRenderer.getData();
 		}
 		rendererDataset.combinedData = mergeData(rendererDataset.combinedData, data);
-
+		
 		// Merge line renderers
 		rendererDataset.lineRenderers = mergeLineRenderers(rendererDataset.lineRenderers, matrixRenderer.getLineRenderers(), data.columns() - 2);
 
@@ -280,6 +292,28 @@ public class CombinedPlot extends Plot {
 			return result.viewSorted(0);
 		}
 	}
+	
+	private ShapeRenderer[] setColors(ShapeRenderer[] srs){
+		if(srs!=null){
+			for(ShapeRenderer sr: srs){
+				if(sr!=null){
+					sr.color = cc.getNextColor();
+				}
+			}
+		}
+		return srs;
+	}
+	
+	private PointRenderer[] setColors(PointRenderer[] dprs){
+		if(dprs!=null){
+			for(PointRenderer dpr: dprs){
+				if(dpr!=null){
+					dpr.color = cc.getNextColor();
+				}
+			}
+		}
+		return dprs;
+	}
 
 	/**
 	 * Merge LineRenderers according MatrixRenderers data storing rules
@@ -317,6 +351,8 @@ public class CombinedPlot extends Plot {
 			return result;
 		}
 	}
+	
+
 
 	/**
 	 * Merge DataPointRenderers according MatrixRenderers data storing rules
@@ -407,17 +443,10 @@ public class CombinedPlot extends Plot {
 	 */
 	private MatrixRenderer createRenderer(RendererDataset rendererDataset) {
 		MatrixRenderer renderer = new MatrixRenderer(rendererDataset.combinedData.viewSorted(0), true);
-		for(ShapeRenderer sr: rendererDataset.lineRenderers){
-			if(sr != null){
-				sr.color = cc.getNextColor();
-				//System.out.println("ShapeRenderer color: " + sr.color);
-			}
-		}
 		renderer.setLineRenderers(rendererDataset.lineRenderers);
 		for (DataPointRenderer pointRenderer : rendererDataset.pointRenderers) {
 			if (pointRenderer != null) {
 				pointRenderer.transformer = renderer;
-				pointRenderer.color = cc.getNextColor();
 				//System.out.println("ShapeRenderer color: " + pointRenderer.color);
 			}
 		}
@@ -426,7 +455,9 @@ public class CombinedPlot extends Plot {
 			renderer.setVisible(i, rendererDataset.visible[i]);
 		}
 		renderer.setLocation(graphX, graphY, graphWidth, graphHeight);
-		renderer.setExtents(minX, maxX,	rendererDataset.minY, rendererDataset.maxY);
+		double extended_minY = rendererDataset.minY  - 0.02*(rendererDataset.maxY-rendererDataset.minY);
+		double extended_maxY = rendererDataset.maxY  + 0.02*(rendererDataset.maxY-rendererDataset.minY);
+		renderer.setExtents(minX, maxX,	extended_minY, extended_maxY);
 		if(rendererDataset.type == 'L'){
 			renderer.createDefaultAxis(8, 8, true, true, false, true, true, true);
 			renderer.getAxis().setBackgroundColor(null);
@@ -435,7 +466,7 @@ public class CombinedPlot extends Plot {
 		} else if (rendererDataset.type == 'R'){
 			AxisRenderer ar = new AxisRenderer(renderer);
 			ar.setBackgroundColor(null);
-			ar.createRightTickLabels(SmartTick.autoTick(rendererDataset.minY, rendererDataset.maxY, leftTicks, false), null);
+			ar.createRightTickLabels(SmartTick.autoTick(extended_minY, extended_maxY, leftTicks, false), null);
 			renderer.setAxis(ar);
 			renderer.getAxis().setRightLabelAsText(rendererDataset.unit);
 		}

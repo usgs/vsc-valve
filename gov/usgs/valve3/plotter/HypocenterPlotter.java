@@ -749,6 +749,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
+		comp.setPlotter(this.getClass().getName());
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		
 		getInputs(comp);

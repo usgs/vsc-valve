@@ -310,6 +310,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException
 	{
+		comp.setPlotter(this.getClass().getName());
 		getInputs(comp);
 		getData(comp);
 

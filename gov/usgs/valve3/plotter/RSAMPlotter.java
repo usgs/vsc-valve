@@ -482,6 +482,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
+		comp.setPlotter(this.getClass().getName());
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		
 		getInputs(comp);

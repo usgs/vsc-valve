@@ -42,6 +42,7 @@ public class PlotComponent
 	private int boxHeight = 0;
 	private int boxWidth = 0;
 	private SimpleDateFormat df = null;
+	private String plotter = null;
 
 	private boolean exportable = false;
 
@@ -73,6 +74,10 @@ public class PlotComponent
 	public void setSource(String s)
 	{
 		source = s;
+	}
+	
+	public void setPlotter(String plotterName){
+		this.plotter = plotterName;
 	}
 
 	/**
@@ -433,6 +438,7 @@ public class PlotComponent
 				sb.append("\t\t\t<" + key + ">" + params.get(key) + "</" + key + ">\n");
 			}
 		}
+		sb.append("\t\t\t<plotter>" + (plotter==null?"":plotter) + "</plotter>\n");
 		sb.append("\t\t</component>\n");
 		return sb.toString();
 	}

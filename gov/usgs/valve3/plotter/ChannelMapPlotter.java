@@ -232,6 +232,7 @@ public class ChannelMapPlotter extends Plotter
 	{
 		forExport = false;
 		v3Plot = plot;
+		comp.setPlotter(this.getClass().getName());
 		component = comp;
 		getInputs();
 		getData();
