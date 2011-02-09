@@ -49,8 +49,8 @@ public class PlotHandler implements HttpHandler
 {
 	public static final int MAX_PLOT_WIDTH = 6000;
 	public static final int MAX_PLOT_HEIGHT = 50000;
-	public static final int DEFAULT_WIDTH_COMPONENT = 850;
-	public static final int DEFAULT_HEIGHT_COMPONENT = 150;
+	public static final int DEFAULT_WIDTH_COMPONENT = 750;
+	public static final int DEFAULT_HEIGHT_COMPONENT = 240;
 	private DataHandler dataHandler;
 	private Logger logger;	
 
@@ -243,7 +243,6 @@ public class PlotHandler implements HttpHandler
 					try {
 						plotter.plot(plot, component);
 					} catch (Exception e) {
-						e.printStackTrace();
 						throw new Valve3Exception(e.toString());
 					}
 			}
