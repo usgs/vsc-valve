@@ -4,7 +4,7 @@ Plot Enhancements: Plot Lines or Points
 Whether data in a plot is to be drawn using lines or points, and if
 points what shape of points to use, are now selectable from the menus.
 
-This is represented in a plot request URL by the lt.N parameter, where N
+This is represented in a plot request URL by the linetype.N parameter, where N
 is the plot component number, and the values have the indicated
 meanings:
 

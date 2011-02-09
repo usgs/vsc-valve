@@ -34,7 +34,7 @@ function loadMenu(id) {
 		menus[id].div.style.display = 'block';
 		lastDiv = menus[id].div;
 		setCurrentMenu(menus[id]);
-		var selector_lt = document.getElementById("selector:lt");
+		var selector_lt = document.getElementById("selector:linetype");
 		if(selector_lt){
 			for (var i = 0; i < selector_lt.options.length; i++)  {
 				if(selector_lt.options[i].value==menus[id].lineType){
@@ -77,7 +77,7 @@ function loadMenu(id) {
 					document.getElementById(id + '_' + menus[id].formName).appendChild(plotSeparately);
 				}
 			});
-			var selector_lt = document.getElementById("selector:lt");
+			var selector_lt = document.getElementById("selector:linetype");
 			if(selector_lt){
 				for (var i = 0; i < selector_lt.options.length; i++)  {
 					if(selector_lt.options[i].value==menus[id].lineType){
