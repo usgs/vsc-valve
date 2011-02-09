@@ -2,7 +2,6 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -19,7 +18,6 @@ import gov.usgs.vdx.data.MatrixExporter;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Generate helicorder images from raw wave data from vdx source
@@ -31,7 +29,6 @@ public class HelicorderPlotter extends RawDataPlotter {
 	int compCount;
 	private Map<Integer, HelicorderData> channelDataMap;
 	private static final double MAX_HELICORDER_TIME = 31 * 86400;
-	private final static Logger logger = Log.getLogger("gov.usgs.valve3.plotter.HelicorderPlotter"); 
 	
 	private boolean		showClip;
 	private float		barMult;
@@ -143,11 +140,15 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 */
 	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
 		
-		// calculate how many graphs we are going to build (number of channels)
-		compCount	= channelDataMap.size();
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 1;
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount * channelDataMap.size();
 		
 		// setting up variables to decide where to plot this component
-		int plotCount	= 0;
+		int currentComp		= 1;
+		int compBoxHeight	= component.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			
@@ -157,6 +158,10 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			// verify their is something to plot
 			if (data == null || data.rows() == 0) {
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
+				Plot plot	= v3Plot.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
+				compCount = compCount - channelCompCount;
 				continue;
 			}
 			
@@ -193,31 +198,34 @@ public class HelicorderPlotter extends RawDataPlotter {
 			settings.minimumAxis			= minimumAxis;
 			
 			settings.left					= component.getBoxX();
-			settings.top					= component.getBoxY();
+			settings.top					= component.getBoxY() + (currentComp - 1) * compBoxHeight;
 			settings.width					= component.getBoxWidth();
-			settings.height					= component.getBoxHeight() / compCount;
-			settings.plotCount				= plotCount;
+			settings.height					= compBoxHeight - 16;
 			settings.timeZoneAbbr			= timeZoneID;
 			settings.timeZoneOffset			= timeOffset/3600.0;
 			settings.timeZone				= component.getTimeZone();
-			plotCount++;
-			if (plotCount == compCount) {
+			if (currentComp == compCount) {
 				settings.showDecorator = true;	
 			} else {
 				settings.showDecorator = false;
 			}
-			
-			// hr.createDefaultLegendRenderer(new String[] {settings.channelCode});
-			settings.largeChannelDisplay	= true;
+			if (isDrawLegend) {
+				settings.showLegend	= true;
+			}
+			settings.largeChannelDisplay	= false;
 			
 			settings.applySettings(hr, data);
 			
+			currentComp++;
+			
+			/*
 			logger.info("componentBoxHeight:"	+ component.getBoxHeight() +
 							  "/settingHeight:" 		+ settings.height + 
 							  "/graphHeight:"   		+ hr.getGraphHeight() + 
 					          "/graphWidth:"  			+ hr.getGraphWidth() + 
 					          "/graphX:"      			+ hr.getGraphX() + 
 					          "/graphY:"      			+ hr.getGraphY());
+			*/
 			
 			component.setTranslation(hr.getTranslationInfo(false));
 			component.setTranslationType("heli");

@@ -186,14 +186,12 @@ public class TensorstrainPlotter extends RawDataPlotter {
 		// setup the rank for the legend
 		Rank rank = new Rank();
 		if (rk == 0) {
-			rank = rank.bestPossible();
-			if (!forExport) {
-				v3Plot.setExportable( false );
-			} else {
+			if (forExport) {
 				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
 			}
+			rank	= rank.bestPossible();
 		} else {
-			rank = ranksMap.get(rk);
+			rank	= ranksMap.get(rk);
 		}
 		String rankLegend = rank.getName();
 		
@@ -224,9 +222,9 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			
 			// if there is no data for this channel, then resize the plot window 
 			if (data == null || data.rows() == 0) {
-				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
 				Plot plot	= v3Plot.getPlot();
-				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 				compCount = compCount - channelCompCount;
 				continue;
 			}

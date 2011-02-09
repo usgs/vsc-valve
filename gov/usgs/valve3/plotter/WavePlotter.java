@@ -289,7 +289,7 @@ public class WavePlotter extends RawDataPlotter {
 	    wr.yTickMarks			= this.yTickMarks;
 	    wr.yTickValues			= this.yTickValues;
 		wr.setWave(wave);
-		wr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		wr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		wr.setViewTimes(startTime+timeOffset, endTime+timeOffset , timeZoneID);		
 		wr.setMinY(yMin);
 		wr.setMaxY(yMax);
@@ -351,7 +351,7 @@ public class WavePlotter extends RawDataPlotter {
 	    sr.yTickValues		= this.yTickValues;
 		sr.setWave(wave);
 		sr.setAutoScale(true);
-		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		sr.setLogPower(logPower);
 		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
@@ -399,7 +399,7 @@ public class WavePlotter extends RawDataPlotter {
 		}
 	    sr.yTickMarks			= this.yTickMarks;
 	    sr.yTickValues			= this.yTickValues;
-		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		sr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		sr.setOverlap(0);
 		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
@@ -462,9 +462,9 @@ public class WavePlotter extends RawDataPlotter {
 			
 			// if there is no data for this channel, then resize the plot window 
 			if (wave == null) {
-				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
 				Plot plot	= v3Plot.getPlot();
-				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 				compCount = compCount - channelCompCount;
 				continue;
 			}

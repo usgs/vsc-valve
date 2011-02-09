@@ -309,7 +309,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		// setup the histogram renderer with this data
 		HistogramExporter hr = new HistogramExporter(rd.getCountsHistogram(bin));
-		hr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		hr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
@@ -362,7 +362,7 @@ public class RSAMPlotter extends RawDataPlotter {
 			
 			MatrixExporter mr = new MatrixExporter(countsData, ranks);
 			mr.setAllVisible(true);
-			mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+			mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
 			Renderer[] r = null;
 			if(shape==null){

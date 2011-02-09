@@ -468,7 +468,7 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		// setup the matrix renderer with this data
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
 		
 		// define the axis and the extents
@@ -536,7 +536,7 @@ public abstract class RawDataPlotter extends Plotter {
 		if (rightUnit == null)
 			return null;
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight + 8, component.getBoxWidth(), compBoxHeight - 16);
+		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
 		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
@@ -1056,7 +1056,7 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 		
 		// define the box height
-		int dh = component.getBoxHeight();
+		int compBoxHeight = component.getBoxHeight();
 
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
@@ -1071,8 +1071,8 @@ public abstract class RawDataPlotter extends Plotter {
 					} else {
 						offset = (Integer)chMap.get( sdo.cid );
 					}
-					sdo.frame_y = component.getBoxY() + (offset * dh) + 8;
-					sdo.frame_h = dh - 16;
+					sdo.frame_y = component.getBoxY() + (offset * compBoxHeight) + 8;
+					sdo.frame_h = compBoxHeight - 16;
 					v3Plot.addSuppDatum( sdo );
 				}
 			} catch (Exception e) {

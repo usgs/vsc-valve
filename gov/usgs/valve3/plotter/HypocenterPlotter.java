@@ -705,11 +705,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// setup the display for the legend
 		Rank rank	= new Rank();
 		if (rk == 0) {
-			rank	= rank.bestPossible();
-			if (!forExport)
-				v3Plot.setExportable( false );
-			else
+			if (forExport) {
 				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
+			}
+			rank	= rank.bestPossible();
 		} else {
 			rank	= ranksMap.get(rk);
 		}

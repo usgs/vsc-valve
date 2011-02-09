@@ -442,13 +442,12 @@ public class GPSPlotter extends RawDataPlotter {
 		// setup the display for the legend
 		Rank rank	= new Rank();
 		if (rk == 0) {
-			rank	= rank.bestPossible();
 			if (forExport) {
 				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
 			}
+			rank	= rank.bestPossible();
 		} else {
 			rank	= ranksMap.get(rk);
-			v3Plot.setExportable(true);
 		}
 		String rankLegend		= rank.getName();
 		
@@ -489,9 +488,9 @@ public class GPSPlotter extends RawDataPlotter {
 					
 					// verify their is something to plot
 					if (data == null || data.observations() == 0) {
-						v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
+						v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
 						Plot plot	= v3Plot.getPlot();
-						plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+						plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 						compCount = compCount - channelCompCount;
 						continue;
 					}
