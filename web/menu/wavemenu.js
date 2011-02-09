@@ -53,16 +53,16 @@ create_wavemenu = function(menu) {
 			return;
 		}
 		
-		var pd = f["skip:popupDuration"];
-		var span = pd[pd.selectedIndex].text * 1;
-		var st = gx - (span / 2) * 60;
-		var et = gx + (span / 2) * 60;
-		var ch = getXMLField(target.xml, "ch");
+		var pd			= f["skip:popupDuration"];
+		var span		= pd[pd.selectedIndex].text * 1;
+		var st			= gx - (span / 2) * 60;
+		var et			= gx + (span / 2) * 60;
+		var ch			= getXMLField(target.xml, "ch");
 		
-		var pr = new PlotRequest(true);
-		var pc = pr.createComponent(this.id, buildTimeString(st), buildTimeString(et));
-		pc.setFromForm(f);
-		pc.ch = ch;
+		var pr			= new PlotRequest(true);
+		var pc			= pr.createComponent(this.id, buildTimeString(st), buildTimeString(et));		
+		pc.setFromForm(f);	
+		pr.params.h		= pr.params.h + (pc.chCnt - 1) * pc.h;
 		
 		loadXML(this.id + " inset plot", pr.getURL(), 
 			function(req) {

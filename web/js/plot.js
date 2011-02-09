@@ -108,36 +108,36 @@ var combineMenuOpenedId = null;
  */
 function handlePlot(xml)
 {
-	var title = getXMLField(xml, "title");
-	var src = getXMLField(xml, "file");
-	var width = getXMLField(xml, "width");
-	var height = getXMLField(xml, "height");
-	var translationType = getXMLField(xml, "translation-type");
-	var translation = getXMLField(xml, "translation");
-	var url = getXMLField(xml, "url");
-	var raw_ok = (getXMLField(xml, "exportable") == "true");
-	var combined = (getXMLField(xml, "combined") == "true");
-	var waveform_type = (getXMLField(xml, "waveform") == "true");
+	var title			= getXMLField(xml, "title");
+	var src				= getXMLField(xml, "file");
+	var width			= getXMLField(xml, "width");
+	var height			= getXMLField(xml, "height");
+	var translationType	= getXMLField(xml, "translation-type");
+	var translation		= getXMLField(xml, "translation");
+	var url				= getXMLField(xml, "url");
+	var raw_ok			= (getXMLField(xml, "exportable") == "true");
+	var combined		= (getXMLField(xml, "combined") == "true");
+	var waveform_type	= (getXMLField(xml, "waveform") == "true");
 	
-	var t = document.getElementById('contentTemplate').cloneNode(true);
-	t.id = "content" + count;
-	t.style.width = (width * 1) + "px";
-	var header = t.getElementsByTagName('h1')[0];
+	var t			= document.getElementById('contentTemplate').cloneNode(true);
+	t.id			= "content" + count;
+	t.style.width	= (width * 1) + "px";
+	var header		= t.getElementsByTagName('h1')[0];
 	t.getElementsByTagName('div')[4].id = t.id + 'combine';
 	header.firstChild.nodeValue = title;
-	var links = t.getElementsByTagName('a');
-	var imgs = t.getElementsByTagName('img');
-	var img = imgs[imgs.length - 1];
-	var minImg = imgs[1];
-	var components = xml.getElementsByTagName('component');
+	var links		= t.getElementsByTagName('a');
+	var imgs		= t.getElementsByTagName('img');
+	var img			= imgs[imgs.length - 1];
+	var minImg		= imgs[1];
+	var components	= xml.getElementsByTagName('component');
 	t.getElementsByTagName('input')[0].value = components.length;
-	img.header = header;
-	img.container = t;
-	img.src = src;
-	img.fullWidth = width;
-	img.fullHeight = height;
-	img.translation = translation.split(",");
-	img.xml = xml;
+	img.header		= header;
+	img.container	= t;
+	img.src			= src;
+	img.fullWidth	= width;
+	img.fullHeight	= height;
+	img.translation	= translation.split(",");
+	img.xml			= xml;
 	for (var i = 0; i < img.translation.length; i++)
 		img.translation[i] = img.translation[i] * 1;
 	
@@ -604,13 +604,21 @@ function removeParameter(param, url){
  *	Initialize some defaults for the Valve page
  *	plot width, plot height, comp x, comp y, comp width, comp height, map height
  */
-var POPUP_SIZE_INDEX = 4;
+var POPUP_SIZE_INDEX = 1;
 var STANDARD_SIZES = new Array(
+	new Array(300,  100, 75, 20, 150,  40,  300),
+	new Array(600,  200, 75, 20, 450,  140, 600),
+	new Array(900,  300, 75, 20, 750,  240, 900),
+	new Array(1200, 400, 75, 20, 1050, 340, 1200));
+
+/*
 	new Array(300, 100, 35, 19, 260, 70, 300),
 	new Array(760, 200, 75, 19, 610, 140, 400),
 	new Array(1000, 250, 75, 19, 850, 188, 600),
 	new Array(1200, 350, 75, 19, 1050, 288, 800),
 	new Array(600, 200, 60, 20, 500, 160, 1200));
+*/
+
 
 /** 
  *  When the user requests a plot with the "Submit" button, or when the user clicks

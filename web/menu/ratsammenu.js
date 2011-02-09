@@ -62,9 +62,10 @@ create_ratsammenu = function(menu) {
 			return false;
 		}
 		
-		// resize the box to make only one plot for two channels instead of two plots
-		pr.params.h	= 150 + 60;
-		pc.h		= 150;
+		// reset the plot height to indicate only one plot will be displayed
+		var sizeIndex	= document.getElementById("outputSize").selectedIndex;
+		var sizes		= STANDARD_SIZES[sizeIndex];
+		pr.params.h	= sizes[1];
 		
 		return true;
 	}

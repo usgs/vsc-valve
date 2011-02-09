@@ -51,7 +51,7 @@ create_helimenu = function(menu) {
 		var dt		= timeDiff(pc.st, pc.et);
 		var rows	= Math.ceil(dt / (pc.tc * 60000));
 		pr.params.h	= pc.chCnt * (size * rows) + 60;
-		pc.h		= pc.chCnt * (size * rows);
+		pc.h		= (size * rows);
 		if (si == 0) {
 			pc.min = "T";
 			pr.params.h -= 30;

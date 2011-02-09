@@ -74,7 +74,6 @@ create_gpsmenu = function(menu) {
 		var f			= this.getForm();
 		var select		= this.allChannels;
 		var baseline	= f.bl;
-		// var select		= f.elements["selector:ch"];
 		
 		// if a baseline was selected, update it's value to the cid found in the select list, element 0
 		if (baseline.value != '[none]') {

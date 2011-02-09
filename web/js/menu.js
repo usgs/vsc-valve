@@ -1139,9 +1139,9 @@ Menu.prototype.submit = function() {
 	if (t == null)
 		return;
 	
-	var form		= this.getForm();
-	var chselect	= form.elements["selector:ch"];
-	var rkselect	= form.elements["selector:rk"];
+	var form			= this.getForm();
+	var chselect		= form.elements["selector:ch"];
+	var rkselect		= form.elements["selector:rk"];
 	var plotSeparately	= form.elements["plotSeparately"];
 	
 	// do validation on the channels input if it exists
@@ -1157,29 +1157,22 @@ Menu.prototype.submit = function() {
 			return;
 		}
 	}
-
-	// temporarily disable best possible rank requests (plotters haven't implemented this yet)
-	if (rkselect) {
-		// if (rkselect[rkselect.selectedIndex].value == 0) {
-			// alert("Best Possible Rank not available at this time.");
-			// return;
-		// }
-	}
 	
 	// create the plot request and plot component
-	var pr = new PlotRequest();
-	var pc = pr.createComponent(this.id, t.st, t.et);
-	var compCount = pc.setFromForm(form);
+	var pr			= new PlotRequest();
+	var pc			= pr.createComponent(this.id, t.st, t.et);
 	
-	// update the sizes on the plots based on how many channels were chosen
-	
-	if(plotSeparately !=null && plotSeparately.value == "true"){
-		pr.params.h	= (compCount*pc.chCnt * 150) + 60;
+	// update the overall plot height based on number of channels and components selected
+	var totalPlots	= 1;
+	var compCount	= pc.setFromForm(form);
+	if (plotSeparately != null && plotSeparately.value == "true") {
+		totalPlots	= pc.chCnt * compCount;
 	} else {
-		pr.params.h	= pc.chCnt * 150 + 60;
+		totalPlots	= pc.chCnt;
 	}
-	pc.h = 150;
+	pr.params.h	= pr.params.h + (totalPlots - 1) * pc.h;
 	
+	// run the presubmit, and if it passes, submit the request
 	if (this.presubmit(pr, pc)) {
 		loadXML(this.id + " plot", pr.getURL());
 	}
