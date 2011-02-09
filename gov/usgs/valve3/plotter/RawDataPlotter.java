@@ -227,7 +227,7 @@ public abstract class RawDataPlotter extends Plotter {
 				isDrawLegend=true;
 			}
 			try{
-				shape = component.getString("lt");
+				shape = component.getString("linetype");
 			} catch(Valve3Exception e){
 				shape="l";
 			}
