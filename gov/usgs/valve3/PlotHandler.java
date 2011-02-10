@@ -47,10 +47,16 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class PlotHandler implements HttpHandler
 {
-	public static final int MAX_PLOT_WIDTH = 6000;
-	public static final int MAX_PLOT_HEIGHT = 50000;
-	public static final int DEFAULT_WIDTH_COMPONENT = 750;
-	public static final int DEFAULT_HEIGHT_COMPONENT = 240;
+	
+	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
+	public static final int DEFAULT_COMPONENT_WIDTH		= 750;
+	public static final int DEFAULT_COMPONENT_HEIGHT	= 240;
+	public static final int DEFAULT_COMPONENT_TOP		= 20;
+	public static final int DEFAULT_COMPONENT_LEFT		= 75;
+	
+	public static final int MAX_PLOT_WIDTH				= 6000;
+	public static final int MAX_PLOT_HEIGHT				= 50000;
+	
 	private DataHandler dataHandler;
 	private Logger logger;	
 
@@ -110,15 +116,7 @@ public class PlotHandler implements HttpHandler
 	 */
 	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
-		int n = Util.stringToInt(request.getParameter("n"), -1);
-		if (n == -1){
-			n = Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.n"), -1);
-			logger.info("Parameter n was set to default value");
-		}
-		if(n == -1){
-			n=1;
-			logger.info("Parameter n was set to default value");
-		}
+		int n = Util.stringToInt(request.getParameter("n"), 1);
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
 		for (int i = 0; i < n; i++)
@@ -158,58 +156,34 @@ public class PlotHandler implements HttpHandler
 				}
 				component.setExportable( ec.isExportable() );
 			}
-			int x = Util.stringToInt(request.getParameter("x." + i), 0);
-			int y = Util.stringToInt(request.getParameter("y." + i), 0);
-			int w = Util.stringToInt(request.getParameter("w." + i), -1);
-			if(w==-1){
-				w=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.w"), -1);
-				logger.info("Parameter w." + i + " was set to default value");
-			}
-			if(w==-1){
-				w=DEFAULT_WIDTH_COMPONENT;
-				logger.info("Illegal w." + i + " parameter value, was set to default");
-			}
-			if (w <= 0 || w > MAX_PLOT_WIDTH)
-				throw new Valve3Exception("Illegal w." + i + ".");
 			
-			int h = Util.stringToInt(request.getParameter("h." + i), -1);
-			if(h==-1){
-				h=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.h"), -1);
-				logger.info("Parameter h." + i + " was set to default value");
+			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
+			if (w <= 0 || w > MAX_PLOT_WIDTH) {
+				throw new Valve3Exception("Illegal w." + i + " parameter.  Must be between 0 and " + MAX_PLOT_WIDTH);
 			}
-			if(h==-1){
-				h=DEFAULT_HEIGHT_COMPONENT;
-				logger.info("Illegal h." + i + " parameter value, was set to default");
+			
+			int h = Util.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
+			if (h <= 0 || h > MAX_PLOT_HEIGHT) {
+				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
 			}
-			if (h <= 0 || h > MAX_PLOT_HEIGHT)
-				throw new Valve3Exception("Illegal h." + i + ".");
-			component.setBoxX(x);
-			component.setBoxY(y);
+			
+			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
+			if (x < 0 || x > w){
+				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
+			}
+			
+			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
+			if (y < 0 || y > h){
+				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
+			}
+
 			component.setBoxWidth(w);
 			component.setBoxHeight(h);
+			component.setBoxX(x);
+			component.setBoxY(y);
 			list.add(component);
 		}
 		return list;
-	}
-	
-	/**
-	 * Check if component's boundaries compatible to this plot
-	 * @param components List of PlotComponents to check
-	 * @param plot Valve3Plot to check against
-	 * @throws Valve3Exception raised if incompatible
-	 */
-	public void checkComponents(List<PlotComponent> components, Valve3Plot plot) throws Valve3Exception {
-		int i=0;
-		for(PlotComponent component: components){
-			int x = component.getBoxX();
-			if (x < 0 || x > plot.getWidth()){
-				throw new Valve3Exception("Illegal x." + i + " value.");
-			}
-			int y = component.getBoxY();
-			if (y < 0 || y > plot.getHeight())
-				throw new Valve3Exception("Illegal y." + i + " value.");
-			i++;
-		}
 	}
 	
 	/**
@@ -222,8 +196,6 @@ public class PlotHandler implements HttpHandler
 			if (components == null || components.size() <= 0)
 				return null;
 			Valve3Plot plot = new Valve3Plot(request, components.size());
-			checkComponents(components, plot);
-			boolean exportable = false;
 			for (PlotComponent component : components) {
 				String source	= component.getSource();
 				Plotter plotter	= null;
