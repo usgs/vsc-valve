@@ -294,9 +294,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 						if(col.checked){
 							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, col.unit);
 							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
-							v3Plot.getPlot().addRenderer(leftMR);
 							if (rightMR != null)
 								v3Plot.getPlot().addRenderer(rightMR);
+							v3Plot.getPlot().addRenderer(leftMR);
 							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 							component.setTranslationType("ty");
 							v3Plot.addComponent(component);
@@ -308,9 +308,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				} else {
 					MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
 					MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
-					v3Plot.getPlot().addRenderer(leftMR);
 					if (rightMR != null)
 						v3Plot.getPlot().addRenderer(rightMR);
+					v3Plot.getPlot().addRenderer(leftMR);
 					component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 					component.setTranslationType("ty");
 					v3Plot.addComponent(component);

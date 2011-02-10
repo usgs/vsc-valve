@@ -290,9 +290,10 @@ public class GenericVariablePlotter extends RawDataPlotter
 	{
 		MatrixRenderer leftMR = getLeftMatrixRenderer(component);
 		MatrixRenderer rightMR = getRightMatrixRenderer(component);
-		v3Plot.getPlot().addRenderer(leftMR);
 		if (rightMR != null)
 			v3Plot.getPlot().addRenderer(rightMR);
+		v3Plot.getPlot().addRenderer(leftMR);
+		
 		
 		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
 		component.setTranslationType("ty");
