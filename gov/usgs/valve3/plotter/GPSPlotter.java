@@ -333,7 +333,7 @@ public class GPSPlotter extends RawDataPlotter {
 			e = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t2, e), t2.viewDice());
 			DoubleMatrix2D v = m.viewPart(0, 0, 3, 1);
 	
-			logger.info("XYZ Velocity: " + v.getQuick(0,0) + " " + v.getQuick(1,0) + " " + v.getQuick(2,0));
+			//logger.info("XYZ Velocity: " + v.getQuick(0,0) + " " + v.getQuick(1,0) + " " + v.getQuick(2,0));
 			DoubleMatrix2D vt = Algebra.DEFAULT.mult(t, v);
 			if (vt.getQuick(0, 0) == 0 && vt.getQuick(1, 0) == 0 && vt.getQuick(2, 0) == 0) {
 				continue;
@@ -348,19 +348,19 @@ public class GPSPlotter extends RawDataPlotter {
 				e.assign(cern.jet.math.Mult.mult(chi2));
 			}
 			
-			logger.info("Velocity: " + vt);
-			logger.info("Error: " + e);
+			//logger.info("Velocity: " + vt);
+			//logger.info("Error: " + e);
 			
 			DoubleMatrix2D es = e.viewPart(0, 0, 2, 2);
 			EigenvalueDecomposition ese = new EigenvalueDecomposition(es);
 			DoubleMatrix1D evals = ese.getRealEigenvalues();
 			DoubleMatrix2D evecs = ese.getV();
-			logger.info("evals: " + evals);
-			logger.info("evecs: " + evecs);
+			//logger.info("evals: " + evals);
+			//logger.info("evecs: " + evecs);
 			double phi = Math.atan2(evecs.getQuick(0, 0), evecs.getQuick(1, 0));
 			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
 			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
-			logger.info("w: " + w + ", h: " + h);
+			//logger.info("w: " + w + ", h: " + h);
 			
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
@@ -376,8 +376,7 @@ public class GPSPlotter extends RawDataPlotter {
 			evr.displayHoriz = hs;
 			evr.displayVert = vs;			
 			evr.sigZ =  e.getQuick(2, 2);
-			
-			maxMag = Math.max(evr.getMag(), maxMag);
+			maxMag = Math.max(Math.max(evr.getMag(), Math.abs(evr.z)), maxMag);
 			v3Plot.getPlot().addRenderer(evr);
 			vrs.add(evr);
 		}
@@ -407,8 +406,10 @@ public class GPSPlotter extends RawDataPlotter {
 		svr.u = desiredLength;
 		svr.v = 0;
 		svr.z = desiredLength;
-		svr.displayHoriz	= hs;
-		svr.displayVert		= vs;
+		svr.displayHoriz	= true;
+		svr.displayVert		= false;
+		svr.colorHoriz = Color.BLACK;
+		svr.colorVert  = Color.BLACK;
 		svr.sigZ = 0;
 		v3Plot.getPlot().addRenderer(svr);
 		
