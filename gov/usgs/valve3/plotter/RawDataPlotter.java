@@ -49,20 +49,24 @@ public abstract class RawDataPlotter extends Plotter {
 	protected String ch;
 	protected boolean isDrawLegend;
 	protected int rk;
-	public boolean ranks = true;
-	protected DownsamplingType downsamplingType = DownsamplingType.NONE;
+	public boolean ranks			= true;
+	protected boolean xTickMarks	= true;
+    protected boolean xTickValues	= true;
+    protected boolean xUnits		= true;
+    protected boolean xLabel		= false;
+    protected boolean yTickMarks	= true;
+    protected boolean yTickValues	= true;
+    protected boolean yUnits		= true;
+    protected boolean yLabel		= false;
+    
 	protected int downsamplingInterval = 0;
-	protected boolean xTickMarks = true;
-    protected boolean xTickValues = true;
-    protected boolean xUnits = true;
-    protected boolean xLabel = false;
-    protected boolean yTickMarks = true;
-    protected boolean yTickValues = true;
-    protected boolean yUnits = true;
-    protected boolean yLabel = false;
+	protected DownsamplingType downsamplingType = DownsamplingType.NONE;
 	
-	protected int leftTicks = 0; //count of left ticks
-	protected int leftLines; //starting line color
+	 //count of left ticks
+	protected int leftTicks = 0;
+	
+	 //starting line color
+	protected int leftLines;
 	protected String leftUnit;
 	protected String rightUnit;
 	protected int compCount;
@@ -91,7 +95,6 @@ public abstract class RawDataPlotter extends Plotter {
 	protected int debiasPick;
 	protected double debiasValue;
 	
-	protected boolean forExport;
 	protected String outputType;
 	protected boolean inclTime;
 	protected SuppDatum sd_data[];
@@ -119,16 +122,16 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @throws Valve3Exception
 	 */
-	protected void parseCommonParameters(PlotComponent component) throws Valve3Exception {
+	protected void parseCommonParameters(PlotComponent comp) throws Valve3Exception {
 		
 		// declare variables
 		String nameArg = null;
 		
 		// Check for named channels, ranks
 		if ( forExport ) {
-			outputType	= component.get( "o" );
+			outputType	= comp.get( "o" );
 			inclTime	= outputType.equals( "csv" );
-			nameArg		= component.get( "chNames" );
+			nameArg		= comp.get( "chNames" );
 			if ( nameArg != null ) {
 				String[] names = nameArg.split(",");
 				int left = names.length;
@@ -149,15 +152,15 @@ public abstract class RawDataPlotter extends Plotter {
 						break;
 				}
 			} else {
-				ch = component.getString("ch");
+				ch = comp.getString("ch");
 			}
 		
-			nameArg = component.get( "rkName" );
+			nameArg = comp.get( "rkName" );
 			if ( nameArg != null ) {
 			    boolean found = false;
 				for ( Rank r : ranksMap.values() ) 
 					if ( nameArg.equals(r.getName()) ) {
-						component.put( "rk", ""+r.getId() );
+						comp.put( "rk", ""+r.getId() );
 						found = true;
 						break;
 					}
@@ -167,7 +170,7 @@ public abstract class RawDataPlotter extends Plotter {
 			
 		// channels are defined in the ch parameter if it is not for export
 		} else {
-			ch = component.getString("ch");
+			ch = comp.getString("ch");
 		}
 		
 		// column parameters
@@ -176,9 +179,9 @@ public abstract class RawDataPlotter extends Plotter {
 		if ( columnsList != null ) {
 			boolean alreadySet[] = new boolean[columnsList.size()];
 			for ( Column c : columnsList ) {
-				String cVal = component.get(c.name);
+				String cVal = comp.get(c.name);
 				if ( cVal != null ) {
-					c.checked = component.getBoolean(c.name);
+					c.checked = comp.getBoolean(c.name);
 					alreadySet[j] = true;
 					useColDefaults = false;
 				}
@@ -193,7 +196,7 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 
 		// end time
-		endTime = component.getEndTime();
+		endTime = comp.getEndTime();
 		if (Double.isNaN(endTime)) {
 			if ( forExport ) {
 				endTime = Double.MAX_VALUE;
@@ -203,18 +206,18 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		
 		// start time
-		startTime = component.getStartTime(endTime);
+		startTime = comp.getStartTime(endTime);
 		if (Double.isNaN(startTime)) {
 			throw new Valve3Exception("Illegal start time.");
 		}
 		
 		// DST and time zone parameters
-		timeOffset	= component.getOffset(startTime);
-		timeZoneID	= component.getTimeZone().getID();
+		timeOffset	= comp.getOffset(startTime);
+		timeZoneID	= comp.getTimeZone().getID();
 		
 		try {
-			downsamplingType = DownsamplingType.fromString(component.getString("ds"));
-			downsamplingInterval = component.getInt("dsInt");
+			downsamplingType = DownsamplingType.fromString(comp.getString("ds"));
+			downsamplingInterval = comp.getInt("dsInt");
 		} catch (Valve3Exception e) {
 			//Do nothing, default values without downsampling
 		}
@@ -222,52 +225,52 @@ public abstract class RawDataPlotter extends Plotter {
 		// plot related parameters
 		if ( !forExport ) {
 			try{
-				isDrawLegend = component.getBoolean("lg");
+				isDrawLegend = comp.getBoolean("lg");
 			} catch(Valve3Exception e){
 				isDrawLegend=true;
 			}
 			try{
-				shape = component.getString("linetype");
+				shape = comp.getString("linetype");
 			} catch(Valve3Exception e){
 				shape="l";
 			}
 			try{
-				xTickMarks = component.getBoolean("xTickMarks");
+				xTickMarks = comp.getBoolean("xTickMarks");
 			} catch(Valve3Exception e){
 				xTickMarks=true;
 			}
 			try{
-				xTickValues = component.getBoolean("xTickValues");
+				xTickValues = comp.getBoolean("xTickValues");
 			} catch(Valve3Exception e){
 				xTickValues=true;
 			}
 			try{
-				xUnits = component.getBoolean("xUnits");
+				xUnits = comp.getBoolean("xUnits");
 			} catch(Valve3Exception e){
 				xUnits=true;
 			}
 			try{
-				xLabel = component.getBoolean("xLabel");
+				xLabel = comp.getBoolean("xLabel");
 			} catch(Valve3Exception e){
 				xLabel=false;
 			}
 			try{
-				yTickMarks = component.getBoolean("yTickMarks");
+				yTickMarks = comp.getBoolean("yTickMarks");
 			} catch(Valve3Exception e){
 				yTickMarks=true;
 			}
 			try{
-				yTickValues = component.getBoolean("yTickValues");
+				yTickValues = comp.getBoolean("yTickValues");
 			} catch(Valve3Exception e){
 				yTickValues=true;
 			}
 			try{
-				yUnits = component.getBoolean("yUnits");
+				yUnits = comp.getBoolean("yUnits");
 			} catch(Valve3Exception e){
 				yUnits=true;
 			}
 			try{
-				yLabel = component.getBoolean("yLabel");
+				yLabel = comp.getBoolean("yLabel");
 			} catch(Valve3Exception e){
 				yLabel=false;
 			}
@@ -463,16 +466,16 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return renderer
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, 
+	protected MatrixRenderer getLeftMatrixRenderer(PlotComponent comp, Channel channel, GenericDataMatrix gdm, 
 			int currentComp, int compBoxHeight, int index, String unit) throws Valve3Exception {
 		
 		// setup the matrix renderer with this data
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
+		mr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
 		
 		// define the axis and the extents
-		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, component, mr);
+		AxisParameters ap = new AxisParameters("L", axisMap, gdm, index, comp, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		
 		// x axis decorations
@@ -503,12 +506,12 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		// data decorations
 		if (shape==null) {
-			mr.createDefaultPointRenderers(component.getColor());
+			mr.createDefaultPointRenderers(comp.getColor());
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(component.getColor());
+				mr.createDefaultLineRenderers(comp.getColor());
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
+				mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
 			}
 		}
 		
@@ -531,14 +534,14 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return renderer
 	 * @throws Valve3Exception
 	 */
-	protected MatrixRenderer getRightMatrixRenderer(PlotComponent component, Channel channel, GenericDataMatrix gdm, int currentComp, int compBoxHeight, int index, LegendRenderer leftLegendRenderer) throws Valve3Exception {
+	protected MatrixRenderer getRightMatrixRenderer(PlotComponent comp, Channel channel, GenericDataMatrix gdm, int currentComp, int compBoxHeight, int index, LegendRenderer leftLegendRenderer) throws Valve3Exception {
 		
 		if (rightUnit == null)
 			return null;
 		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
+		mr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 		mr.setAllVisible(false);
-		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, component, mr);
+		AxisParameters ap = new AxisParameters("R", axisMap, gdm, index, comp, mr);
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
 		if(yTickValues){
@@ -549,12 +552,12 @@ public abstract class RawDataPlotter extends Plotter {
 			mr.getAxis().setRightLabelAsText(rightUnit);
 		}
 		if(shape==null){
-			mr.createDefaultPointRenderers(leftLines, component.getColor());
+			mr.createDefaultPointRenderers(leftLines, comp.getColor());
 		} else{
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(leftLines, component.getColor());
+				mr.createDefaultLineRenderers(leftLines, comp.getColor());
 			} else {
-				mr.createDefaultPointRenderers(leftLines, shape.charAt(0), component.getColor());
+				mr.createDefaultPointRenderers(leftLines, shape.charAt(0), comp.getColor());
 			}
 		}
 		if(isDrawLegend) {
@@ -569,7 +572,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @throws Valve3Exception
 	 */
-	abstract void getInputs(PlotComponent component) throws Valve3Exception;
+	abstract void getInputs(PlotComponent comp) throws Valve3Exception;
 	
 	/**
 	 * This function should be overridden in each concrete plotter.
@@ -577,7 +580,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @throws Valve3Exception
 	 */
-	abstract void getData(PlotComponent component) throws Valve3Exception;
+	abstract void getData(PlotComponent comp) throws Valve3Exception;
 	
 	/**
 	 * Format time and data using decFmt (and nullField for empty fields); 
@@ -608,15 +611,6 @@ public abstract class RawDataPlotter extends Plotter {
 		csvText.append(line);
 		csvText.append("\n");	
 	}
-	
-	/**
-     * Yield contents as CSV w/o comment
-     * @param comp plot component
-	 * @return CSV dump of binary data described by given PlotComponent
-	 *
-	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		return toCSV(comp, "", null);
-	}*/
 	
 	private int vax_order = 0;
 	//private int enc_fmt = 1; // 16-bit ints
@@ -660,6 +654,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @throws Valve3Exception
      */
 	public String toCSV(PlotComponent comp, String cmt, OutputStream seedOut) throws Valve3Exception {
+		
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		outputType = comp.get( "o" );
@@ -899,19 +894,19 @@ public abstract class RawDataPlotter extends Plotter {
 		boolean allowExpand = true;
 		double[] ys=null;
 		
-		public AxisParameters(String axisType, Map<Integer, String> axisMap, GenericDataMatrix gdm, int index, PlotComponent component, MatrixRenderer mr) throws Valve3Exception{
+		public AxisParameters(String axisType, Map<Integer, String> axisMap, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception{
 			if (!(axisType.equals("L") || axisType.equals("R"))) 
 				throw new Valve3Exception("Illegal axis type: " + axisType);
 			if(index==-1){
 				for (int i = 0; i < axisMap.size(); i++) {
-					setParameters(axisType, axisMap.get(i), gdm, i, component, mr);
+					setParameters(axisType, axisMap.get(i), gdm, i, comp, mr);
 				}
 			} else {
-				setParameters(axisType, axisMap.get(index), gdm, index, component, mr);
+				setParameters(axisType, axisMap.get(index), gdm, index, comp, mr);
 			}
 		}
 		
-		private void setParameters(String axisType, String mapAxisType, GenericDataMatrix gdm, int index, PlotComponent component, MatrixRenderer mr) throws Valve3Exception {
+		private void setParameters(String axisType, String mapAxisType, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception {
 			int offset = 2;
 			if (!ranks) offset = 1;
 			
@@ -921,14 +916,14 @@ public abstract class RawDataPlotter extends Plotter {
 				if (mapAxisType.equals(axisType)){
 					mr.setVisible(index, true);
 				}
-				if (component.isAutoScale("ys"+axisType)) {
+				if (comp.isAutoScale("ys"+axisType)) {
 					yMin	= Math.min(yMin, gdm.min(index + offset));
 					yMax	= Math.max(yMax, gdm.max(index + offset));
 					buff	= (yMax - yMin) * 0.05;
 					yMin	= yMin - buff;
 					yMax	= yMax + buff;
 				} else {
-					ys = component.getYScale("ys"+axisType, yMin, yMax);
+					ys = comp.getYScale("ys"+axisType, yMin, yMax);
 					yMin = ys[0];
 					yMax = ys[1];
 					allowExpand = false;
@@ -944,38 +939,38 @@ public abstract class RawDataPlotter extends Plotter {
      * @param comp plot component
      * @throws Valve3Exception
 	 */
-	protected void validateDataManipOpts(PlotComponent component) throws Valve3Exception {
-		doDespike = Util.stringToBoolean(component.get("despike"));
+	protected void validateDataManipOpts(PlotComponent comp) throws Valve3Exception {
+		doDespike = Util.stringToBoolean(comp.get("despike"));
 		if ( doDespike ) {
-			despikePeriod = component.getDouble("despike_period");
+			despikePeriod = comp.getDouble("despike_period");
 			if ( Double.isNaN(despikePeriod) )
 				throw new Valve3Exception("Illegal/missing period for despike");
 		}
-		doDetrend = Util.stringToBoolean(component.get("detrend"));
+		doDetrend = Util.stringToBoolean(comp.get("detrend"));
 		try {
-			filterPick = component.getInt("dmo_fl");
+			filterPick = comp.getInt("dmo_fl");
 		} catch(Valve3Exception e){
 			filterPick = 0;
 		}
 		if ( filterPick != 0 ) {
 			if ( filterPick != 1 ) {
-				filterPeriod = component.getDouble("filter_arg1");
+				filterPeriod = comp.getDouble("filter_arg1");
 				if ( Double.isNaN(filterPeriod) )
 					throw new Valve3Exception("Illegal/missing period for filter");
 			} else {
-				filterMax = component.getDouble("filter_arg1");
-				filterMin = component.getDouble("filter_arg2");
+				filterMax = comp.getDouble("filter_arg1");
+				filterMin = comp.getDouble("filter_arg2");
 				if ( Double.isNaN(filterMax) && Double.isNaN(filterMax) )
 					throw new Valve3Exception("Illegal/missing bound(s) for bandpass");
 			}
 		}
 		try {
-			debiasPick = component.getInt("dmo_db");
+			debiasPick = comp.getInt("dmo_db");
 		} catch(Valve3Exception e){
 			debiasPick = 0;
 		}
 		if ( debiasPick == 3 ) {
-			debiasValue = component.getDouble("debias_period");
+			debiasValue = comp.getDouble("debias_period");
 			if ( Double.isNaN(debiasValue) )
 				throw new Valve3Exception("Illegal/missing value for bias removal");
 		}
@@ -989,7 +984,7 @@ public abstract class RawDataPlotter extends Plotter {
      * @param component plot component
      * @throws Valve3Exception
 	 */
-	protected void addSuppData (String vdxSource, String vdxClient, Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+	protected void addSuppData (String vdxSource, String vdxClient, Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		List<String> stringList = null;
@@ -998,7 +993,7 @@ public abstract class RawDataPlotter extends Plotter {
 		String sdTypes;
 		
 		try {
-			sdTypes = component.getString("sdt");
+			sdTypes = comp.getString("sdt");
 		} catch (Valve3Exception e) {
 			sdTypes = "";
 		}
@@ -1056,7 +1051,7 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 		
 		// define the box height
-		int compBoxHeight = component.getBoxHeight();
+		int compBoxHeight = comp.getBoxHeight();
 
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
@@ -1071,9 +1066,9 @@ public abstract class RawDataPlotter extends Plotter {
 					} else {
 						offset = (Integer)chMap.get( sdo.cid );
 					}
-					sdo.frame_y = component.getBoxY() + (offset * compBoxHeight) + 8;
+					sdo.frame_y = comp.getBoxY() + (offset * compBoxHeight) + 8;
 					sdo.frame_h = compBoxHeight - 16;
-					v3Plot.addSuppDatum( sdo );
+					v3p.addSuppDatum( sdo );
 				}
 			} catch (Exception e) {
 				throw new Valve3Exception(e.getMessage()); 

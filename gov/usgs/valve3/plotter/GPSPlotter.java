@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
@@ -23,7 +22,6 @@ import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
@@ -69,7 +67,6 @@ public class GPSPlotter extends RawDataPlotter {
 			}
 		}
 	}
-	private final static Logger logger = Log.getLogger("gov.usgs.valve3.plotter.GPSPlotter"); 
 	
 	// variables acquired from the PlotComponent
 	private PlotType	plotType;
@@ -88,7 +85,6 @@ public class GPSPlotter extends RawDataPlotter {
 	 */
 	public GPSPlotter() {
 		super();
-		shape		= null;
 	}
 	
 	/**
@@ -431,25 +427,9 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
-
-		PlotType corePlotType	= plotType;
-		
-		// Export is treated as a time series, even if requested plot was a velocity map
-		if (forExport) {
-			corePlotType = PlotType.TIME_SERIES;
-		}
+	public void plotData(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
 		
 		// setup the display for the legend
-		Rank rank	= new Rank();
-		if (rk == 0) {
-			if (forExport) {
-				throw new Valve3Exception( "Exports for Best Possible Rank not allowed" );
-			}
-			rank	= rank.bestPossible();
-		} else {
-			rank	= ranksMap.get(rk);
-		}
 		String rankLegend		= rank.getName();
 		
 		// if a baseline was chosen then setup the display for the legend
@@ -458,7 +438,7 @@ public class GPSPlotter extends RawDataPlotter {
 			baselineLegend = "-" + channelsMap.get(Integer.valueOf(bl)).getCode();
 		}
 		
-		switch (corePlotType) {
+		switch (plotType) {
 		
 			case TIME_SERIES:
 				
@@ -611,7 +591,6 @@ public class GPSPlotter extends RawDataPlotter {
 				break;
 				
 			case VELOCITY_MAP:
-				v3Plot.setExportable(false);
 				plotVelocityMap(v3Plot, component, rank);
 				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
 				break;
@@ -630,15 +609,57 @@ public class GPSPlotter extends RawDataPlotter {
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
-		comp.setPlotter(this.getClass().getName());
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
-		
+		comp.setPlotter(this.getClass().getName());		
 		getInputs(comp);
-		getData(comp);
 		
-		plotData(v3p, comp);
+		// get the rank object for this request
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+		} else {
+			rank	= ranksMap.get(rk);
+		}
+		
+		// set the exportable based on the output and plot type
+		switch (plotType) {
+		
+		case TIME_SERIES:
+			
+			// plot configuration
+			if (!forExport) {
+				if (rk == 0) {
+					v3p.setExportable(false);
+				} else {
+					v3p.setExportable(true);
+				}
+				
+			// export configuration
+			} else {
+				if (rk == 0) {
+					throw new Valve3Exception( "Data Export Not Available for Best Possible Rank");
+				}
+			}
+			break;
+			
+		case VELOCITY_MAP:
+			
+			// plot configuration
+			if (!forExport) {
+				v3p.setExportable(false);
+				
+			// export configuration
+			} else {
+				throw new Valve3Exception("Data Export Not Available for GPS Velocity Map");
+			}
+			break;
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
+		plotData(v3p, comp, rank);
 		
 		if (!forExport) {
 			Plot plot = v3p.getPlot();

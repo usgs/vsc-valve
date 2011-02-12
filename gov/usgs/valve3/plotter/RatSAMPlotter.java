@@ -61,13 +61,13 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */	
-	protected void getInputs(PlotComponent component) throws Valve3Exception {
+	protected void getInputs(PlotComponent comp) throws Valve3Exception {
 		
-		parseCommonParameters(component);
+		parseCommonParameters(comp);
 		
 		channelLegendsCols	= new String  [1];
 		
-		String pt = component.get("plotType");
+		String pt = comp.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.VALUES;
 		else {
@@ -98,7 +98,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	protected void getData(PlotComponent component) throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		boolean gotData			= false;
@@ -149,7 +149,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @param rd RSAMData
 	 * @throws Valve3Exception
 	 */
-	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel1, Channel channel2, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
+	protected void plotValues(Valve3Plot v3p, PlotComponent comp, Channel channel1, Channel channel2, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
 		
 		String channelCode1		= channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
 		String channelCode2		= channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
@@ -169,11 +169,11 @@ public class RatSAMPlotter extends RawDataPlotter {
 			
 		} else {
 			try {
-				MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel1, gdm, currentComp, compBoxHeight, 0, leftUnit);
-				v3Plot.getPlot().addRenderer(leftMR);
-				component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-				component.setTranslationType("ty");
-				v3Plot.addComponent(component);
+				MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel1, gdm, currentComp, compBoxHeight, 0, leftUnit);
+				v3p.getPlot().addRenderer(leftMR);
+				comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+				comp.setTranslationType("ty");
+				v3p.addComponent(comp);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -186,7 +186,7 @@ public class RatSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 
 		String[] channels	= ch.split(",");
 		Channel channel1	= channelsMap.get(Integer.valueOf(channels[0]));
@@ -200,12 +200,12 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		// setting up variables to decide where to plot this component
 		int currentComp		= 1;
-		int compBoxHeight	= component.getBoxHeight();
+		int compBoxHeight	= comp.getBoxHeight();
 			
 		switch(plotType) {
 			case VALUES:
-				plotValues(v3Plot, component, channel1, channel2, data, currentComp, compBoxHeight);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+				plotValues(v3p, comp, channel1, channel2, data, currentComp, compBoxHeight);
+				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
 				break;
 			case COUNTS:
 				break;
@@ -223,19 +223,23 @@ public class RatSAMPlotter extends RawDataPlotter {
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
-		comp.setPlotter(this.getClass().getName());
 		channelsMap	= getChannels(vdxSource, vdxClient);
-		
+		comp.setPlotter(this.getClass().getName());
 		getInputs(comp);
-		getData(comp);
 		
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
 		plotData(v3p, comp);
-
+		
 		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());
 		}
 	}
-
 }

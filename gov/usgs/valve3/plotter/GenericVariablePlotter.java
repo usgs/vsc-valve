@@ -10,7 +10,6 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.PlotComponent;
-import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
@@ -20,7 +19,6 @@ import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,12 +49,12 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	protected void getInputs(PlotComponent component) throws Valve3Exception
+	protected void getInputs(PlotComponent comp) throws Valve3Exception
 	{
-		parseCommonParameters(component);
+		parseCommonParameters(comp);
 		//ToDo: check for one channel in ch only
-		String[] types = component.getString("dataTypes").split("\\$");
-		String[] selectedTypes = component.getString("selectedTypes").split(":");
+		String[] types = comp.getString("dataTypes").split("\\$");
+		String[] selectedTypes = comp.getString("selectedTypes").split(":");
 		int c = 0;
 		for (int i = 0; i<types.length; i++)
 		{
@@ -133,7 +131,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	protected void getData(PlotComponent component) throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		boolean gotData			= false;
@@ -148,7 +146,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
-		params.put("selectedTypes", component.getString("selectedTypes"));
+		params.put("selectedTypes", comp.getString("selectedTypes"));
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
@@ -182,10 +180,10 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getLeftMatrixRenderer(PlotComponent component) throws Valve3Exception
+	private MatrixRenderer getLeftMatrixRenderer(PlotComponent comp) throws Valve3Exception
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
@@ -205,12 +203,12 @@ public class GenericVariablePlotter extends RawDataPlotter
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);	
 		mr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
 		if(shape==null){
-			mr.createDefaultPointRenderers(component.getColor());
+			mr.createDefaultPointRenderers(comp.getColor());
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(component.getColor());
+				mr.createDefaultLineRenderers(comp.getColor());
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
+				mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
 			}
 		}
 		mr.setXAxisToTime(8, xTickMarks, xTickValues);
@@ -229,12 +227,12 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getRightMatrixRenderer(PlotComponent component) throws Valve3Exception
+	private MatrixRenderer getRightMatrixRenderer(PlotComponent comp) throws Valve3Exception
 	{
 		if (rightUnit == null)
 			return null;
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
@@ -258,16 +256,16 @@ public class GenericVariablePlotter extends RawDataPlotter
 		}
 		mr.setAxis(ar);
 		if(shape==null){
-			mr.createDefaultPointRenderers(component.getColor());
+			mr.createDefaultPointRenderers(comp.getColor());
 			PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
 			r[1].color = Color.red;
 		} else {
 			if (shape.equals("l")) {
-				mr.createDefaultLineRenderers(component.getColor());
+				mr.createDefaultLineRenderers(comp.getColor());
 				ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
 				r[1].color = Color.red;
 			} else {
-				mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
+				mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
 				PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
 				r[1].color = Color.red;
 			}
@@ -286,17 +284,22 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception
-	{
-		MatrixRenderer leftMR = getLeftMatrixRenderer(component);
-		MatrixRenderer rightMR = getRightMatrixRenderer(component);
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		
+		MatrixRenderer leftMR = getLeftMatrixRenderer(comp);
+		MatrixRenderer rightMR = getRightMatrixRenderer(comp);
 		if (rightMR != null)
-			v3Plot.getPlot().addRenderer(rightMR);
-		v3Plot.getPlot().addRenderer(leftMR);
+			v3p.getPlot().addRenderer(rightMR);
+		v3p.getPlot().addRenderer(leftMR);		
 		
+		comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+		comp.setTranslationType("ty");
+		v3p.addComponent(comp);
 		
-		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
+		if (!forExport) {
+			addSuppData( vdxSource, vdxClient, v3p, comp );
+			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+		}
 	}
 
 	/**
@@ -309,24 +312,25 @@ public class GenericVariablePlotter extends RawDataPlotter
 	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException
-	{
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		comp.setPlotter(this.getClass().getName());
 		getInputs(comp);
-		getData(comp);
-
-		Plot plot = v3p.getPlot();
-		plot.setBackgroundColor(Color.white);
 		
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
 		plotData(v3p, comp);
-
-		v3p.addComponent(comp);
-		addSuppData( vdxSource, vdxClient, v3p, comp );
-		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
-		//v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
-		v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
-		v3p.setFilename(PlotHandler.getRandomFilename());
-		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3p.getFilename());
+				
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
-
 }

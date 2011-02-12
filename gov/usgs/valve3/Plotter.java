@@ -36,6 +36,8 @@ abstract public class Plotter
 	protected String vdxClient;
 	protected String vdxSource;
 	
+	protected boolean forExport;
+	
 	protected ConfigFile plotterConfig;
 	
 	/**
@@ -124,7 +126,7 @@ abstract public class Plotter
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	abstract public void plot(Valve3Plot plot, PlotComponent component) throws Valve3Exception, PlotException;
+	abstract public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException;
 	
 	/**
 	 * Yield export configuration for specified source & client

@@ -26,7 +26,6 @@ import java.util.Map;
  */
 public class HelicorderPlotter extends RawDataPlotter {
 
-	int compCount;
 	private Map<Integer, HelicorderData> channelDataMap;
 	private static final double MAX_HELICORDER_TIME = 31 * 86400;
 	
@@ -47,32 +46,32 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getInputs(PlotComponent component) throws Valve3Exception {
+	public void getInputs(PlotComponent comp) throws Valve3Exception {
 
-		parseCommonParameters(component);
+		parseCommonParameters(comp);
 		if (endTime - startTime >= MAX_HELICORDER_TIME)
 			throw new Valve3Exception("Illegal duration.");
 		
 		try{
-			showClip = component.getBoolean("sc");
+			showClip = comp.getBoolean("sc");
 		} catch (Valve3Exception ex){
 			showClip = false;
 		}
 		
 		try {
-			barMult = new Double(component.getDouble("barMult")).floatValue();
+			barMult = new Double(comp.getDouble("barMult")).floatValue();
 		} catch (Valve3Exception ex) {
 			barMult = 3;
 		}
 		
 		try {
-			timeChunk = component.getInt("tc") * 60; 
+			timeChunk = comp.getInt("tc") * 60; 
 		} catch (Valve3Exception ex) {
 			timeChunk = 15;
 		}
 		
 		try{
-			minimumAxis = component.getBoolean("min");
+			minimumAxis = comp.getBoolean("min");
 		} catch (Valve3Exception ex){
 			minimumAxis = false;
 		}
@@ -83,7 +82,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	protected void getData(PlotComponent component) throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		boolean gotData			= false;
@@ -138,7 +137,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		
 		// calculate the number of plot components that will be displayed per channel
 		int channelCompCount = 1;
@@ -148,7 +147,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 		
 		// setting up variables to decide where to plot this component
 		int currentComp		= 1;
-		int compBoxHeight	= component.getBoxHeight();
+		int compBoxHeight	= comp.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			
@@ -158,8 +157,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			// verify their is something to plot
 			if (data == null || data.rows() == 0) {
-				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
-				Plot plot	= v3Plot.getPlot();
+				v3p.setHeight(v3p.getHeight() - channelCompCount * compBoxHeight);
+				Plot plot	= v3p.getPlot();
 				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 				compCount = compCount - channelCompCount;
 				continue;
@@ -184,7 +183,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 			hr.yTickValues			= this.yTickValues;
 			hr.yUnits				= this.yUnits;
 			hr.yLabel				= this.yLabel;
-			hr.setColor(component.getColor());
+			hr.setColor(comp.getColor());
 			hr.setData(data);
 
 			HelicorderSettings settings		= new HelicorderSettings();
@@ -197,13 +196,13 @@ public class HelicorderPlotter extends RawDataPlotter {
 			settings.timeChunk				= timeChunk;
 			settings.minimumAxis			= minimumAxis;
 			
-			settings.left					= component.getBoxX();
-			settings.top					= component.getBoxY() + (currentComp - 1) * compBoxHeight;
-			settings.width					= component.getBoxWidth();
+			settings.left					= comp.getBoxX();
+			settings.top					= comp.getBoxY() + (currentComp - 1) * compBoxHeight;
+			settings.width					= comp.getBoxWidth();
 			settings.height					= compBoxHeight - 16;
 			settings.timeZoneAbbr			= timeZoneID;
 			settings.timeZoneOffset			= timeOffset/3600.0;
-			settings.timeZone				= component.getTimeZone();
+			settings.timeZone				= comp.getTimeZone();
 			if (currentComp == compCount) {
 				settings.showDecorator = true;	
 			} else {
@@ -218,24 +217,15 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			currentComp++;
 			
-			/*
-			logger.info("componentBoxHeight:"	+ component.getBoxHeight() +
-							  "/settingHeight:" 		+ settings.height + 
-							  "/graphHeight:"   		+ hr.getGraphHeight() + 
-					          "/graphWidth:"  			+ hr.getGraphWidth() + 
-					          "/graphX:"      			+ hr.getGraphX() + 
-					          "/graphY:"      			+ hr.getGraphY());
-			*/
-			
-			component.setTranslation(hr.getTranslationInfo(false));
-			component.setTranslationType("heli");
-			v3Plot.getPlot().addRenderer(hr);
-			v3Plot.addComponent(component);
+			comp.setTranslation(hr.getTranslationInfo(false));
+			comp.setTranslationType("heli");
+			v3p.getPlot().addRenderer(hr);
+			v3p.addComponent(comp);
 		}
 		
 		if ( !forExport ) {
-			addSuppData( vdxSource, vdxClient, v3Plot, component );
-			v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Helicorder");
+			addSuppData( vdxSource, vdxClient, v3p, comp );
+			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Helicorder");
 		}
 	}
 
@@ -249,14 +239,22 @@ public class HelicorderPlotter extends RawDataPlotter {
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		comp.setPlotter(this.getClass().getName());
-		channelsMap	= getChannels(vdxSource, vdxClient);
-		getInputs(comp);
-		getData(comp);
 		
+		forExport	= (v3p == null);
+		channelsMap	= getChannels(vdxSource, vdxClient);
+		comp.setPlotter(this.getClass().getName());
+		getInputs(comp);
+		
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
 		plotData(v3p, comp);
 		
-		if ( v3p != null ) {
+		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);
 			plot.writePNG(v3p.getLocalFilename());

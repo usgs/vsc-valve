@@ -67,17 +67,15 @@ public class Valve3Plot extends Result
 	
 	protected int width;
 	protected int height;
-	//filled during initiating, from http request, not during plotting like "components"
-	private int componentCount = 0;
 
 	protected String url;
 	
 	protected List<PlotComponent> components;
 	private Logger logger;	
 	
-	protected boolean exportable;
-	private boolean isCombined = false;
-	protected boolean isWaveform = false;
+	protected boolean isExportable	= false;
+	private boolean isCombined		= false;
+	protected boolean isWaveform	= false;
 	
 	protected List<SuppDatum> suppdata;
 	
@@ -118,7 +116,9 @@ public class Valve3Plot extends Result
 		} else {
 			plot = new Plot(width, height);
 		}
-		exportable = false;
+		
+		// is this necessary ??
+		// exportable = false;
 		
 		suppdata = new ArrayList<SuppDatum>();
 	}
@@ -266,7 +266,7 @@ public class Valve3Plot extends Result
 	 */
 	public boolean getExportable()
 	{
-		return exportable;
+		return isExportable;
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class Valve3Plot extends Result
 	 */
 	public void setExportable(boolean e)
 	{
-		exportable = e;
+		isExportable = e;
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<title>" + title + "</title>\n");
 		sb.append("\t\t<width>" + width + "</width>\n");
 		sb.append("\t\t<height>" + height + "</height>\n");
-		sb.append("\t\t<exportable>" + exportable + "</exportable>\n");
+		sb.append("\t\t<exportable>" + isExportable + "</exportable>\n");
 		sb.append("\t\t<combined>" + isCombined + "</combined>\n");
 		sb.append("\t\t<waveform>" + isWaveform + "</waveform>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )

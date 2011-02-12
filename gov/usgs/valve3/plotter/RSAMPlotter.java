@@ -83,13 +83,13 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */	
-	protected void getInputs(PlotComponent component) throws Valve3Exception {
+	protected void getInputs(PlotComponent comp) throws Valve3Exception {
 		
-		parseCommonParameters(component);
+		parseCommonParameters(comp);
 		
 		channelLegendsCols	= new String  [1];
 		
-		String pt = component.get("plotType");
+		String pt = comp.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.VALUES;
 		else {
@@ -104,33 +104,33 @@ public class RSAMPlotter extends RawDataPlotter {
 		case VALUES:
 			leftLines	= 0;
 			axisMap		= new LinkedHashMap<Integer, String>();
-			validateDataManipOpts(component);
+			validateDataManipOpts(comp);
 			axisMap.put(0, "L");
 			leftUnit	= "RSAM";
 			leftLines++;
 			break;
 			
 		case COUNTS:
-			if (component.get("threshold") != null) {
-				threshold = component.getDouble("threshold");
+			if (comp.get("threshold") != null) {
+				threshold = comp.getDouble("threshold");
 				if (threshold <= 0)
 					throw new Valve3Exception("Illegal threshold.");
 			} else
 				threshold = 50;
 			
-			if (component.get("ratio") != null) {
-				ratio = component.getDouble("ratio");
+			if (comp.get("ratio") != null) {
+				ratio = comp.getDouble("ratio");
 				if (ratio == 0)
 					throw new Valve3Exception("Illegal ratio.");
 			} else
 				ratio = 1.3;
 			
-			if (component.get("maxEventLength") != null) {
-				maxEventLength = component.getDouble("maxEventLength");
+			if (comp.get("maxEventLength") != null) {
+				maxEventLength = comp.getDouble("maxEventLength");
 			} else
 				maxEventLength = 300;
 			
-			String bs	= Util.stringToString(component.get("cntsBin"), "hour");
+			String bs	= Util.stringToString(comp.get("cntsBin"), "hour");
 			bin			= BinSize.fromString(bs);
 			if (bin == null)
 				throw new Valve3Exception("Illegal bin size option.");
@@ -146,7 +146,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	protected void getData(PlotComponent component) throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		boolean gotData			= false;
@@ -208,7 +208,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
-	protected void plotValues(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData data, int currentComp, int compBoxHeight) throws Valve3Exception {
+	protected void plotValues(Valve3Plot v3p, PlotComponent comp, Channel channel, RSAMData data, int currentComp, int compBoxHeight) throws Valve3Exception {
 
 		// get the relevant information for this channel
 		channel.setCode(channel.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/'));
@@ -279,11 +279,11 @@ public class RSAMPlotter extends RawDataPlotter {
 			
 		} else {
 			try {
-				MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, 0, leftUnit);
-				v3Plot.getPlot().addRenderer(leftMR);
-				component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-				component.setTranslationType("ty");
-				v3Plot.addComponent(component);
+				MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, 0, leftUnit);
+				v3p.getPlot().addRenderer(leftMR);
+				comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+				comp.setTranslationType("ty");
+				v3p.addComponent(comp);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -301,7 +301,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @param dh display height
 	 * @throws Valve3Exception
 	 */
-	private void plotEvents(Valve3Plot v3Plot, PlotComponent component, Channel channel, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
+	private void plotEvents(Valve3Plot v3p, PlotComponent comp, Channel channel, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
 
 		// get the relevant information for this channel
 		channel.setCode(channel.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/'));
@@ -309,7 +309,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		// setup the histogram renderer with this data
 		HistogramExporter hr = new HistogramExporter(rd.getCountsHistogram(bin));
-		hr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
+		hr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
@@ -362,19 +362,19 @@ public class RSAMPlotter extends RawDataPlotter {
 			
 			MatrixExporter mr = new MatrixExporter(countsData, ranks);
 			mr.setAllVisible(true);
-			mr.setLocation(component.getBoxX(), component.getBoxY() + (currentComp - 1) * compBoxHeight, component.getBoxWidth(), compBoxHeight - 16);
+			mr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax + 1);
 			Renderer[] r = null;
 			if(shape==null){
-				mr.createDefaultPointRenderers(component.getColor());
+				mr.createDefaultPointRenderers(comp.getColor());
 			} else {
 				if (shape.equals("l")) {
-					mr.createDefaultLineRenderers(component.getColor());
+					mr.createDefaultLineRenderers(comp.getColor());
 					r = mr.getLineRenderers();
 					((ShapeRenderer)r[0]).color		= Color.red;
 					((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
 				} else {
-					mr.createDefaultPointRenderers(shape.charAt(0), component.getColor());
+					mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
 					r = mr.getPointRenderers();
 					((DataPointRenderer)r[0]).color	= Color.red;
 				}
@@ -406,10 +406,10 @@ public class RSAMPlotter extends RawDataPlotter {
 		}
 		
 		if (!forExport) {
-			v3Plot.getPlot().addRenderer(hr);		
-			component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-			component.setTranslationType("ty");
-			v3Plot.addComponent(component);
+			v3p.getPlot().addRenderer(hr);		
+			comp.setTranslation(hr.getDefaultTranslation(v3p.getPlot().getHeight()));
+			comp.setTranslationType("ty");
+			v3p.addComponent(comp);
 		}
 	}
 
@@ -420,7 +420,7 @@ public class RSAMPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component) throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		
 		// calculate the number of plot components that will be displayed per channel
 		int channelCompCount = 1;
@@ -430,7 +430,7 @@ public class RSAMPlotter extends RawDataPlotter {
 		
 		// setting up variables to decide where to plot this component
 		int currentComp		= 1;
-		int compBoxHeight	= component.getBoxHeight();
+		int compBoxHeight	= comp.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			
@@ -440,19 +440,19 @@ public class RSAMPlotter extends RawDataPlotter {
 			
 			// if there is no data for this channel, then resize the plot window 
 			if (data == null || data.rows() == 0) {
-				v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * component.getBoxHeight());
-				Plot plot	= v3Plot.getPlot();
-				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * component.getBoxHeight());
+				v3p.setHeight(v3p.getHeight() - channelCompCount * comp.getBoxHeight());
+				Plot plot	= v3p.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * comp.getBoxHeight());
 				compCount = compCount - channelCompCount;
 				continue;
 			}
 			
 			switch(plotType) {
 				case VALUES:
-					plotValues(v3Plot, component, channel, data, currentComp, compBoxHeight);
+					plotValues(v3p, comp, channel, data, currentComp, compBoxHeight);
 					break;
 				case COUNTS:
-					plotEvents(v3Plot, component, channel, data, currentComp, compBoxHeight);
+					plotEvents(v3p, comp, channel, data, currentComp, compBoxHeight);
 					break;
 			}
 			currentComp++;
@@ -461,10 +461,10 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (!forExport) {
 			switch(plotType) {
 				case VALUES:
-					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
 					break;
 				case COUNTS:
-					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
 					break;
 			}
 		}
@@ -482,14 +482,19 @@ public class RSAMPlotter extends RawDataPlotter {
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
-		comp.setPlotter(this.getClass().getName());
 		channelsMap	= getChannels(vdxSource, vdxClient);
-		
+		comp.setPlotter(this.getClass().getName());
 		getInputs(comp);
-		getData(comp);
 		
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
 		plotData(v3p, comp);
-
+		
 		if (!forExport) {
 			Plot plot = v3p.getPlot();
 			plot.setBackgroundColor(Color.white);

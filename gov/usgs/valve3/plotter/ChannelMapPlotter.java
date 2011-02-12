@@ -1,6 +1,5 @@
 package gov.usgs.valve3.plotter;
 
-import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabel;
@@ -35,11 +34,8 @@ import java.util.logging.Logger;
  */
 public class ChannelMapPlotter extends Plotter
 {
-	private PlotComponent component;
-	private Valve3Plot v3Plot;
 	private GeoRange range;
 	private GeoLabelSet labels;
-	private boolean forExport;
 	
 	protected boolean xTickMarks = true;
     protected boolean xTickValues = true;
@@ -56,68 +52,67 @@ public class ChannelMapPlotter extends Plotter
 	 * Default constructor
 	 */
 	public ChannelMapPlotter() {
-		logger		= Logger.getLogger("gov.usgs.vdx");		
+		logger	= Logger.getLogger("gov.usgs.vdx");		
 	}
 
 	/**
 	 * Initialize internal data from PlotComponent 
 	 * @throws Valve3Exception
 	 */
-	private void getInputs() throws Valve3Exception
-	{
-		double w = component.getDouble("west");
+	private void getInputs(PlotComponent comp) throws Valve3Exception {
+		double w = comp.getDouble("west");
 		if (w > 360 || w < -360)
 			throw new Valve3Exception("Illegal area of interest: w=" +w);
-		double e = component.getDouble("east");
+		double e = comp.getDouble("east");
 		if (e > 360 || e < -360)
 			throw new Valve3Exception("Illegal area of interest: e=" +e);
-		double s = component.getDouble("south");
+		double s = comp.getDouble("south");
 		if (s < -90)
 			throw new Valve3Exception("Illegal area of interest: s=" +s);
-		double n = component.getDouble("north");
+		double n = comp.getDouble("north");
 		if (n > 90)
 			throw new Valve3Exception("Illegal area of interest: n=" +n);
-		if(s>=n){
+		if(s >= n){
 			throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
 		}
-		try{
-			xTickMarks = component.getBoolean("xTickMarks");
-		} catch(Valve3Exception ex){
+		try {
+			xTickMarks = comp.getBoolean("xTickMarks");
+		} catch (Valve3Exception ex) {
 			xTickMarks=true;
 		}
-		try{
-			xTickValues = component.getBoolean("xTickValues");
-		} catch(Valve3Exception ex){
+		try {
+			xTickValues = comp.getBoolean("xTickValues");
+		} catch (Valve3Exception ex) {
 			xTickValues=true;
 		}
-		try{
-			xUnits = component.getBoolean("xUnits");
-		} catch(Valve3Exception ex){
+		try {
+			xUnits = comp.getBoolean("xUnits");
+		} catch (Valve3Exception ex) {
 			xUnits=true;
 		}
-		try{
-			xLabel = component.getBoolean("xLabel");
-		} catch(Valve3Exception ex){
+		try {
+			xLabel = comp.getBoolean("xLabel");
+		} catch (Valve3Exception ex) {
 			xLabel=false;
 		}
-		try{
-			yTickMarks = component.getBoolean("yTickMarks");
-		} catch(Valve3Exception ex){
+		try {
+			yTickMarks = comp.getBoolean("yTickMarks");
+		} catch (Valve3Exception ex) {
 			yTickMarks=true;
 		}
-		try{
-			yTickValues = component.getBoolean("yTickValues");
-		} catch(Valve3Exception ex){
+		try {
+			yTickValues = comp.getBoolean("yTickValues");
+		} catch (Valve3Exception ex) {
 			yTickValues=true;
 		}
-		try{
-			yUnits = component.getBoolean("yUnits");
-		} catch(Valve3Exception ex){
+		try {
+			yUnits = comp.getBoolean("yUnits");
+		} catch (Valve3Exception ex) {
 			yUnits=true;
 		}
-		try{
-			yLabel = component.getBoolean("yLabel");
-		} catch(Valve3Exception ex){
+		try {
+			yLabel = comp.getBoolean("yLabel");
+		} catch (Valve3Exception ex) {
 			yLabel=false;
 		}
 		range = new GeoRange(w, e, s, n);
@@ -127,7 +122,7 @@ public class ChannelMapPlotter extends Plotter
 	 * Loads GeoLabelSet labels from VDX
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception {
+	private void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		List<String> stringList = null;
@@ -174,35 +169,34 @@ public class ChannelMapPlotter extends Plotter
 	 * Generate PNG map image to local file.
 	 * @throws Valve3Exception
 	 */
-	private void plotMap() throws Valve3Exception, PlotException
-	{
-		Plot plot = v3Plot.getPlot();
+	private void plotMap(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
 		
 		if (labels != null)
 			mr.setGeoLabelSet(labels.getSubset(range));
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
-		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
+		RenderedImage ri = images.getMapBackground(proj, range, comp.getBoxWidth());
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
-		plot.setSize(plot.getWidth(), mr.getGraphHeight() + 60);
-		v3Plot.setHeight(mr.getGraphHeight() + 60);
-		double[] trans = mr.getDefaultTranslation(plot.getHeight());
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60);
+		v3p.setHeight(mr.getGraphHeight() + 60);
+		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
 		trans[4] = 0;
 		trans[5] = 0;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
-		component.setTranslation(trans);
-		component.setTranslationType("map");
+		comp.setTranslation(trans);
+		comp.setTranslationType("map");
 		
 		mr.createEmptyAxis();
 		if(xUnits){
@@ -211,15 +205,15 @@ public class ChannelMapPlotter extends Plotter
 		if(yUnits){
 			mr.getAxis().setLeftLabelAsText("Latitude");
 		}
-		plot.addRenderer(mr);
-		plot.writePNG(v3Plot.getLocalFilename());
+		v3p.getPlot().addRenderer(mr);
+		v3p.getPlot().writePNG(v3p.getLocalFilename());
 		
-		v3Plot.addComponent(component);
-		v3Plot.setTitle("Map");
-		if (vdxSource != null)
-		{
+		v3p.addComponent(comp);
+		if (vdxSource != null) {
 			String n = Valve3.getInstance().getMenuHandler().getItem(vdxSource).name;
-			v3Plot.setTitle("Map: " + n);
+			v3p.setTitle("Map: " + n);
+		} else {
+			v3p.setTitle("Map");
 		}
 	}
 
@@ -228,14 +222,18 @@ public class ChannelMapPlotter extends Plotter
 	 * Generate PNG map image to local file.
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot plot, PlotComponent comp) throws Valve3Exception, PlotException
-	{
-		forExport = false;
-		v3Plot = plot;
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		comp.setPlotter(this.getClass().getName());
-		component = comp;
-		getInputs();
-		getData();
-		plotMap();
+		getInputs(comp);
+		
+		// plot configuration, channel maps don't support data export
+		if (!forExport) {
+			v3p.setExportable(false);
+		}
+		
+		getData(comp);
+		plotMap(v3p, comp);
 	}
 }
