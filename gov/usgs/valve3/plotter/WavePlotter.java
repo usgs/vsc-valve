@@ -481,19 +481,29 @@ public class WavePlotter extends RawDataPlotter {
 			}
 			currentComp++;
 		}
-		
 		switch(plotType) {
 			case WAVEFORM:
 				if (!forExport) {
 					addSuppData( vdxSource, vdxClient, v3p, comp );
+					if(channelDataMap.size()!=1){
+						v3p.setCombineable(false);
+					} else {
+						v3p.setCombineable(true);
+					}
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Waveform");
 				}
 				break;
 			case SPECTRA:
-				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectra");
+				if (!forExport) {
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectra");
+				}
 				break;
 			case SPECTROGRAM:
-				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectrogram");
+				if (!forExport) {
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Spectrogram");
+				}
 				break;
 		}
 	}

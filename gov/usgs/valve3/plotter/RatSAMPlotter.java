@@ -205,9 +205,15 @@ public class RatSAMPlotter extends RawDataPlotter {
 		switch(plotType) {
 			case VALUES:
 				plotValues(v3p, comp, channel1, channel2, data, currentComp, compBoxHeight);
-				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+				if(!forExport){
+					v3p.setCombineable(true);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+				}
 				break;
 			case COUNTS:
+				if(!forExport){
+					v3p.setCombineable(false);
+				}
 				break;
 		}
 	}

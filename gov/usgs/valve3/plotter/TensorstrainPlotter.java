@@ -333,7 +333,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				csvData.add(ed);
 				
 			} else {
-				
 				// create an individual matrix renderer for each component selected
 				if (isPlotComponentsSeparately()){
 					for (int i = 0; i < columnsList.size(); i++) {
@@ -362,8 +361,13 @@ public class TensorstrainPlotter extends RawDataPlotter {
 					currentComp++;
 				}
 			}
-		}		
+		}
 		if (!forExport) {
+			if(channelDataMap.size()>1){
+				v3p.setCombineable(false);
+			} else {
+				v3p.setCombineable(true);
+			}
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 			addSuppData(vdxSource, vdxClient, v3p, comp);
 		}

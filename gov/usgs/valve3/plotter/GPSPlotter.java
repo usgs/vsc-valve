@@ -441,7 +441,6 @@ public class GPSPlotter extends RawDataPlotter {
 		switch (plotType) {
 		
 			case TIME_SERIES:
-				
 				// calculate the number of plot components that will be displayed per channel
 				int channelCompCount = 0;
 				if(isPlotComponentsSeparately()){
@@ -549,7 +548,6 @@ public class GPSPlotter extends RawDataPlotter {
 						csvData.add( ed );
 						
 					} else {
-						
 						// set up the legend 
 						for (int i = 0; i < legendsCols.length; i++) {
 							channelLegendsCols[i] = String.format("%s%s %s %s", channel.getCode(), baselineLegend, rankLegend, legendsCols[i]);
@@ -585,14 +583,22 @@ public class GPSPlotter extends RawDataPlotter {
 					}
 				}
 				if (!forExport) {
+					if(channelDataMap.size()>1){
+						v3Plot.setCombineable(false);
+					} else {
+						v3Plot.setCombineable(true);
+					}
 					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 					addSuppData( vdxSource, vdxClient, v3Plot, component );
 				}
 				break;
 				
 			case VELOCITY_MAP:
+				if (!forExport) {
+					v3Plot.setCombineable(false);
+					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
+				}
 				plotVelocityMap(v3Plot, component, rank);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
 				break;
 		}
 	}

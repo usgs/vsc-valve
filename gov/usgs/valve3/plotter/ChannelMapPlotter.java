@@ -170,7 +170,9 @@ public class ChannelMapPlotter extends Plotter
 	 * @throws Valve3Exception
 	 */
 	private void plotMap(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		
+		if (!forExport) {
+			v3p.setCombineable(false);
+		}
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
@@ -232,7 +234,7 @@ public class ChannelMapPlotter extends Plotter
 		if (!forExport) {
 			v3p.setExportable(false);
 		}
-		
+	
 		getData(comp);
 		plotMap(v3p, comp);
 	}

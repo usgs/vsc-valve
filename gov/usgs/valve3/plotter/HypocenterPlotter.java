@@ -702,14 +702,17 @@ public class HypocenterPlotter extends RawDataPlotter {
 				csvIndex++;
 			} else {
 				plotMap(v3p, comp, rank);
+				v3p.setCombineable(false);
 				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			}
 			break;
 		
 		case COUNTS:
 			plotCounts(v3p, comp, rank);
-			if (!forExport)
+			if (!forExport){
 				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
+				v3p.setCombineable(true);
+			}
 			break;			
 		}			
 	}

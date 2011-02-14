@@ -385,7 +385,6 @@ public class TiltPlotter extends RawDataPlotter {
 		switch (plotType) {
 		
 			case TIME_SERIES:
-				
 				// calculate the number of plot components that will be displayed per channel
 				int channelCompCount = 0;
 				if(isPlotComponentsSeparately()){
@@ -539,7 +538,6 @@ public class TiltPlotter extends RawDataPlotter {
 						csvIndex++;
 						
 					} else {
-						
 						// create an individual matrix renderer for each component selected
 						if (isPlotComponentsSeparately()){
 							for (int i = 0; i < columnsList.size(); i++) {
@@ -570,14 +568,22 @@ public class TiltPlotter extends RawDataPlotter {
 					}
 				}
 				if (!forExport) {
+					if(channelDataMap.size()!=1){
+						v3p.setCombineable(false);
+					} else {
+						v3p.setCombineable(true);
+					}
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 					addSuppData( vdxSource, vdxClient, v3p, comp );
 				}
 				break;
 				
 			case TILT_VECTORS:
+				if (!forExport) {
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");
+				}
 				plotTiltVectors(v3p, comp, rank);
-				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");
 				break;
 		}
 	}

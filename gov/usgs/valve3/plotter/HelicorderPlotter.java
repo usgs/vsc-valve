@@ -225,6 +225,7 @@ public class HelicorderPlotter extends RawDataPlotter {
 		
 		if ( !forExport ) {
 			addSuppData( vdxSource, vdxClient, v3p, comp );
+			v3p.setCombineable(false);
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Helicorder");
 		}
 	}
@@ -249,7 +250,6 @@ public class HelicorderPlotter extends RawDataPlotter {
 		if (!forExport) {
 			v3p.setExportable(true);
 		}
-		
 		// this is a legitimate request so lookup the data from the database and plot it
 		getData(comp);		
 		plotData(v3p, comp);

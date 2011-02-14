@@ -74,6 +74,7 @@ public class Valve3Plot extends Result
 	private Logger logger;	
 	
 	protected boolean isExportable	= false;
+	protected boolean isCombineable	= false;
 	private boolean isCombined		= false;
 	protected boolean isWaveform	= false;
 	
@@ -113,6 +114,7 @@ public class Valve3Plot extends Result
 		isCombined	= Util.stringToBoolean(request.getParameter("combine"), false);
 		if(isCombined){
 			plot = new CombinedPlot(width, height, componentCount);
+			setCombineable(true);
 		} else {
 			plot = new Plot(width, height);
 		}
@@ -277,6 +279,15 @@ public class Valve3Plot extends Result
 	{
 		isExportable = e;
 	}
+	
+	/**
+	 * Setter for plot combineable flag
+	 * @param e boolean: "plot is combineable"
+	 */
+	public void setCombineable(boolean e)
+	{
+		isCombineable = e;
+	}
 
 	/**
 	 * Getter for waveform plot flag
@@ -328,6 +339,7 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<height>" + height + "</height>\n");
 		sb.append("\t\t<exportable>" + isExportable + "</exportable>\n");
 		sb.append("\t\t<combined>" + isCombined + "</combined>\n");
+		sb.append("\t\t<combineable>" + isCombineable + "</combineable>\n");
 		sb.append("\t\t<waveform>" + isWaveform + "</waveform>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )
 //			sb.append(((PlotComponent)it.next()).toXML());

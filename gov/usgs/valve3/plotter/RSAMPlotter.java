@@ -457,13 +457,18 @@ public class RSAMPlotter extends RawDataPlotter {
 			}
 			currentComp++;
 		}
-		
 		if (!forExport) {
 			switch(plotType) {
 				case VALUES:
+					if(channelDataMap.size()!=1){
+						v3p.setCombineable(false);
+					} else {
+						v3p.setCombineable(true);
+					}
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
 					break;
 				case COUNTS:
+					v3p.setCombineable(false);
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
 					break;
 			}

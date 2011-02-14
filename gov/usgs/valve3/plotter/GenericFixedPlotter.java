@@ -311,6 +311,11 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		}
 		if (!forExport) {
 			addSuppData( vdxSource, vdxClient, v3p, comp );
+			if(channelDataMap.size()!=1){
+				v3p.setCombineable(false);
+			} else {
+				v3p.setCombineable(true);
+			}
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 		}
 	}
