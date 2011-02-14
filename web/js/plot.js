@@ -117,6 +117,7 @@ function handlePlot(xml)
 	var url				= getXMLField(xml, "url");
 	var raw_ok			= (getXMLField(xml, "exportable") == "true");
 	var combined		= (getXMLField(xml, "combined") == "true");
+	var combineable		= (getXMLField(xml, "combineable") == "true");
 	var waveform_type	= (getXMLField(xml, "waveform") == "true");
 	
 	var t			= document.getElementById('contentTemplate').cloneNode(true);
@@ -254,7 +255,7 @@ function handlePlot(xml)
 		})(ieGetElementsByClassName( t, "suppnodl")[0]));
 
     //Combination
-    if(((components.length == 1) && (getXMLField(components[0],'plotter') != 'gov.usgs.valve3.plotter.HelicorderPlotter') && (getXMLField(components[0],'plotter') != 'gov.usgs.valve3.plotter.HypocenterPlotter')) || combined){
+    if(((components.length == 1) && combineable) || combined){
     	addListener(imgs[7], 'click',
     		function()
     		{
