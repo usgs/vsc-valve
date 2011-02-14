@@ -471,6 +471,15 @@ public class HypocenterPlotter extends RawDataPlotter {
 			base.getAxis().setBottomLabelAsText("Latitude");
 			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
+		case TIME_DEPTH:
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, -maxDepth, -minDepth);
+			base.createDefaultAxis();
+			base.setXAxisToTime(8);
+			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
+			comp.setTranslationType("ty");
+			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
+			base.getAxis().setLeftLabelAsText("Depth (km)");
+			break;
 		case ARB_DEPTH:
 		
 			// need to set the extents for along the line. km offset?
@@ -513,15 +522,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 			}
 			subCount = new String(count + " of ");
 			
-			break;
-		case DEPTH_TIME:
-			base.setExtents(startTime+timeOffset, endTime+timeOffset, -maxDepth, -minDepth);
-			base.createDefaultAxis();
-			base.setXAxisToTime(8);
-			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
-			comp.setTranslationType("ty");
-			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
-			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
 		case ARB_TIME:
 			
@@ -567,9 +567,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			break;
 		}
-						
-		base.getAxis().setTopLabelAsText(subCount + getTopLabel(rank));   // set the label at the top of the plot.
-		v3p.getPlot().addRenderer(base);                    // add my framerenderer to this plot
+		
+		// set the label at the top of the plot.
+		base.getAxis().setTopLabelAsText(subCount + getTopLabel(rank));
+		v3p.getPlot().addRenderer(base);
 		
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
 		hr.setColorOption(color);
