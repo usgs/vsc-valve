@@ -402,6 +402,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
 
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		mr.setGeoLabelSet(labels.getSubset(range));
@@ -412,7 +413,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
-		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
 		trans[4] = startTime+timeOffset;
 		trans[5] = endTime+timeOffset;
@@ -435,7 +435,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		ArbDepthCalculator adc = null;
 		
 		BasicFrameRenderer base = new BasicFrameRenderer();
-		base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
+		base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 		String subCount = "";
 		double lat1;
 		double lon1;
@@ -484,7 +484,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 			// need to set the extents for along the line. km offset?
 			base = new ArbDepthFrameRenderer();
-			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
+			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 
 			/*
 			 * 			lat1 = range.getSouth();
@@ -527,7 +527,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			// need to set the extents for along the line. km offset?
 			base = new ArbDepthFrameRenderer();
-			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));			
+			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh") - 16);			
 			v3p.getPlot().setSize(v3p.getPlot().getWidth(), comp.getInt("mh") + 60);
 			
 			lat1 = startLoc.getY();
@@ -600,7 +600,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		int leftLabels = 0;
 		
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
-		hr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
+		hr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 		hr.setDefaultExtents();
 		hr.setMinX(startTime+timeOffset);
 		hr.setMaxX(endTime+timeOffset);
@@ -654,7 +654,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			// TODO: utilize ranks for counts plots
 			MatrixExporter mr = new MatrixExporter(data, false, null);
 			mr.setAllVisible(true);
-			mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
+			mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 			mr.setExtents(startTime+timeOffset, endTime+timeOffset, cmin, cmax * 1.05);
 			mr.createDefaultLineRenderers(comp.getColor());
 			
@@ -714,14 +714,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			break;
 		
 		case COUNTS:
-			try {
-				plotCounts(v3p, comp, rank);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			plotCounts(v3p, comp, rank);
 			if (!forExport){
-				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 				v3p.setCombineable(true);
+				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			}
 			break;			
 		}			
