@@ -174,7 +174,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		try{
 			xLabel = comp.getBoolean("xLabel");
 		} catch(Valve3Exception e){
-			xLabel=false;
+			xLabel=true;
 		}
 		try{
 			yTickMarks = comp.getBoolean("yTickMarks");
@@ -569,9 +569,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 		}
 		
 		// set the label at the top of the plot.
-		base.getAxis().setTopLabelAsText(subCount + getTopLabel(rank));
+		if (xLabel) {
+			base.getAxis().setTopLabelAsText(subCount + getTopLabel(rank));
+		}
+		
+		// add this plot to the valve plot
 		v3p.getPlot().addRenderer(base);
 		
+		// create the scale renderer
 		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
 		hr.setColorOption(color);
 		if (color == ColorOption.TIME)
@@ -709,7 +714,11 @@ public class HypocenterPlotter extends RawDataPlotter {
 			break;
 		
 		case COUNTS:
-			plotCounts(v3p, comp, rank);
+			try {
+				plotCounts(v3p, comp, rank);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			if (!forExport){
 				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 				v3p.setCombineable(true);
