@@ -1,16 +1,14 @@
 package gov.usgs.valve3;
 
 import gov.usgs.util.Log;
-import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
+import gov.usgs.valve3.plotter.RawDataPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.RawData;
 import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.vdx.client.VDXClient;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -185,47 +182,6 @@ public class RawDataHandler implements HttpHandler
 	}
 	
 	/**
-	 * Initialize list of ranks for given vdx source
-	 * @param vdxSource	vdx source name
-	 * @param vdxClient	vdx client name
-	 * @return map of ids to ranks
-	 * @throws Valve3Exception
-	 */
-	protected static Map<Integer, Rank> getRanks(String vdxSource, String vdxClient) throws Valve3Exception {
-		
-		// initialize variables
-		List<String> stringList 	= null;
-		Map<Integer, Rank> rankMap	= null;
-		Pool<VDXClient> pool		= null;
-		VDXClient client			= null;
-		
-		// create a map of all the input parameters
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", vdxSource);
-		params.put("action", "ranks");
-		
-		// checkout a connection to the database
-		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		if (pool != null) {
-			client	= pool.checkout();
-			try {
-				stringList	= client.getTextData(params);
-			} catch (Exception e) {
-				stringList	= null;
-			} finally {
-				pool.checkin(client);
-			}
-			
-			// if data was collected
-			if (stringList != null) {
-				rankMap	= Rank.fromStringsToMap(stringList);
-			}
-		}
-		
-		return rankMap;
-	}
-	
-	/**
 	 * Handle the given http request and generate raw data type result. 
 	 * @see HttpHandler#handle 
 	 */
@@ -288,7 +244,7 @@ public class RawDataHandler implements HttpHandler
 				// if ( rk == null && ss == null ) {
 				if ( rk == null) 
 					try {
-						ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+						ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
 						for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
 							Rank r = me.getValue();
 							if ( r.getUserDefault() == 1 ) {
@@ -314,7 +270,7 @@ public class RawDataHandler implements HttpHandler
 						fn_rank = "RankNbr" + fn_rankID;
 					} else {
 						if ( ranksMap == null ) {
-							ranksMap = getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+							ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
 						}
 						fn_rank = ranksMap.get(fn_rankID).getName();
 					}

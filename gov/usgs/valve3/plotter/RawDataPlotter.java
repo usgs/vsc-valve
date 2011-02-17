@@ -375,7 +375,7 @@ public abstract class RawDataPlotter extends Plotter {
 	 * @return map of ids to ranks
 	 * @throws Valve3Exception
 	 */
-	protected static Map<Integer, Rank> getRanks(String vdxSource, String vdxClient) throws Valve3Exception {
+	public static Map<Integer, Rank> getRanks(String vdxSource, String vdxClient) throws Valve3Exception {
 		
 		// initialize variables
 		List<String> stringList 	= null;
