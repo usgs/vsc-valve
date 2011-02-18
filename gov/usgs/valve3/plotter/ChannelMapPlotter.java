@@ -8,6 +8,7 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -60,6 +61,7 @@ public class ChannelMapPlotter extends Plotter
 	 * @throws Valve3Exception
 	 */
 	private void getInputs(PlotComponent comp) throws Valve3Exception {
+		
 		double w = comp.getDouble("west");
 		if (w > 360 || w < -360)
 			throw new Valve3Exception("Illegal area of interest: w=" +w);
@@ -178,7 +180,7 @@ public class ChannelMapPlotter extends Plotter
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxMapHeight());
 		
 		if (labels != null)
 			mr.setGeoLabelSet(labels.getSubset(range));

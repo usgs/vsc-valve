@@ -399,7 +399,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		hypos.project(proj);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxMapHeight());
 		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 190);
 
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();

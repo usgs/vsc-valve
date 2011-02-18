@@ -47,10 +47,16 @@ import gov.usgs.vdx.data.Rank;
  */
 public class RawDataHandler implements HttpHandler
 {
-	public static final int MAX_PLOT_WIDTH = 6000;
-	public static final int MAX_PLOT_HEIGHT = 6000;
-	public static final int DEFAULT_WIDTH_COMPONENT = 610;
-	public static final int DEFAULT_HEIGHT_COMPONENT = 140;
+	
+	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
+	public static final int DEFAULT_COMPONENT_WIDTH		= 750;
+	public static final int DEFAULT_COMPONENT_HEIGHT	= 240;
+	public static final int DEFAULT_COMPONENT_TOP		= 20;
+	public static final int DEFAULT_COMPONENT_LEFT		= 75;
+	public static final int DEFAULT_COMPONENT_MAPHEIGHT	= 900;	
+	public static final int MAX_PLOT_WIDTH				= 6000;
+	public static final int MAX_PLOT_HEIGHT				= 50000;
+	
 	private DataHandler dataHandler;
 	private Logger logger;	
 	
@@ -72,71 +78,55 @@ public class RawDataHandler implements HttpHandler
 	 */
 	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
-		int n = Util.stringToInt(request.getParameter("n"), -1);
-		if (n == -1){
-			n = Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.n"), -1);
-			logger.info("Parameter n was set to default value");
-		}
-		if(n == -1){
-			n=1;
-			logger.info("Parameter n was set to default value");
-		}
-		
-		String rkNameArg = request.getParameter( "rkName" );
-		String outputType = request.getParameter( "o" );
-		if ( outputType == null || outputType.equals("") )
-			outputType = "csv";
-		else if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed") ) )
-			throw new Valve3Exception("Illegal output type");
-		
+		int n = Util.stringToInt(request.getParameter("n"), 1);
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
+		
+		String rkNameArg	= request.getParameter( "rkName" );
+		String outputType	= Util.stringToString(request.getParameter("o"), "csv");
+		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")))
+			outputType	= "csv";
 		
 		for (int i = 0; i < n; i++)
 		{
 			PlotComponent component = createComponent(request, i);
 			if (component == null)
-				continue;
-			
-			int x = Util.stringToInt(request.getParameter("x." + i), 0);
-			if (x < 0 || x > MAX_PLOT_WIDTH){
-				throw new Valve3Exception("Illegal x." + i + " value.");
-			}
-			int y = Util.stringToInt(request.getParameter("y." + i), 0);
-			if (y < 0 || y > MAX_PLOT_HEIGHT)
-				throw new Valve3Exception("Illegal y." + i + " value.");
-			
-			int w = Util.stringToInt(request.getParameter("w." + i), -1);
-			if(w==-1){
-				w=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.w"), -1);
-				logger.info("Parameter w." + i + " was set to default value");
-			}
-			if(w==-1){
-				w=DEFAULT_WIDTH_COMPONENT;
-				logger.info("Illegal w." + i + " parameter value, was set to default");
-			}
-			if (w <= 0 || w > MAX_PLOT_WIDTH)
-				throw new Valve3Exception("Illegal w." + i + ".");
-			
-			int h = Util.stringToInt(request.getParameter("h." + i), -1);
-			if(h==-1){
-				w=Util.stringToInt(Valve3.getInstance().getDefaults().getString("parameter.component.h"), -1);
-				logger.info("Parameter h." + i + " was set to default value");
-			}
-			if(h==-1){
-				h=DEFAULT_WIDTH_COMPONENT;
-				logger.info("Illegal h." + i + " parameter value, was set to default");
-			}
-			if (h <= 0 || h > MAX_PLOT_HEIGHT)
-				throw new Valve3Exception("Illegal h." + i + ".");
-			
-			component.setBoxX(x);
-			component.setBoxY(y);
-			component.setBoxWidth(w);
-			component.setBoxHeight(h);
+				continue;			
+
+			component.put( "o", outputType );
 
 			if ( rkNameArg != null ) 
 				component.put( "rkName", rkNameArg );
-			component.put( "o", outputType );
+			
+			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
+			if (w <= 0 || w > MAX_PLOT_WIDTH) {
+				throw new Valve3Exception("Illegal w." + i + " parameter.  Must be between 0 and " + MAX_PLOT_WIDTH);
+			}
+			
+			int h = Util.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
+			if (h <= 0 || h > MAX_PLOT_HEIGHT) {
+				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
+			}
+			
+			int mh = Util.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
+			if (mh < 0){
+				throw new Valve3Exception("Illegal mh." + i + " parameter.  Must be greater than 0");
+			}
+			
+			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
+			if (x < 0 || x > w){
+				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
+			}
+			
+			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
+			if (y < 0 || y > h){
+				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
+			}
+
+			component.setBoxWidth(w);
+			component.setBoxHeight(h);
+			component.setBoxMapHeight(mh);
+			component.setBoxX(x);
+			component.setBoxY(y);
 
 			list.add(component);
 		}
@@ -185,10 +175,8 @@ public class RawDataHandler implements HttpHandler
 	 * Handle the given http request and generate raw data type result. 
 	 * @see HttpHandler#handle 
 	 */
-	public Object handle(HttpServletRequest request)
-	{
-		try
-		{
+	public Object handle(HttpServletRequest request) {
+		try {
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
@@ -210,28 +198,23 @@ public class RawDataHandler implements HttpHandler
 			boolean miniseed = false;
 			String fn = null, filePath = null, outFileName = null, outFilePath = null;
 
-			for (PlotComponent component : components)
-			{
-				String source = component.getSource();
+			for (PlotComponent component : components) {
+				String source				= component.getSource();
+				Plotter plotter				= null;
+				DataSourceDescriptor dsd	= null;
 				if ( fn_source == null )
 					fn_source = source;
 				else if ( !fn_source.equals(source) )
 					throw new Valve3Exception( "Multi-source export not supported" );
-				Plotter plotter = null;
-				DataSourceDescriptor dsd = null;
-				if (source.equals("channel_map"))
-				{
-					dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					plotter = new ChannelMapPlotter();
+				if (source.equals("channel_map")) {
+					plotter	= new ChannelMapPlotter();
+					dsd		= dataHandler.getDataSourceDescriptor(component.get("subsrc"));
 					if (dsd != null) {
 						plotter.setVDXClient(dsd.getVDXClientName());
 						plotter.setVDXSource(dsd.getVDXSource());
 					}
-				}
-				else
-				{
-					dsd = dataHandler.getDataSourceDescriptor(component.getSource());
-					plotter = dsd.getPlotter();
+				} else {
+					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 				}
 				if (plotter != null) {
 					if ( cmtDataType == null ) {
@@ -240,9 +223,7 @@ public class RawDataHandler implements HttpHandler
 					}
 				}
 				String rk = component.get( "rk" );
-				// String ss = component.get( "selectedStation" );
-				// if ( rk == null && ss == null ) {
-				if ( rk == null) 
+				if (rk == null) 
 					try {
 						ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
 						for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
@@ -255,7 +236,7 @@ public class RawDataHandler implements HttpHandler
 						}
 						logger.info("Ranks acquired");
 					} catch (Exception e) {}
-				if ( rk != null ) {
+				if (rk != null) {
 					int rankID = component.getInt( "rk" );
 					if ( rankID != fn_rankID )
 						if ( fn_rankID == -1 ) {

@@ -37,14 +37,16 @@ public class PlotComponent
 	protected String translationType = "none";
 	protected double[] translation;
 	
-	private int boxX = 0;
-	private int boxY = 0;
-	private int boxHeight = 0;
-	private int boxWidth = 0;
-	private SimpleDateFormat df = null;
-	private String plotter = null;
+	private int boxX			= 0;
+	private int boxY			= 0;
+	private int boxHeight		= 0;
+	private int boxWidth		= 0;
+	private int boxMapHeight	= 0;
+	
+	private SimpleDateFormat df	= null;
+	private String plotter		= null;
 
-	private boolean exportable = false;
+	private boolean exportable	= false;
 
 	/**
 	 * Constructor
@@ -293,6 +295,15 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Yield graph's box map height
+	 * @return graph's box map height
+	 */
+	public int getBoxMapHeight()
+	{
+		return boxMapHeight;
+	}
+	
+	/**
 	 * Setter for graph's box width
 	 * @param w width
 	 */
@@ -308,6 +319,15 @@ public class PlotComponent
 	public void setBoxHeight(int h)
 	{
 		boxHeight = h;
+	}
+	
+	/**
+	 * Setter for graph's box map height
+	 * @param mh map height
+	 */
+	public void setBoxMapHeight(int mh)
+	{
+		boxMapHeight = mh;
 	}
 	
 	/**

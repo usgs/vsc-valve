@@ -53,7 +53,7 @@ public class PlotHandler implements HttpHandler
 	public static final int DEFAULT_COMPONENT_HEIGHT	= 240;
 	public static final int DEFAULT_COMPONENT_TOP		= 20;
 	public static final int DEFAULT_COMPONENT_LEFT		= 75;
-	
+	public static final int DEFAULT_COMPONENT_MAPHEIGHT	= 900;	
 	public static final int MAX_PLOT_WIDTH				= 6000;
 	public static final int MAX_PLOT_HEIGHT				= 50000;
 	
@@ -68,44 +68,6 @@ public class PlotHandler implements HttpHandler
 	{
 		logger = Log.getLogger("gov.usgs.valve3");
 		dataHandler = dh;
-	}
-	
-	/**
-	 * Process HttpServletRequest and generate one {@link PlotComponent}
-	 * @param request request to process
-	 * @param i serial number of source in the request 
-	 * @return generated PlotComponent
-	 * @throws Valve3Exception
-	 */
-	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
-	{
-		String source = request.getParameter("src." + i);
-		if (source == null || source.length()==0)
-			throw new Valve3Exception("Illegal src." + i + " value.");
-		String tz = request.getParameter("tz");
-		if ( tz==null || tz.equals("") ) {
-			tz = Valve3.getInstance().getTimeZoneAbbr();
-			logger.info( "Illegal/missing tz parameter; using default value" );
-		}	
-		TimeZone timeZone = TimeZone.getTimeZone(tz);
-		PlotComponent component = new PlotComponent(source, timeZone);
-
-		// Not using generics because HttpServletRequest is Java 1.4
-		Map parameters = request.getParameterMap();
-		for (Object k : parameters.keySet())
-		{
-			String key = (String)k;
-			if (key.endsWith("." + i))
-			{
-				String[] values = (String[])parameters.get(key);
-				if (values == null || values.length <= 0)
-					continue;
-				String value = values[0];
-				key = key.substring(0, key.indexOf('.'));
-				component.put(key, value);
-			}
-		}
-		return component;
 	}
 	
 	/**
@@ -167,6 +129,11 @@ public class PlotHandler implements HttpHandler
 				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
 			}
 			
+			int mh = Util.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
+			if (mh < 0){
+				throw new Valve3Exception("Illegal mh." + i + " parameter.  Must be greater than 0");
+			}
+			
 			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
 			if (x < 0 || x > w){
 				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
@@ -179,11 +146,51 @@ public class PlotHandler implements HttpHandler
 
 			component.setBoxWidth(w);
 			component.setBoxHeight(h);
+			component.setBoxMapHeight(mh);
 			component.setBoxX(x);
 			component.setBoxY(y);
+			
 			list.add(component);
 		}
 		return list;
+	}
+	
+	/**
+	 * Process HttpServletRequest and generate one {@link PlotComponent}
+	 * @param request request to process
+	 * @param i serial number of source in the request 
+	 * @return generated PlotComponent
+	 * @throws Valve3Exception
+	 */
+	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
+	{
+		String source = request.getParameter("src." + i);
+		if (source == null || source.length()==0)
+			throw new Valve3Exception("Illegal src." + i + " value.");
+		String tz = request.getParameter("tz");
+		if ( tz==null || tz.equals("") ) {
+			tz = Valve3.getInstance().getTimeZoneAbbr();
+			logger.info( "Illegal/missing tz parameter; using default value" );
+		}	
+		TimeZone timeZone = TimeZone.getTimeZone(tz);
+		PlotComponent component = new PlotComponent(source, timeZone);
+
+		// Not using generics because HttpServletRequest is Java 1.4
+		Map parameters = request.getParameterMap();
+		for (Object k : parameters.keySet())
+		{
+			String key = (String)k;
+			if (key.endsWith("." + i))
+			{
+				String[] values = (String[])parameters.get(key);
+				if (values == null || values.length <= 0)
+					continue;
+				String value = values[0];
+				key = key.substring(0, key.indexOf('.'));
+				component.put(key, value);
+			}
+		}
+		return component;
 	}
 	
 	/**
@@ -195,15 +202,17 @@ public class PlotHandler implements HttpHandler
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
+			
 			Valve3Plot plot = new Valve3Plot(request, components.size());
 			for (PlotComponent component : components) {
-				String source	= component.getSource();
-				Plotter plotter	= null;
+				String source				= component.getSource();
+				Plotter plotter				= null;
+				DataSourceDescriptor dsd	= null;
 				if (component.getExportable())
 					plot.setExportable( true );
 				if (source.equals("channel_map")) {
-					plotter = new ChannelMapPlotter();
-					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					plotter	= new ChannelMapPlotter();
+					dsd		= dataHandler.getDataSourceDescriptor(component.get("subsrc"));
 					if (dsd != null) {
 						plotter.setVDXClient(dsd.getVDXClientName());
 						plotter.setVDXSource(dsd.getVDXSource());

@@ -163,9 +163,21 @@ public class GPSPlotter extends RawDataPlotter {
 			break;
 		
 		case VELOCITY_MAP:
-			se = comp.getBoolean("se");
-			vs = comp.getBoolean("vs");
-			hs = comp.getBoolean("hs");
+			try {
+				hs	= Util.stringToBoolean(comp.getString("hs"), true);
+			} catch (Exception e) {
+				hs	= true;
+			}
+			try {
+				vs	= Util.stringToBoolean(comp.getString("vs"), false);
+			} catch (Exception e) {
+				vs	= false;
+			}
+			try {
+				se	= Util.stringToBoolean(comp.getString("se"), true);
+			} catch (Exception e) {
+				se	= true;
+			}
 			break;
 		}
 	}
@@ -278,7 +290,7 @@ public class GPSPlotter extends RawDataPlotter {
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxMapHeight());
 		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
 		
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
