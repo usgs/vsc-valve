@@ -30,7 +30,7 @@ import gov.usgs.vdx.data.hypo.Hypocenter;
 import gov.usgs.vdx.data.hypo.HypocenterList;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer;
-import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.Axes;
+import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.AxesOption;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
 import gov.usgs.vdx.data.HypocenterExporter;
 import gov.usgs.vdx.data.MatrixExporter;
@@ -98,7 +98,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 	private static final double DEFAULT_WIDTH = 100.0;
 
-	private double hypowidth; // the width is for the Arbitrary line vs depth plot (SBH)
+	 // the width is for the Arbitrary line vs depth plot (SBH)
+	private double hypowidth;
 	private GeoRange range;
 	private Point2D startLoc;
 	private Point2D endLoc;
@@ -110,8 +111,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private double minVerr, maxVerr;
 	private String rmk;
 	
-	private Axes axes;
-	private ColorOption color;
+	private AxesOption axesOption;
+	private ColorOption colorOption;
 	private PlotType plotType;
 	private BinSize bin;
 	private RightAxis rightAxis;
@@ -213,39 +214,33 @@ public class HypocenterPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal area of interest: s=" +s);
 		double n = comp.getDouble("north");
 		if (n > 90)
-			throw new Valve3Exception("Illegal area of interest: n=" +n);
-		
+			throw new Valve3Exception("Illegal area of interest: n=" +n);		
 
-//		this.startLoc = new Point2D.Double(w,s);
-//		this.endLoc = new Point2D.Double(e,n);
-		this.startLoc = new Point2D.Double(w,n);
-		this.endLoc = new Point2D.Double(e,s);
+		this.startLoc	= new Point2D.Double(w,n);
+		this.endLoc		= new Point2D.Double(e,s);
 		
 		if(s>=n){
 			double t = s;
 			s=n;
 			n=t;
-			//throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
-
 		}	
 		if(w>=e){
 			double t = e;
 			e=w;
 			w=t;
-			//throw new Valve3Exception("Illegal area of interest: s=" + s + ", n=" + n);
 		}	
-		range	= new GeoRange(w, e, s, n);
+		range		= new GeoRange(w, e, s, n);
 		
-		hypowidth = Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
+		hypowidth	= Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
 		
 		minMag		= Util.stringToDouble(comp.get("minMag"), -Double.MAX_VALUE);
 		maxMag		= Util.stringToDouble(comp.get("maxMag"), Double.MAX_VALUE);
 		if (minMag > maxMag)
 			throw new Valve3Exception("Illegal magnitude filter.");
 		
-		minDepth	= Util.stringToDouble(comp.get("minDepth"), -Double.MAX_VALUE);
-		maxDepth	= Util.stringToDouble(comp.get("maxDepth"), Double.MAX_VALUE);
-		if (minDepth > maxDepth)
+		minDepth	= Util.stringToDouble(comp.get("minDepth"), Double.MAX_VALUE);
+		maxDepth	= Util.stringToDouble(comp.get("maxDepth"), -Double.MAX_VALUE);
+		if (minDepth < maxDepth)
 			throw new Valve3Exception("Illegal depth filter.");
 		
 		minNPhases	= Util.stringToInteger(comp.get("minNPhases"), Integer.MIN_VALUE);
@@ -269,37 +264,39 @@ public class HypocenterPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal vertical error filter.");
 		
 		rmk			= Util.stringToString(comp.get("rmk"), "");
-		String c = "";
+		
 		switch (plotType) {
 		
-		case MAP:			
-			String axisType = comp.get("axes");
-			String a    = Util.stringToString(axisType, "M");
-			axes		= Axes.fromString(a);
-			if (axes == null)
+		case MAP:
+			
+			// axes defaults to Map View
+			axesOption	= AxesOption.fromString(Util.stringToString(comp.get("axesOption"), "M"));
+			if (axesOption == null)
 				throw new Valve3Exception("Illegal axes type.");
 
-			 c	= Util.stringToString(comp.get("color"), "A");
+			// color defaults to Auto
+			String c	= Util.stringToString(comp.get("colorOption"), "A");
 			if (c.equals("A"))
-				color	= ColorOption.chooseAuto(axes);
+				colorOption	= ColorOption.chooseAuto(axesOption);
 			else
-				color	= ColorOption.fromString(c);
-			if (color == null)
+				colorOption	= ColorOption.fromString(c);
+			if (colorOption == null)
 				throw new Valve3Exception("Illegal color option.");
 			
 			break;
 		
 		case COUNTS:
-			String bs	= Util.stringToString(comp.get("cntsBin"), "day");
-			bin			= BinSize.fromString(bs);
+			
+			// bin size defalts to day
+			bin		= BinSize.fromString(Util.stringToString(comp.get("cntsBin"), "day"));
 			if (bin == null)
 				throw new Valve3Exception("Illegal bin size option.");
 
 			if ((endTime - startTime) / bin.toSeconds() > 10000)
 				throw new Valve3Exception("Bin size too small.");
 
-			String ra   = Util.stringToString(comp.get("cntsAxis"), "C");
-			rightAxis	= RightAxis.fromString(ra);
+			// right axis default to cumulative counts
+			rightAxis	= RightAxis.fromString(Util.stringToString(comp.get("cntsAxis"), "C"));
 			if (rightAxis == null)
 				throw new Valve3Exception("Illegal counts axis option.");
 			
@@ -325,7 +322,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		double tnorth	= range.getNorth();
 		
 		// we need to get extra hypocenters for plotting the width	
-		if (axes == Axes.ARB_DEPTH || axes == Axes.ARB_TIME) {		
+		if (axesOption == AxesOption.ARB_DEPTH || axesOption == AxesOption.ARB_TIME) {		
 			double latDiff 		= ArbDepthCalculator.getLatDiff(hypowidth);			
 			double lonNorthDiff = ArbDepthCalculator.getLonDiff(hypowidth, tnorth);
 			double lonSouthDiff = ArbDepthCalculator.getLonDiff(hypowidth, tsouth);
@@ -347,8 +344,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("east", Double.toString(teast));
 		params.put("south", Double.toString(tsouth));
 		params.put("north", Double.toString(tnorth));
-		params.put("minDepth", Double.toString(-maxDepth));
-		params.put("maxDepth", Double.toString(-minDepth));
+		params.put("minDepth", Double.toString(minDepth));
+		params.put("maxDepth", Double.toString(maxDepth));
 		params.put("minMag", Double.toString(minMag));
 		params.put("maxMag", Double.toString(maxMag));
 		params.put("minNPhases", Integer.toString(minNPhases));
@@ -393,6 +390,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private BasicFrameRenderer plotMapView(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		
 		// TODO: make projection variable
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
@@ -402,10 +400,11 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
-		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 190);
 
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
-		mr.setGeoLabelSet(labels.getSubset(range));
+		labels = labels.getSubset(range);
+		mr.setGeoLabelSet(labels);
 
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, comp.getBoxWidth());
@@ -413,6 +412,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
+		
 		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
 		trans[4] = startTime+timeOffset;
 		trans[5] = endTime+timeOffset;
@@ -432,67 +432,64 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception
 	 */
 	private void plotMap(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
-		ArbDepthCalculator adc = null;
 		
-		BasicFrameRenderer base = new BasicFrameRenderer();
-		base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
+		// default variables
+		ArbDepthCalculator adc = null;	
 		String subCount = "";
 		double lat1;
 		double lon1;
 		double lat2;
 		double lon2;
 		int count;
-		List<Hypocenter> myhypos;
-		switch (axes) {
+		List<Hypocenter> myhypos;	
+		BasicFrameRenderer base = new BasicFrameRenderer();
+		base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight() + 115);
+		
+		switch (axesOption) {
+		
 		case MAP_VIEW:
 			base = plotMapView(v3p, comp);
 			base.createEmptyAxis();
-			if(xUnits){
-				base.getAxis().setBottomLabelAsText("Longitude");
-			}
-			if(yUnits){
-				base.getAxis().setLeftLabelAsText("Latitude");
-			}
-			((MapRenderer) base).createScaleRenderer();
+			if(xUnits) base.getAxis().setBottomLabelAsText("Longitude");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Latitude");
+			((MapRenderer)base).createScaleRenderer();
 			break;
+			
 		case LON_DEPTH:
-			base.setExtents(range.getWest(), range.getEast(), -maxDepth, -minDepth);
+			base.setExtents(range.getWest(), range.getEast(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
 			base.createDefaultAxis();
+			if(xUnits) base.getAxis().setBottomLabelAsText("Longitude");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
 			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
 			comp.setTranslationType("xy");
-			base.getAxis().setBottomLabelAsText("Longitude");
-			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
+			
 		case LAT_DEPTH:
-			base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
+			base.setExtents(range.getSouth(), range.getNorth(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
 			base.createDefaultAxis();
+			if(xUnits) base.getAxis().setBottomLabelAsText("Latitude");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
 			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
 			comp.setTranslationType("xy");
-			base.getAxis().setBottomLabelAsText("Latitude");
-			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
+			
 		case TIME_DEPTH:
-			base.setExtents(startTime+timeOffset, endTime+timeOffset, -maxDepth, -minDepth);
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
 			base.createDefaultAxis();
 			base.setXAxisToTime(8);
+			if(xUnits) base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
 			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
 			comp.setTranslationType("ty");
-			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
-			base.getAxis().setLeftLabelAsText("Depth (km)");
 			break;
+			
 		case ARB_DEPTH:
 		
 			// need to set the extents for along the line. km offset?
 			base = new ArbDepthFrameRenderer();
 			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 
-			/*
-			 * 			lat1 = range.getSouth();
-			 *			lon1 = range.getWest();
-			 *			lat2 = range.getNorth();
-			 *			lon2 = range.getEast();
-			 */
-
 			lat1 = startLoc.getY();
 			lon1 = startLoc.getX();
 			lat2 = endLoc.getY();
@@ -502,14 +499,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);
 
-			// base.setExtents(range.getSouth(), range.getNorth(), -maxDepth, -minDepth);
-			base.setExtents(0.0, adc.getMaxDist(), -maxDepth, -minDepth);
-
+			base.setExtents(0.0, adc.getMaxDist(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
 			base.createDefaultAxis();
+			
+			if(xUnits) base.getAxis().setBottomLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
+			
 			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
 			comp.setTranslationType("xy");
-			base.getAxis().setBottomLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
-			base.getAxis().setLeftLabelAsText("Depth (km)");
 		
 			count = 0;
 			myhypos = hypos.getHypocenters();
@@ -523,12 +520,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 			subCount = new String(count + " of ");
 			
 			break;
+			
 		case ARB_TIME:
 			
 			// need to set the extents for along the line. km offset?
 			base = new ArbDepthFrameRenderer();
-			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh") - 16);			
-			v3p.getPlot().setSize(v3p.getPlot().getWidth(), comp.getInt("mh") + 60);
+			base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxWidth());			
+			v3p.getPlot().setSize(v3p.getPlot().getWidth(), base.getGraphHeight() + 190);
 			
 			lat1 = startLoc.getY();
 			lon1 = startLoc.getX();
@@ -537,9 +535,17 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 			adc = new ArbDepthCalculator(lat1, lon1, lat2, lon2, hypowidth);
 
-			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);
+			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);	
 
-		
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, 0.0, adc.getMaxDist());
+			base.createDefaultAxis();
+			base.setXAxisToTime(8);			
+					
+			if(xUnits) base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
+			if(yUnits) base.getAxis().setLeftLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
+						
+			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
+			comp.setTranslationType("ty");	
 		
 			count = 0;
 			myhypos = hypos.getHypocenters();
@@ -551,19 +557,6 @@ public class HypocenterPlotter extends RawDataPlotter {
 				}
 			}
 			subCount = new String(count + " of ");
-					
-			//base.setExtents(0.0, adc.getMaxDist(), -maxDepth, -minDepth);
-
-			base.setExtents(startTime+timeOffset, endTime+timeOffset, 0.0, adc.getMaxDist());
-			base.createDefaultAxis();
-			base.setXAxisToTime(8);
-			
-					
-			base.getAxis().setLeftLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
-						
-			comp.setTranslation(base.getDefaultTranslation(v3p.getPlot().getHeight()));
-			comp.setTranslationType("ty");
-			base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
 			
 			break;
 		}
@@ -577,12 +570,14 @@ public class HypocenterPlotter extends RawDataPlotter {
 		v3p.getPlot().addRenderer(base);
 		
 		// create the scale renderer
-		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axes);
-		hr.setColorOption(color);
-		if (color == ColorOption.TIME)
+		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axesOption);
+		hr.setColorOption(colorOption);
+		if (colorOption == ColorOption.TIME)
 			hr.setColorTime(startTime+timeOffset, endTime+timeOffset);
-		hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY() + base.getGraphHeight());
-		hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() + 16, base.getGraphY());
+		if (xLabel) {
+			hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 + 150, base.getGraphY() + base.getGraphHeight() + 150);
+			hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 - 150, base.getGraphY() + base.getGraphHeight() + 150);
+		}
 		v3p.getPlot().addRenderer(hr);
 		v3p.addComponent(comp);
 	}
@@ -597,8 +592,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 * @throws Valve3Exception 
 	 */
 	private void plotCounts(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
-		int leftLabels = 0;
 		
+		int leftLabels = 0;		
 		HistogramExporter hr = new HistogramExporter(hypos.getCountsHistogram(bin));
 		hr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 		hr.setDefaultExtents();
@@ -606,19 +601,12 @@ public class HypocenterPlotter extends RawDataPlotter {
 		hr.setMaxX(endTime+timeOffset);
 		hr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
 		hr.setXAxisToTime(8, xTickMarks, xTickValues);
-		if(yUnits){
-			hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
-		}
-		if(xUnits){
-			hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
-		}
-		if(xLabel){
-			hr.getAxis().setTopLabelAsText(getTopLabel(rank));
-		}
-		if(hr.getAxis().getLeftLabels() != null){
+		if (yUnits) hr.getAxis().setLeftLabelAsText("Earthquakes per " + bin);
+		if (xUnits) hr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
+		if (xLabel) hr.getAxis().setTopLabelAsText(getTopLabel(rank));
+		if (hr.getAxis().getLeftLabels() != null) {
 			leftLabels = hr.getAxis().getLeftLabels().length;
 		}
-
 		if ( forExport ) {
 			// Add column headers to csvHdrs (second one incomplete)
 			csvHdrs.append(String.format( ",%s_EventsPer%s", rank.getName(), bin ));
@@ -668,15 +656,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 				((ShapeRenderer)r[0]).color		= Color.red;
 				((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
 				AxisRenderer ar = new AxisRenderer(mr);
-				if(yTickValues){
-					ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftLabels, false), null);
-				}
-				mr.setAxis(ar);
-			
+				if (yTickValues) ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, leftLabels, false), null);
+				if (yUnits) hr.getAxis().setRightLabelAsText(rightAxis.toString());
+				mr.setAxis(ar);			
 				hr.addRenderer(mr);
-				if(yUnits){
-					hr.getAxis().setRightLabelAsText(rightAxis.toString());
-				}
 			}
 		}
 		if(isDrawLegend) hr.createDefaultLegendRenderer(new String[] {rank.getName() + " Events"});
