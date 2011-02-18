@@ -177,6 +177,17 @@ public class PlotComponent
 	}
 	
 	/**
+	 * Get whether or not vector autoscaling is allowed
+	 * @param key key to query 
+	 * @return flag if auto scaling allowed for given key
+	 */
+	public boolean isVectorAutoScale(String key)
+	{
+		String vs = params.get(key);
+		return vs == null || vs.trim().isEmpty() || vs.toLowerCase().startsWith("a");
+	}
+	
+	/**
 	 * Compute max and min values for given prefix from PlotComponent's parameters
 	 * @param pre prefix to query
 	 * @param min default min value 
