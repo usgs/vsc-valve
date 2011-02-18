@@ -90,6 +90,9 @@ public class TiltPlotter extends RawDataPlotter {
 	private double azimuthRadial;
 	private double azimuthTangential;
 	
+	private double vectorScale;
+	private boolean isAutoVectorScale;
+	
 	/**
 	 * Default constructor
 	 */
@@ -180,6 +183,15 @@ public class TiltPlotter extends RawDataPlotter {
 			break;
 			
 		case TILT_VECTORS:
+			
+			// if auto vector scaling is not enabled, look up to see what the user input
+			isAutoVectorScale	= comp.isVectorAutoScale("vs");
+			if (!isAutoVectorScale) {
+				vectorScale = Util.stringToDouble(comp.get("vs"));
+				if (vectorScale <= 0 || Double.isNaN(vectorScale)) {
+					isAutoVectorScale = true;
+				}
+			}
 			break;
 		}
 	}
@@ -267,6 +279,7 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
 
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
@@ -274,14 +287,15 @@ public class TiltPlotter extends RawDataPlotter {
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
 		RenderedImage ri = images.getMapBackground(proj, range, comp.getBoxWidth());
+		
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
-		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60);
+		
 		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
-		trans[4] = 0;
-		trans[5] = 0;
+		trans[4] = startTime+timeOffset;
+		trans[5] = endTime+timeOffset;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
 		mr.createEmptyAxis();
@@ -306,10 +320,49 @@ public class TiltPlotter extends RawDataPlotter {
 			}
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
 			DoubleMatrix2D dm = data.getAllData(0.0);
-			double et1	= dm.getQuick(0, 2);
-			double et2	= dm.getQuick(dm.rows() - 1, 2);
-			double nt1	= dm.getQuick(0, 3);
-			double nt2	= dm.getQuick(dm.rows() - 1, 3);
+			
+			// iterate through each matrix and get the value that is not null.  we can't calculate vectors from potentially null values
+			double et1	= 0.0;
+			double et2	= 0.0;
+			double nt1	= 0.0;
+			double nt2	= 0.0;
+			int i;
+			for (i = 0; i < dm.rows(); i++) {
+				if (!Double.isNaN(dm.getQuick(i, 4))) {
+					et1 = dm.getQuick(i, 4);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = 0; i < dm.rows(); i++) {
+				if (!Double.isNaN(dm.getQuick(i, 5))) {
+					nt1 = dm.getQuick(i, 5);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = dm.rows() - 1; i > -1; i--) {
+				if (!Double.isNaN(dm.getQuick(i, 4))) {
+					et2 = dm.getQuick(i, 4);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = dm.rows() - 1; i > -1; i--) {
+				if (!Double.isNaN(dm.getQuick(i, 5))) {
+					nt2 = dm.getQuick(i, 5);
+					break;
+				} else {
+					continue;
+				}
+			}
+			// double et1	= dm.getQuick(0, 2);
+			// double nt1	= dm.getQuick(0, 3);
+			// double et2	= dm.getQuick(dm.rows() - 1, 2);
+			// double nt2	= dm.getQuick(dm.rows() - 1, 3);
 			double e	= et2 - et1;
 			double n	= nt2 - nt1;
 
@@ -333,8 +386,15 @@ public class TiltPlotter extends RawDataPlotter {
 			return;
 		}
 		
+		// lookup the correct scaling factor
+		double scale = 0.0;
+		if (isAutoVectorScale) {
+			scale = EllipseVectorRenderer.getBestScale(maxMag);
+		} else {
+			scale = vectorScale;
+		}
+		
 		// set the length of the legend vector to 1/5 of the width of the shortest side of the map
-		double scale = EllipseVectorRenderer.getBestScale(maxMag);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
 		// logger.info("Scale: " + scale);
 		// logger.info("desiredLength: " + desiredLength);
