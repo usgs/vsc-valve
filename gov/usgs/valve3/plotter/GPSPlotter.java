@@ -92,17 +92,17 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getInputs(PlotComponent component) throws Valve3Exception {
+	public void getInputs(PlotComponent comp) throws Valve3Exception {
 		
-		parseCommonParameters(component);	
+		parseCommonParameters(comp);	
 		
-		rk = component.getInt("rk");	
-		bl = component.get("bl");
+		rk = comp.getInt("rk");	
+		bl = comp.get("bl");
 		if (bl != null && bl.equals("[none]")) {
 			bl = null;
 		}
 		
-		String pt = component.get("plotType");
+		String pt = comp.get("plotType");
 		if ( pt == null )
 			plotType = PlotType.TIME_SERIES;
 		else {
@@ -112,7 +112,7 @@ public class GPSPlotter extends RawDataPlotter {
 			}
 		}
 
-		validateDataManipOpts(component);
+		validateDataManipOpts(comp);
 
 		switch(plotType) {		
 		case TIME_SERIES:			
@@ -163,9 +163,9 @@ public class GPSPlotter extends RawDataPlotter {
 			break;
 		
 		case VELOCITY_MAP:
-			se = component.getBoolean("se");
-			vs = component.getBoolean("vs");
-			hs = component.getBoolean("hs");
+			se = comp.getBoolean("se");
+			vs = comp.getBoolean("vs");
+			hs = comp.getBoolean("hs");
 			break;
 		}
 	}
@@ -175,7 +175,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getData(PlotComponent component) throws Valve3Exception {
+	public void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
 		boolean gotData			= false;
@@ -255,7 +255,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @param rank Rank
 	 */
-	private void plotVelocityMap(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
+	private void plotVelocityMap(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		
@@ -278,23 +278,24 @@ public class GPSPlotter extends RawDataPlotter {
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getInt("mh"));
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getInt("mh"));
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
 		
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
 		mr.setGeoLabelSet(labels);
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
-		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
+		RenderedImage ri = images.getMapBackground(proj, range, comp.getBoxWidth());
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
-		v3Plot.getPlot().setSize(v3Plot.getPlot().getWidth(), mr.getGraphHeight() + 60);
-		double[] trans = mr.getDefaultTranslation(v3Plot.getPlot().getHeight());
-		trans[4] = 0;
-		trans[5] = 0;
+		
+		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
+		trans[4] = startTime+timeOffset;
+		trans[5] = endTime+timeOffset;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
 		mr.createEmptyAxis();
@@ -305,7 +306,7 @@ public class GPSPlotter extends RawDataPlotter {
 			mr.getAxis().setLeftLabelAsText("Latitude");
 		}
 		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
-		v3Plot.getPlot().addRenderer(mr);
+		v3p.getPlot().addRenderer(mr);
 		
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
@@ -373,7 +374,7 @@ public class GPSPlotter extends RawDataPlotter {
 			evr.displayVert = vs;			
 			evr.sigZ =  e.getQuick(2, 2);
 			maxMag = Math.max(Math.max(evr.getMag(), Math.abs(evr.z)), maxMag);
-			v3Plot.getPlot().addRenderer(evr);
+			v3p.getPlot().addRenderer(evr);
 			vrs.add(evr);
 		}
 		
@@ -407,18 +408,18 @@ public class GPSPlotter extends RawDataPlotter {
 		svr.colorHoriz = Color.BLACK;
 		svr.colorVert  = Color.BLACK;
 		svr.sigZ = 0;
-		v3Plot.getPlot().addRenderer(svr);
+		v3p.getPlot().addRenderer(svr);
 		
 		// draw the legend vector units
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
 		tr.text = scale + " m/year";
-		v3Plot.getPlot().addRenderer(tr);
+		v3p.getPlot().addRenderer(tr);
 		
-		component.setTranslation(trans);
-		component.setTranslationType("map");
-		v3Plot.addComponent(component);
+		comp.setTranslation(trans);
+		comp.setTranslationType("map");
+		v3p.addComponent(comp);
 	}
 
 	/**
@@ -427,7 +428,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData(Valve3Plot v3Plot, PlotComponent component, Rank rank) throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
 		
 		// setup the display for the legend
 		String rankLegend		= rank.getName();
@@ -458,7 +459,7 @@ public class GPSPlotter extends RawDataPlotter {
 				
 				// setting up variables to decide where to plot this component
 				int currentComp		= 1;
-				int compBoxHeight	= component.getBoxHeight();
+				int compBoxHeight	= comp.getBoxHeight();
 				
 				for (int cid : channelDataMap.keySet()) {
 					
@@ -468,8 +469,8 @@ public class GPSPlotter extends RawDataPlotter {
 					
 					// verify their is something to plot
 					if (data == null || data.observations() == 0) {
-						v3Plot.setHeight(v3Plot.getHeight() - channelCompCount * compBoxHeight);
-						Plot plot	= v3Plot.getPlot();
+						v3p.setHeight(v3p.getHeight() - channelCompCount * compBoxHeight);
+						Plot plot	= v3p.getPlot();
 						plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 						compCount = compCount - channelCompCount;
 						continue;
@@ -558,47 +559,47 @@ public class GPSPlotter extends RawDataPlotter {
 							for (int i = 0; i < columnsList.size(); i++) {
 								Column col = columnsList.get(i);
 								if(col.checked){
-									MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, col.unit);
-									MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
+									MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, i, col.unit);
+									MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
 									if (rightMR != null)
-										v3Plot.getPlot().addRenderer(rightMR);
-									v3Plot.getPlot().addRenderer(leftMR);
-									component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-									component.setTranslationType("ty");
-									v3Plot.addComponent(component);
+										v3p.getPlot().addRenderer(rightMR);
+									v3p.getPlot().addRenderer(leftMR);
+									comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+									comp.setTranslationType("ty");
+									v3p.addComponent(comp);
 									currentComp++;	
 								}
 							}
 						} else {
-							MatrixRenderer leftMR	= getLeftMatrixRenderer(component, channel, gdm, compBoxHeight, compBoxHeight, -1, leftUnit);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(component, channel, gdm, compBoxHeight, compBoxHeight, -1, leftMR.getLegendRenderer());
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, compBoxHeight, compBoxHeight, -1, leftUnit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, compBoxHeight, compBoxHeight, -1, leftMR.getLegendRenderer());
 							if (rightMR != null)
-								v3Plot.getPlot().addRenderer(rightMR);
-							v3Plot.getPlot().addRenderer(leftMR);
-							component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-							component.setTranslationType("ty");
-							v3Plot.addComponent(component);
+								v3p.getPlot().addRenderer(rightMR);
+							v3p.getPlot().addRenderer(leftMR);
+							comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+							comp.setTranslationType("ty");
+							v3p.addComponent(comp);
 							currentComp++;
 						}
 					}
 				}
 				if (!forExport) {
 					if(channelDataMap.size()>1){
-						v3Plot.setCombineable(false);
+						v3p.setCombineable(false);
 					} else {
-						v3Plot.setCombineable(true);
+						v3p.setCombineable(true);
 					}
-					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
-					addSuppData( vdxSource, vdxClient, v3Plot, component );
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+					addSuppData( vdxSource, vdxClient, v3p, comp );
 				}
 				break;
 				
 			case VELOCITY_MAP:
 				if (!forExport) {
-					v3Plot.setCombineable(false);
-					v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
 				}
-				plotVelocityMap(v3Plot, component, rank);
+				plotVelocityMap(v3p, comp, rank);
 				break;
 		}
 	}
