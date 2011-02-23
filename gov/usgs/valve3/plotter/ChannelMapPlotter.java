@@ -8,7 +8,6 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -38,14 +37,14 @@ public class ChannelMapPlotter extends Plotter
 	private GeoRange range;
 	private GeoLabelSet labels;
 	
-	protected boolean xTickMarks = true;
-    protected boolean xTickValues = true;
-    protected boolean xUnits = true;
-    protected boolean xLabel = false;
-    protected boolean yTickMarks = true;
-    protected boolean yTickValues = true;
-    protected boolean yUnits = true;
-    protected boolean yLabel = false;
+	protected boolean xTickMarks	= true;
+    protected boolean xTickValues	= true;
+    protected boolean xUnits		= true;
+    protected boolean xLabel		= false;
+    protected boolean yTickMarks	= true;
+    protected boolean yTickValues	= true;
+    protected boolean yUnits		= true;
+    protected boolean yLabel		= false;
 	
 	protected Logger logger;
 	
@@ -172,15 +171,15 @@ public class ChannelMapPlotter extends Plotter
 	 * @throws Valve3Exception
 	 */
 	private void plotMap(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
-		if (!forExport) {
-			v3p.setCombineable(false);
-		}
+		
 		TransverseMercator proj = new TransverseMercator();
 		Point2D.Double origin = range.getCenter();
 		proj.setup(origin, 0, 0);
 
 		MapRenderer mr = new MapRenderer(range, proj);
 		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxMapHeight());
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
+		v3p.setHeight(mr.getGraphHeight() + 60 + 16);
 		
 		if (labels != null)
 			mr.setGeoLabelSet(labels.getSubset(range));
@@ -192,8 +191,6 @@ public class ChannelMapPlotter extends Plotter
 		mr.createBox(8);
 		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
-		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60);
-		v3p.setHeight(mr.getGraphHeight() + 60);
 		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
 		trans[4] = 0;
 		trans[5] = 0;
@@ -235,6 +232,7 @@ public class ChannelMapPlotter extends Plotter
 		// plot configuration, channel maps don't support data export
 		if (!forExport) {
 			v3p.setExportable(false);
+			v3p.setCombineable(false);
 		}
 	
 		getData(comp);
