@@ -24,6 +24,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -190,12 +191,16 @@ public class GPSPlotter extends RawDataPlotter {
 	public void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
-		boolean gotBaselineData	= false;
-		Pool<VDXClient> pool	= null;
-		VDXClient client		= null;
-		channelDataMap			= new LinkedHashMap<Integer, GPSData>();
-		String[] channels		= ch.split(",");
+		boolean gotData				= false;
+		boolean gotBaselineData		= false;
+		boolean exceptionThrown		= false;
+		String exceptionMsg			= "";
+		boolean blexceptionThrown	= false;
+		String blexceptionMsg		= "";
+		Pool<VDXClient> pool		= null;
+		VDXClient client			= null;
+		channelDataMap				= new LinkedHashMap<Integer, GPSData>();
+		String[] channels			= ch.split(",");
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();		
@@ -217,6 +222,10 @@ public class GPSPlotter extends RawDataPlotter {
 				GPSData data = null;
 				try {
 					data = (GPSData)client.getBinaryData(params);
+				} catch (UtilException e) {
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				} catch (Exception e) {
 					data = null;
 				}
@@ -234,6 +243,9 @@ public class GPSPlotter extends RawDataPlotter {
 				params.put("ch", bl);
 				try {
 					baselineData = (GPSData)client.getBinaryData(params);
+				} catch (UtilException e) {
+					blexceptionThrown	= true;
+					blexceptionMsg		= e.getMessage();
 				} catch(Exception e){
 					baselineData = null; 
 				}
@@ -249,13 +261,21 @@ public class GPSPlotter extends RawDataPlotter {
 			pool.checkin(client);
 		}
 		
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
+
 		// if no data exists, then throw exception
-		if (channelDataMap.size() == 0 || !gotData) {
+		} else if (channelDataMap.size() == 0 || !gotData) {
 			throw new Valve3Exception("No data for any channel.");
 		}
 		
+		// if a data limit message exists, then throw exception
+		if (blexceptionThrown) {
+			throw new Valve3Exception(blexceptionMsg);
+		
 		// if no baseline data exists, then throw exception
-		if (bl != null && !gotBaselineData) {
+		} else if (bl != null && !gotBaselineData) {
 			throw new Valve3Exception("No data for baseline channel.");
 		}
 	}

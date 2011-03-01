@@ -224,7 +224,7 @@ public class PlotHandler implements HttpHandler
 					try {
 						plotter.plot(plot, component);
 					} catch (Exception e) {
-						throw new Valve3Exception(e.toString());
+						throw new Valve3Exception(e.getMessage());
 					}
 			}
 			Valve3.getInstance().getResultDeleter().addResult(plot);

@@ -3,6 +3,7 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -86,6 +87,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 		
 		// initialize variables
 		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
 		VDXClient client		= null;
 		channelDataMap			= new LinkedHashMap<Integer, HelicorderData>();
@@ -109,6 +112,10 @@ public class HelicorderPlotter extends RawDataPlotter {
 				HelicorderData data = null;
 				try {
 					data = (HelicorderData)client.getBinaryData(params);
+				} catch (UtilException e) {
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				} catch (Exception e) {
 					data = null; 
 				}
@@ -125,8 +132,12 @@ public class HelicorderPlotter extends RawDataPlotter {
 			pool.checkin(client);
 		}
 		
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
+
 		// if no data exists, then throw exception
-		if (channelDataMap.size() == 0 || !gotData) {
+		} else if (channelDataMap.size() == 0 || !gotData) {
 			throw new Valve3Exception("No data for any channel.");
 		}
 	}

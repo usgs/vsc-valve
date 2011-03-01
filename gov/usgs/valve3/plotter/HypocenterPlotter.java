@@ -17,6 +17,7 @@ import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -313,6 +314,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
 		VDXClient client		= null;
 		
@@ -366,6 +369,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 			// get the data, if nothing is returned then create an empty list
 			try {
 				hypos = (HypocenterList)client.getBinaryData(params);
+			} catch (UtilException e) {
+				exceptionThrown	= true;
+				exceptionMsg	= e.getMessage();
 			} catch (Exception e) {
 				hypos = null; 
 			}
@@ -380,6 +386,11 @@ public class HypocenterPlotter extends RawDataPlotter {
 			// check back in our connection to the database
 			pool.checkin(client);
 		} 
+		
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
+		}
 	}
 
 	/**

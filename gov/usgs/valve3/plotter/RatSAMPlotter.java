@@ -8,6 +8,7 @@ import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -102,6 +103,8 @@ public class RatSAMPlotter extends RawDataPlotter {
 		
 		// initialize variables
 		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
 		VDXClient client		= null;
 		
@@ -121,9 +124,14 @@ public class RatSAMPlotter extends RawDataPlotter {
 			client = pool.checkout();	
 			try {
 				data = (RSAMData)client.getBinaryData(params);
+			} catch (UtilException e) {
+				exceptionThrown	= true;
+				exceptionMsg	= e.getMessage();
 			} catch (Exception e) {
 				data = null;
-			}		
+			}
+			
+			// if data was collected
 			if (data != null && data.rows() > 0) {
 				data.adjustTime(timeOffset);
 				gotData = true;
@@ -133,8 +141,12 @@ public class RatSAMPlotter extends RawDataPlotter {
 			pool.checkin(client);
 		}
 		
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
+
 		// if no data exists, then throw exception
-		if (!gotData) {
+		} else if (!gotData) {
 			throw new Valve3Exception("No data for any channel.");
 		}
 	}
