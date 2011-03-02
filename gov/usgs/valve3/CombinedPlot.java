@@ -116,11 +116,7 @@ public class CombinedPlot extends Plot {
 						}
 					}
 					legendRenderer = mergeLegendRenderer(legendRenderer, waveRenderer.getLegendRenderer());
-					waveRenderer.setLegendRenderer(null);
 					setBoundaries(waveRenderer, waveRendererDataset);
-					AxisRenderer ar = new AxisRenderer(waveRenderer);
-					ar.createRightTickLabels(SmartTick.autoTick(waveRenderer.getMinY(), waveRenderer.getMaxY(), 8, false), null);
-					waveRenderer.setAxis(ar);
 					waveRenderers.add(waveRenderer);
 				}
 				else {	
@@ -128,10 +124,32 @@ public class CombinedPlot extends Plot {
 				}
 			}
 			renderers.clear();
+			boolean firstRenderer = true;
 			for(SliceWaveRenderer waveRenderer: waveRenderers){
 				waveRenderer.setLocation(graphX, graphY, graphWidth, graphHeight);
 				waveRenderer.setExtents(minX, maxX,	waveRendererDataset.minY, waveRendererDataset.maxY);
-				addRenderer(waveRenderer);
+				if(firstRenderer){
+					waveRenderer.update();
+					waveRenderer.setLegendRenderer(legendRenderer);
+					firstRenderer = false;
+				} else {
+					AxisRenderer ar = new AxisRenderer(waveRenderer);
+					waveRenderer.setAxis(ar);
+					waveRenderer.setLegendRenderer(null);
+				}
+				if(leftRendererDataset.unit==null){
+					addRenderer(waveRenderer);
+				}
+				else if (rightRendererDataset.unit==null){
+					waveRenderer.setLegendRenderer(null);
+					AxisRenderer ar = new AxisRenderer(waveRenderer);
+					ar.createRightTickLabels(SmartTick.autoTick(waveRenderer.getMinY(), waveRenderer.getMaxY(), 8, false), null);
+					waveRenderer.setAxis(ar);
+					addRenderer(waveRenderer);
+				}
+				else {
+					throw new RuntimeException("Count of units is more than 2");
+				}
 			}
 			if(leftRendererDataset.unit!=null){
 				MatrixRenderer leftRenderer = createRenderer(leftRendererDataset);
