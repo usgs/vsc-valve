@@ -130,8 +130,6 @@ function handlePlot(xml)
 	var imgs		= t.getElementsByTagName('img');
 	var img			= imgs[imgs.length - 1];
 	var minImg		= imgs[1];
-	var components	= xml.getElementsByTagName('component');
-	t.getElementsByTagName('input')[0].value = components.length;
 	img.header		= header;
 	img.container	= t;
 	img.src			= src;
@@ -139,6 +137,14 @@ function handlePlot(xml)
 	img.fullHeight	= height;
 	img.translation	= translation.split(",");
 	img.xml			= xml;
+	var components	= xml.getElementsByTagName('component');
+	
+	if (combined) {
+		t.getElementsByTagName('input')[0].value = 1;
+	} else {
+		t.getElementsByTagName('input')[0].value = components.length;
+	}
+	
 	for (var i = 0; i < img.translation.length; i++)
 		img.translation[i] = img.translation[i] * 1;
 	
@@ -262,33 +268,31 @@ function handlePlot(xml)
     			loadXML("combineMenu", "menu/combinemenu.html", function(req) {
     				var mip = document.getElementById(t.id+'combine');
     				if (req.readyState == 4 && req.status == 200) {
-    					combineMenuOpenedId = t.id+'combine';
-    					mip.innerHTML=req.responseText;
-    					mip.style.display = "block";
+    					combineMenuOpenedId	= t.id+'combine';
+    					mip.innerHTML		=req.responseText;
+    					mip.style.display	= "block";
       				}
     				var combineOKButton = mip.getElementsByTagName('input')[1];
         			addListener(combineOKButton, 'click',
         					function(){
-         				    combineMenuOpenedId = null;
-        					mip.style.display = 'none';
-         					var plotSize = STANDARD_SIZES[mip.getElementsByTagName('select')[0].selectedIndex].slice(0);
-         					var xScalingSelect = mip.getElementsByTagName('select')[1];
-         					var yScalingSelect = mip.getElementsByTagName('select')[2];
-         					var xScaling = parseFloat(xScalingSelect[xScalingSelect.selectedIndex].text);
-         					var yScaling = parseFloat(yScalingSelect[yScalingSelect.selectedIndex].text);
-         					plotSize[0] = plotSize[0]*xScaling; //plot width
-         					plotSize[1] = plotSize[1]*yScaling; //plot height
-         					plotSize[4] = plotSize[4]*xScaling; //comp width
-         					plotSize[5] = plotSize[5]*yScaling; //comp height 
-         					plotSize[6] = plotSize[6]*yScaling; //map height
-         					var clickedId = mip.getElementsByTagName('input')[2].value;
-         					var componentCount = document.getElementById(clickedId).getElementsByTagName('input')[0].value;
-         					if(componentCount==1){
-         						try{
+         				    combineMenuOpenedId	= null;
+        					mip.style.display	= 'none';
+         					var plotSize		= STANDARD_SIZES[mip.getElementsByTagName('select')[0].selectedIndex].slice(0);
+         					var xScalingSelect	= mip.getElementsByTagName('select')[1];
+         					var yScalingSelect	= mip.getElementsByTagName('select')[2];
+         					var xScaling		= parseFloat(xScalingSelect[xScalingSelect.selectedIndex].text);
+         					var yScaling		= parseFloat(yScalingSelect[yScalingSelect.selectedIndex].text);
+         					plotSize[0]			= plotSize[0] + plotSize[4] * (xScaling - 1); // plot width
+         					plotSize[1]			= plotSize[1] + plotSize[5] * (yScaling - 1); // plot height
+         					plotSize[4]			= plotSize[4] * xScaling; //comp width
+         					plotSize[5]			= plotSize[5] * yScaling; //comp height 
+         					plotSize[6]			= plotSize[6] * yScaling; //map height
+         					var clickedId		= mip.getElementsByTagName('input')[2].value;
+         					var componentCount	= document.getElementById(clickedId).getElementsByTagName('input')[0].value;
+         					if(componentCount == 1){
+         						try {
          							loadXML(title + '+' + mip.getElementsByTagName('input')[3].value, combineUrl(url, document.getElementById(clickedId).getElementsByTagName('a')[0].href, plotSize));
-         						} 
-         						catch(err)
-         						{
+         						} catch(err) {
          							alert(err);
          						}
          					} else {
@@ -522,57 +526,124 @@ function show_sd(me) {
 	elts[4].innerHTML = "<b>Data</b>: " + info_bits[9] + "<br><textarea rows=\"3\" cols=\"40\">" + info_bits[10] + "</textarea></td>";
 }
 
-function combineUrl(url1, url2, size){
-	var tz1 = url1.match(/&tz=\w+/)[0].substr(4);
-	var tz2 = url2.match(/&tz=\w+/)[0].substr(4);
-	if(tz1 != tz2){
-		throw "Timezones are differ";	
-	}
+function combineUrl(url1, url2, size) {
+	
+	// alert("url1:" + url1);
+	// alert("url2:" + url2);
+	
+    // check the time zones
+    var tz1 = url1.match(/&tz=.+?&/)[0];
+    var tz2 = url2.match(/&tz=.+?&/)[0];
+    if (tz1.length <= 5 || tz2.length <=5) {
+        throw "Timezones are missing";
+    } else if (tz1 != tz2) {
+        throw "Timezones are different";
+    }
+    var tz  = tz1.substr(4, tz1.length - 5);
+	
+	// get the count of components per plot
 	var url1_n = getIntParameter('n', url1);
 	var url2_n = getIntParameter('n', url2);
-	url1 = url1.replace("o=png", "o=xml&combine=true");
-	url1 = url1.replace(/&w=\d+/, "&w=" + size[0]);
-	url1 = url1.replace(/&h=\d+/, "&h=" + size[1]);
-	url1 = updateParameter('n', url1_n + url2_n, url1);
-	compParams = url1.match(/&\w+\.\d+=[-|\*|\w|\d]+/g);
-	for ( i=0; i<compParams.length; i++ ) {
-		var param = compParams[i].split('=')[0].substr(1);
-		var paramNameSplitted = param.split('.');
-		if(paramNameSplitted[0] == 'x'){
-			url1 = updateParameter('x.'+ paramNameSplitted[1], size[2], url1);
-		} else if(paramNameSplitted[0] == 'y'){
-			url1 = updateParameter('y.'+ paramNameSplitted[1], size[3], url1);
-		} else if(paramNameSplitted[0] == 'h'){
-			url1 = updateParameter('h.'+ paramNameSplitted[1], size[5], url1);
-		} else if(paramNameSplitted[0] == 'w'){
-			url1 = updateParameter('w.'+ paramNameSplitted[1], size[4], url1);
-		} else if(paramNameSplitted[0] == 'mh'){
-			url1 = updateParameter('mh.'+ paramNameSplitted[1], size[6], url1);
-		}	
+	
+	// prepare url 1 for parsing
+	url1_tmp1	= url1;
+	url1		= "";
+	
+	// update url 1 for each index individually
+	for (i = 0; i < url1_n; i++) {
+		
+		// parse url 1 into individual parameters for this particular index
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		compParams	= url1_tmp1.match(pattern);
+		url1_tmp2	= "";
+	
+		// correct url 1 with updated parameters
+		for (j = 0; j < compParams.length; j++) {
+			
+			// parse the parameter into local variables
+			var param		= compParams[j].split('=');
+			var paramKey	= param[0].substr(1);
+			var paramVal	= param[1];
+			var key			= paramKey.split('.')[0];
+			var index		= parseInt(paramKey.split('.')[1]);
+			
+			// update the parameter in the url
+			if (key == 'x') {
+				url1_tmp2 = updateParameter('x.'  + index, size[2], url1_tmp2);
+			} else if (key == 'y') {
+				url1_tmp2 = updateParameter('y.'  + index, size[3], url1_tmp2);
+			} else if (key == 'h') {
+				url1_tmp2 = updateParameter('h.'  + index, size[5], url1_tmp2);
+			} else if (key == 'w') {
+				url1_tmp2 = updateParameter('w.'  + index, size[4], url1_tmp2);
+			} else if (key == 'mh') {
+				url1_tmp2 = updateParameter('mh.' + index, size[6], url1_tmp2);
+			} else if (!(!paramVal || paramVal.length === 0)) {
+				url1_tmp2 = updateParameter(key + '.' + index, paramVal, url1_tmp2);
+			}
+		}
+		
+		url1 = url1 + url1_tmp2;
 	}
 	
-	url2 = url2.substr(url2.search(/&\w+\.0=/));
-	compParams = url2.match(/&\w+\.\d+=[-|\*|\w|\d]+/g);
-	for ( i=0; i<compParams.length; i++ ) {
-		var param = compParams[i].split('=');
-		var paramNameSplitted = param[0].substr(1).split('.');
-		var paramIndex = parseInt(paramNameSplitted[1]);
-		url2 = removeParameter(param[0].substr(1), url2);
-		if(paramNameSplitted[0] == 'x'){
-			url2 = updateParameter('x.'+ (paramIndex+url1_n), size[2], url2);
-		} else if(paramNameSplitted[0] == 'y'){
-			url2 = updateParameter('y.'+ (paramIndex+url1_n), size[3], url2);
-		} else if(paramNameSplitted[0] == 'h'){
-			url2 = updateParameter('h.'+ (paramIndex+url1_n), size[5], url2);
-		} else if(paramNameSplitted[0] == 'w'){
-			url2 = updateParameter('w.'+ (paramIndex+url1_n), size[4], url2);
-		} else if(paramNameSplitted[0] == 'mh'){
-			url2 = updateParameter('mh.'+ (paramIndex+url1_n), size[6], url2);
-		} else {
-			url2 = updateParameter(paramNameSplitted[0]+'.'+ (paramIndex+url1_n), param[1], url2);
+	// prepare url 2 for parsing
+	url2_tmp1	= url2;
+	url2		= "";
+	
+	// update url 2 for each index individually
+	for (i = url2_n - 1; i >= 0; i--) {
+		
+		// parse url 2 into individual parameters for this particular index
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		compParams	= url2_tmp1.match(pattern);
+		url2_tmp2	= "";
+		
+		// correct url 2 with updated parameters
+		for (j = 0; j < compParams.length; j++) {
+			
+			// parse the parameter into local variables
+			var param		= compParams[j].split('=');
+			var paramKey	= param[0].substr(1);
+			var paramVal	= param[1];
+			var key			= paramKey.split('.')[0];
+			var index		= parseInt(paramKey.split('.')[1]);
+			
+			// add the parameter back in to the url, updating the index value
+			if(key == 'x'){
+				url2_tmp2 = updateParameter('x.'  + (index + url1_n), size[2], url2_tmp2);
+			} else if(key == 'y'){
+				url2_tmp2 = updateParameter('y.'  + (index + url1_n), size[3], url2_tmp2);
+			} else if(key == 'h'){
+				url2_tmp2 = updateParameter('h.'  + (index + url1_n), size[5], url2_tmp2);
+			} else if(key == 'w'){
+				url2_tmp2 = updateParameter('w.'  + (index + url1_n), size[4], url2_tmp2);
+			} else if(key == 'mh'){
+				url2_tmp2 = updateParameter('mh.' + (index + url1_n), size[6], url2_tmp2);
+			} else if (!(!paramVal || paramVal.length === 0)) {
+				url2_tmp2 = updateParameter(key + '.' + (index + url1_n), paramVal, url2_tmp2);
+			}
 		}
+		
+		url2 = url2_tmp2 + url2;
 	}
-	return 'valve3.jsp?' + url1 + url2;
+	
+	// build the final url	
+	url	= 'valve3.jsp?';
+	url+= '&combine=true';
+	url+= '&a=plot';
+	url+= '&o=xml';
+	url+= '&tz=' + tz;
+	url+= '&w=' + size[0];
+	url+= '&h=' + size[1];
+	url+= '&n=' + (url1_n + url2_n);	
+	url+= url1;
+	url+= url2;	
+	
+	// return the completed url to valve	
+	// alert("url1:" + url1);
+	// alert("url2:" + url2);
+	// alert("url:" + url);
+	return url;
 }
 
 function getIntParameter(param, url){
@@ -606,21 +677,12 @@ function removeParameter(param, url){
  *	Initialize some defaults for the Valve page
  *	plot width, plot height, comp x, comp y, comp width, comp height, map height
  */
-var POPUP_SIZE_INDEX = 1;
-var STANDARD_SIZES = new Array(
+var POPUP_SIZE_INDEX	= 1;
+var STANDARD_SIZES		= new Array(
 	new Array(300,  100, 75, 20, 150,  40,  300),
 	new Array(600,  200, 75, 20, 450,  140, 600),
 	new Array(900,  300, 75, 20, 750,  240, 900),
 	new Array(1200, 400, 75, 20, 1050, 340, 1200));
-
-/*
-	new Array(300, 100, 35, 19, 260, 70, 300),
-	new Array(760, 200, 75, 19, 610, 140, 400),
-	new Array(1000, 250, 75, 19, 850, 188, 600),
-	new Array(1200, 350, 75, 19, 1050, 288, 800),
-	new Array(600, 200, 60, 20, 500, 160, 1200));
-*/
-
 
 /** 
  *  When the user requests a plot with the "Submit" button, or when the user clicks
