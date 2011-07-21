@@ -1,0 +1,78 @@
+<!--
+  -- $Log: gpsdoc.html,v $
+  -- Revision 1.1  2004/01/25 20:44:30  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve GPS Section User's Guide</title>
+<link type="text/css" rel="stylesheet" href="../valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="../usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;GPS User's Guide</h1><hr></div>
+
+<table class="layout">
+<tr>
+    <td class="navPane">
+    <div class="navPane">
+    <p class="selected">User's Guide</p>
+    <p><a href="../index.html">Home</a></p>
+    <p><a href="../menu.html">Main Menu</a></p>
+    <p><a href="../plot.html">Plots</a></p>
+    <br/>
+    <p class="selected">Section Guides</p>
+    <p><a href="../ewrsam/index.html">EWRSAM</a></p>
+    <p><a href="../genericfixed/index.html">Generic Fixed</a></p>
+    <p><a href="../genericvariable/index.html">Generic Variable</a></p>
+    <p><a href="../gps/index.html">GPS</a></p>
+    <p><a href="../heli/index.html">Helicorders</a></p>
+    <p><a href="../hypocenter/index.html">Hypocenters</a></p>
+    <p><a href="../ratsam/index.html">RatSAM</a></p>
+    <p><a href="../strain/index.html">Strain</a></p>
+    <p><a href="../tilt/index.html">Tilt</a></p>
+    <p><a href="../wave/index.html">Waveforms</a></p>
+    <br/>
+    </div>
+    </td>
+<td class="bodyPane">
+
+<div class="content">
+<h1>GPS Section User's Guide</h1>
+<p>The main GPS UI looks something like this (depending somewhat on your Valve installation):</p>
+<p><center><img border="1" src="gpstab.png" alt="GPS UI"></center></p>
+<p>The GPS section can generate three types of plots: position time-series, velocity fields, and a displacement field.  Descriptions and examples of each of these plots follow, but a word on selecting stations.  Both continuous and campaign GPS stations are available to choose from (control-click/shift-click to select more than one station). Also, any single station can be set as the baseline station.  This substracts that station position from all other observations.  When using a baseline station only epochs in which both the source station and the baseline station have data will be used.</p>
+<p><b>Position Time-Series</b><br>
+Perhaps the most common use of the GPS section is plotting time-series.  Valve can plot four different components of a time-series: east, north, up, and, if a baseline station is selected, length.  Here is an example of a GPS time-series:</p>
+<p><center><img border="1" src="gpsexample1.png" alt="GPS Example 1"></center></p>
+<p><b>Velocity Plots</b><br>
+Valve can also be used to estimate velocities and plot them spatially.  Select the stations you want estimated, optionally select a baseline station, choose your options, and press submit.  The Scale Errors option scales the error ellipse by the model misfit, the Horizontal option draws the velocity vector, and the Vertical option shows the vertical component.  Here is an example of a GPS Velocities plot at the summmit of Mauna Loa:</p>
+<p><center><img border="1" src="gpsexample2.png" alt="GPS Example 2"></center></p>
+<p><b>Displacement Plots</b><br>
+Valve can also be used to estimate a displacement at a specific time.  Select the stations you want estimated, optionally select a baseline station, enter the displacement time (unfortunately this must be done by hand), choose your options, and press submit.  The Detrend option removes the linear trend from the positions first, the Scale Errors option scales the error ellipse by the model misfit, the Horizontal option draws the displacement vector, and the Vertical option shows the vertical component.  Here is an example of a GPS Displacement plot for a dike intrusion:</p>
+<p><center><img border="1" src="gpsexample3.png" alt="GPS Example 3"></center></p>
+</div>
+
+</td>
+</tr>
+</table>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/GPSdoc.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-06 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>

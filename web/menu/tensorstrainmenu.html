@@ -1,0 +1,200 @@
+<div id="tensorstrainBox">
+
+	<form id="tensorstrainForm">
+	<input type="hidden" name="lg" value="true">
+	<div class="w110 fl">
+	    <div class="box">
+		<h1>Channels</h1>
+		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
+		</select></p>
+		</div>
+        <img class="fl" src="images/help.gif" onclick="help_popup('doc/user_docs/tensorstrain/index.html')">
+	</div>
+	
+	<div class="w310 fl">
+		<div class="w155 fl">
+			<div class="box w140">
+				<h1 id="collapse_rotOptions">Rotation Options</h1>
+				<div id="collapseTarget_rotOptions">
+					<p>X-Axis Azimuth</p>
+					<p><input type="radio" value="n" name="az" id="az_n" > <label for="az_n" class="mr8" id="naturallabel">Natural</label></p>
+					<p><input type="radio" value="u" name="az" id="az_u" > <label for="az_u">User value: </label><input type="text" size="4" name="azval" id="azval"></p>
+				</div>
+			</div>	
+			<div class="box w140">
+				<h1 id="collapse_rankOptions">Ranks</h1>
+				<div id="collapseTarget_rankOptions">
+					<p><select class="w100p" name="selector:rk">
+					</select></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_dsOptions">Downsampling</h1>
+				<div id="collapseTarget_dsOptions">
+					<p><select class="w100p" name="selector:ds" id="selector:ds">
+						<option selected="selected">None</option>
+						<option>Decimation</option>
+						<option>Mean filter</option>
+					</select></p>
+					<p id="selector:ds_interval" >Interval:  <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_suppOptions">Supplemental Data</h1>
+				<div id="collapseTarget_suppOptions">
+					<p><select class="w100p" name="selector:sdt" multiple="multiple" size="3"></select></p>
+				</div>
+			</div>
+		</div>
+		<div class="w155 fl">	
+			<div class="box w140">
+				<h1 id="collapse_lineOptions">Line Type</h1>
+				<div id="collapseTarget_lineOptions">
+					<p><select class="w100p" name="selector:linetype" id="selector:linetype">
+					<option value="l">Line</option>
+					<option value="o">Circle</option>
+					<option value="s">Square</option>
+					<option value="*">Star</option>
+					<option value="t">Triangle</option>
+					<option value="d">Dot</option>
+					</select></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_leftOptions">Left Axis Options</h1>
+				<div id="collapseTarget_leftOptions">
+					<p>Min <input type="text" size="2" id="ysMinLeft" value="Auto" name="ysLMin"> Max <input type="text" size="2" id="ysMaxLeft" value="Auto" name="ysLMax"></p>
+				</div>
+			</div>
+			<div class="box w140">
+				<h1 id="collapse_rightOptions">Right Axis Options</h1>
+				<div id="collapseTarget_rightOptions">
+					<p>Min <input type="text" size="2" id="ysMinRight" value="Auto" name="ysRMin"> Max <input type="text" size="2" id="ysMaxRight" value="Auto" name="ysRMax"></p>
+				</div>
+			</div>
+		</div>
+		<div class="w310 fl">		
+			<div class="box w295">
+				<h1 id="collapse_manipOptions">Data Manipulation Options</h1>
+				<div id="collapseTarget_manipOptions">
+				<span id="datamanip">
+					<div id="dmo_args" class="fr mlr4">
+						<p>
+							<input style='visibility:hidden;' type="text" id="dmo_despike_period" name="despike_period" size="8">
+						</p>
+						<p>&nbsp;
+						</p>
+						<p> 
+							<input style="visibility: hidden;" type="text" id="dmo_filter_arg1" name="filter_arg1" size="8">
+						</p><p>
+							<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="8">
+						</p>
+						<p>
+							<input style='visibility:hidden;'type="text" id="dmo_debias_period" name="debias_period" size="8">
+						</p>
+					</div>
+					<div id="dmo_arglbls" class="fr mlr4">
+						<p>
+							<label style='visibility:hidden;'for="dmo_despike_period" id="dmo_despike_lbl">Period:</label>
+						</p>
+						<p>&nbsp;
+						</p>
+						<p> 
+							<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Max freq:</label>
+						</p><p>
+							<label style="visibility: hidden;" id="dmo_filter_arg2_lbl" for="dmo_filter_arg2">Min freq:</label>
+						</p>
+						<p>
+							<label style='visibility:hidden;' id="dmo_debias_lbl" for="dmo_debias_period"">User value:</label>
+						</p>
+					</div>
+					<div id="dmo_menu" class="mlr4">
+						<p>
+							<input type="checkbox" id="dmo_despike" name="despike"
+							  onchange="var prefix = this.id.substring( 0, this.id.length-11 );
+							  	var fld = document.getElementById(prefix+'dmo_despike_period'); 
+							  	var lbl = document.getElementById(prefix+'dmo_despike_lbl'); 
+							  	if (this.checked) {
+							  		fld.style.visibility='visible';
+							  		lbl.style.visibility='visible';
+							  	} else {
+							  		fld.style.visibility='hidden';
+							  		lbl.style.visibility='hidden';
+							  	}">
+							<label for="dmo_despike">Despike (mean)</label>
+						</p>
+						<p>
+							<input type="checkbox" id="dmo_detrend" name="detrend">
+							<label for="dmo_detrend">Detrend (linear)</label>
+						</p>
+						<p>
+							<!-- <label for="dmo_filter">Filter</label> -->
+							<select id="dmo_filter_pick" name="selector:dmo_fl" onchange="var tos = this.options.selectedIndex;
+								var prefix = this.id.substring( 0, this.id.length-15 );
+								var lbl1 = document.getElementById(prefix+'dmo_filter_arg1_lbl');
+								var arg1 = document.getElementById(prefix+'dmo_filter_arg1');
+								var lbl2 = document.getElementById(prefix+'dmo_filter_arg2_lbl');
+								var arg2 = document.getElementById(prefix+'dmo_filter_arg2');
+								if ( tos == 0 ) {
+									lbl1.style.visibility='hidden';
+									arg1.style.visibility='hidden';
+									lbl2.style.visibility='hidden';
+									arg2.style.visibility='hidden';
+								} else {
+									lbl1.style.visibility='visible';
+									arg1.style.visibility='visible';
+									if (tos == 1 ) {
+										lbl1.innerHTML = 'Max freq:';
+										lbl2.innerHTML = 'Min freq:';
+										lbl2.style.visibility='visible';
+										arg2.style.visibility='visible';
+									} else {
+										lbl1.innerHTML = 'Period:';
+										lbl2.style.visibility='hidden';
+										arg2.style.visibility='hidden';
+									}
+								}">
+								<option selected value="0">No filter</option>
+								<option value="1">Bandpass</option>
+								<option value="2">Running median</option>
+								<option value="3">Running mean</option>
+							</select>
+						</p>
+						<p>&nbsp;
+						</p>
+						<p>
+							<!-- <label for="norm_debias">Remove bias</label> -->
+							<select id="dmo_debias_pick" name="selector:dmo_db" onchange="var tos = this.options.selectedIndex;
+								var prefix = this.id.substring( 0, this.id.length-15 );
+								var fld = document.getElementById(prefix+'dmo_debias_period');
+								var lbl = document.getElementById(prefix+'dmo_debias_lbl');			  	
+								if ( tos != 3 ) {
+									fld.style.visibility='hidden';
+									lbl.style.visibility='hidden';
+								} else {
+									fld.style.visibility='visible';
+									lbl.style.visibility='visible';
+								}">
+								<option selected value="0">No bias removal</option>
+								<option value="1">Rem Mean</option>
+								<option value="2">Rem Initial Value</option>
+								<option value="3">Rem User Value</option>
+							</select>
+						</p>
+					</div>
+				</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="w185 fl">
+		<div class="box w185">
+			<h1 class="help">Columns</h1>
+			<span id="columns"></span>
+		</div>
+	</div>	
+	
+	</form>
+	
+</div>

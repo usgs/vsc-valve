@@ -1,0 +1,34 @@
+* Plots with time-series data can have that data exported by clicking on the CSV button at the top of a plot; this will cause a file in CSV (comma-separated value) format to be downloaded.
+
+* There is a new option, Downsampling, to reduce the effort required to plot high-rate data sets.  This can be accomplished either through the use of decimation (where only every Nth datapoint is plotted) or using a mean filter (where only the mean of each window of N seconds is plotted).
+
+* Data Manipulation Options have been consolidated into one box and standardized into 4 stages: Despike (with a specified period for the mean), Detrend, Filter (which can be Bandpass, Running Mean or Running Median), and finally Bias Removal (of the Mean, the Initial Value, or a User Specified Value).
+
+* Supplemental Data associated with a plot can now be included in the plot by selecting the types desired from a list.  These will appear in the plot as start and/or end markers indicating the period the data covers.  Clicking on a marker will bring up the details of that data.
+
+* A list of processing data associated with a plot can be brought up by clicking the PD button at the top of a plot, details od each can be brought up by clicking its Show button.
+
+* Two new Map View Options are available for Hypocenters: Arbitrary-Depth and Arbitrary-Time.  These plot the events within a specified width of the plane defined by the lowe-left and upper-right corners of the Area of Interest (the Arbitrary part) versus Depth or Time, respectively.
+
+* Plots can now be made using either Lines or Points; for Points, one can choose between circles, squares, triangles, stars, and dots.
+
+* Plot legends now include channel and column names as well as indicating the type and color used for time-series plots.  Although not available through the webpage interface, individual legends can now be disabled.
+
+* Although not available through the webpage interface, the appearance of both x- and y- axes can be controlled.  Specifically, tick marks, values at tick marks, units an the label for each can be inidividually disabled.
+
+* It is now possible to combine two time-series plots into one.  By clicking on the + button at the top of a plot, you can then click on a second plot, and a new plot will be produced with the data from both of the original plots.
+
+* All time-series plots are now allowed to contain multiple channels from the same datasource.
+
+* Clicks on a time-series plot cause the time associated with that click to alternate between filling the start time and filling the end time.  Now those clicks are indicated with an arrow at the top of the plot clicked on: green for start and red for end.
+
+* Vertical velocities can now be displayed on GPS plots.
+
+* A comprehensive help system has been integrated into the VALVE webpage interface.
+
+* Although not available through the webpage interface, the color of each plotted item can now be specified.
+
+
+
+
+

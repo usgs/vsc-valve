@@ -1,0 +1,106 @@
+<!--
+  -- $Log: tiltdoc.html,v $
+  -- Revision 1.1  2004/01/25 20:47:10  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve Tilt Section User's Guide</title>
+<link type="text/css" rel="stylesheet" href="../valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="../usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;Tilt User's Guide</h1><hr></div>
+
+<table class="layout">
+<tr>
+    <td class="navPane">
+    <div class="navPane">
+    <p class="selected">User's Guide</p>
+    <p><a href="../index.html">Home</a></p>
+    <p><a href="../menu.html">Main Menu</a></p>
+    <p><a href="../plot.html">Plots</a></p>
+    <br/>
+    <p class="selected">Section Guides</p>
+    <p><a href="../ewrsam/index.html">EWRSAM</a></p>
+    <p><a href="../genericfixed/index.html">Generic Fixed</a></p>
+    <p><a href="../genericvariable/index.html">Generic Variable</a></p>
+    <p><a href="../gps/index.html">GPS</a></p>
+    <p><a href="../heli/index.html">Helicorders</a></p>
+    <p><a href="../hypocenter/index.html">Hypocenters</a></p>
+    <p><a href="../ratsam/index.html">RatSAM</a></p>
+    <p><a href="../strain/index.html">Strain</a></p>
+    <p><a href="../tilt/index.html">Tilt</a></p>
+    <p><a href="../wave/index.html">Waveforms</a></p>
+    <br/>
+    </div>
+    </td>
+<td class="bodyPane">
+
+<div class="content">
+<h1>Tilt Section User's Guide</h1>
+<p>The main Tilt UI looks something like this (depending somewhat on your Valve installation):</p>
+<p><center><img border="1" src="tilttab.png" alt="Tilt UI"></center></p>
+<p>There are two types of output from the tilt module: time-series and tilt vectors.  Select the type of output desired from the Output Type radio buttons.</p>
+<p><b>Time-Series</b><br>
+When plotting a time-series the Tilt Sites section is used to select which stations will have graphs produced (one graph per station).  Use control-click and shift-click to select more than one station.  A time-series will have one line for each component or environment option selected.  The available components are:<br>
+<ul>
+<li>Radial: tilt radial to an azimuth.  See below.</li>
+<li>Tangential: tilt tangential to an azimuth.  See below.</li>
+<li>North: north tilt.</li>
+<li>East: east tilt.</li>
+<li>Magnitude: magnitude of tilt.</li>
+<li>Azimuth: azimuth of tilt in degrees.</li>
+</ul>
+<p>Note: clicking the detrend box will remove the linear trend from the component before plotting.</p>
+</p>
+<p>If either of the radial or tangential components is selected then an azimuth must be specified in one of three ways:<br>
+<ul>
+<li>Nominal: the nominal azimuth to the assumed source of inflation or deflation.  This number is stored outside of Valve.</li>
+<li>Optimal: the azimuth is optimized to place the maximum tilt in the radial direction.</li>
+<li>Azimuth: user-specified azimuth: 0..360.</li>
+</ul>
+</p>
+<p>Environmental components available are, if applicable:<br>
+<ul>
+<li>Hole temp: borehole temperature.</li>
+<li>Box temp: data logger temperature.</li>
+<li>Battery V: data logger battery voltage.</li>
+<li>Rainfall: rainfall at site, cumulative over time interval.</li>
+</ul>
+</p>
+<p>Here is an example tilt time-series:<br>
+<center><img border="1" src="tilttsexample.png" alt="Tilt Time-Series Example"></center>
+</p>
+<p>The numbers in the legend of the plot show the azimuth of the tilt.</p>
+<p><b>Tilt Vectors</b><br>
+Plotting Tilt Vectors shows a spatial plot with representations of the direction of tilt at the specified Tilt Sites (control-click/shift-click to specify multiple sites) over the specified time interval.</p>
+<p>Here is an example tilt vector plot:<br>
+<center><img border="1" src="tiltvexample.png" alt="Tilt Vector Example"></center>
+<a name="dryTilt"></a><p><b>Dry Tilt</b><br>
+Dry Tilt works exactly like Tilt except that you are allowed to select 'All data', there is no nominal azimuth, and  there are no environment options.  Otherwise it is same, you can generate either time-series or vector plots.
+</div>
+
+</td>
+</tr>
+</table>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/tiltdoc.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-06 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>

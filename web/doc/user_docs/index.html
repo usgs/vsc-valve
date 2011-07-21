@@ -1,0 +1,333 @@
+<!--
+  -- $Log: index.html,v $
+  -- Revision 1.1  2004/01/25 20:40:11  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve General Help</title>
+<link type="text/css" rel="stylesheet" href="valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;User's Guide</h1><hr></div>
+
+<table class="layout">
+<tr>
+	<td class="navPane">
+	<div class="navPane">
+	<p class="selected">User's Guide</p>
+	<p><a href="index.html">Home</a></p>
+    <p><a href="menu.html">Main Menu</a></p>
+    <p><a href="plot.html">Plots</a></p>
+    <br/>
+	<p class="selected">Section Guides</p>
+	<p><a href="ewrsam/index.html">EWRSAM</a></p>
+    <p><a href="genericfixed/index.html">Generic Fixed</a></p>
+    <p><a href="genericvariable/index.html">Generic Variable</a></p>
+    <p><a href="gps/index.html">GPS</a></p>
+    <p><a href="heli/index.html">Helicorders</a></p>
+    <p><a href="hypocenter/index.html">Hypocenters</a></p>
+    <p><a href="ratsam/index.html">RatSAM</a></p>
+    <p><a href="strain/index.html">Strain</a></p>
+	<p><a href="tilt/index.html">Tilt</a></p>
+    <p><a href="wave/index.html">Waveforms</a></p>
+    <br/>
+	</div>
+	</td>
+<td class="bodyPane">
+
+<a name="requirements"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> System Requirements</span></h1>
+<p>Because of Valve's interactive UI, a modern internet browser is needed.  It has been tested thoroughly and works with Internet Explorer 6 and Mozilla 1.4 or browsers that are based on Mozilla.  Mozilla builds are available on a wide variety of platforms.  JavaScript and Cookies must be enabled.  Furthermore, your browser must support Java applets to use any 3-D graphs.
+</div>
+
+<a name="general"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> General Usage</span></h1>
+<p>Valve is a system that lets you visualize and analyze a variety of geophysical data sources from your web browser.  The main user interface (UI) looks like this:</p>
+<p><center><img alt="Main Valve UI Image" src="ui.png"></center></p>
+<p>The UI is divided into separate sections (Deformation, Seismic, Gas, and Other in the image above).  Each section contains a group of tabs (Tilt, Strain, GPS, Dry Tilt, EDM, Leveling in the image above), each of which usually represents a data source.  Next to the main UI is the "<a href="#commonPanel">Common Panel</a>", this is used to specify time ranges and graph options.</p>
+<p>The typical usage to generate a graph would go something like this:
+<ul>
+<li>1. Pick the appropriate section and tab.</li>
+<li>2. Pick stations, output options, etc. from the tab.</li>
+<li>3. Specify the time interval, typically using one of the time shortcuts generally available on the right side of each tab.</li>
+<li>4. Specify any graph options.</li>
+<li>5. Press Submit.</li>
+<li>6. <a href="#graphs">Interact with the graph.</a></li>
+</ul></p>
+
+</div>
+
+
+<a name="commonPanel"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Using the Common Panel</span></h1>
+<table><tr><td valign="top">
+<img src="common.gif">
+</td><td>
+<p>The common panel will look something like the image to the left, depending on 
+your browser and operating system.
+
+			<p><b>Start Time</b><br>
+			This is the starting time for a given request. Incomplete formats such as yyyy (e.g., 2002) are
+			rounded to the earliest time.  Valid entry formats are:<br>
+			<table>
+				<tr><td>Format</td><td>Example</td></tr>
+				<tr><td>yyyy</td><td>2002 becomes 200201010000</td></tr>
+				<tr><td>yyyyMMdd</td><td>20020405 becomes 200204050000</td></tr>
+				<tr><td>yyyyMMddHHmm</td><td>200204051200</td></tr>
+				<tr><td>-#i</td><td>-30i is last 30 minutes</td>
+				<tr><td>-#h</td><td>-2h is last 2 hours</td>
+				<tr><td>-#d</td><td>-3d is last 3 days</td>
+				<tr><td>-#w</td><td>-6w is last 6 weeks</td>
+				<tr><td>-#m</td><td>-9m is last 9 months</td>
+				<tr><td>-#y</td><td>-15y is last 15 years</td>
+				<tr><td>All</td><td>All data, if supported</td>
+			</table>
+			
+			<p><b>End Time</b><br>
+			This is the ending time for a given request. Clicking the 'Now' link 
+			replaces the text with 'Now'. Incomplete formats are rounded to the latest time. 
+			Valid entry formats are:<br>
+			<table class=inner>
+				<tr><td>Format</td><td>Example</td></tr>
+				<tr><td>yyyy</td><td>2002 becomes 200212312359</td></tr>
+				<tr><td>yyyyMMdd</td><td>20020405 becomes 200204052359</td></tr>
+				<tr><td>yyyyMMddHHmm</td><td>200204051200</td></tr>
+				<tr><td>Now</td><td>Data up until now</td>
+			</table>
+
+			<p><b>Submit</b><br>
+			Submit button: submits the request<br>
+			Small graphs checkbox: the requested content are smaller, this is sometimes useful for plots
+			destined for web pages<br>
+			PostScript checkbox: generates <a href="#postscript">PostScript</a> in addition (if applicable)<br>
+			Raw data checkbox: generates <a href="#rawdata">raw data</a> in addition (if applicable)<br>
+
+</td></tr></table>
+</div>
+
+<a name="graphs"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Interacting with Graphs</span></h1>
+<p>Most graphs that Valve produces allow extensive interaction.  These graphs can be used to select time intervals on other graphs, select map bounding boxes, earthquake cross-sections.  In general, a time-series graph will look something like the figure below (a time-series of a tilt event).</p>
+<p><center><img alt="Example time-series graph" border="1" src="graph.png"></center></p>
+<p>To select a subset of the time represented on the x-axis in this graph simply move the mouse over the graph (a red line and crosshair cursor will appear) and click the time the start and end times respectively.  A green marker arrow will appear over the start time you selected and a red arrow over the end time.  Or to set the time interval to exactly what is on the x-axis, click the clock icon on the graph menu bar.  Of course, graphs that don't have time as the x-axis (like a frequency power chart) will not allow this.  This functionality allows the user to quickly look at interesting time intervals on a variety of different instruments or to find interesting events and plot them in other, perhaps more insightful, ways.  For example, a user could plot earthquake counts over a region for the last 25 years, select a time interval that has a swarm, then plot the swarm's hypocenters on an earthquake map.</p>
+<p>Valve also produces many spatial plots.  These plots can be interacted with to select area boundaries, assuming that the tab currently visible is 'interested' in boundary selection.  A spatial graph will look something like the figure below (a hypocenter plot of a dike intrusion).</p>
+<p><center><img alt="Example spatial graph" border="1" src="spatial.png"></center></p>
+<p>If the Valve UI was open to a tab that was interested in spatial boundaries or other user-selected spatial information, clicking on the spatial graph would provide that input.  In the case of selecting a boundary for an earthquake plot, for example, simply click on the upper-left corner of the new boundary (a rubber-band type box will appear), then click on the lower-right.  Unfortunately, due to browsers interpreting a dragged mouse as a drag-and-drop event, dragging (the intuitive way of selecting a space) the clicked mouse will not work.</p>
+<p><a name="rawdata"></a><b>Raw Data</b><br>
+If you selected raw data output in the common panel a link will be provided in the title bar of the graph to that raw data.  To save the data to your computer, right-click on the link and select "Save link as..." or the equivalent in whatever browser you are using.</p>
+<p><a name="postscript"></a><b>PostScript</b><br>
+If you selected PostScript output in the common panel a link will be provided in the title bar of the graph to a PostScript file.  This file can be loaded into programs like Adobe Illustrator in order to produce publication quality plots.  To save the file to your computer, right-click on the link and select "Save link as..." or the equivalent in whatever browser you are using.</p>
+</div>
+
+<a name="windowIcons"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Window Icons</span></h1>
+<p>Some of the icons can be found on both the main user interface window and
+on user-generated contents.  This table shows what each icon does in each place.
+<table>
+<tr>
+	<td width="10%"><b>Icon</b></td><td width="45%"><b>Main</b></td><td width="45%"><b>Content</b></td>
+</tr>
+<tr>
+	<td><img src="../images/close.gif"></td><td>Deletes all content.</td><td>Deletes this piece of content</td>
+<tr>
+<tr>
+	<td><img src="../images/minimize.gif"></td><td>Minimizes the user interface, 
+	this is good for printing the whole document.</td><td>Minimizes this piece of content.</td>
+</tr>
+<tr>
+	<td><img src="../images/maximize.gif"></td><td>Maximizes the user interface.</td>
+	<td>Maximizes this piece of content.</td>
+</tr>
+<tr>
+	<td><img src="../images/help.gif"></td><td>Opens this window.</td>
+	<td>N/A</td>
+</tr>
+<tr>
+	<td><img src="../images/bug.gif"></td><td>Opens general bug submit window.</td>
+	<td>Opens bug submit window about this piece of content.</td>
+</tr>
+<tr>
+	<td><img src="../images/refresh.gif"></td><td>N/A</td>
+	<td>Refreshes a "Now" graph to be current.</td>
+</tr>
+<tr>
+	<td><img src="../images/up.gif"></td><td>N/A</td>
+	<td>Moves this content up one place.</td>
+</tr>
+<tr>
+	<td><img src="../images/down.gif"></td><td>N/A</td>
+	<td>Moves this content up down place.</td>
+</tr>
+<tr>
+	<td><img src="../images/clock.gif"></td><td>N/A</td>
+	<td>Sets time interval to be exactly equal to the time interval of this graph.</td>
+</tr>
+<tr>
+	<td><img src="../images/cp.gif"></td><td>N/A</td>
+	<td>Opens the <a href="#cp">Graph Controller</a>.</td>
+</tr>
+
+</table>
+</div>
+
+<a name="statusPages"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Status Pages</span></h1>
+<p>Status Pages are web pages that present a large quantity of information in one place.  They are generally created and maintained by your Valve administrator.  A status page generally will contain many graphs that are updated automatically by Valve on an administrator specified time interval.  Ask you administrator for instructions on how to create a status page.</p>
+</div>
+
+<a name="customData"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Custom Data</span></h1>
+<p>Valve allows you to import your own custom data into the system in a quick, convenient way.  Here is a step-by-step description of how to create your own custom data set:<br>
+<br>
+1. Format your data in to the <a href="#customFormat">format Valve expects</a>.<br>
+<br>
+2. Create a folder in the Valve custom data folder (ask your Valve Administrator for the location of this folder).  The name of the folder you create will then show up as a choice under Valve's "Custom" tab.<br>
+<br>
+3. Copy your data files into the folder you created.<br>
+<br>
+4. (Optional) The last optional, but very useful, step is creating a file that describes your data.  The name of this file must be '&lt;folder_name&gt;.txt'.  Read <a href="#customDDFormat">below</a> for the format of this file.<br>
+<br>
+
+<a name="customFormat"></a><p><b>Data File(s) Format Specification</b><br>
+<ul>
+<li>An attempt is made to read all files, except the data description file, in your custom folder as data files.
+<li>The data files are simply tab or comma delimited columnar text files (easily exported from programs like Excel).
+<li>The first two columns must be the time and location of the observation/measurement/data.  Each column thereafter is arbitrary numeric data.
+<li>The first column, time, can be in any parsable time format as specified <a href="#customTimeFormat">below</a> as long as it is described in the <a href="#customDDFormat">optional data description file</a> or, if no such file exists, in this format: 'yyyyMMddHHmmss' (no quotes).
+<li>The second column, station, is a text string that identifies where the data was gathered.  Valve groups the data by station such that each station's data can be viewed independently.  No spaces in station names!
+<li>All subsequent columns are converted into double precision floating point numbers, any unparsable field is set to NaN (not-a-number).
+<li><b>Input files are expected in UTC.</b>
+</ul>
+<br>
+
+<a name="customDDFormat"></a><p><b>Data Description File</b><br>
+The data description file includes information about your data.  It is a simple text file with each line specifying something about the data.  The format for each line is this (no angle brackets):<br>
+<br><code>
+&lt;option&gt;: &lt;value&gt;</code><br>
+<br>
+Valid options are (case-insensitive):<br>
+<table>
+<tr>
+	<td width="15%" valign="top"><code>TimeFormat</code></td>
+	<td width="85%">A string that exactly specifies the format for time<br>
+		Examples: yyyy/MM/dd HH:mm:ss.SSS, MM-dd-yy HH:mm, etc.<br>
+		Refer <a href="http://java.sun.com/j2se/1.4.1/docs/api/java/text/SimpleDateFormat.html">here</a> for more information on the date string specifiers.</td>
+</tr>
+<tr>
+	<td valign="top"><code>Column &lt;#&gt;</code></td>
+	<td>A string that specifies one or more of the following options for the column, in this format:<br>
+		<code>&lt;option1&gt;=&lt;value1&gt;; &lt;option2&gt;=&lt;value2&gt;; &lt;optionN&gt;=&lt;valueN&gt;;</code><br>
+		<br>
+		Valid column options (case-insensitive):
+		<table border=0>
+		<tr>
+			<td><code>Name</code></td>
+			<td>[a string] -- The name of the column, shows up in the output selection and on the graph's legend.</td>
+		</tr>
+		<tr>
+			<td><code>Units</code></td>
+			<td>[a string] -- The units for the column, shows up on the graph's axis legend.</td>
+		</tr>
+		<tr>
+			<td><code>Style</code></td>
+			<td>[a string] -- The output style, 'o': plot data points, '-': plot line, 'o-' plot both.</td>
+		</tr>
+		<tr>
+			<td><code>Default</code></td>
+			<td>[yes|no] -- Whether or not this column is checked by default in the output selection.</td>
+		</tr>
+		<tr>
+			<td><code>Allowed</code></td>
+			<td>[yes|no] -- Whether or not this column is allowed to be selected in the output selection.</td>
+		</tr>
+		<tr>
+			<td><code>Detrend</code></td>
+			<td>[yes|no] -- Whether or not this column should have the linear trend removed.</td>
+		</tr>
+		<tr>
+			<td><code>SubtractMean</code></td>
+			<td>[yes|no] -- Whether or not this column should have the mean of the column subtracted from it.</td>
+		</tr>
+		<!--
+		<tr>
+			<td><code>ErrorColumn</code></td>
+			<td>[&lt;#&gt;] -- Specifies another column which should be displayed as error bars for this column.</td>
+		</tr>
+		  -->
+		</table>
+		</td>
+	</tr>
+</tr>
+</table><br>
+<p><b>Complete Example</b><br>
+<p>Here is a complete example of a custom data set.
+<pre>
+		Directory [custom-data-path]/WidgetCounts:
+			File WidgetCounts.txt:
+				timeformat: MM/dd/yy HH:mm                         
+				column 1: name=Standard Widgets; default=yes; units=Widgets; style=-;
+				column 2: name=Complex Widgets; default=no; units=Widgets; style=-;
+				column 3: name=Temperature; default=no; units=Degrees C; style=-;
+				
+			File WidgetData1.txt:
+				05/06/03 12:00,WIDGETFACTORY,37,3,10.6
+				05/06/03 12:10,WIDGETFACTORY,38,3,10.7
+				05/06/03 12:20,WIDGETFACTORY,37,3,10.6
+				05/15/03 23:30,WIDGETFACTORY,13,193,57.6
+				05/15/03 23:40,WIDGETFACTORY,12,196,57.8
+			
+			File WidgetData2.txt:
+				06/06/03 12:00,WIDGETEMPORIUM,7,3,30.6
+				06/06/03 12:10,WIDGETEMPORIUM,38,3,40.7
+				06/06/03 12:00,WIDGETGALLERY,7,3,10.6
+				06/06/03 12:10,WIDGETGALLERY,38,3,10.7
+</pre>
+<p>With this set of files the following stations would be available in the WidgetCounts custom section: WIDGETFACTORY, WIDGETEMPORIUM, and WIDGETGALLERY.  There would be three selectable columns: Standard Widgets, Complex Widgets, and Temperature.  Only the Standard Widgets would be selected by default.  Hopefully, before you draw any conclusions about widgets and temperature correlation you would have more than 9 data points.
+</div>  
+        
+<a name="graphController"></a>
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Using the Graph Controller</span></h1>
+<p>The Graph Controller is used to make adjustments to a graph you have already created.  The Graph Controller is activated by pressing its button: <img src="../images/cp.gif" alt="Graph Controller Icon">.  Pressing the button will popup this window:</p>
+<p><center><img alt="Graph Controller Image" border="1" src="gc.png"></center></p>
+<p>The various sections of the Graph Controller allow you to change many aspects of the graph.</p>
+<p><b>Background Color</b>: enter RGB values for the background color between 0 and 1.  0,0,0 is black; 1,1,1 is white; 1,0,0 is full red, etc.</p>
+<p><b>Y-Axis</b>: enter the minimum and maximum scale for the y-axis.  This disables auto y-axis scaling.</p>
+<p><b>Time Shift</b>: generates the same type of graph but with the selected time shifted a user-specified percentage earlier or later.</p>
+<p><b>Options</b>: this regenerates the graph as if you had specified the option chosen.</p>
+<p><b>Combine</b>: after clicking the "Combine Time-Series" button click on another time-series graph in the Valve UI and Valve will join these two graphs into one.  User beware though, you can create some pretty nonsensical graphs with this option.</p>
+</div>
+
+
+</td>
+</tr>
+</table>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/index.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-06 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>

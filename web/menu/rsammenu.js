@@ -12,8 +12,6 @@
   *  @param {menu object} menu 
   */
 create_rsammenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "rsamForm";
 	menu.boxName			= "rsamBox";
 
@@ -25,8 +23,26 @@ create_rsammenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1h", "-2h", "-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-2w","-1m");
 		}
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

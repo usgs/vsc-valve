@@ -34,9 +34,26 @@ function loadMenu(id) {
 		menus[id].div.style.display = 'block';
 		lastDiv = menus[id].div;
 		setCurrentMenu(menus[id]);
+		var selector_lt = document.getElementById("selector:linetype");
+		if(selector_lt){
+			for (var i = 0; i < selector_lt.options.length; i++)  {
+				if(selector_lt.options[i].value==menus[id].lineType){
+					selector_lt.options[i].selected=true;
+					break;
+				}
+			}
+		}	
+		var selector_bt = document.getElementById("dmo_debias_pick");
+		if(selector_bt){
+			for (var i = 0; i < selector_bt.options.length; i++)  {
+				if(selector_bt.options[i].value==menus[id].biasType){
+					selector_bt.options[i].selected=true;
+					break;
+				}
+			}
+		}	
 		return;
 	}
-		
 	var url = "menu/" + menus[id].file + ".html";
 	loadXML(menus[id].file + " javascript", url, 
 		function(req) {	
@@ -53,8 +70,31 @@ function loadMenu(id) {
 					eval('create_' + menus[id].file + '(menus[id], id)');
 					menus[id].initialize();
 					setCurrentMenu(menus[id]);
+					var plotSeparately			= document.createElement('input');
+					plotSeparately.name = "plotSeparately";
+					plotSeparately.type = "hidden";
+					plotSeparately.value = menus[id].plotSeparately;
+					document.getElementById(id + '_' + menus[id].formName).appendChild(plotSeparately);
 				}
 			});
+			var selector_lt = document.getElementById("selector:linetype");
+			if(selector_lt){
+				for (var i = 0; i < selector_lt.options.length; i++)  {
+					if(selector_lt.options[i].value==menus[id].lineType){
+						selector_lt.options[i].selected=true;
+						break;
+					}
+				}
+			}	
+			var selector_bt = document.getElementById("dmo_debias_pick");
+			if(selector_bt){
+				for (var i = 0; i < selector_bt.options.length; i++)  {
+					if(selector_bt.options[i].value==menus[id].biasType){
+						selector_bt.options[i].selected=true;
+						break;
+					}
+				}
+			}	
 	});
 }
 
@@ -89,6 +129,9 @@ function handleMenu(xml) {
 			var menuid			= items[j].getElementsByTagName("menuid")[0].firstChild.data;
 			var name			= items[j].getElementsByTagName("name")[0].firstChild.data;
 			var file			= items[j].getElementsByTagName("file")[0].firstChild.data;
+			var lineType		= items[j].getElementsByTagName("lineType")[0].firstChild.data;
+			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
+			var biasType		= items[j].getElementsByTagName("biasType")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
 			var timeShortcuts	= "";
@@ -97,6 +140,9 @@ function handleMenu(xml) {
 			m.id			= menuid;
 			m.file			= file;
 			m.timeShortcuts	= timeShortcuts.split(",");
+			m.lineType		= lineType;
+			m.plotSeparately = plotSeparately;
+			m.biasType      = biasType;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
 			li.id			= menuid;
@@ -108,14 +154,20 @@ function handleMenu(xml) {
 			ip.appendChild(li);
 		}
 		vp.getElementsByTagName('ul')[0].appendChild(t);
+
+	    if ( sections[i].getElementsByTagName("expanded")[0].firstChild.data == "true" ) {
+			// It would be better to call toggle, but then we'd need to fake an event
+			var subMenu = t.getElementsByTagName("ul")[0];
+			var img = t.getElementsByTagName("img")[0];
+			subMenu.className = "subMenu";
+			img.src = "images/minus.png";
+	    }
 	}
 	
 	var inst = xml.getElementsByTagName("title")[0].firstChild.data;
 	document.title = inst;
 	
 	document.getElementById('appTitle').appendChild(document.createTextNode(inst));
-	document.getElementById('timeZoneAbbr').appendChild(document.createTextNode(getXMLField(xml, "timeZoneAbbr")));
-	document.getElementById('timeZoneOffset').value = getXMLField(xml, "timeZoneOffset");
 	setAdmin(getXMLField(xml, "administrator"), getXMLField(xml, "administrator-email"));
 	document.getElementById('version').appendChild(document.createTextNode("Valve " + getXMLField(xml, "version")));
 }
@@ -313,28 +365,16 @@ function populateGenericColumns(menu) {
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			var detDiv = document.createElement('div');
-			detDiv.className = 'fr mlr4';
-			var norDiv = document.createElement('div');
-			norDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
-			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Detrend');
-			p.appendChild(l);
-			detDiv.appendChild(p);
-			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Remove Bias');
-			p.appendChild(l);
-			norDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -343,17 +383,18 @@ function populateGenericColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];				
 				p.appendChild(el);
+				el.checked  = (col[4] == "T");
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
@@ -364,30 +405,7 @@ function populateGenericColumns(menu) {
 				var l		= document.createTextNode(col[3]);
 				p.appendChild(l);
 				uniDiv.appendChild(p);
-				
-				// build the detrend checkbox
-				var p		= document.createElement('p');
-				p.className	= 'center';
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_d_" + col[1];
-				el.name		= "d_" + col[1];
-				p.appendChild(el);
-				detDiv.appendChild(p);
-				
-				// build the normalize checkbox
-				var p		= document.createElement('p');
-				p.className	= 'center';
-				var el		= document.createElement('input');
-				el.type		= 'checkbox';
-				el.id		= menu.id + "_n_" + col[1];
-				el.name		= "n_" + col[1];
-				p.appendChild(el);
-				norDiv.appendChild(p);
 			}
-			
-			mainColDiv.appendChild(detDiv);
-			mainColDiv.appendChild(norDiv);
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
@@ -402,27 +420,21 @@ function populateTiltColumns(menu) {
 		function(req) {
 			var xml		= req.responseXML;
 			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
 			
 			var colDiv = document.createElement('div');
 			colDiv.className = 'mlr4';
 			var uniDiv = document.createElement('div');
 			uniDiv.className = 'hide';
-			var detDiv = document.createElement('div');
-			detDiv.className = 'fr mlr4';
 
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
-			
-			var p = document.createElement('p');
-			var l = document.createTextNode('Detrend');
-			p.appendChild(l);
-			detDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -431,17 +443,18 @@ function populateTiltColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
 				p.appendChild(el);
+				el.checked  = (col[4] == "T");
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -452,19 +465,69 @@ function populateTiltColumns(menu) {
 				var l		= document.createTextNode(col[3]);
 				p.appendChild(l);
 				uniDiv.appendChild(p);
+			}
+
+			mainColDiv.appendChild(colDiv);
+			mainColDiv.appendChild(uniDiv);
+		}
+	);
+}
+
+function populateTensorstrainColumns(menu) {
+	var mainColDiv	= document.getElementById(menu.id + "_columns");
+	var url			= "valve3.jsp?a=data&src=" + menu.id + "&da=columns";
+	
+	loadXML(menu.id + " columns", url, 
+		function(req) {
+			var xml		= req.responseXML;
+			var cols	= xml.getElementsByTagName('list-item');
+			
+			var colDiv = document.createElement('div');
+			colDiv.className = 'mlr4';
+			var uniDiv = document.createElement('div');
+			uniDiv.className = 'hide';
+
+			colDiv.id = menu.id + 'colNames';
+			uniDiv.id = menu.id + 'colUnits';
+			
+			/*
+			var p = document.createElement('p');
+			var l = document.createTextNode('Name: Units');
+			p.appendChild(l);
+			colDiv.appendChild(p);
+			*/
+			
+			for (var i = 0; i < cols.length; i++) {
 				
-				// build the detrend checkbox
+				// split up the column entry into it's elements
+				var col		= cols[i].firstChild.data.split(":");
+				
+				// build the column checkbox
 				var p		= document.createElement('p');
-				p.className	= 'center';
+				p.className	= "columns";
+				
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
-				el.id		= menu.id + "_d_" + col[1];
-				el.name		= "d_" + col[1];
-				if (col[5] == "T") { p.appendChild(el); }
-				detDiv.appendChild(p);
+				el.id		= menu.id + "_" + col[1];
+				el.name		= col[1];
+				p.appendChild(el);
+				el.checked  = (col[4] == "T");
+								
+				var el		= document.createElement('label');
+				el.setAttribute("for", menu.id + "_" + col[1]);
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
+				el.appendChild(tn);
+				p.appendChild(el);
+
+				colDiv.appendChild(p);
+				
+				// build the units list
+				var p		= document.createElement('p');
+				var l		= document.createTextNode(col[3]);
+				p.appendChild(l);
+				uniDiv.appendChild(p);
 			}
-			
-			mainColDiv.appendChild(detDiv);
+
 			mainColDiv.appendChild(colDiv);
 			mainColDiv.appendChild(uniDiv);
 		}
@@ -479,7 +542,6 @@ function populateGPSColumns(menu) {
 		function(req) {
 			var xml		= req.responseXML;
 			var cols	= xml.getElementsByTagName('list-item');
-			// var temp	= (new XMLSerializer()).serializeToString(xml);
 			
 			var colDiv = document.createElement('div');
 			colDiv.className = 'mlr4';
@@ -489,10 +551,12 @@ function populateGPSColumns(menu) {
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			/*
 			var p = document.createElement('p');
-			var l = document.createTextNode('Name');
+			var l = document.createTextNode('Name: Units');
 			p.appendChild(l);
 			colDiv.appendChild(p);
+			*/
 			
 			for (var i = 0; i < cols.length; i++) {
 				
@@ -501,17 +565,18 @@ function populateGPSColumns(menu) {
 				
 				// build the column checkbox
 				var p		= document.createElement('p');
+				p.className	= "columns";
 
 				var el		= document.createElement('input');
 				el.type		= 'checkbox';
 				el.id		= menu.id + "_" + col[1];
-				if (col[4] == "T") { el.checked = "checked"; }
 				el.name		= col[1];
 				p.appendChild(el);				
+				el.checked  = (col[4] == "T");
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + " (" + col[3] + ")");
+				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
@@ -528,6 +593,38 @@ function populateGPSColumns(menu) {
 			mainColDiv.appendChild(uniDiv);
 		}
 	);
+}
+
+/**
+ * Make an AJAX call via jsp to return the values for the supplemental datatype list
+ * The request to valve for select options returns a list of quote-separated items
+ * [0] sdtypeid
+ * [2] typename
+ * 
+ * @param {menu object} menu
+ */
+function populateSuppDataTypes(menu) {
+	var form	= document.getElementById(menu.id + '_' + menu.formName);
+	var select	= form.elements["selector:sdt"];
+	var url		= "valve3.jsp?a=data&src=" + menu.id + "&da=supptypes";
+	
+	loadXML(menu.id + " supptypes", url,
+		function(req) {
+			var xml		= req.responseXML;
+			var ch		= xml.getElementsByTagName('list-item');
+			var opts	= new Array(ch.length + 1);
+			// var temp	= (new XMLSerializer()).serializeToString(xml);
+			
+			for (var i = 0; i < ch.length; i++) {
+				var val	= ch[i].firstChild.nodeValue;
+				var ss	= val.split("\"");
+				var opt	= document.createElement('option');					
+				opt.value = ss[0];				
+				opt.appendChild(document.createTextNode(ss[2]));
+				select.appendChild(opt);
+				opts[i] = opt;
+			}
+		});
 }
 
 function countSelectedColumns(menu) {
@@ -867,7 +964,7 @@ function getChannelTypeFilter(form) {
 function Menu()
 {}
 
-Menu.prototype.allowChannelMap = false;
+Menu.prototype.allowChannelMap = true;
 
 /**
 	Initialize the time shortcuts array (for all menus)
@@ -885,13 +982,65 @@ Menu.prototype.acceptMapClick = function(target, mx, my, lon, lat)
 	end times for the area clicked on (assuming X values are over time)
 	The first click sets the start time. The second click sets the end time.
 	(Then you can submit to zoom in on your new time range.)
+	Also sets markers for clicked times at top of plot (green=start,red=end).
  */
 Menu.prototype.acceptTYClick = function(target, mx, my, gx, gy)
 {
-	if (lastTimeClick++ % 2 == 0)
+	/* Clicks on minimized plots don't translate properly, so we'll ignore them */
+	if ( target.width < target.fullWidth )
+		return;
+		
+	var scroll = getScroll();
+	var mark;			/* marker for this click */
+	var otherMark;		/* the other marker */
+
+	/* Toggle between green & red markers */
+	lastTimeClick = 1 - lastTimeClick;
+	if (lastTimeClick == 1) {
+		mark = document.getElementById("greenMark")
+		otherMark = document.getElementById("redMark")
+	} else {
+		mark = document.getElementById("redMark")
+		otherMark = document.getElementById("greenMark")
+	}
+	
+	if ( mark.parentNode != target.parentNode ) {
+		/* If click isn't in marker's parent, user clicked on a different plot.
+			Force click to be treated as start time & hide end marker */
+		var oldParent = mark.parentNode;
+		mark = oldParent.removeChild(mark);
+		otherMark = oldParent.removeChild(otherMark);
+		target.parentNode.appendChild(mark);
+		target.parentNode.appendChild(otherMark);
+		if ( lastTimeClick == 0 ) {
+			var t = mark;
+			mark = otherMark;
+			otherMark = t;
+			lastTimeClick = 1;
+		}
+		otherMark.style.visibility = "hidden";
+	}
+	
+	/* Set the appropriate time field */
+	if (lastTimeClick == 1) {
 		document.getElementById("startTime").value	= buildTimeString(gx);
-	else
+	} else {
 		document.getElementById("endTime").value	= buildTimeString(gx);
+	}
+	
+	/* Make mark visible, and align its horizontal position w/ the click */
+	mark.style.visibility = "visible";
+	var leftSide = 0;
+	var imgs = mark.parentNode.getElementsByTagName("img");
+	var i;
+	for ( i = 0; imgs[i].className != "pointer"; i++ );
+	/* leftSide = imgs[i].x; */
+	i = imgs[i];
+	while ( i != null ) {
+		leftSide = leftSide + i.offsetLeft;
+		i = i.offsetParent;
+	}
+	mark.style.left=(scroll[0] + mx - leftSide - 5) + "px";
 }
 
 /**
@@ -965,12 +1114,19 @@ Menu.prototype.initialize = function() {
 }
 
 Menu.prototype.presubmit = function() {
-	var returnValue = true;
 	var colDiv	= document.getElementById(this.id + "_columns");
-	if (colDiv) {
-		returnValue = validateColumns(this);
+	if (colDiv && !validateColumns(this)) {
+		return false;
 	}
-	return returnValue;
+	var decimationType = document.getElementById(this.id + "_selector:ds");
+	if(decimationType!=null && decimationType.selectedIndex > 0){
+		var decimationInterval = parseInt(document.getElementById(this.id + '_downSamplingInterval').value);
+		if(isNaN(decimationInterval) || decimationInterval<=0){
+			alert("Wrong value for decimation interval.");
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -983,9 +1139,10 @@ Menu.prototype.submit = function() {
 	if (t == null)
 		return;
 	
-	var form		= this.getForm();
-	var chselect	= form.elements["selector:ch"];
-	var rkselect	= form.elements["selector:rk"];
+	var form			= this.getForm();
+	var chselect		= form.elements["selector:ch"];
+	var rkselect		= form.elements["selector:rk"];
+	var plotSeparately	= form.elements["plotSeparately"];
 	
 	// do validation on the channels input if it exists
 	if (chselect) {
@@ -1001,23 +1158,21 @@ Menu.prototype.submit = function() {
 		}
 	}
 	
-	// temporarily disable best possible rank requests (plotters haven't implemented this yet)
-	if (rkselect) {
-		// if (rkselect[rkselect.selectedIndex].value == 0) {
-			// alert("Best Possible Rank not available at this time.");
-			// return;
-		// }
-	}
-	
 	// create the plot request and plot component
-	var pr = new PlotRequest();
-	var pc = pr.createComponent(this.id, t.st, t.et);
-	pc.setFromForm(form);
+	var pr			= new PlotRequest();
+	var pc			= pr.createComponent(this.id, t.st, t.et);
 	
-	// update the sizes on the plots based on how many channels were chosen
-	pr.params.h	= pc.chCnt * 150 + 60;
-	pc.h		= pc.chCnt * 150;
+	// update the overall plot height based on number of channels and components selected
+	var totalPlots	= 1;
+	var compCount	= pc.setFromForm(form);
+	if (plotSeparately != null && plotSeparately.value == "true") {
+		totalPlots	= pc.chCnt * compCount;
+	} else {
+		totalPlots	= pc.chCnt;
+	}
+	pr.params.h	= pr.params.h + (totalPlots - 1) * pc.h;
 	
+	// run the presubmit, and if it passes, submit the request
 	if (this.presubmit(pr, pc)) {
 		loadXML(this.id + " plot", pr.getURL());
 	}
@@ -1052,7 +1207,7 @@ Menu.prototype.filterChanged = function() {
 			var pt		= this.allChannels[i].value.split(":");
 			var lon		= pt[3];
 			var lat		= pt[4];
-			var ctid1	= pt[6];
+			var ctid1	= pt[7];
 			var gfCheck	= false;
 			var ctCheck	= false;
 			

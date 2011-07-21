@@ -5,7 +5,7 @@ body
 	margin-top: 5px;
 	background-color: #efecda;
 	font-family: tahoma;
-	font-size: 11px;
+	font-size: 12px;
 	text-align: center;
 }
 
@@ -40,9 +40,10 @@ div.content
 	background: white;
 	margin: 0 auto;
 	margin-bottom: 10px;
+	position: relative;
 }
 
-div.content img.button
+div.content img.button, img.button_off
 {
 	padding-top: 1px;
 	margin: 0px;
@@ -54,6 +55,47 @@ div.content div.titleBar
 {
 	background: url(images/bg.png) repeat-x;
 	height: 20px;
+}
+
+div.content div.combine
+{
+	width: 200px; 
+	height: 150px; 
+	border: solid 1px black; 
+	background-color: white;
+	float: left; 
+	position: absolute; 
+	top: 20px; 
+	left: 0px; 
+	display: none;
+}
+
+div.suppviewer
+{
+	width: 50px; 
+	height: 50px; 
+	border: none; 
+	background-color: white;
+	float: left; 
+	position: absolute; 
+	top: 20px; 
+	left: 0px; 
+	visibility: hidden;
+	z-index: 97;
+}
+
+div.suppnodl
+{
+	width: 200px; 
+	height: 150px; 
+	/*border: solid 1px black; */
+	background-color: white;
+	float: right; 
+	position: absolute; 
+	top: 20px; 
+	left: 0px;
+	visibility: hidden;
+	z-index: 96;
 }
 
 div.content h1
@@ -70,7 +112,7 @@ div.content h1.min
 	display: inline;
 	padding-left: 3px;
 	font-family: tahoma;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: normal;
 	color: white;
 }
@@ -98,7 +140,7 @@ div.dataPanel
 	width: 160px;
 	padding: 4px;
 	font-family: tahoma;
-	font-size: 11px;
+	font-size: 12px;
 	padding-bottom: 0px;
 }
 
@@ -122,7 +164,7 @@ div#timePanel
 	margin: 0px;
 	margin-left: 5px;
 	border:	1px solid rgb( 145, 155, 156 );
-	width: 160px;
+	width: 159px;
 	padding: 4px;
 }			
 
@@ -196,13 +238,14 @@ ul h1
 
 ul.subMenu li.selected
 {
-	background: #eee;
-	color: black;
+	background: #888888;
+	color: #FFFFFF;
 }
 
 ul.subMenu li.hover
 {
-	background-color: #e8f2fe;
+	background: url(images/bg.png) repeat-x;
+	color: #FFFFFF;
 	cursor: pointer;
 }
 
@@ -226,7 +269,7 @@ h1.filter
 	padding: 2px;
 	color: white;
 	background: url(images/bg.png);
-	font-size: 11px;
+	font-size: 12px;
 	font-family: Verdana;
 	padding-top: 2px;
 	margin: 0px;
@@ -236,11 +279,13 @@ select
 {
 	background: #fefefe;
 	border: 1px solid #ddd;
+	font-size: 100%;
 }
 
 input
 {
 	vertical-align: middle;
+	font-size: 100%;
 }
 
 label
@@ -258,6 +303,15 @@ img.button
 {
 	border: 0px;
 	float: right;
+}
+
+img.helpimg
+{
+	padding: 2px;
+}
+
+.clear img.helpimg {
+	padding-right: 0px;
 }
 
 form
@@ -304,9 +358,11 @@ div.box p
 {
 	margin: 3px 0px 3px 0px;
 	padding: 0px;
-	font-size: 12px;
+	/*font-size: 12px;*/
 	font-family: Verdana;
 }
+
+.columns { font-size: 10px; }
 
 .p0 { padding: 0px; }
 .m0 { margin: 0px; }
@@ -323,16 +379,21 @@ div.box p
 .w100 { width: 100px; }
 .w110 { width: 110px; }
 .w120 { width: 120px; }
+.w135 { width: 135px; }
 .w140 { width: 140px; }
 .w145 { width: 145px; }
 .w150 { width: 150px; }
+.w155 { width: 155px; }
 .w160 { width: 160px; }
 .w180 { width: 180px; }
+.w185 { width: 185px; }
 .w200 { width: 200px; }
 .w220 { width: 220px; }
 .w240 { width: 240px; }
 .w260 { width: 260px; }
 .w280 { width: 280px; }
+.w290 { width: 290px; }
+.w295 { width: 295px; }
 .w300 { width: 300px; }
 .w310 { width: 310px; }
 .w320 { width: 320px; }
@@ -355,6 +416,7 @@ div.box p
 .left { text-align: left; }
 .fl { float: left; }
 .fr { float: right; }
+.clear {clear: both; border: 0px none; margin: 0px; padding: 0px; }
 .hide { display: none; }
 .pointer { cursor: crosshair; }
 .abs { position: absolute; }
@@ -385,7 +447,7 @@ div.listbox p
 	margin: 1px 0px 0px 0px;
 	padding: 0px;
 	font-family: verdana;
-	font-size: 11px;
+	font-size: 10px;
 	padding: 1px 3px 1px 3px;
 }
 
@@ -415,3 +477,167 @@ div.listbox p:hover
 	font-size: 1px;
 	visibility: hidden;
 }
+
+
+#redMark, #greenMark
+{
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	left: 0px;
+	top: 31px;
+	z-index: 99;
+	font-size: 1px;
+	visibility: hidden;
+}
+
+div.suppdataline
+{
+	visibility:visible; 
+	top:20px; 
+	width:1px; 
+	z-index:98; 
+	position:absolute;
+}
+
+div.suppdataanchor
+{
+	visibility:visible; 
+	height:20px; 
+	width:20px; 
+	z-index:98; 
+	position:absolute;
+}
+
+
+/* Scrollable table */
+
+/* define height and width of scrollable area. Add 16px to width for scrollbar          */
+div.tableContainer {
+	clear: both;
+	border: 1px solid black;
+	height: 150px;
+	overflow: auto;
+	width: 216px
+}
+
+/* Reset overflow value to hidden for all non-IE browsers. */
+html>body div.tableContainer {
+	overflow: hidden;
+	width: 200px
+}
+
+/* define width of table. IE browsers only                 */
+div.tableContainer table {
+	float: left;
+	width: 200px
+}
+
+/* define width of table. Add 16px to width for scrollbar.           */
+/* All other non-IE browsers.                                        */
+html>body div.tableContainer table {
+	width: 216px
+}
+
+/* set table header to a fixed position. WinIE 6.x only                                       */
+/* In WinIE 6.x, any element with a position property set to relative and is a child of       */
+/* an element that has an overflow property set, the relative value translates into fixed.    */
+/* Ex: parent element DIV with a class of tableContainer has an overflow property set to auto */
+thead.fixedHeader tr {
+	position: relative
+}
+
+/* set THEAD element to have block level attributes. All other non-IE browsers            */
+/* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+html>body thead.fixedHeader tr {
+	display: block
+}
+
+/* make the TH elements pretty */
+thead.fixedHeader th {
+	background: #CCC;
+	border: 1px solid black;
+	font-weight: normal;
+	padding: 4px 3px;
+	text-align: left
+}
+
+/* make the A elements pretty. makes for nice clickable headers                */
+thead.fixedHeader a, thead.fixedHeader a:link, thead.fixedHeader a:visited {
+	color: #FFF;
+	display: block;
+	text-decoration: none;
+	width: 100%
+}
+
+/* make the A elements pretty. makes for nice clickable headers                */
+/* WARNING: swapping the background on hover may cause problems in WinIE 6.x   */
+thead.fixedHeader a:hover {
+	color: #FFF;
+	display: block;
+	text-decoration: underline;
+	width: 100%
+}
+
+/* define the table content to be scrollable                                              */
+/* set TBODY element to have block level attributes. All other non-IE browsers            */
+/* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+/* induced side effect is that child TDs no longer accept width: auto                     */
+html>body tbody.scrollContent {
+	display: block;
+	height: 62px;
+	overflow: auto;
+	width: 100%
+}
+
+/* make TD elements pretty. Provide alternating classes for striping the table */
+/* http://www.alistapart.com/articles/zebratables/                             */
+tbody.scrollContent td, tbody.scrollContent tr.normalRow td {
+	background: #FFF;
+	border-bottom: none;
+	border-left: none;
+	border-right: 1px solid #CCC;
+	border-top: 1px solid #DDD;
+	padding: 2px 3px 3px 4px
+}
+
+tbody.scrollContent tr.alternateRow td {
+	background: #EEE;
+	border-bottom: none;
+	border-left: none;
+	border-right: 1px solid #CCC;
+	border-top: 1px solid #DDD;
+	padding: 2px 3px 3px 4px
+}
+
+/* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+/* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+/* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+html>body thead.fixedHeader th {
+	width: 216px
+}
+
+html>body thead.fixedHeader th + th {
+	width: 266px
+}
+
+html>body thead.fixedHeader th + th + th {
+	width: 66px
+}
+
+/* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+/* All other non-IE browsers.                                            */
+/* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+html>body tbody.scrollContent td {
+	width: 200px
+}
+
+html>body tbody.scrollContent td + td {
+	width: 250px
+}
+
+html>body tbody.scrollContent td + td + td {
+	width: 50px
+}
+
+/* end scrollable table */

@@ -33,7 +33,7 @@ create_hypocentermenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-2h", "-6h", "-12h", "-24h", "-3d", "-1w", "-1m", "-3m", "-6m", "-1y", "-2y", "-5y", "-10y", "-25y");
+			menu.timeShortcuts	= new Array("-2h", "-6h", "-12h", "-1d", "-3d", "-1w", "-1m", "-3m", "-6m", "-1y", "-2y", "-5y", "-10y", "-25y");
 		}	
 		
 		activateBox("hypocenterBox", this.id);

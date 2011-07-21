@@ -20,8 +20,6 @@
   *  @param {menu object} menu 
   */
 create_wavemenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "waveForm";
 	menu.boxName			= "waveBox";
 
@@ -35,6 +33,9 @@ create_wavemenu = function(menu) {
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1i", "-2i", "-5i", "-10i", "-20i", "-30i", "-1h");
 		}
+
+		// populate suppdata types
+		populateSuppDataTypes(this);
 	}
 	
 	menu.presubmit = function(pr, pc) {	
@@ -46,24 +47,22 @@ create_wavemenu = function(menu) {
 	}
 	
 	menu.acceptTYClick = function(target, mx, my, gx, gy) {
-		
 		var f = this.getForm();
 		if (getChecked(f["skip:ca"]) == 0) {
 			Menu.prototype.acceptTYClick.call(this, target, mx, my, gx, gy);
 			return;
 		}
 		
-		var pd = f["skip:popupDuration"];
-		var span = pd[pd.selectedIndex].text * 1;
-		var time = gx;
-		var st = time - (span / 2) * 60;
-		var et = time + (span / 2) * 60;
-		var ch = getXMLField(target.xml, "ch");
+		var pd			= f["skip:popupDuration"];
+		var span		= pd[pd.selectedIndex].text * 1;
+		var st			= gx - (span / 2) * 60;
+		var et			= gx + (span / 2) * 60;
+		var ch			= getXMLField(target.xml, "ch");
 		
-		var pr = new PlotRequest(true);
-		var pc = pr.createComponent(this.id, buildTimeString(st), buildTimeString(et));
-		pc.setFromForm(f);
-		pc.ch = ch;
+		var pr			= new PlotRequest(true);
+		var pc			= pr.createComponent(this.id, buildTimeString(st), buildTimeString(et));		
+		pc.setFromForm(f);	
+		pr.params.h		= pr.params.h + (pc.chCnt - 1) * pc.h;
 		
 		loadXML(this.id + " inset plot", pr.getURL(), 
 			function(req) {

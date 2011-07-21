@@ -12,8 +12,6 @@
  *  @param {menu object} menu 
  */
 create_ewrsammenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "ewrsamForm";
 	menu.boxName			= "ewrsamBox";
 	
@@ -25,7 +23,7 @@ create_ewrsammenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1m", "-6m", "-1y", "-2y", "-4y");
+			menu.timeShortcuts	= new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");
 		}	
 		
 		loadXML(this.id + " generic menu description", "valve3.jsp?a=data&da=ewRsamMenu&src=" + this.id, 
@@ -50,6 +48,24 @@ create_ewrsammenu = function(menu) {
 				}
 					
 		});
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

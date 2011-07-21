@@ -1,7 +1,5 @@
 
 create_nwismenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "genericVariableForm";
 	menu.boxName			= "genericVariableBox";
 	
@@ -12,11 +10,29 @@ create_nwismenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m", "-2m", "-6m");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-1m","-1y");
 		}
 		
-		var sel = document.getElementById(this.id + '_nwisSelector');
-		sel.myId = this.id;
+		var selnwis = document.getElementById(this.id + '_nwisSelector');
+		selnwis.myId = this.id;
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

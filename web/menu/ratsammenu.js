@@ -14,8 +14,6 @@
   *  @param {menu object} menu 
   */
 create_ratsammenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "ratsamForm";
 	menu.boxName			= "ratsamBox";	
 
@@ -27,8 +25,26 @@ create_ratsammenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1h", "-2h", "-6h", "-12h", "-24h", "-2d", "-3d", "-1w", "-2w", "-1m");
+			menu.timeShortcuts	= new Array("-10i","-30i","-1h","-6h","-12h","-1d","-3d","-1w","-2w","-1m");
 		}
+		
+		var sel = document.getElementById(this.id + '_selector:ds');		
+		addListener(sel, 'change', 
+			function() {
+				var interval = document.getElementById(this.id + '_interval');
+				switch(sel.selectedIndex)
+				{
+					case 0:
+						interval.firstChild.textContent = "Interval:";
+						break;
+					case 1:
+						interval.firstChild.textContent = "Interval, pts: ";
+						break;
+					case 2:
+						interval.firstChild.textContent = "Interval, sec: ";
+						break;
+				}
+			}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	
@@ -46,9 +62,10 @@ create_ratsammenu = function(menu) {
 			return false;
 		}
 		
-		// resize the box to make only one plot for two channels instead of two plots
-		pr.params.h	= 150 + 60;
-		pc.h		= 150;
+		// reset the plot height to indicate only one plot will be displayed
+		var sizeIndex	= document.getElementById("outputSize").selectedIndex;
+		var sizes		= STANDARD_SIZES[sizeIndex];
+		pr.params.h	= sizes[1];
 		
 		return true;
 	}

@@ -19,8 +19,6 @@
  *  @param {menu object} menu 
  */
 create_helimenu = function(menu) {
-	
-	menu.allowChannelMap	= true;
 	menu.formName			= "heliForm";
 	menu.boxName			= "heliBox";
 	menu.SIZES				= new Array(8, 10, 12, 14);
@@ -33,7 +31,7 @@ create_helimenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-6h", "-12h", "-24h", "-2d", "-3d", "-1w");
+			menu.timeShortcuts	= new Array("-1h","-6h","-12h","-1d","-3d","-1w");
 		}
 	}
 	
@@ -53,7 +51,7 @@ create_helimenu = function(menu) {
 		var dt		= timeDiff(pc.st, pc.et);
 		var rows	= Math.ceil(dt / (pc.tc * 60000));
 		pr.params.h	= pc.chCnt * (size * rows) + 60;
-		pc.h		= pc.chCnt * (size * rows);
+		pc.h		= (size * rows);
 		if (si == 0) {
 			pc.min = "T";
 			pr.params.h -= 30;

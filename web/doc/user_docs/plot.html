@@ -1,0 +1,78 @@
+<!--
+  -- $Log: index.html,v $
+  -- Revision 1.1  2004/01/25 20:40:11  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve General Help</title>
+<link type="text/css" rel="stylesheet" href="valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;User's Guide</h1><hr></div>
+
+<table class="layout">
+<tr>
+	<td class="navPane">
+	<div class="navPane">
+	<p class="selected">User's Guide</p>
+	<p><a href="index.html">Home</a></p>
+    <p><a href="menu.html">Main Menu</a></p>
+    <p><a href="plot.html">Plots</a></p>
+    <br/>
+	<p class="selected">Section Guides</p>
+	<p><a href="ewrsam/index.html">EWRSAM</a></p>
+    <p><a href="genericfixed/index.html">Generic Fixed</a></p>
+    <p><a href="genericvariable/index.html">Generic Variable</a></p>
+    <p><a href="gps/index.html">GPS</a></p>
+    <p><a href="heli/index.html">Helicorders</a></p>
+    <p><a href="hypocenter/index.html">Hypocenters</a></p>
+    <p><a href="ratsam/index.html">RatSAM</a></p>
+    <p><a href="strain/index.html">Strain</a></p>
+	<p><a href="tilt/index.html">Tilt</a></p>
+    <p><a href="wave/index.html">Waveforms</a></p>
+    <br/>
+	</div>
+	</td>
+<td class="bodyPane">
+
+<div class="content">
+<h1><a href="#top"><img border="0" src="../images/topnavnobg.gif"></a><span class="top"> Interacting with Graphs</span></h1>
+<p>[Note - currently this text is simply a copy of what is in <a href="index.html">home</a>.]</p>
+<p>Most graphs that Valve produces allow extensive interaction.  These graphs can be used to select time intervals on other graphs, select map bounding boxes, earthquake cross-sections.  In general, a time-series graph will look something like the figure below (a time-series of a tilt event).</p>
+<p><center><img alt="Example time-series graph" border="1" src="graph.png"></center></p>
+<p>To select a subset of the time represented on the x-axis in this graph simply move the mouse over the graph (a red line and crosshair cursor will appear) and click the time the start and end times respectively.  A green marker arrow will appear over the start time you selected and a red arrow over the end time.  Or to set the time interval to exactly what is on the x-axis, click the clock icon on the graph menu bar.  Of course, graphs that don't have time as the x-axis (like a frequency power chart) will not allow this.  This functionality allows the user to quickly look at interesting time intervals on a variety of different instruments or to find interesting events and plot them in other, perhaps more insightful, ways.  For example, a user could plot earthquake counts over a region for the last 25 years, select a time interval that has a swarm, then plot the swarm's hypocenters on an earthquake map.</p>
+<p>Valve also produces many spatial plots.  These plots can be interacted with to select area boundaries, assuming that the tab currently visible is 'interested' in boundary selection.  A spatial graph will look something like the figure below (a hypocenter plot of a dike intrusion).</p>
+<p><center><img alt="Example spatial graph" border="1" src="spatial.png"></center></p>
+<p>If the Valve UI was open to a tab that was interested in spatial boundaries or other user-selected spatial information, clicking on the spatial graph would provide that input.  In the case of selecting a boundary for an earthquake plot, for example, simply click on the upper-left corner of the new boundary (a rubber-band type box will appear), then click on the lower-right.  Unfortunately, due to browsers interpreting a dragged mouse as a drag-and-drop event, dragging (the intuitive way of selecting a space) the clicked mouse will not work.</p>
+<p><a name="rawdata"></a><b>Raw Data</b><br>
+If you selected raw data output in the common panel a link will be provided in the title bar of the graph to that raw data.  To save the data to your computer, right-click on the link and select "Save link as..." or the equivalent in whatever browser you are using.</p>
+<p><a name="postscript"></a><b>PostScript</b><br>
+If you selected PostScript output in the common panel a link will be provided in the title bar of the graph to a PostScript file.  This file can be loaded into programs like Adobe Illustrator in order to produce publication quality plots.  To save the file to your computer, right-click on the link and select "Save link as..." or the equivalent in whatever browser you are using.</p>
+</div>
+
+
+</td>
+</tr>
+</table>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/index.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-06 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>

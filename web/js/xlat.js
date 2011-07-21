@@ -48,6 +48,13 @@ function translate_ty(event)
 	currentMenu.acceptTYClick(target, mxy.x, mxy.y, gxy[0], gxy[1]);
 }
 
+function translateT2X( t, targ )
+{
+	var xy = getTopLeftOffset(targ);
+	var tt = targ.translation;
+	return (t - tt[1]*1.0)/(tt[0]*1.0);
+}
+
 /**
  *  Get event and target element x/y coordinates. For example mouse coordinates
  *  and png image coordinates which mouse is rolling over. Ty can mean latitude
@@ -74,7 +81,6 @@ function getTranslation_ty(event)
 	sy = target.height - sy;
 	gx = sx * t[0] + t[1] * 1;
 	gy = sy * t[2] + t[3] * 1;
-	
 	var result = new Array(3);
 	result[0] = gx;
 	result[1] = gy;
@@ -163,6 +169,21 @@ function getTranslation_heli(event)
 		gx += row * t[6];
 		gy = row;
 	}
+	var tzselect  = document.getElementById('timeZoneAbbr');
+	if(tzselect){
+		// at least one time zone must be selected
+		if (tzselect.selectedIndex == -1) {
+			alert("You must select a time zone.");
+			return;
+		}
+	} else {
+		alert("Time zone not defined.");
+		return;
+	}
+	if(tzselect[tzselect.selectedIndex].text != "UTC"){
+		gx = gx + parseFloat(document.getElementById('timeZoneOffset').value);
+	}
+	
 	var result = new Array(3);
 	result[0] = gx;
 	result[1] = gy;

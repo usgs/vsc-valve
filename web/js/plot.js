@@ -49,8 +49,51 @@ function createPopupPlot(xml, px, py)
 	popup.style.display = "block";
 }
 
+/** 
+ *  This function will fix the zoom marks if they are currently
+ *  within the plot t, or if t is null.
+ *	adj =  0: reset marks
+ *	    = -1: fix for a minimized plot
+ *	    =  1: fix for a maximized plot
+ *  
+ *  @param {t} If t is null or contains the marks, they will be fixed
+ */
+function fixZoomMarksInside(t,adj)
+{
+	var gmark = document.getElementById("greenMark");
+	function reset( mark, newHome )
+	{
+		mark.style.visibility = "hidden";
+		mark.parentNode.removeChild( mark );
+		newHome.appendChild( mark );
+	}
+	function shrink( mark )
+	{
+		mark.style.visibility = "hidden";
+	}
+	function grow( mark )
+	{
+		mark.style.visibility = "visible";
+	}
+	if ( (t == null) || (gmark.parentNode == t) ) {
+		var rmark = document.getElementById("redMark");
+		if ( adj == 0 ) {
+			var newHome = document.getElementById("container");
+			reset( gmark, newHome );
+			reset( rmark, newHome );
+		} else if ( adj == 1 ) {
+			grow( gmark );
+			grow( rmark );
+		} else {
+			shrink( gmark );
+			shrink( rmark );
+		}
+	}
+}
+
 var count = 0;
 var dataCount = 0;
+var combineMenuOpenedId = null;
 /** 
  *  This function is called by Plot Request and is responsible for 
  *  bringing a plot pane onto the screen, based on the xml from the request.
@@ -65,30 +108,43 @@ var dataCount = 0;
  */
 function handlePlot(xml)
 {
-	var title = getXMLField(xml, "title");
-	var src = getXMLField(xml, "file");
-	var width = getXMLField(xml, "width");
-	var height = getXMLField(xml, "height");
-	var translationType = getXMLField(xml, "translation-type");
-	var translation = getXMLField(xml, "translation");
-	var url = getXMLField(xml, "url");
+	var title			= getXMLField(xml, "title");
+	var src				= getXMLField(xml, "file");
+	var width			= getXMLField(xml, "width");
+	var height			= getXMLField(xml, "height");
+	var translationType	= getXMLField(xml, "translation-type");
+	var translation		= getXMLField(xml, "translation");
+	var url				= getXMLField(xml, "url");
+	var raw_ok			= (getXMLField(xml, "exportable") == "true");
+	var combined		= (getXMLField(xml, "combined") == "true");
+	var combineable		= (getXMLField(xml, "combineable") == "true");
+	var waveform_type	= (getXMLField(xml, "waveform") == "true");
 	
-	var t = document.getElementById('contentTemplate').cloneNode(true);
-	t.id = "content" + count;
-	t.style.width = (width * 1) + "px";
-	var header = t.getElementsByTagName('h1')[0];
+	var t			= document.getElementById('contentTemplate').cloneNode(true);
+	t.id			= "content" + count;
+	t.style.width	= (width * 1) + "px";
+	var header		= t.getElementsByTagName('h1')[0];
+	t.getElementsByTagName('div')[4].id = t.id + 'combine';
 	header.firstChild.nodeValue = title;
-	var links = t.getElementsByTagName('a');
-	var imgs = t.getElementsByTagName('img');
-	var img = imgs[imgs.length - 1];
-	var minImg = imgs[1];
-	img.header = header;
-	img.container = t;
-	img.src = src;
-	img.fullWidth = width;
-	img.fullHeight = height;
-	img.translation = translation.split(",");
-	img.xml = xml;
+	var links		= t.getElementsByTagName('a');
+	var imgs		= t.getElementsByTagName('img');
+	var img			= imgs[imgs.length - 1];
+	var minImg		= imgs[1];
+	img.header		= header;
+	img.container	= t;
+	img.src			= src;
+	img.fullWidth	= width;
+	img.fullHeight	= height;
+	img.translation	= translation.split(",");
+	img.xml			= xml;
+	var components	= xml.getElementsByTagName('component');
+	
+	if (combined) {
+		t.getElementsByTagName('input')[0].value = 1;
+	} else {
+		t.getElementsByTagName('input')[0].value = components.length;
+	}
+	
 	for (var i = 0; i < img.translation.length; i++)
 		img.translation[i] = img.translation[i] * 1;
 	
@@ -108,13 +164,26 @@ function handlePlot(xml)
 	addListener(img, 'click', 
 		function(event)
 		{
-			eval('translate_' + translationType + '(event)');
+			if(combineMenuOpenedId===null){
+				eval('translate_' + translationType + '(event)');
+			} else {
+				if(t.id == combineMenuOpenedId.replace('combine', '')){
+					alert('You clicked the same graph');
+				} else {
+					var menu = document.getElementById(combineMenuOpenedId);
+					menu.getElementsByTagName('font')[0].textContent = title + ' (' + t.id + ')'; 
+					menu.getElementsByTagName('input')[1].disabled = false;
+					menu.getElementsByTagName('input')[2].value = t.id;
+					menu.getElementsByTagName('input')[3].value = title;
+				}
+			}
 		}, false);
 		
 	// close
 	addListener(imgs[0], 'click', 
 		function()
 		{
+			fixZoomMarksInside(t,0);
 			t.parentNode.removeChild(t);
 			count--;
 		}, false);
@@ -125,6 +194,7 @@ function handlePlot(xml)
 		{
 			if (minImg.src.indexOf("min.gif") != -1)
 			{
+				fixZoomMarksInside(t,-1);
 				img.width = img.fullWidth / 4;
 				img.height = img.fullHeight / 4;
 				img.container.style.width = (img.fullWidth / 4) + "px";
@@ -133,6 +203,7 @@ function handlePlot(xml)
 			}
 			else
 			{
+				fixZoomMarksInside(t,+1);
 				img.width = img.fullWidth;
 				img.height = img.fullHeight;
 				img.header.className = "";
@@ -145,8 +216,27 @@ function handlePlot(xml)
 	addListener(imgs[2], 'click',
 		function()
 		{
-			document.getElementById("startTime").value = buildTimeString(img.translation[4]);
-			document.getElementById("endTime").value = buildTimeString(img.translation[5]);
+			var timeZoneOffset = 0;
+			
+			if((components.length == 1) && (getXMLField(components[0],'plotter') == 'gov.usgs.valve3.plotter.HelicorderPlotter')){
+				var tzselect  = document.getElementById('timeZoneAbbr');
+				if(tzselect){
+					// at least one time zone must be selected
+					if (tzselect.selectedIndex == -1) {
+						alert("You must select a time zone.");
+						return;
+					}
+				} else {
+					alert("Time zone not defined.");
+					return;
+				}
+				if(tzselect[tzselect.selectedIndex].text != "UTC"){
+					timeZoneOffset = parseFloat(document.getElementById('timeZoneOffset').value);
+				}
+			}
+			
+			document.getElementById("startTime").value = buildTimeString(img.translation[4] + timeZoneOffset);
+			document.getElementById("endTime").value = buildTimeString(img.translation[5] + timeZoneOffset);
 		});
 	
 	// xml
@@ -158,34 +248,176 @@ function handlePlot(xml)
 			w.document.close();
 		});
 		
-	// raw data
-	addListener(imgs[4], 'click',
-		function()
+	// processing data
+	addListener(imgs[8], 'click',
+		(function(t)
 		{
-			var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
-			var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
-			
-			loadXML("rawData", url, function(req)
-			{ 
-				var doc = req.responseXML;
-				if (doc != null)
-				{
-					var result = doc.getElementsByTagName("valve3result")[0];
-					if (result != null)
+			return function() {
+				if ( t.style.visibility == "visible" )
+					t.style.visibility = "hidden";
+				else
+					t.style.visibility = "visible";
+			}
+		})(ieGetElementsByClassName( t, "suppnodl")[0]));
+
+    //Combination
+    if(((components.length == 1) && combineable) || combined){
+    	addListener(imgs[7], 'click',
+    		function()
+    		{
+    			loadXML("combineMenu", "menu/combinemenu.html", function(req) {
+    				var mip = document.getElementById(t.id+'combine');
+    				if (req.readyState == 4 && req.status == 200) {
+    					combineMenuOpenedId	= t.id+'combine';
+    					mip.innerHTML		=req.responseText;
+    					mip.style.display	= "block";
+      				}
+    				var combineOKButton = mip.getElementsByTagName('input')[1];
+        			addListener(combineOKButton, 'click',
+        					function(){
+         				    combineMenuOpenedId	= null;
+        					mip.style.display	= 'none';
+         					var plotSize		= STANDARD_SIZES[mip.getElementsByTagName('select')[0].selectedIndex].slice(0);
+         					var xScalingSelect	= mip.getElementsByTagName('select')[1];
+         					var yScalingSelect	= mip.getElementsByTagName('select')[2];
+         					var xScaling		= parseFloat(xScalingSelect[xScalingSelect.selectedIndex].text);
+         					var yScaling		= parseFloat(yScalingSelect[yScalingSelect.selectedIndex].text);
+         					plotSize[0]			= plotSize[0] + plotSize[4] * (xScaling - 1); // plot width
+         					plotSize[1]			= plotSize[1] + plotSize[5] * (yScaling - 1); // plot height
+         					plotSize[4]			= plotSize[4] * xScaling; //comp width
+         					plotSize[5]			= plotSize[5] * yScaling; //comp height 
+         					plotSize[6]			= plotSize[6] * yScaling; //map height
+         					var clickedId		= mip.getElementsByTagName('input')[2].value;
+         					var componentCount	= document.getElementById(clickedId).getElementsByTagName('input')[0].value;
+         					if(componentCount == 1){
+         						try {
+         							loadXML(title + '+' + mip.getElementsByTagName('input')[3].value, combineUrl(url, document.getElementById(clickedId).getElementsByTagName('a')[0].href, plotSize));
+         						} catch(err) {
+         							alert(err);
+         						}
+         					} else {
+         						alert("Selected plot has more than 1 component");
+         					}
+
+         			});
+        			var combineCancelButton = mip.getElementsByTagName('input')[0];
+        			addListener(combineCancelButton, 'click',
+        					function(){
+        				    combineMenuOpenedId = null;
+        					mip.style.display = 'none';
+        			});
+    			});
+    			
+      		});
+    } else {
+    	t.removeChild(imgs[7]);
+    }
+    
+	// raw data
+    if ( raw_ok && !combined ) {
+    	// csv
+		addListener(imgs[4], 'click',
+			function()
+			{
+				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=csv");
+				
+				loadXML("rawData", url, function(req)
+				{ 
+					var doc = req.responseXML;
+					if (doc != null)
 					{
-						type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-						if (type == 'error')
-							alert(doc.getElementsByTagName("message")[0].firstChild.data);
-						else if (type == 'rawData')
+						var result = doc.getElementsByTagName("valve3result")[0];
+						if (result != null)
 						{
-							var d = document.getElementById('dataFrame');
-							d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+							if (type == 'error')
+								alert(doc.getElementsByTagName("message")[0].firstChild.data);
+							else if (type == 'rawData')
+							{
+								var d = document.getElementById('dataFrame');
+								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							}
 						}
 					}
-				}
-			});
-		}, false);
-		
+				});
+			}, false);
+		if ( waveform_type ) {
+			// csvnots
+			addListener(imgs[5], 'click',
+				function()
+				{
+					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+					var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=csvnots");
+					
+					loadXML("rawData", url, function(req)
+					{ 
+						var doc = req.responseXML;
+						if (doc != null)
+						{
+							var result = doc.getElementsByTagName("valve3result")[0];
+							if (result != null)
+							{
+								type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+								if (type == 'error')
+									alert(doc.getElementsByTagName("message")[0].firstChild.data);
+								else if (type == 'rawData')
+								{
+									var d = document.getElementById('dataFrame');
+									d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+								}
+							}
+						}
+					});
+				}, false);
+			// seed
+			addListener(imgs[6], 'click',
+				function()
+				{
+					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+					var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=seed");
+					
+					loadXML("rawData", url, function(req)
+					{ 
+						var doc = req.responseXML;
+						if (doc != null)
+						{
+							var result = doc.getElementsByTagName("valve3result")[0];
+							if (result != null)
+							{
+								type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+								if (type == 'error')
+									alert(doc.getElementsByTagName("message")[0].firstChild.data);
+								else if (type == 'rawData')
+								{
+									var d = document.getElementById('dataFrame');
+									d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+								}
+							}
+						}
+					});
+				}, false);
+		} else {
+			t.removeChild(imgs[6]);
+			t.removeChild(imgs[5]);
+		}
+	} 
+	else {
+		t.removeChild(imgs[6]);
+		t.removeChild(imgs[5]);
+		t.removeChild(imgs[4]);
+		//var ebs = t.getElementsByClassName('button');
+		//var e;
+		//for ( e in ebs ) {
+		//	if ( ebs[e].getAttribute('name') == 'export_btn' ) {
+		//		ebs[e].setAttribute( 'src', 'images/nocsv.gif' );
+		//		ebs[e].setAttribute( 'class', 'button_off' );
+		//		break;
+		//	}
+		//}
+	}
+	
+    
 	// setup direct link
 	url = url.replace("o=xml", "o=png");
 	var newURL = "valve3.jsp?" + url.substring(1);
@@ -196,19 +428,261 @@ function handlePlot(xml)
 	ip.insertBefore(t, ip.firstChild);
 		
 	count++;
+
+	// gather/format supplemental data
+	var supp_data = xml.getElementsByTagName('suppdatum');
+	var sbar = document.createElement( "div" );
+	var node = 0;
+	sbar.className = "suppdataline";
+	var width = t.clientWidth*1;
+	var height = t.clientHeight*1 + img.fullHeight*1 - 10;
+	//sbar.style.height = (height-30) + "px";
+	var sanchor = document.createElement( "div" );
+	sanchor.className = "suppdataanchor";
+	//sanchor.style.top = (height-20) + "px";
+	sanchor.style.width = "11px";
+	sanchor.style.height = "11px";
+	var proctable = ieGetElementsByClassName( t, "suppnodltable" )[0];
+	var procdata = proctable.getElementsByTagName('tbody')[0];
+	for ( i=0; i<supp_data.length; i++ ) {
+		var sd_text = supp_data[i].textContent;
+		var sd_bits = sd_text.split( "\"" );
+		if ( sd_bits[7] == "0" ) {
+			var new_tr = document.createElement( "tr" );
+			var new_td = document.createElement( "td" );
+			new_td.appendChild( document.createTextNode( sd_bits[8] ) );
+			new_tr.appendChild( new_td );
+			var new_td = document.createElement( "td" );
+			new_td.appendChild( document.createTextNode( timeToString(parseFloat(sd_bits[2])) + " thru " + timeToString(parseFloat(sd_bits[3])) ) );
+			new_tr.appendChild( new_td );
+			var new_td = document.createElement( "td" );
+			var buttonnode= document.createElement('input');
+			buttonnode.setAttribute('type','button');
+			buttonnode.setAttribute('value','Show');
+			new_td.appendChild(buttonnode);
+			buttonnode.onclick = (function(sd) {return function(){ show_sd(sd) }})(t.id+"\""+sd_text);
+			new_tr.appendChild( new_td );
+			procdata.appendChild( new_tr );
+			continue;
+		}
+		var color = "#" + sd_bits[14];
+		sbar.style.background = color;
+		//sanchor.style.background = color;
+		var when = Math.round( translateT2X(parseFloat(sd_bits[3]), img) );
+		var theNewParagraph = document.createElement('suppdatum');
+		var theTextOfTheParagraph = document.createTextNode(supp_data[i].textContent);
+		theNewParagraph.appendChild(theTextOfTheParagraph);
+		theNewParagraph.style.visibility = "hidden";
+		var bar_top = (sd_bits[15]*1 + 11) + "px";
+		sbar.style.top = bar_top;
+		var bar_height = (sd_bits[16]*1 - 13) + "px";
+		sbar.style.height = bar_height;
+		var anch_top = (sd_bits[15]*1 + sd_bits[16]*1 + 1) + "px";
+		sanchor.style.top = anch_top;
+		if ( when < width ) {
+			sbar.style.left = when + "px";
+			node = sbar.cloneNode(true);
+			node.style.backgroundImage="url(images/supp_et.gif)";
+			t.insertBefore(node, t.firstChild);
+			sanchor.style.left = (when-5) + "px";
+			node = sanchor.cloneNode(true);
+			node.style.backgroundImage="url(images/sd_anchor.png)";
+			node.appendChild(theNewParagraph);
+			node.show_data = t.id+"\""+sd_text;
+			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
+			t.insertBefore(node,t.firstChild);
+		}
+		when = Math.round( translateT2X(parseFloat(sd_bits[2]), img) );
+		if ( when > 0 ) {
+			sbar.style.left = when + "px";
+			t.insertBefore(sbar, t.firstChild);
+			sbar = sbar.cloneNode(true);
+			sanchor.style.left = (when-5) + "px";
+			node = sanchor.cloneNode(true);
+			node.style.backgroundImage="url(images/sd_anchor.png)";
+			node.appendChild(theNewParagraph);
+			node.show_data = t.id+"\""+sd_text;
+			node.onclick = (function(sd) {return function(){ show_sd(sd) }})(node.show_data); //function() {show_sd(node)};
+			t.insertBefore(node,t.firstChild);
+		}
+	}
+	var ig = new scrollableTable(proctable, 150, 200);
+//	if ( node != 0 ) {
+//		var ebs = t.getElementsByClassName('suppdataviewer');
+//		ebs[0].style.display = 'visible';
+//	}
+}
+
+function show_sd(me) {
+	var info = me;
+	var info_bits = info.split("\"");
+	var content = document.getElementById( info_bits[0] );
+	var viewer = ieGetElementsByClassName( content, "suppviewer" )[0];
+	viewer.style.visibility = "visible";
+	var elts = viewer.getElementsByTagName("td");
+	elts[1].onclick = (function(sv) {return function(){ sv.style.visibility = "hidden"; }})(viewer);
+	elts[2].innerHTML = "<b>From</b> " + timeToString(parseFloat(info_bits[3])) + "<br><b>to</b> " + timeToString(parseFloat(info_bits[4]))
+	elts[3].innerHTML = "<b>Type</b>: " + info_bits[14];
+	elts[4].innerHTML = "<b>Data</b>: " + info_bits[9] + "<br><textarea rows=\"3\" cols=\"40\">" + info_bits[10] + "</textarea></td>";
+}
+
+function combineUrl(url1, url2, size) {
+	
+	// alert("url1:" + url1);
+	// alert("url2:" + url2);
+	
+    // check the time zones
+    var tz1 = url1.match(/&tz=.+?&/)[0];
+    var tz2 = url2.match(/&tz=.+?&/)[0];
+    if (tz1.length <= 5 || tz2.length <=5) {
+        throw "Timezones are missing";
+    } else if (tz1 != tz2) {
+        throw "Timezones are different";
+    }
+    var tz  = tz1.substr(4, tz1.length - 5);
+	
+	// get the count of components per plot
+	var url1_n = getIntParameter('n', url1);
+	var url2_n = getIntParameter('n', url2);
+	
+	// prepare url 1 for parsing
+	url1_tmp1	= url1;
+	url1		= "";
+	
+	// update url 1 for each index individually
+	for (i = 0; i < url1_n; i++) {
+		
+		// parse url 1 into individual parameters for this particular index
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		compParams	= url1_tmp1.match(pattern);
+		url1_tmp2	= "";
+	
+		// correct url 1 with updated parameters
+		for (j = 0; j < compParams.length; j++) {
+			
+			// parse the parameter into local variables
+			var param		= compParams[j].split('=');
+			var paramKey	= param[0].substr(1);
+			var paramVal	= param[1];
+			var key			= paramKey.split('.')[0];
+			var index		= parseInt(paramKey.split('.')[1]);
+			
+			// update the parameter in the url
+			if (key == 'x') {
+				url1_tmp2 = updateParameter('x.'  + index, size[2], url1_tmp2);
+			} else if (key == 'y') {
+				url1_tmp2 = updateParameter('y.'  + index, size[3], url1_tmp2);
+			} else if (key == 'h') {
+				url1_tmp2 = updateParameter('h.'  + index, size[5], url1_tmp2);
+			} else if (key == 'w') {
+				url1_tmp2 = updateParameter('w.'  + index, size[4], url1_tmp2);
+			} else if (key == 'mh') {
+				url1_tmp2 = updateParameter('mh.' + index, size[6], url1_tmp2);
+			} else if (!(!paramVal || paramVal.length === 0)) {
+				url1_tmp2 = updateParameter(key + '.' + index, paramVal, url1_tmp2);
+			}
+		}
+		
+		url1 = url1 + url1_tmp2;
+	}
+	
+	// prepare url 2 for parsing
+	url2_tmp1	= url2;
+	url2		= "";
+	
+	// update url 2 for each index individually
+	for (i = url2_n - 1; i >= 0; i--) {
+		
+		// parse url 2 into individual parameters for this particular index
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		compParams	= url2_tmp1.match(pattern);
+		url2_tmp2	= "";
+		
+		// correct url 2 with updated parameters
+		for (j = 0; j < compParams.length; j++) {
+			
+			// parse the parameter into local variables
+			var param		= compParams[j].split('=');
+			var paramKey	= param[0].substr(1);
+			var paramVal	= param[1];
+			var key			= paramKey.split('.')[0];
+			var index		= parseInt(paramKey.split('.')[1]);
+			
+			// add the parameter back in to the url, updating the index value
+			if(key == 'x'){
+				url2_tmp2 = updateParameter('x.'  + (index + url1_n), size[2], url2_tmp2);
+			} else if(key == 'y'){
+				url2_tmp2 = updateParameter('y.'  + (index + url1_n), size[3], url2_tmp2);
+			} else if(key == 'h'){
+				url2_tmp2 = updateParameter('h.'  + (index + url1_n), size[5], url2_tmp2);
+			} else if(key == 'w'){
+				url2_tmp2 = updateParameter('w.'  + (index + url1_n), size[4], url2_tmp2);
+			} else if(key == 'mh'){
+				url2_tmp2 = updateParameter('mh.' + (index + url1_n), size[6], url2_tmp2);
+			} else if (!(!paramVal || paramVal.length === 0)) {
+				url2_tmp2 = updateParameter(key + '.' + (index + url1_n), paramVal, url2_tmp2);
+			}
+		}
+		
+		url2 = url2_tmp2 + url2;
+	}
+	
+	// build the final url	
+	url	= 'valve3.jsp?';
+	url+= '&combine=true';
+	url+= '&a=plot';
+	url+= '&o=xml';
+	url+= '&tz=' + tz;
+	url+= '&w=' + size[0];
+	url+= '&h=' + size[1];
+	url+= '&n=' + (url1_n + url2_n);	
+	url+= url1;
+	url+= url2;	
+	
+	// return the completed url to valve	
+	// alert("url1:" + url1);
+	// alert("url2:" + url2);
+	// alert("url:" + url);
+	return url;
+}
+
+function getIntParameter(param, url){
+	var regexp = new RegExp('&'+ param + '=[-|\\*|\\w|\\d]+');
+	var paramStrings = url.match(regexp);
+	if(paramStrings === null){
+		throw 'Parameter "' + param + '" not found';
+	}
+	return parseInt(paramStrings[0].substr(param.length+2));
+}
+
+function updateParameter(param, newValue, url){
+	var regexp = new RegExp('&'+ param + '=[-|\\*|\\w|\\d]+');
+	var paramStrings = url.match(regexp);
+	if(paramStrings === null){
+		url = url + '&'+param+'='+newValue;
+	}
+	return url.replace(regexp, '&'+param+'='+newValue);
+}
+
+function removeParameter(param, url){
+	var regexp = new RegExp('&'+ param + '=[-|\\*|\\w|\\d]+');
+	var paramStrings = url.match(regexp);
+	if(paramStrings === null){
+		throw 'Parameter "' + param + '" not found';
+	}
+	return url.replace(regexp, '');
 }
 
 /**
  *	Initialize some defaults for the Valve page
- *	width, height, x, y, width, height, map height
+ *	plot width, plot height, comp x, comp y, comp width, comp height, map height
  */
-var POPUP_SIZE_INDEX = 4;
-var STANDARD_SIZES = new Array(
-	new Array(300, 100, 35, 19, 260, 70, 300),
-	new Array(760, 200, 75, 19, 610, 140, 400),
-	new Array(1000, 250, 75, 19, 850, 188, 600),
-	new Array(1200, 350, 75, 19, 1050, 288, 800),
-	new Array(600, 200, 60, 20, 500, 160, 1200));
+var POPUP_SIZE_INDEX	= 1;
+var STANDARD_SIZES		= new Array(
+	new Array(300,  100, 75, 20, 150,  40,  300),
+	new Array(600,  200, 75, 20, 450,  140, 600),
+	new Array(900,  300, 75, 20, 750,  240, 900),
+	new Array(1200, 400, 75, 20, 1050, 340, 1200));
 
 /** 
  *  When the user requests a plot with the "Submit" button, or when the user clicks
@@ -229,6 +703,18 @@ function PlotRequest(popup)
 	
 	this.params.a = "plot";
 	this.params.o = "xml";
+	var tzselect  = document.getElementById('timeZoneAbbr');
+	if(tzselect){
+		// at least one time zone must be selected
+		if (tzselect.selectedIndex == -1) {
+			alert("You must select a time zone.");
+			return;
+		}
+	} else {
+		alert("Time zone not defined.");
+		return;
+	}
+	this.params.tz = tzselect[tzselect.selectedIndex].text;
 	
 	this.setStandardSize = function()
 	{
@@ -267,7 +753,8 @@ function PlotRequest(popup)
 		this.components[index] = comp;
 
 		comp.setFromForm = function(form) {
-			
+			var compUnselected = 0;
+			var compSelected = 0;
 			// iterate through each element in the form
 			for (var i = 0; i < form.elements.length; i++) {
 				var elt = form.elements[i];
@@ -297,7 +784,9 @@ function PlotRequest(popup)
 								comp.chCnt = vals.length;
 							}	
 							
-							comp["selectedStation"] = elt.options[elt.selectedIndex].text;
+							// if ( elt.selectedIndex != -1 )
+								// comp["selectedStation"] = elt.options[elt.selectedIndex].text;
+								
 							if (!comp[name])
 								comp[name] = "";
 							
@@ -323,8 +812,17 @@ function PlotRequest(popup)
 						}
 						
 					} else if (elt.type == "checkbox") {
-						comp[elt.name] = elt.checked ? "T" : "F";
-						
+						if(elt.checked){
+							comp[elt.name] = "T";
+							if((elt.offsetHeight != 0) && (elt.id.indexOf('_dmo_')==-1)){
+								compSelected = compSelected+1;
+							}
+						} else {
+							comp[elt.name] = "F";
+							if((elt.offsetHeight != 0) && (elt.id.indexOf('_dmo_')==-1)){
+								compUnselected = compUnselected+1;
+							}
+						}		
 					} else if (elt.type == "text") {
 						comp[elt.name] = elt.value;
 						
@@ -337,6 +835,11 @@ function PlotRequest(popup)
 					}
 				}
 			}
+			//where isn't components in form at all
+			if((compSelected==0) && (compUnselected==0))
+				compSelected = 1;
+			
+			return compSelected;
 		}
 		return comp;
 	}
@@ -364,4 +867,21 @@ function PlotRequest(popup)
 	this.setStandardSize();
 	
 	return this;
+}
+
+function ieGetElementsByClassName(oElm, strClassName){
+	if (oElm.getElementsByClassName)
+		return oElm.getElementsByClassName(strClassName);
+    var arrElements = oElm.all ? oElm.all : oElm.getElementsByTagName("*");
+    var arrReturnElements = new Array();
+    strClassName = strClassName.replace(/\-/g, "\\-");
+    var oRegExp = new RegExp("(^|\\s)" + strClassName + "(\\s|$)");
+    var oElement;
+    for(var i=0; i<arrElements.length; i++){
+        oElement = arrElements[i];      
+        if(oRegExp.test(oElement.className)){
+            arrReturnElements.push(oElement);
+        }   
+    }
+    return (arrReturnElements)
 }

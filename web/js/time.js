@@ -243,9 +243,8 @@ function validateDate(textField, start)
  */
 function buildTimeString(tIn)
 {
-	// don't add in the timeZoneOffset here, leave that to the plotters to figure out.  	
-	var t = Math.round(1000*tIn) + 946728000000;  // - (document.getElementById('timeZoneOffset').value * 60 * 60 * 1000);
-	
+
+	var t = Math.round(1000*tIn) + 946728000000;
 	var time = new Date(t);
 	var mo = (time.getUTCMonth() + 1 < 10 ? "0" + (time.getUTCMonth() + 1) : (time.getUTCMonth() + 1));
 	var da = (time.getUTCDate() < 10 ? "0" + time.getUTCDate() : time.getUTCDate());

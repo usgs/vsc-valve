@@ -1,0 +1,72 @@
+Data Export: CSV Exports
+------------------------
+
+The data behind time-series plots can be downloaded as a comma-separated
+value (CSV) file by clicking the CSV button at the top of the plot
+window.  (If downloading such a file is not permitted, either the button
+will have a red X through it, or it will not appear at all.)
+
+The name of the file that gets downloaded will start with the date &
+time of the request, followed by a dash and the name of the datasource
+(and, if applicable, followed by another dash and the rank name),
+followed by ".csv".
+
+The first few lines of the file will be comments (preceded by a #);
+these will be followed by a header, naming each column of data; the
+remaining lines will be the data.  The first comment line will list the
+date and time, in seconds since 1970 and then a standard YYYY-MM-DD
+HH:MM:SS.SSS (TZ) format.  The second comment line will show the URL
+used in requesting the export.  The third comment line will list the
+datasource name.  The fourth comment line will list the start and and
+times  (in seconds since 1970).  For Winston datasources, the fifth
+comment line will list the sample rate, and the sixth will list the
+datatype.  The remaining comment lines are those specified in the
+configuration files.
+
+The first two columns represent the time of that line's data; the first
+will be the number of seconds since 1970, the second in a standard
+YYYY-MM-DD HH:MM:SS.SSS date and time format.  The headers of these
+columns will be "Seconds_since_1970 (XXX)" and "Date (XXX)", where XXX
+is the timezone code that the times are expressed in.
+
+The remaining columns correspond to the selected data for the time
+identified in that line's first two columns; if these is no data for a
+given column for that time, the column will be blank (but still have a
+comma(s) separating it from adjacent columns).  The headings of these
+columns are made up of the channel name and the column name separated by
+an underscore, as in AHUP_East.
+
+Data Export: Export-Related Configuration File Entries
+------------------------------------------------------
+
+In valve3.config:
+
+exportEnabled can be set to false to disable all exports
+
+exportCommentLines can be set to the number of comment lines to add
+after the standard ones (see above).
+
+exportCommentLine can be set to a name to use for a comment line; this
+can be done multiple times
+
+<nameOfCommentLine>.index is set to the position of the comment line (1
+being the first after the standard comments, 2 being the second, etc.).
+
+<nameOfCommentLine>.value is the text of the comment line.
+
+exportDataWidth=N.M specified the formatting of numeric values in an
+export file, where N is the total width and M the number of decimal
+places.
+
+In vdxSources.config:
+
+These same settings can be applied to specific datasources, overriding
+their valve3.config counterparts (but you cannot enable exports for any
+datasource if exportEnabled is false in valve3.config)
+
+Data Export: Request Parameters
+-------------------------------
+
+Except for a change in action (rawData) and the output type (and some
+others no longer being meaningful, like width or height), the parameters
+for an export request are identical to those of a plot.
