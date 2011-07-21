@@ -1,7 +1,11 @@
 package gov.usgs.valve3;
 
+import gov.usgs.util.Log;
+import gov.usgs.util.Util;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,9 +17,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ActionHandler implements HttpHandler
 {
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.ActionHandler"); 
 	protected Map<String, HttpHandler> handlers;
 	protected String key;
-
 	
 	/**
 	 * Constructor
@@ -28,7 +32,7 @@ public class ActionHandler implements HttpHandler
 	}
 
 	/**
-	 * 
+	 * Yield map of action names to http handlers
 	 * @return map of pairs action name-http handler
 	 */
 	public Map<String, HttpHandler> getHandlers()
@@ -39,14 +43,19 @@ public class ActionHandler implements HttpHandler
 	/**
 	 * apply action with name containing in the 'key' field to http requests.
 	 * See {@link HttpHandler}
+	 * @param request - got http request
+	 * @throws Valve3Exception
+	 * @return result of handling request
 	 */
-	public Object handle(HttpServletRequest request)
-	{
-		System.out.println(request.getQueryString());
-		String action = request.getParameter(key);
-		if (action == null)
-			return null;
+	public Object handle(HttpServletRequest request) throws Valve3Exception {
 		
+		// log the request to the log file
+		logger.info(request.getQueryString());
+		
+		// get the parameter, default to "plot" if not specified
+		String action = Util.stringToString(request.getParameter(key), "plot");
+		
+		// lookup the handler from the map
 		HttpHandler handler = handlers.get(action);
 		if (handler == null)
 			return null;

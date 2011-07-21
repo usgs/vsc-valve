@@ -5,6 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
 	<classpathentry kind="lib" path="/USGS/contrib/servlet.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
-

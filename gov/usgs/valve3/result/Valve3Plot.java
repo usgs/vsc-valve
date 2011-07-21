@@ -5,11 +5,16 @@ import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.CombinedPlot;
+import gov.usgs.vdx.data.SuppDatum;
+import gov.usgs.util.Log;
+import gov.usgs.util.Util;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,12 +56,13 @@ public class Valve3Plot extends Result
 		}
 	}
 	
-	public static final int DEFAULT_WIDTH = 1000;
-	public static final int DEFAULT_HEIGHT = 250;
+	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
+	public static final int DEFAULT_PLOT_WIDTH	= 900;
+	public static final int DEFAULT_PLOT_HEIGHT	= 300;
 	
 	protected Plot plot;
 	protected String filename;
-	protected String title;
+	private String title;
 	protected OutputType outputType;
 	
 	protected int width;
@@ -65,46 +71,62 @@ public class Valve3Plot extends Result
 	protected String url;
 	
 	protected List<PlotComponent> components;
+	private Logger logger;	
+	
+	protected boolean isExportable	= false;
+	protected boolean isCombineable	= false;
+	private boolean isCombined		= false;
+	protected boolean isWaveform	= false;
+	
+	protected List<SuppDatum> suppdata;
 	
 	/**
 	 * Constructor
 	 * @param request http servlet request which keeps height, width and output type parameters
+	 * @param componentCount number of components
 	 * @throws Valve3Exception
 	 */
-	public Valve3Plot(HttpServletRequest request) throws Valve3Exception
+	public Valve3Plot(HttpServletRequest request, int componentCount) throws Valve3Exception
 	{
-		String w = request.getParameter("w");
-		String h = request.getParameter("h");
+		logger = Log.getLogger("gov.usgs.valve3");
 		
-		width = -1;
-		if (w == null)
-			width = DEFAULT_WIDTH;
-		else
-			try { width = Integer.parseInt(w); } catch (Exception e) {}
-		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH)
-			throw new Valve3Exception("Illegal width.");
+		width = Util.stringToInt(request.getParameter("w"), DEFAULT_PLOT_WIDTH);
+		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH) {
+			width = DEFAULT_PLOT_WIDTH;
+			logger.info("Illegal w parameter.  Was set to default value of " + DEFAULT_PLOT_WIDTH);
+		}
+		
+		height = Util.stringToInt(request.getParameter("h"), DEFAULT_PLOT_HEIGHT);
+		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT) {
+			height = DEFAULT_PLOT_HEIGHT;
+			logger.info("Illegal h parameter.  Was set to default value of " + DEFAULT_PLOT_HEIGHT);
+		}
 
-		height = -1;
-		if (h == null)
-			height = DEFAULT_HEIGHT;
-		else
-			try { height = Integer.parseInt(h); } catch (Exception e) {}
-		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT)
-			throw new Valve3Exception("Illegal height.");
-		
-		outputType = OutputType.fromString(request.getParameter("o"));
-		if (outputType == null)
+		outputType = OutputType.fromString(Util.stringToString(request.getParameter("o"), "png"));
+		if (outputType == null) {
 			throw new Valve3Exception("Illegal output type.");
+		}
 
-		title = "Valve Plot";
-		url = request.getQueryString();
-		components = new ArrayList<PlotComponent>(2);
+		title		= "Valve Plot";
+		url			= request.getQueryString();
+		components	= new ArrayList<PlotComponent>(2);
 		
-		plot = new Plot(width, height);
+		isCombined	= Util.stringToBoolean(request.getParameter("combine"), false);
+		if(isCombined){
+			plot = new CombinedPlot(width, height, componentCount);
+			setCombineable(true);
+		} else {
+			plot = new Plot(width, height);
+		}
+		
+		// is this necessary ??
+		// exportable = false;
+		
+		suppdata = new ArrayList<SuppDatum>();
 	}
 
 	/***
-	 * 
+	 * Getter for plot width
 	 * @return plot width
 	 */
 	public int getWidth()
@@ -122,7 +144,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for plot height
 	 * @return plot height
 	 */
 	public int getHeight()
@@ -140,7 +162,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for output type
 	 * @return output type to generate plot content
 	 */
 	public OutputType getOutputType()
@@ -157,7 +179,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for local file name
 	 * @return full file name to generate plot image. If not set return random file name.
 	 */
 	public String getLocalFilename()
@@ -169,7 +191,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for file name
 	 * @return short file name to generate plot image.
 	 */
 	public String getFilename()
@@ -178,7 +200,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
+	 * Getter for short file name
 	 * @return short file name to generate plot image as URL
 	 */
 	public String getURLFilename()
@@ -189,7 +211,7 @@ public class Valve3Plot extends Result
 	/**
 	 * Does nothing
 	 * @param rgb
-	 * @return
+	 * @return null
 	 */
 	public Color getRGB(String rgb)
 	{
@@ -197,8 +219,8 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * 
 	 * Getter for plot
+	 * @return plot
 	 */
 	public Plot getPlot()
 	{
@@ -206,7 +228,8 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
-	 * Add PlotComponent. (For what? It is never used)
+	 * Add PlotComponent.
+	 * @param comp PlotComponent
 	 */
 	public void addComponent(PlotComponent comp)
 	{
@@ -215,6 +238,7 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Getter for plot title
+	 * @return title
 	 */
 	public String getTitle()
 	{
@@ -223,12 +247,75 @@ public class Valve3Plot extends Result
 
 	/**
 	 * Setter for plot title
+	 * @param t title
 	 */
 	public void setTitle(String t)
 	{
-		title = t;
+		if(isCombined){
+			if(title.equals("Valve Plot")){
+				title = t;
+			} else {
+				title = title + "+" + t;
+			}
+		} else {
+			title = t;
+		}
 	}
 
+	/**
+	 * Getter for plot exportable flag
+	 * @return "plot is exportable"
+	 */
+	public boolean getExportable()
+	{
+		return isExportable;
+	}
+
+	/**
+	 * Setter for plot exportable flag
+	 * @param e boolean: "plot is exportable"
+	 */
+	public void setExportable(boolean e)
+	{
+		isExportable = e;
+	}
+	
+	/**
+	 * Setter for plot combineable flag
+	 * @param e boolean: "plot is combineable"
+	 */
+	public void setCombineable(boolean e)
+	{
+		isCombineable = e;
+	}
+
+	/**
+	 * Getter for waveform plot flag
+	 * @return "waveform plot"
+	 */
+	public boolean getWaveform()
+	{
+		return isWaveform;
+	}
+
+	/**
+	 * Setter for waveform plot flag
+	 * @param w boolean: "waveform plot"
+	 */
+	public void setWaveform(boolean w)
+	{
+		isWaveform = w;
+	}
+
+	/**
+	 * Getter for plot combined flag
+	 * @return "plot is combined"
+	 */
+	public boolean getCombined()
+	{
+		return isCombined;
+	}
+	
 	/**
 	 * Delete file with generated plot image from file system
 	 */
@@ -238,6 +325,7 @@ public class Valve3Plot extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return XML representation of object
 	 */
 	public String toXML()
@@ -249,11 +337,27 @@ public class Valve3Plot extends Result
 		sb.append("\t\t<title>" + title + "</title>\n");
 		sb.append("\t\t<width>" + width + "</width>\n");
 		sb.append("\t\t<height>" + height + "</height>\n");
+		sb.append("\t\t<exportable>" + isExportable + "</exportable>\n");
+		sb.append("\t\t<combined>" + isCombined + "</combined>\n");
+		sb.append("\t\t<combineable>" + isCombineable + "</combineable>\n");
+		sb.append("\t\t<waveform>" + isWaveform + "</waveform>\n");
 //		for (Iterator it = components.iterator(); it.hasNext(); )
 //			sb.append(((PlotComponent)it.next()).toXML());
 		for (PlotComponent pc : components)
 			sb.append(pc.toXML());
+		for (SuppDatum sd : suppdata)
+			sb.append(sd.toXML( true ));
 		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
 	}
+
+	/**
+	 * Add SuppDatum.
+	 * @param sd SuppDatum SuppDatum to add
+	 */
+	public void addSuppDatum(SuppDatum sd)
+	{
+		suppdata.add(sd);
+	}
+
 }

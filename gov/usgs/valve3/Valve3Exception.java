@@ -10,6 +10,10 @@ public class Valve3Exception extends Exception
 {
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Constructor
+	 * @param m error message
+	 */
 	public Valve3Exception(String m)
 	{
 		super(m);

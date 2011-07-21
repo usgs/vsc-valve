@@ -43,7 +43,7 @@ public class DataSourceDescriptor
 	}
 	
 	/**
-	 * 
+	 * Getter for name
 	 * @return name of this data source
 	 */
 	public String getName()
@@ -52,7 +52,7 @@ public class DataSourceDescriptor
 	}
 	
 	/**
-	 * 
+	 * Getter for VDX cleint name
 	 * @return vdx name for valve data source
 	 */
 	public String getVDXClientName()
@@ -61,7 +61,7 @@ public class DataSourceDescriptor
 	}
 	
 	/**
-	 * 
+	 * Getter for VDX source
 	 * @return vdx data source name
 	 */
 	public String getVDXSource()
@@ -70,7 +70,7 @@ public class DataSourceDescriptor
 	}
 	
 	/**
-	 * 
+	 * Getter for config file
 	 * @return subconfiguration for valve data source
 	 */
 	public ConfigFile getConfig()
@@ -79,7 +79,7 @@ public class DataSourceDescriptor
 	}
 	
 	/**
-	 * 
+	 * Getter for plotter
 	 * @return initialized plotter for valve data source
 	 */
 	public Plotter getPlotter()

@@ -20,70 +20,89 @@ import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
+import gov.usgs.vdx.data.tensorstrain.TensorstrainData;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Generate images for generic data plot to files
- *
- * @author Dan Cervelli, Loren Antolik
+ * Generate tensorstrain images from raw data got from vdx source
+ * 
+ * @author Max Kokoulin
  */
-public class GenericFixedPlotter extends RawDataPlotter {
-	
-	private Map<Integer, GenericDataMatrix> channelDataMap;	
+public class TensorstrainPlotter extends RawDataPlotter {
+
+	private enum Azimuth {
+		NATURAL, USERDEFINED;
+		public static Azimuth fromString(String s) {
+			if (s.equals("n")) {
+				return NATURAL;
+			} else if (s.equals("u")) {
+				return USERDEFINED;
+			} else {
+				return null;
+			}
+		}
+	}
+
+	private Map<Integer, TensorstrainData> channelDataMap;
+	private static Map<Integer, Double> azimuthsMap;
 
 	private String legendsCols[];
-	
+
+	private Azimuth azimuth;
+	private double azimuthValue;
+
 	/**
 	 * Default constructor
 	 */
-	public GenericFixedPlotter() {
+	public TensorstrainPlotter() {
 		super();
 	}
 
-	/**
-	 * Initialize internal data from PlotComponent component
-	 * @param component data to initialize from
-	 * @throws Valve3Exception
-	 */
 	protected void getInputs(PlotComponent comp) throws Valve3Exception {
 		
 		parseCommonParameters(comp);
 		
 		rk = comp.getInt("rk");
-		legendsCols			= new String  [columnsList.size()];
-		channelLegendsCols	= new String  [columnsList.size()];
-		bypassManipCols     = new boolean [columnsList.size()];
 		
-		leftLines		= 0;
-		axisMap			= new LinkedHashMap<Integer, String>();
-		
+		String az = comp.get("az");
+		if (az == null)
+			az = "n";
+		azimuth = Azimuth.fromString(az);
+		if (azimuth == null) {
+			throw new Valve3Exception("Illegal azimuth: " + az);
+		}
+		columnsCount = columnsList.size();
+		legendsCols = new String[columnsCount];
+		channelLegendsCols = new String[columnsCount];
+		bypassManipCols = new boolean[columnsList.size()];
+		leftLines = 0;
+		axisMap = new LinkedHashMap<Integer, String>();
 		validateDataManipOpts(comp);
-		columnsCount		= columnsList.size();
-		
-		// iterate through all the active columns and place them in a map if they are displayed
-		for (int i = 0; i < columnsCount; i++) {
-			Column column	= columnsList.get(i);
+		// iterate through all the active columns and place them in a map if
+		// they are displayed
+		for (int i = 0; i < columnsList.size(); i++) {
+			Column column = columnsList.get(i);
 			String col_arg = comp.get(column.name);
-			if ( col_arg != null )
-				column.checked	= Util.stringToBoolean(comp.get(column.name));
-			bypassManipCols[i] = column.bypassmanipulations;
-			legendsCols[i]	= column.description;
+			if (col_arg != null)
+				column.checked = Util.stringToBoolean(comp.get(column.name));
+			legendsCols[i] = column.description;
 			if (column.checked) {
-				if(isPlotComponentsSeparately()){
+				if (forExport || isPlotComponentsSeparately()) {
 					axisMap.put(i, "L");
-					leftUnit	= column.unit;
+					leftUnit = column.unit;
 					leftLines++;
 				} else {
-					if ((leftUnit != null && leftUnit.equals(column.unit))) {
+					if (leftUnit != null && leftUnit.equals(column.unit)) {
 						axisMap.put(i, "L");
 						leftLines++;
-					} else if (rightUnit != null && rightUnit.equals(column.unit)) {
-					axisMap.put(i, "R");
+					} else if (rightUnit != null
+							&& rightUnit.equals(column.unit)) {
+						axisMap.put(i, "R");
 					} else if (leftUnit == null) {
-						leftUnit	= column.unit;
+						leftUnit = column.unit;
 						axisMap.put(i, "L");
 						leftLines++;
 					} else if (rightUnit == null) {
@@ -97,14 +116,13 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				axisMap.put(i, "");
 			}
 		}
-		
 		if (leftUnit == null && rightUnit == null)
 			throw new Valve3Exception("Nothing to plot.");
 	}
 
 	/**
-	 * Gets binary data from VDX server.
-	 * @param component to get data for
+	 * Gets binary data from VDX
+	 * 
 	 * @throws Valve3Exception
 	 */
 	protected void getData(PlotComponent comp) throws Valve3Exception {
@@ -115,7 +133,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
 		VDXClient client		= null;
-		channelDataMap			= new LinkedHashMap<Integer, GenericDataMatrix>();
+		channelDataMap			= new LinkedHashMap<Integer, TensorstrainData>();
 		String[] channels		= ch.split(",");
 		
 		// create a map of all the input parameters
@@ -128,21 +146,21 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
 		if (pool != null) {
-			client	= pool.checkout();
+			client = pool.checkout();
 		
-			// iterate through each of the selected channels and place the data in the map
+			// iterate through each of the selected channels and get the data from the db
 			for (String channel : channels) {
 				params.put("ch", channel);
-				GenericDataMatrix data = null;
+				TensorstrainData data = null;
 				try {
-					data = (GenericDataMatrix)client.getBinaryData(params);		
+					data = (TensorstrainData)client.getBinaryData(params);
 				} catch (UtilException e) {
 					exceptionThrown	= true;
 					exceptionMsg	= e.getMessage();
 					break;
-				} catch(Exception e) {
+				} catch (Exception e) {
 					data = null;
 				}
 				
@@ -167,18 +185,17 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			throw new Valve3Exception("No data for any channel.");
 		}
 	}
-	
+
 	/**
-	 * If v3Plot is null, prepare data for exporting
-	 * Otherwise, initialize MatrixRenderers for left and right axis, adds them to plot
-	 * @param v3Plot Valve3Plot
-	 * @param component PlotComponent
+	 * If v3Plot is null, prepare data for exporting Otherwise, Initialize
+	 * MatrixRenderers for left and right axis, adds them to plot
+	 * 
 	 * @throws Valve3Exception
 	 */
 	public void plotData(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
-		
-		// setup the legend for the rank
-		String rankLegend	= rank.getName();
+
+		// setup the rank for the legend
+		String rankLegend = rank.getName();
 		
 		// calculate the number of plot components that will be displayed per channel
 		int channelCompCount = 0;
@@ -198,99 +215,137 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		// setting up variables to decide where to plot this component
 		int currentComp		= 1;
 		int compBoxHeight	= comp.getBoxHeight();
-		
+
 		for (int cid : channelDataMap.keySet()) {
 			
 			// get the relevant information for this channel
 			Channel channel			= channelsMap.get(cid);
-			GenericDataMatrix gdm	= channelDataMap.get(cid);			
+			TensorstrainData data	= channelDataMap.get(cid);			
 			
 			// if there is no data for this channel, then resize the plot window 
-			if (gdm == null || gdm.rows() == 0) {
+			if (data == null || data.rows() == 0) {
 				v3p.setHeight(v3p.getHeight() - channelCompCount * compBoxHeight);
 				Plot plot	= v3p.getPlot();
 				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 				compCount = compCount - channelCompCount;
 				continue;
 			}
+
+			// instantiate the azimuth and tangential values based on the user selection
+			switch (azimuth) {
+			case NATURAL:
+				azimuthValue = azimuthsMap.get(channel.getCID());
+				break;
+			case USERDEFINED:
+				String azval = comp.get("azval");
+				if (azval == null)
+					azimuthValue = 0.0;
+				else
+					azimuthValue = comp.getDouble("azval");
+				break;
+			default:
+				azimuthValue = 0.0;
+				break;
+			}
 			
-			// detrend and normalize the data that the user requested to be detrended		
+			// subtract the mean from the data to get it on a zero based scale (for east and north)
+			data.add(2, -data.mean(2));
+			data.add(3, -data.mean(3));
+
+			// set up the legend
+			String tensorstrainLegend = null;
+			if (!forExport) {
+				for (int i = 0; i < legendsCols.length; i++) {
+					tensorstrainLegend = legendsCols[i];
+					channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tensorstrainLegend);
+				}
+			}
+			GenericDataMatrix gdm = new GenericDataMatrix(data.getAllData(90-azimuthValue));
+			
+			// detrend the data that the user requested to be detrended
 			for (int i = 0; i < columnsCount; i++) {
-				if ( bypassManipCols[i] )
+				Column col = columnsList.get(i);
+				if (!col.checked) {
 					continue;
-				if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
-				if (doDetrend) { gdm.detrend(i + 2); }
+				}
+				if (bypassManipCols[i]) {
+					continue;
+				}
+				if (doDespike) {
+					gdm.despike(i + 2, despikePeriod);
+				}
+				if (doDetrend) {
+					gdm.detrend(i + 2);
+				}
 				if (filterPick != 0) {
-					Butterworth bw = new Butterworth();
-					FilterType ft = FilterType.BANDPASS;
-					Double singleBand = 0.0;
-					switch(filterPick) {
-						case 1: // Bandpass
-							if ( !Double.isNaN(filterMax) ) {
-								if ( filterMax <= 0 )
-									throw new Valve3Exception("Illegal max hertz value.");
-							} else {
-								ft = FilterType.HIGHPASS;
-								singleBand = filterMin;
-							}
-							if ( !Double.isNaN(filterMin) ) {
-								if ( filterMin <= 0 )
-									throw new Valve3Exception("Illegal min hertz value.");
-							} else {
-								ft = FilterType.LOWPASS;
-								singleBand = filterMax;
-							}
-							/* SBH
-							if ( ft == FilterType.BANDPASS )
-								bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
-							else
-								bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
-							data.filter(bw, true); */
-							break;
-						case 2: // Running median
-							gdm.set2median( i+2, filterPeriod );
-							break;
-						case 3: // Running mean
-							gdm.set2mean( i+2, filterPeriod );
-							break;
+					switch (filterPick) {
+					case 1: // Bandpass
+						Butterworth bw = new Butterworth();
+						FilterType ft = FilterType.BANDPASS;
+						Double singleBand = 0.0;
+						if (!Double.isNaN(filterMax)) {
+							if (filterMax <= 0)
+								throw new Valve3Exception(
+										"Illegal max hertz value.");
+						} else {
+							ft = FilterType.HIGHPASS;
+							singleBand = filterMin;
+						}
+						if (!Double.isNaN(filterMin)) {
+							if (filterMin <= 0)
+								throw new Valve3Exception(
+										"Illegal min hertz value.");
+						} else {
+							ft = FilterType.LOWPASS;
+							singleBand = filterMax;
+						}
+						/*
+						 * SBH if ( ft == FilterType.BANDPASS ) bw.set(ft, 4,
+						 * gdm.getSamplingRate(), filterMin, filterMax); else
+						 * bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
+						 * gdm.filter(bw, true);
+						 */
+						break;
+					case 2: // Running median
+						gdm.set2median(i + 2, filterPeriod);
+						break;
+					case 3: // Running mean
+						gdm.set2mean(i + 2, filterPeriod);
 					}
 				}
-				if (debiasPick != 0 ) {
+				if (debiasPick != 0) {
 					double bias = 0.0;
-					switch ( debiasPick ) {
-						case 1: // remove mean 
-							bias = gdm.mean(i+2);
-							break;
-						case 2: // remove initial value
-							bias = gdm.first(i+2);
-							break;
-						case 3: // remove user value
-							bias = debiasValue;
-							break;
+					switch (debiasPick) {
+					case 1: // remove mean
+						bias = gdm.mean(i + 2);
+						break;
+					case 2: // remove initial value
+						bias = gdm.first(i + 2);
+						break;
+					case 3: // remove user value
+						bias = debiasValue;
+						break;
 					}
 					gdm.add(i + 2, -bias);
 				}
 			}
-			
+
 			if (forExport) {
-				// Add column headers to csvHdrs
+				
+				// Add the headers to the CSV file
 				for (int i = 0; i < columnsList.size(); i++) {
-					if ( !axisMap.get(i).equals("") ) {
-						csvHdrs.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
+					if (!axisMap.get(i).equals("")) {
+						csvHdrs.append(String.format(",%s_%s", channel.getCode(), legendsCols[i]));
 					}
 				}
 				// Initialize data for export; add to set for CSV
-				ExportData ed = new ExportData(csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
-				csvData.add(ed);
+				ExportData ed = new ExportData(csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap));
 				csvIndex++;
+				csvData.add(ed);
+				
 			} else {
-				// set up the legend 
-				for (int i = 0; i < legendsCols.length; i++) {
-					channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, legendsCols[i]);
-				}
-
 				// create an individual matrix renderer for each component selected
-				if (isPlotComponentsSeparately()) {
+				if (isPlotComponentsSeparately()){
 					for (int i = 0; i < columnsList.size(); i++) {
 						Column col = columnsList.get(i);
 						if(col.checked){
@@ -305,8 +360,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 							currentComp++;	
 						}
 					}
-					
-				// create a single matrix renderer for each component selected
 				} else {
 					MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
 					MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
@@ -321,31 +374,29 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			}
 		}
 		if (!forExport) {
-			addSuppData( vdxSource, vdxClient, v3p, comp );
-			if(channelDataMap.size()!=1){
+			if(channelDataMap.size()>1){
 				v3p.setCombineable(false);
 			} else {
 				v3p.setCombineable(true);
 			}
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+			addSuppData(vdxSource, vdxClient, v3p, comp);
 		}
 	}
-	
+
 	/**
-	 * Concrete realization of abstract method. 
-	 * Initialize MatrixRenderers for left and right axis
-	 * (plot may have 2 different value axis)
-	 * Generate PNG image to file with random file name if v3p isn't null.
-	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
-	 * @param comp PlotComponent
-	 * @throws Valve3Exception
+	 * Concrete realization of abstract method. Generate tilt PNG image to file
+	 * with random name. If v3p is null, prepare data for export -- assumes
+	 * csvData, csvData & csvIndex initialized
+	 * 
 	 * @see Plotter
 	 */
 	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
 		forExport	= (v3p == null);
-		channelsMap	= getChannels(vdxSource, vdxClient);
+		channelsMap = getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
+		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
 		comp.setPlotter(this.getClass().getName());		
 		getInputs(comp);

@@ -1,7 +1,9 @@
 package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -9,33 +11,25 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
 import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
-
+import gov.usgs.vdx.data.MatrixExporter;
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Generate helicorder images from raw wave data from vdx source
  *
  * @author Dan Cervelli, Loren Antolik
  */
-public class HelicorderPlotter extends Plotter {
+public class HelicorderPlotter extends RawDataPlotter {
 
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	int compCount;
 	private Map<Integer, HelicorderData> channelDataMap;
-	private static Map<Integer, Channel> channelsMap;
-	private HelicorderData data;
 	private static final double MAX_HELICORDER_TIME = 31 * 86400;
 	
-	private String 		ch;
-	private double		startTime, endTime;
 	private boolean		showClip;
 	private float		barMult;
 	private int 		timeChunk;
@@ -44,59 +38,61 @@ public class HelicorderPlotter extends Plotter {
 	/**
 	 * Default constructor
 	 */
-	public HelicorderPlotter()
-	{}
+	public HelicorderPlotter(){
+		super();
+	}
 
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getInputs() throws Valve3Exception {
-		
-		ch	= component.get("ch");
-		if (ch == null || ch.length() <= 0) {
-			throw new Valve3Exception("Illegal channel.");
-		}
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time.");
-		
+	public void getInputs(PlotComponent comp) throws Valve3Exception {
+
+		parseCommonParameters(comp);
 		if (endTime - startTime >= MAX_HELICORDER_TIME)
 			throw new Valve3Exception("Illegal duration.");
 		
-		showClip = false;
-		String clip = component.get("sc");
-		if (clip != null && clip.toUpperCase().equals("T"))
-			showClip = true;
-		
-		barMult = Float.parseFloat(component.get("barMult"));
-
-		timeChunk = -1;
-		try { 
-			timeChunk = Integer.parseInt(component.get("tc")) * 60; 
-		} catch (Exception e) {			
+		try{
+			showClip = comp.getBoolean("sc");
+		} catch (Valve3Exception ex){
+			showClip = false;
 		}
-		if (timeChunk <= 0)
-			throw new Valve3Exception("Illegal time chunk.");
 		
-		minimumAxis = false;
-		String min = component.get("min");
-		if (min != null && min.toUpperCase().equals("T"))
-			minimumAxis = true;
+		try {
+			barMult = new Double(comp.getDouble("barMult")).floatValue();
+		} catch (Valve3Exception ex) {
+			barMult = 3;
+		}
+		
+		try {
+			timeChunk = comp.getInt("tc") * 60; 
+		} catch (Valve3Exception ex) {
+			timeChunk = 15;
+		}
+		
+		try{
+			minimumAxis = comp.getBoolean("min");
+		} catch (Valve3Exception ex){
+			minimumAxis = false;
+		}
 	}
 	
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void getData() throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
-		boolean gotData = false;
+		// initialize variables
+		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		channelDataMap			= new LinkedHashMap<Integer, HelicorderData>();
+		String[] channels		= ch.split(",");
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -104,48 +100,65 @@ public class HelicorderPlotter extends Plotter {
 		params.put("action", "data");
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-
+		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null)
-			return;
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
 		
-		// double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
-		// create a map to hold all the channel data
-		channelDataMap		= new LinkedHashMap<Integer, HelicorderData>();
-		String[] channels	= ch.split(",");
-		
-		// iterate through each of the selected channels and place the data in the map
-		for (String channel : channels) {
-			params.put("ch", channel);
-			HelicorderData data = (HelicorderData)client.getBinaryData(params);
-			if (data != null && data.rows() > 0) {
-				gotData = true;
+			// iterate through each of the selected channels and place the data in the map
+			for (String channel : channels) {
+				params.put("ch", channel);
+				HelicorderData data = null;
+				try {
+					data = (HelicorderData)client.getBinaryData(params);
+				} catch (UtilException e) {
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
+				} catch (Exception e) {
+					data = null; 
+				}
+				
+				// if data was collected
+				if (data != null && data.rows() > 0) {
+					// data.adjustTime(timeOffset);
+					gotData = true;
+				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
+			
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
 		
-		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
-		}
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
 
-        // check back in our connection to the database
-		pool.checkin(client);
+		// if no data exists, then throw exception
+		} else if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**
-	 * Loop through the list of channels and create plots
+	 * Loop through the list of channels, initialize renderers and add them to plots
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		
-		/// calculate how many graphs we are going to build (number of channels)
-		compCount	= channelDataMap.size();
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 1;
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount * channelDataMap.size();
 		
 		// setting up variables to decide where to plot this component
-		int plotCount	= 0;
+		int currentComp		= 1;
+		int compBoxHeight	= comp.getBoxHeight();
 		
 		for (int cid : channelDataMap.keySet()) {
 			
@@ -155,10 +168,33 @@ public class HelicorderPlotter extends Plotter {
 			
 			// verify their is something to plot
 			if (data == null || data.rows() == 0) {
+				v3p.setHeight(v3p.getHeight() - channelCompCount * compBoxHeight);
+				Plot plot	= v3p.getPlot();
+				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
+				compCount = compCount - channelCompCount;
 				continue;
 			}
 			
-			HelicorderRenderer hr = new HelicorderRenderer();			
+			if ( forExport ) {
+				// Add column headers to csvHdrs
+				csvHdrs.append("," + channel.getCode().replace("$","_") + "_Data");
+				// Initialize data for export; add to set for CSV
+				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, timeOffset) );
+				csvIndex++;
+				csvData.add( ed );
+				continue;
+			}
+			
+			HelicorderRenderer hr	= new HelicorderRenderer();
+			hr.xTickMarks			= this.xTickMarks;
+			hr.xTickValues			= this.xTickValues;
+			hr.xUnits				= this.xUnits;
+			hr.xLabel				= this.xLabel;
+			hr.yTickMarks			= this.yTickMarks;
+			hr.yTickValues			= this.yTickValues;
+			hr.yUnits				= this.yUnits;
+			hr.yLabel				= this.yLabel;
+			hr.setColor(comp.getColor());
 			hr.setData(data);
 
 			HelicorderSettings settings		= new HelicorderSettings();
@@ -171,88 +207,68 @@ public class HelicorderPlotter extends Plotter {
 			settings.timeChunk				= timeChunk;
 			settings.minimumAxis			= minimumAxis;
 			
-			settings.left					= component.getBoxX();
-			settings.top					= component.getBoxY();
-			settings.width					= component.getBoxWidth();
-			settings.height					= component.getBoxHeight() / compCount;
-			settings.plotCount				= plotCount;
-			
-			settings.timeZoneAbbr	= Valve3.getInstance().getTimeZoneAbbr();
-			settings.timeZoneOffset	= Valve3.getInstance().getTimeZoneOffset();
-			settings.timeZone		= TimeZone.getTimeZone(settings.timeZoneAbbr);
-			
-			plotCount++;
-			if (plotCount == compCount) {
+			settings.left					= comp.getBoxX();
+			settings.top					= comp.getBoxY() + (currentComp - 1) * compBoxHeight;
+			settings.width					= comp.getBoxWidth();
+			settings.height					= compBoxHeight - 16;
+			settings.timeZoneAbbr			= timeZoneID;
+			settings.timeZoneOffset			= timeOffset/3600.0;
+			settings.timeZone				= comp.getTimeZone();
+			if (currentComp == compCount) {
 				settings.showDecorator = true;	
 			} else {
 				settings.showDecorator = false;
 			}
-			
-			// hr.createDefaultLegendRenderer(new String[] {settings.channelCode});
-			settings.largeChannelDisplay	= true;
+			if (isDrawLegend) {
+				settings.showLegend	= true;
+			}
+			settings.largeChannelDisplay	= false;
 			
 			settings.applySettings(hr, data);
 			
-			System.out.println("componentBoxHeight:"	+ component.getBoxHeight() +
-							  "/settingHeight:" 		+ settings.height + 
-							  "/graphHeight:"   		+ hr.getGraphHeight() + 
-					          "/graphWidth:"  			+ hr.getGraphWidth() + 
-					          "/graphX:"      			+ hr.getGraphX() + 
-					          "/graphY:"      			+ hr.getGraphY());
+			currentComp++;
 			
-			component.setTranslation(hr.getTranslationInfo(false));
-			component.setTranslationType("heli");
-			v3Plot.getPlot().addRenderer(hr);
-			v3Plot.addComponent(component);
+			comp.setTranslation(hr.getTranslationInfo(false));
+			comp.setTranslationType("heli");
+			v3p.getPlot().addRenderer(hr);
+			v3p.addComponent(comp);
 		}
 		
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name);
+		if ( !forExport ) {
+			addSuppData( vdxSource, vdxClient, v3p, comp );
+			v3p.setCombineable(false);
+			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Helicorder");
+		}
 	}
 
 	/**
 	 * Concrete realization of abstract method. 
 	 * Initialize HelicorderRenderer, generate PNG image to local file.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		comp.setPlotter(this.getClass().getName());
+		getInputs(comp);
 		
-		plotData();
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
+		plotData(v3p, comp);
 		
-		Plot plot = v3Plot.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
-	}
-
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-		component = c;
-		getInputs();
-		getData();
-        return data.toCSV();
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
-		pool.checkin(cl);
-		channels				= Channel.fromStringsToMap(chs);
-		return channels;
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 }

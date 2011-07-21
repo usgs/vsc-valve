@@ -1,14 +1,16 @@
 package gov.usgs.valve3.plotter;
 
-import gov.usgs.plot.AxisRenderer;
+import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
-import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -17,10 +19,11 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
+import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.tilt.TiltData;
-
 
 import gov.usgs.proj.GeoRange;
 import gov.usgs.plot.map.GeoLabel;
@@ -32,11 +35,10 @@ import gov.usgs.proj.TransverseMercator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -45,7 +47,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  *
  * @author Dan Cervelli, Loren Antolik
  */
-public class TiltPlotter extends Plotter {
+public class TiltPlotter extends RawDataPlotter {
 	
 	private static final char MICRO = (char)0xb5;
 	
@@ -77,31 +79,10 @@ public class TiltPlotter extends Plotter {
 		}
 	}
 	
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	private int compCount;
-	
 	private Map<Integer, TiltData> channelDataMap;
-	private static Map<Integer, Channel> channelsMap;
-	private static Map<Integer, Rank> ranksMap;
 	private static Map<Integer, Double> azimuthsMap;
-	private static List<Column> columnsList;
-	
-	private double startTime;
-	private double endTime;
-	private String ch;
-	private int rk;
-	
-	private String leftUnit;
-	private String rightUnit;
-	private Map<Integer, String> axisMap;
-	private int leftLines;
-	private int leftTicks;
-	
-	private int columnsCount;
-	private boolean detrendCols[];
+
 	private String legendsCols[];
-	private String channelLegendsCols[];
 	
 	private PlotType plotType;
 	
@@ -110,75 +91,87 @@ public class TiltPlotter extends Plotter {
 	private double azimuthRadial;
 	private double azimuthTangential;
 	
-	public final boolean ranks	= true;
-	
-	protected Logger logger;
+	private double vectorScale;
+	private boolean isAutoVectorScale;
 	
 	/**
 	 * Default constructor
 	 */
 	public TiltPlotter() {
-		logger		= Logger.getLogger("gov.usgs.vdx");		
+		super();	
 	}
 		
-	private void getInputs() throws Valve3Exception {
+	/**
+	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
+	 */	
+	protected void getInputs(PlotComponent comp) throws Valve3Exception {
 		
-		ch = component.get("ch");
-		if (ch == null || ch.length() <= 0)
-			throw new Valve3Exception("Illegal channel.");
-		
-		rk = Util.stringToInt(component.get("rk"));
-		if (rk < 0) {
-			throw new Valve3Exception("Illegal rank.");
-		}
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time.");
-		
-		plotType	= PlotType.fromString(component.get("plotType"));
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
+		parseCommonParameters(comp);
+	
+		rk = comp.getInt("rk");
+	
+		String pt = comp.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.TIME_SERIES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
 		
 		switch(plotType) {
-		case TIME_SERIES:
 		
-			azimuth				= Azimuth.fromString(component.get("az"));
+		case TIME_SERIES:
+			
+			String az = comp.get("az");
+			if ( az == null )
+				az = "n";
+			azimuth	= Azimuth.fromString(az);
+			if (azimuth == null) {
+				throw new Valve3Exception("Illegal azimuth: " + az);
+			}
 		
 			columnsCount		= columnsList.size();
-			detrendCols			= new boolean [columnsCount];
 			legendsCols			= new String  [columnsCount];
 			channelLegendsCols	= new String  [columnsCount];
+			bypassManipCols     = new boolean [columnsList.size()];
 			
 			leftLines		= 0;
 			axisMap			= new LinkedHashMap<Integer, String>();
 			
+			validateDataManipOpts(comp);
+			
 			// iterate through all the active columns and place them in a map if they are displayed
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
-				boolean display	= Util.stringToBoolean(component.get(column.name));
-				detrendCols[i]	= Util.stringToBoolean(component.get("d_" + column.name));
+				String col_arg = comp.get(column.name);
+				if ( col_arg != null )
+					column.checked	= Util.stringToBoolean(comp.get(column.name));
 				legendsCols[i]	= column.description;
-				if (display) {
-					if (leftUnit != null && leftUnit.equals(column.unit)) {
+				if (column.checked) {
+					if(forExport || isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
-						leftLines++;
-					} else if (rightUnit != null && rightUnit.equals(column.unit)) {
-						axisMap.put(i, "R");
-					} else if (leftUnit == null) {
 						leftUnit	= column.unit;
-						axisMap.put(i, "L");
 						leftLines++;
-					} else if (rightUnit == null) {
-						rightUnit = column.unit;
-						axisMap.put(i, "R");
 					} else {
-						throw new Valve3Exception("Too many different units.");
+						if (leftUnit != null && leftUnit.equals(column.unit)) {
+							axisMap.put(i, "L");
+							leftLines++;
+						} else if (rightUnit != null && rightUnit.equals(column.unit)) {
+							axisMap.put(i, "R");
+						} else if (leftUnit == null) {
+							leftUnit	= column.unit;
+							axisMap.put(i, "L");
+							leftLines++;
+						} else if (rightUnit == null) {
+							rightUnit = column.unit;
+							axisMap.put(i, "R");
+						} else {
+							throw new Valve3Exception("Too many different units.");
+						}
 					}
 				} else {
 					axisMap.put(i, "");
@@ -191,13 +184,34 @@ public class TiltPlotter extends Plotter {
 			break;
 			
 		case TILT_VECTORS:
+			
+			// if auto vector scaling is not enabled, look up to see what the user input
+			isAutoVectorScale	= comp.isVectorAutoScale("vs");
+			if (!isAutoVectorScale) {
+				vectorScale = Util.stringToDouble(comp.get("vs"));
+				if (vectorScale <= 0 || Double.isNaN(vectorScale)) {
+					isAutoVectorScale = true;
+				}
+			}
 			break;
 		}
 	}
 
-	private void getData() throws Valve3Exception {
+	/**
+	 * Gets binary data from VDX
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
+	 */
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
-		boolean gotData = false;
+		// initialize variables
+		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		channelDataMap			= new LinkedHashMap<Integer, TiltData>();
+		String[] channels		= ch.split(",");
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -206,147 +220,59 @@ public class TiltPlotter extends Plotter {
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
 		params.put("rk", Integer.toString(rk));
+		addDownsamplingInfo(params);
 		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null)
-			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
-		// create a map to hold all the channel data
-		channelDataMap		= new LinkedHashMap<Integer, TiltData>();
-		String[] channels	= ch.split(",");
-		
-		// iterate through each of the selected channels and get the data from the db=
-		for (String channel : channels) {
-			params.put("ch", channel);		
-			TiltData data = (TiltData)client.getBinaryData(params);
-			if (data != null) {
-				gotData = true;	
-				data.adjustTime(TZOffset);
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+				
+			// iterate through each of the selected channels and get the data from the db
+			for (String channel : channels) {
+				params.put("ch", channel);	
+				TiltData data = null;
+				try {
+					data = (TiltData)client.getBinaryData(params);
+				} catch (UtilException e) {
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
+				} catch (Exception e) {
+					data = null; 
+				}
+				
+				// if data was collected
+				if (data != null && data.rows() > 0) {
+					data.adjustTime(timeOffset);
+					gotData = true;
+				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
+		
+			// check back in our connection to the database
+			pool.checkin(client);
 		}
 		
-		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
-		}
-		
-		// adjust the start and end times
-		startTime	+= TZOffset;
-		endTime		+= TZOffset;
-		
-		// check back in our connection to the database
-		pool.checkin(client);
-	}
-	
-	/**
-	 * Initialize MatrixRenderer for left plot axis
-	 * @throws Valve3Exception
-	 */
-	private MatrixRenderer getLeftMatrixRenderer(Channel channel, GenericDataMatrix gdm, int displayCount, int dh) throws Valve3Exception {	
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
 
-		double yMin = 1E300;
-		double yMax = -1E300;
-		boolean allowExpand = true;
-			
-		mr.setAllVisible(false);
-
-		for (int i = 0; i < axisMap.size(); i++) {
-			if (axisMap.get(i).equals("L")) {
-				mr.setVisible(i, true);
-				if (component.isAutoScale("ysL")) {
-					double buff;
-					yMin	= Math.min(yMin, gdm.min(i + 2));
-					yMax	= Math.max(yMax, gdm.max(i + 2));
-					buff	= (yMax - yMin) * 0.05;
-					yMin	= yMin - buff;
-					yMax	= yMax + buff;
-				} else {
-					double[] ys = component.getYScale("ysL", yMin, yMax);
-					yMin = ys[0];
-					yMax = ys[1];
-					allowExpand = false;
-					if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-						throw new Valve3Exception("Illegal axis values.");
-				}
-			}
+		// if no data exists, then throw exception
+		} else if (channelDataMap.size() == 0 || !gotData) {
+			throw new Valve3Exception("No data for any channel.");
 		}
-		
-		mr.setExtents(startTime, endTime, yMin, yMax);	
-		mr.createDefaultAxis(8, 8, false, allowExpand);
-		mr.setXAxisToTime(8);
-		mr.getAxis().setLeftLabelAsText(leftUnit);
-		mr.createDefaultLineRenderers();
-		mr.createDefaultLegendRenderer(channelLegendsCols);
-		leftTicks = mr.getAxis().leftTicks.length;
-		
-		if (displayCount + 1 == compCount) {
-			mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");	
-		}
-		
-		return mr;
-	}
+	}	
 
 	/**
-	 * Initialize MatrixRenderer for right plot axis
-	 * @throws Valve3Exception
+	 * Create MapRenderer for tilt vector, adds it to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param rank Rank
 	 */
-	private MatrixRenderer getRightMatrixRenderer(Channel channel, GenericDataMatrix gdm, int displayCount, int dh) throws Valve3Exception {
-		
-		if (rightUnit == null)
-			return null;
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + displayCount * dh + 8, component.getBoxWidth(), dh - 16);
-		
-		double yMin = 1E300;
-		double yMax = -1E300;
-		
-		mr.setAllVisible(false);
-
-		for (int i = 0; i < axisMap.size(); i++) {
-			if (axisMap.get(i).equals("R")) {
-				mr.setVisible(i, true);
-				if (component.isAutoScale("ysR")) {
-					double buff;
-					yMin	= Math.min(yMin, gdm.min(i + 2));
-					yMax	= Math.max(yMax, gdm.max(i + 2));
-					buff	= (yMax - yMin) * 0.05;
-					yMin	= yMin - buff;
-					yMax	= yMax + buff;
-				} else {
-					double[] ys = component.getYScale("ysR", yMin, yMax);
-					yMin = ys[0];
-					yMax = ys[1];
-					if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-						throw new Valve3Exception("Illegal axis values.");
-				}
-			}
-		}
-		
-		mr.setExtents(startTime, endTime, yMin, yMax);
-		
-		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, leftTicks, false), null);
-		// ar.createRightTickLabels(SmartTick.autoTick(yMin, yMax, 8, allowExpand), null);
-		mr.setAxis(ar);
-		mr.getAxis().setRightLabelAsText(rightUnit);
-		mr.createDefaultLineRenderers(leftLines);
-		mr.createDefaultLegendRenderer(channelLegendsCols, leftLines);
-		
-		return mr;
-	}
-	
-	public void plotTiltVectors() {
+	public void plotTiltVectors(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
-		
+
 		// add a location for each channel that is being plotted
 		for (int cid : channelDataMap.keySet()) {
 			TiltData data = channelDataMap.get(cid);
@@ -354,7 +280,7 @@ public class TiltPlotter extends Plotter {
 				locs.add(channelsMap.get(cid).getLonLat());
 			}
 		}
-		
+
 		// create the dimensions of the plot based on these stations
 		GeoRange range = GeoRange.getBoundingBox(locs);
 		
@@ -363,52 +289,94 @@ public class TiltPlotter extends Plotter {
 		proj.setup(origin, 0, 0);
 		
 		MapRenderer mr = new MapRenderer(range, proj);
-		mr.setLocationByMaxBounds(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), Integer.parseInt(component.get("mh")));
-		
+		mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxMapHeight());
+		v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60 + 16);
+
 		GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
 		labels = labels.getSubset(range);
 		mr.setGeoLabelSet(labels);
 		
 		GeoImageSet images = Valve3.getInstance().getGeoImageSet();
-		RenderedImage ri = images.getMapBackground(proj, range, component.getBoxWidth());
+		RenderedImage ri = images.getMapBackground(proj, range, comp.getBoxWidth());
 		
 		mr.setMapImage(ri);
 		mr.createBox(8);
-		mr.createGraticule(8, true);
+		mr.createGraticule(8, xTickMarks, yTickMarks, xTickValues, yTickValues, Color.BLACK);
 		mr.createScaleRenderer();
-		v3Plot.getPlot().setSize(v3Plot.getPlot().getWidth(), mr.getGraphHeight() + 60);
-		double[] trans = mr.getDefaultTranslation(v3Plot.getPlot().getHeight());
-		trans[4] = 0;
-		trans[5] = 0;
+		
+		double[] trans = mr.getDefaultTranslation(v3p.getPlot().getHeight());
+		trans[4] = startTime+timeOffset;
+		trans[5] = endTime+timeOffset;
 		trans[6] = origin.x;
 		trans[7] = origin.y;
 		mr.createEmptyAxis();
-		mr.getAxis().setBottomLabelAsText("Longitude");
-		mr.getAxis().setLeftLabelAsText("Latitude");
-		v3Plot.getPlot().addRenderer(mr);
-		
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText("Longitude");
+		}
+		if(yUnits){
+			mr.getAxis().setLeftLabelAsText("Latitude");
+		}
+		mr.getAxis().setTopLabelAsText(getTopLabel(rank));
+		v3p.getPlot().addRenderer(mr);
+
 		double maxMag = -1E300;
 		List<Renderer> vrs = new ArrayList<Renderer>();
 		
 		for (int cid : channelDataMap.keySet()) {
-			Channel channel = channelsMap.get(cid);
-			TiltData data = channelDataMap.get(cid);
+			Channel channel	= channelsMap.get(cid);
+			TiltData data	= channelDataMap.get(cid);
 			
-			if (data == null) {
+			if (data == null || data.rows() == 0) {
 				continue;
 			}
-			
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
-			
 			DoubleMatrix2D dm = data.getAllData(0.0);
 			
-			double et1	= dm.getQuick(0, 2);
-			double et2	= dm.getQuick(dm.rows() - 1, 2);
-			double nt1	= dm.getQuick(0, 3);
-			double nt2	= dm.getQuick(dm.rows() - 1, 3);
+			// iterate through each matrix and get the value that is not null.  we can't calculate vectors from potentially null values
+			double et1	= 0.0;
+			double et2	= 0.0;
+			double nt1	= 0.0;
+			double nt2	= 0.0;
+			int i;
+			for (i = 0; i < dm.rows(); i++) {
+				if (!Double.isNaN(dm.getQuick(i, 4))) {
+					et1 = dm.getQuick(i, 4);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = 0; i < dm.rows(); i++) {
+				if (!Double.isNaN(dm.getQuick(i, 5))) {
+					nt1 = dm.getQuick(i, 5);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = dm.rows() - 1; i > -1; i--) {
+				if (!Double.isNaN(dm.getQuick(i, 4))) {
+					et2 = dm.getQuick(i, 4);
+					break;
+				} else {
+					continue;
+				}
+			}
+			for (i = dm.rows() - 1; i > -1; i--) {
+				if (!Double.isNaN(dm.getQuick(i, 5))) {
+					nt2 = dm.getQuick(i, 5);
+					break;
+				} else {
+					continue;
+				}
+			}
+			// double et1	= dm.getQuick(0, 2);
+			// double nt1	= dm.getQuick(0, 3);
+			// double et2	= dm.getQuick(dm.rows() - 1, 2);
+			// double nt2	= dm.getQuick(dm.rows() - 1, 3);
 			double e	= et2 - et1;
 			double n	= nt2 - nt1;
-			
+
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(channel.getLonLat());
@@ -416,9 +384,12 @@ public class TiltPlotter extends Plotter {
 			evr.y = ppt.y;
 			evr.u = e;
 			evr.v = n;
-			
+			evr.z = 0;
+			evr.displayHoriz	= true;
+			evr.displayVert		= false;
+
 			maxMag = Math.max(evr.getMag(), maxMag);
-			v3Plot.getPlot().addRenderer(evr);
+			v3p.getPlot().addRenderer(evr);
 			vrs.add(evr);
 		}
 		
@@ -426,9 +397,19 @@ public class TiltPlotter extends Plotter {
 			return;
 		}
 		
+		// lookup the correct scaling factor
+		double scale = 0.0;
+		if (isAutoVectorScale) {
+			scale = EllipseVectorRenderer.getBestScale(maxMag);
+		} else {
+			scale = vectorScale;
+		}
+		
 		// set the length of the legend vector to 1/5 of the width of the shortest side of the map
-		double scale = EllipseVectorRenderer.getBestScale(maxMag);
 		double desiredLength = Math.min((mr.getMaxY() - mr.getMinY()), (mr.getMaxX() - mr.getMinX())) / 5;
+		// logger.info("Scale: " + scale);
+		// logger.info("desiredLength: " + desiredLength);
+		// logger.info("desiredLength/scale: " + desiredLength / scale);
 		
 		for (int i = 0; i < vrs.size(); i++) {
 			EllipseVectorRenderer evr = (EllipseVectorRenderer)vrs.get(i);
@@ -440,47 +421,59 @@ public class TiltPlotter extends Plotter {
 		svr.frameRenderer = mr;
 		svr.drawEllipse = false;
 		svr.x = mr.getMinX();
-		svr.y = mr.getMinY() + 17 / mr.getYScale();
+		svr.y = mr.getMinY();
 		svr.u = desiredLength;
 		svr.v = 0;
-		v3Plot.getPlot().addRenderer(svr);
+		svr.z = 0;
+		svr.displayHoriz	= true;
+		svr.displayVert		= false;
+		v3p.getPlot().addRenderer(svr);
 		
 		// draw the legend vector units
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
 		tr.text = scale + " " + MICRO + "R";
-		v3Plot.getPlot().addRenderer(tr);
+		v3p.getPlot().addRenderer(tr);
 		
-		component.setTranslation(trans);
-		component.setTranslationType("map");
-		v3Plot.addComponent(component);
+		comp.setTranslation(trans);
+		comp.setTranslationType("map");
+		v3p.addComponent(comp);
 	}
 
 	/**
-	 * Initialize MatrixRenderers for left and right axis, adds them to plot
+	 * If v3Plot is null, prepare data for exporting
+	 * Otherwise, Initialize MatrixRenderers for left and right axis, adds them to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
+		
+		// setup the rank for the legend
+		String rankLegend = rank.getName();
 		
 		switch (plotType) {
+		
 			case TIME_SERIES:
+				// calculate the number of plot components that will be displayed per channel
+				int channelCompCount = 0;
+				if(isPlotComponentsSeparately()){
+					for(Column col: columnsList){
+						if(col.checked){
+							channelCompCount++;
+						}
+					}
+				} else {
+					channelCompCount = 1;
+				}
 				
-				/// calculate how many graphs we are going to build (number of channels)
-				compCount			= channelDataMap.size();
+				// total components is components per channel * number of channels
+				compCount = channelCompCount * channelDataMap.size();
 				
 				// setting up variables to decide where to plot this component
-				int displayCount	= 0;
-				int dh				= component.getBoxHeight() / compCount;
-				
-				// setup the display for the legend
-				Rank rank	= new Rank();
-				if (rk == 0) {
-					rank	= rank.bestPossible();
-				} else {
-					rank	= ranksMap.get(rk);
-				}
-				String rankLegend	= rank.getName();
+				int currentComp		= 1;
+				int compBoxHeight	= comp.getBoxHeight();
 				
 				for (int cid : channelDataMap.keySet()) {
 					
@@ -488,8 +481,12 @@ public class TiltPlotter extends Plotter {
 					Channel channel	= channelsMap.get(cid);
 					TiltData data	= channelDataMap.get(cid);
 					
-					// verify their is something to plot
+					// if there is no data for this channel, then resize the plot window 
 					if (data == null || data.rows() == 0) {
+						v3p.setHeight(v3p.getHeight() - channelCompCount * compBoxHeight);
+						Plot plot	= v3p.getPlot();
+						plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
+						compCount = compCount - channelCompCount;
 						continue;
 					}
 					
@@ -502,7 +499,11 @@ public class TiltPlotter extends Plotter {
 						azimuthValue = data.getOptimalAzimuth();
 						break;
 					case USERDEFINED:
-						azimuthValue = Util.stringToDouble(component.get("azval"));
+						String azval = comp.get("azval");
+						if ( azval == null )
+							azimuthValue = 0.0;
+						else
+							azimuthValue = comp.getDouble("azval");
 						break;
 					default:
 						azimuthValue = 0.0;
@@ -516,49 +517,144 @@ public class TiltPlotter extends Plotter {
 					data.add(2, -data.mean(2));
 					data.add(3, -data.mean(3));
 					
+					// set up the legend 
+					String tiltLegend = null;
+					if ( !forExport ) {
+						for (int i = 0; i < legendsCols.length; i++) {
+							if (legendsCols[i].equals("Radial")) {
+								tiltLegend	= String.valueOf(azimuthRadial);
+							} else if (legendsCols[i].equals("Tangential")) {
+								tiltLegend	= String.valueOf(azimuthTangential);
+							} else {
+								tiltLegend	= legendsCols[i];
+							}
+							channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
+						}
+					}
+					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
+
 					// detrend the data that the user requested to be detrended					
 					for (int i = 0; i < columnsCount; i++) {
-						if (detrendCols[i]) { data.detrend(i + 2); }
-					}
-					
-					// set up the legend 
-					String tiltLegend;
-					for (int i = 0; i < legendsCols.length; i++) {
-						if (legendsCols[i].equals("Radial")) {
-							tiltLegend	= String.valueOf(azimuthRadial);
-						} else if (legendsCols[i].equals("Tangential")) {
-							tiltLegend	= String.valueOf(azimuthTangential);
-						} else {
-							tiltLegend	= legendsCols[i];
+						Column col = columnsList.get(i);
+						if ( !col.checked ) {
+							continue;
 						}
-						channelLegendsCols[i] = String.format("%s %s %s", channel.getCode(), rankLegend, tiltLegend);
+						if ( bypassManipCols[i] ) {
+							continue;
+						}
+						if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
+						if (doDetrend) { gdm.detrend(i + 2); }
+						if (filterPick != 0) {
+							switch(filterPick) {
+								case 1: // Bandpass
+									Butterworth bw = new Butterworth();
+									FilterType ft = FilterType.BANDPASS;
+									Double singleBand = 0.0;
+									if ( !Double.isNaN(filterMax) ) {
+										if ( filterMax <= 0 )
+											throw new Valve3Exception("Illegal max hertz value.");
+									} else {
+										ft = FilterType.HIGHPASS;
+										singleBand = filterMin;
+									}
+									if ( !Double.isNaN(filterMin) ) {
+										if ( filterMin <= 0 )
+											throw new Valve3Exception("Illegal min hertz value.");
+									} else {
+										ft = FilterType.LOWPASS;
+										singleBand = filterMax;
+									}
+									/* SBH
+									if ( ft == FilterType.BANDPASS )
+										bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
+									else
+										bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
+									gdm.filter(bw, true); */
+									break;
+								case 2: // Running median
+									gdm.set2median( i+2, filterPeriod );
+									break;
+								case 3: // Running mean
+									gdm.set2mean( i+2, filterPeriod );
+							}
+						}
+						if (debiasPick != 0 ) {
+							double bias = 0.0;
+							switch ( debiasPick ) {
+								case 1: // remove mean 
+									bias = gdm.mean(i+2);
+									break;
+								case 2: // remove initial value
+									bias = gdm.first(i+2);
+									break;
+								case 3: // remove user value
+									bias = debiasValue;
+									break;
+							}
+							gdm.add(i + 2, -bias);
+						}
 					}
 					
-					GenericDataMatrix gdm	= new GenericDataMatrix(data.getAllData(azimuthValue));
-					
-					MatrixRenderer leftMR	= getLeftMatrixRenderer(channel, gdm, displayCount, dh);
-					MatrixRenderer rightMR	= getRightMatrixRenderer(channel, gdm, displayCount, dh);
-					v3Plot.getPlot().addRenderer(leftMR);
-					if (rightMR != null)
-						v3Plot.getPlot().addRenderer(rightMR);
-					component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-					component.setTranslationType("ty");
-					v3Plot.addComponent(component);
-					displayCount++;
+					if (forExport) {
+						
+						// Add the headers to the CSV file
+						for (int i = 0; i < columnsList.size(); i++) {
+							if ( !axisMap.get(i).equals("") ) {
+								csvHdrs.append(String.format( ",%s_%s", channel.getCode(), legendsCols[i] ));
+							}
+						}
+						// Initialize data for export; add to set for CSV
+						ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+						csvData.add( ed );
+						csvIndex++;
+						
+					} else {
+						// create an individual matrix renderer for each component selected
+						if (isPlotComponentsSeparately()){
+							for (int i = 0; i < columnsList.size(); i++) {
+								Column col = columnsList.get(i);
+								if(col.checked){
+									MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, i, col.unit);
+									MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, i, leftMR.getLegendRenderer());
+									if (rightMR != null)
+										v3p.getPlot().addRenderer(rightMR);
+									v3p.getPlot().addRenderer(leftMR);
+									comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+									comp.setTranslationType("ty");
+									v3p.addComponent(comp);
+									currentComp++;	
+								}
+							}
+						} else {
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
+							if (rightMR != null)
+								v3p.getPlot().addRenderer(rightMR);
+							v3p.getPlot().addRenderer(leftMR);
+							comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+							comp.setTranslationType("ty");
+							v3p.addComponent(comp);
+							currentComp++;
+						}
+					}
+				}
+				if (!forExport) {
+					if(channelDataMap.size()!=1){
+						v3p.setCombineable(false);
+					} else {
+						v3p.setCombineable(true);
+					}
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+					addSuppData( vdxSource, vdxClient, v3p, comp );
 				}
 				break;
 				
 			case TILT_VECTORS:
-				plotTiltVectors();
-				break;
-		}
-		
-		switch(plotType) {
-			case TIME_SERIES:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
-				break;
-			case TILT_VECTORS:
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");
+				if (!forExport) {
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Vectors");
+				}
+				plotTiltVectors(v3p, comp, rank);
 				break;
 		}
 	}
@@ -566,110 +662,86 @@ public class TiltPlotter extends Plotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate tilt PNG image to file with random name.
+	 * If v3p is null, prepare data for export -- assumes csvData, csvData & csvIndex initialized
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception	{		
-		v3Plot		= v3p;
-		component	= comp;
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException	{
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
 		ranksMap	= getRanks(vdxSource, vdxClient);
 		azimuthsMap	= getAzimuths(vdxSource, vdxClient);
 		columnsList	= getColumns(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		comp.setPlotter(this.getClass().getName());		
+		getInputs(comp);
 		
-		plotData();
-				
-		Plot plot = v3Plot.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
-	}	
-
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent comp) throws Valve3Exception {
-		component	= comp;
-		
-		getInputs();
-		getData();
-		
-		// return data.toCSV();
-		return "NOT IMPLEMENTED YET FOR MULTIPLE STATIONS";
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
-		pool.checkin(cl);
-		channels				= Channel.fromStringsToMap(chs);
-		return channels;
-	}
-	
-	/**
-	 * Initialize list of ranks for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Rank> getRanks(String source, String client) {
-		Map<Integer, Rank> ranks;
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "ranks");
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl = pool.checkout();
-		List<String> rks = cl.getTextData(params);
-		pool.checkin(cl);
-		ranks = Rank.fromStringsToMap(rks);
-		return ranks;
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Double> getAzimuths(String source, String client) {
-		Map<Integer, Double> azimuths = new LinkedHashMap<Integer, Double>();	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "azimuths");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
-		pool.checkin(cl);
-		for (int i = 0; i < chs.size(); i++) {
-			String[] temp = chs.get(i).split(":");
-			azimuths.put(Integer.valueOf(temp[0]), Double.valueOf(temp[1]));
+		// get the rank object for this request
+		Rank rank	= new Rank();
+		if (rk == 0) {
+			rank	= rank.bestPossible();
+		} else {
+			rank	= ranksMap.get(rk);
 		}
-		return azimuths;
+		
+		// set the exportable based on the output and plot type
+		switch (plotType) {
+		
+		case TIME_SERIES:
+			
+			// plot configuration
+			if (!forExport) {
+				if (rk == 0) {
+					v3p.setExportable(false);
+				} else {
+					v3p.setExportable(true);
+				}
+				
+			// export configuration
+			} else {
+				if (rk == 0) {
+					throw new Valve3Exception( "Data Export Not Available for Best Possible Rank");
+				}
+			}
+			break;
+			
+		case TILT_VECTORS:
+			
+			// plot configuration
+			if (!forExport) {
+				v3p.setExportable(false);
+				
+			// export configuration
+			} else {
+				throw new Valve3Exception("Data Export Not Available for Tilt Vectors");
+			}
+			break;
+		}
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
+		plotData(v3p, comp, rank);
+		
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 
 	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
+	 * 
+	 * @return plot top label text
 	 */
-	private static List<Column> getColumns(String source, String client) {
-		List<Column> columns;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "columns");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> cols		= cl.getTextData(params);
-		pool.checkin(cl);
-		columns					= Column.fromStringsToList(cols);
-		return columns;
+	private String getTopLabel(Rank rank) {
+		StringBuilder top = new StringBuilder(100);
+		top.append(rank.getName() + " Vectors between ");
+		top.append(Util.j2KToDateString(startTime+timeOffset, dateFormatString));
+		top.append(" and ");
+		top.append(Util.j2KToDateString(endTime+timeOffset, dateFormatString));
+		top.append(" " + timeZoneID + " Time");
+		return top.toString();
 	}
 }

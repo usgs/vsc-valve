@@ -26,6 +26,9 @@ public class ResultDeleter extends Thread
 		results = new ArrayList<Entry>(100);
 	}
 	
+	/**
+	 * Kills execution thread
+	 */
 	public void kill()
 	{
 		kill = true;
@@ -69,6 +72,9 @@ public class ResultDeleter extends Thread
 		}
 	}
 	
+	/**
+	 * Main execution thread. Call deleteResults() in non-force manner every DELETE_DELAY ms
+	 */
 	public void run()
 	{
 		while (!kill)

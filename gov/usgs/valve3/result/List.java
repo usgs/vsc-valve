@@ -23,6 +23,7 @@ public class List extends Result
 	}
 	
 	/**
+	 * Yield XML representation
 	 * @return XML representation of this object
 	 */
 	public String toXML()

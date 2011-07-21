@@ -1,21 +1,14 @@
 package gov.usgs.valve3.plotter;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.HistogramRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.ShapeRenderer;
-import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
@@ -23,11 +16,10 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
-import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
+import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.rsam.RSAMData;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * Get RSAM information from vdx server and  
@@ -36,7 +28,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  *
  * @author Dan Cervelli, Loren Antolik
  */
-public class RatSAMPlotter extends Plotter {
+public class RatSAMPlotter extends RawDataPlotter {
 	
 	private enum PlotType {
 		VALUES, COUNTS;		
@@ -53,119 +45,68 @@ public class RatSAMPlotter extends Plotter {
 		}
 	}
 
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	int compCount;
-	private static Map<Integer, Channel> channelsMap;
-	private double startTime;
-	private double endTime;
-	protected String ch;
-	private int cid1, cid2;
-	private boolean removeBias;
-	private double period;
-	private double threshold;
-	private double ratio;
-	private double maxEventLength;
-	private BinSize bin;
-	private RSAMData rd;
 	private PlotType plotType;
-	private GenericDataMatrix gdm;
+	private static Map<Integer, Channel> channelsMap;
 	RSAMData data;
-	
-	protected String label;
-	protected Logger logger;
-	
-	public final boolean ranks	= false;
 
 	/**
 	 * Default constructor
 	 */
 	public RatSAMPlotter() {
-		label	= "RatSAM";
-		logger	= Logger.getLogger("gov.usgs.vdx");
+		super();
+		ranks	= false;
 	}
 
 	/**
 	 * Initialize internal data from PlotComponent
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */	
-	private void getInputs() throws Valve3Exception {
+	protected void getInputs(PlotComponent comp) throws Valve3Exception {
 		
-		ch	= component.get("ch");
-		if (ch == null || ch.length() <= 0) {
-			throw new Valve3Exception("Illegal channel.");
+		parseCommonParameters(comp);
+		
+		channelLegendsCols	= new String  [1];
+		
+		String pt = comp.get("plotType");
+		if ( pt == null )
+			plotType = PlotType.VALUES;
+		else {
+			plotType	= PlotType.fromString(pt);
+			if (plotType == null) {
+				throw new Valve3Exception("Illegal plot type: " + pt);
+			}
 		}
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time.");
-		
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time.");
-		
-		plotType	= PlotType.fromString(component.get("plotType"));
-		if (plotType == null) {
-			throw new Valve3Exception("Illegal plot type.");
-		}
-	
-		removeBias	= false;
-		String bias	= component.get("rb");
-		if (bias != null && bias.toUpperCase().equals("T"))
-			removeBias = true;
 		
 		switch(plotType) {
 		
 		case VALUES:
-			period = Double.parseDouble(component.get("valuesPeriod"));
-			if (period == 0)
-				throw new Valve3Exception("Illegal period.");
-				
+			leftLines	= 0;
+			axisMap		= new LinkedHashMap<Integer, String>();
+			// validateDataManipOpts(component);
+			axisMap.put(0, "L");
+			leftUnit	= "RatSAM";
+			leftLines++;
 			break;
 			
 		case COUNTS:
-			if (component.get("countsPeriod") != null) {
-				period = Double.parseDouble(component.get("countsPeriod"));
-				if (period == 0)
-					throw new Valve3Exception("Illegal period.");
-			} else {
-				period = 600;
-			}
-			
-			if (component.get("threshold") != null) {
-				threshold = Double.parseDouble(component.get("threshold"));
-				if (threshold == 0)
-					throw new Valve3Exception("Illegal threshold.");
-			}
-			
-			if (component.get("ratio") != null) {
-				ratio = Double.parseDouble(component.get("ratio"));
-				if (ratio == 0)
-					throw new Valve3Exception("Illegal ratio.");
-			}
-			
-			if (component.get("maxEventLength") != null) {
-				maxEventLength = Double.parseDouble(component.get("maxEventLength"));
-			}
-			
-			String bs	= Util.stringToString(component.get("cntsBin"), "day");
-			bin			= BinSize.fromString(bs);
-			if (bin == null)
-				throw new Valve3Exception("Illegal bin size option.");
-			if ((endTime - startTime)/bin.toSeconds() > 1000)
-				throw new Valve3Exception("Bin size too small.");
-
 			break;
 		}
 	}
 
 	/**
 	 * Gets binary data from VDX
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private void getData() throws Valve3Exception {
+	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
-		boolean gotData = false;
+		// initialize variables
+		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
 		
 		// create a map of all the input parameters
 		Map<String, String> params = new LinkedHashMap<String, String>();
@@ -174,172 +115,117 @@ public class RatSAMPlotter extends Plotter {
 		params.put("ch", ch);
 		params.put("st", Double.toString(startTime));
 		params.put("et", Double.toString(endTime));
-		params.put("period", Double.toString(period));
 		params.put("plotType", plotType.toString());
-
+		addDownsamplingInfo(params);
+		
 		// checkout a connection to the database
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client		= pool.checkout();
-		if (client == null)
-			return;
-		
-		double TZOffset = Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		
-		data = (RSAMData)client.getBinaryData(params);
-		if (data != null && data.rows() > 0) {
-			gotData = true;
-			data.adjustTime(TZOffset);
+		pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client = pool.checkout();	
+			try {
+				data = (RSAMData)client.getBinaryData(params);
+			} catch (UtilException e) {
+				exceptionThrown	= true;
+				exceptionMsg	= e.getMessage();
+			} catch (Exception e) {
+				data = null;
+			}
+			
+			// if data was collected
+			if (data != null && data.rows() > 0) {
+				data.adjustTime(timeOffset);
+				gotData = true;
+			}
+			
+	        // check back in our connection to the database
+			pool.checkin(client);
 		}
 		
-		if (!gotData) {
-			throw new Valve3Exception("No data for any stations.");
-		}
-		
-		// adjust the start and end times
-        startTime	   += TZOffset;
-        endTime		   += TZOffset;
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
 
-        // check back in our connection to the database
-		pool.checkin(client);
+		// if no data exists, then throw exception
+		} else if (!gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 	
 	/**
 	 * Initialize DataRenderer, add it to plot, remove mean from rsam data if needed 
 	 * and render rsam values to PNG image in local file
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
+	 * @param channel1 Channel
+	 * @param channel2 Channel
+	 * @param rd RSAMData
 	 * @throws Valve3Exception
 	 */
-	protected void plotValues(Channel channel1, Channel channel2, RSAMData rd) throws Valve3Exception {
+	protected void plotValues(Valve3Plot v3p, PlotComponent comp, Channel channel1, Channel channel2, RSAMData rd, int currentComp, int compBoxHeight) throws Valve3Exception {
 		
-		GenericDataMatrix gdm = new GenericDataMatrix(rd.getData());
+		String channelCode1		= channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
+		String channelCode2		= channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
+		channel1.setCode(channelCode1 + "-" + channelCode2);
+		GenericDataMatrix gdm	= new GenericDataMatrix(rd.getData());	
+		channelLegendsCols[0]	= String.format("%s %s", channel1.getCode(), leftUnit);	
 		
-		// Remove the mean from the first column (this needs to be user controlled)
-		if (removeBias) {
-			gdm.add(1, -gdm.mean(1));
-		}
-		
-		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		
-		/*
-		double[] d	= component.getYScale("ys", gdm.min(1), gdm.max(1));
-		double yMin	= d[0];
-		double yMax	= d[1];
-		if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-			throw new Valve3Exception("Illegal axis values.");
-		*/
-
-		double yMin = 1E300;
-		double yMax = -1E300;
-		boolean allowExpand = true;
-		
-		if (component.isAutoScale("ys")) {
-			double buff;
-			yMin	= Math.min(yMin, gdm.min(1));
-			yMax	= Math.max(yMax, gdm.max(1));
-			buff	= (yMax - yMin) * 0.05;
-			yMin	= yMin - buff;
-			yMax	= yMax + buff;
+		if (forExport) {
+			
+			// Add column header to csvHdrs
+			csvHdrs.append(",");
+			csvHdrs.append(channel1.getCode() + "_" + leftUnit);
+			
+			// Initialize data for export; add to set for CSV
+			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
+			csvData.add( ed );
+			
 		} else {
-			double[] ys = component.getYScale("ysR", yMin, yMax);
-			yMin = ys[0];
-			yMax = ys[1];
-			allowExpand = false;
-			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-				throw new Valve3Exception("Illegal axis values.");
+			try {
+				MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel1, gdm, currentComp, compBoxHeight, 0, leftUnit);
+				v3p.getPlot().addRenderer(leftMR);
+				comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+				comp.setTranslationType("ty");
+				v3p.addComponent(comp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
-		MatrixRenderer mr = new MatrixRenderer(gdm.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		mr.setExtents(startTime, endTime, yMin, yMax);		
-		mr.createDefaultAxis(8, 8, false, allowExpand);
-		mr.setXAxisToTime(8);		
-		mr.setAllVisible(true);
-		mr.createDefaultLineRenderers();
-		mr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " " + label});
-		mr.getAxis().setLeftLabelAsText(label);
-		mr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
-		
-		component.setTranslation(mr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(mr);
-		v3Plot.addComponent(component);
-	}
-	
-	/**
-	 * Initialize HistogramRenderer, add it to plot, and 
-	 * render event count histogram to PNG image in local file
-	 */
-	private void plotEvents(Channel channel1, Channel channel2, RSAMData rd) {
-
-		if (threshold > 0) {
-			rd.countEvents(threshold, ratio, maxEventLength);
-		}
-		
-		String channelCode1 = channel1.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		String channelCode2 = channel2.getCode().replace('$', ' ').replace('_', ' ').replace(',', '/');
-		
-		HistogramRenderer hr = new HistogramRenderer(rd.getCountsHistogram(bin));
-		hr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-		hr.setDefaultExtents();
-		hr.setMinX(startTime);
-		hr.setMaxX(endTime);
-		hr.createDefaultAxis(8, 8, false, true);
-		hr.setXAxisToTime(8);
-		hr.getAxis().setLeftLabelAsText("Events per " + bin);
-		hr.getAxis().setBottomLabelAsText("Time (" + Valve3.getInstance().getTimeZoneAbbr()+ ")");
-		
-		DoubleMatrix2D data	= null;		
-		data				= rd.getCumulativeCounts();
-		if (data != null && data.rows() > 0) {
-			
-			double cmin = data.get(0, 1);
-			double cmax = data.get(data.rows() - 1, 1);	
-			
-			MatrixRenderer mr = new MatrixRenderer(data, ranks);
-			mr.setAllVisible(true);
-			mr.setLocation(component.getBoxX(), component.getBoxY() + 8, component.getBoxWidth(), component.getBoxHeight() - 16);
-			mr.setExtents(startTime, endTime, cmin, cmax + 1);
-			mr.createDefaultLineRenderers();
-			
-			Renderer[] r = mr.getLineRenderers();
-			((ShapeRenderer)r[0]).color		= Color.red;
-			((ShapeRenderer)r[0]).stroke	= new BasicStroke(2.0f);
-			AxisRenderer ar = new AxisRenderer(mr);
-			ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
-			mr.setAxis(ar);
-			
-			hr.addRenderer(mr);
-			hr.getAxis().setRightLabelAsText("Cumulative Counts");
-		}
-		
-		hr.createDefaultLegendRenderer(new String[] {channelCode1 + "/" + channelCode2 + " Events"});
-		
-		component.setTranslation(hr.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
-		v3Plot.getPlot().addRenderer(hr);
-		v3Plot.addComponent(component);	
 	}
 
 	/**
 	 * Loop through the list of channels and create plots
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData() throws Valve3Exception {
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 
 		String[] channels	= ch.split(",");
-		cid1				= Integer.valueOf(channels[0]);
-		cid2				= Integer.valueOf(channels[1]);
-		Channel channel1 = channelsMap.get(cid1);
-		Channel channel2 = channelsMap.get(cid2);
+		Channel channel1	= channelsMap.get(Integer.valueOf(channels[0]));
+		Channel channel2	= channelsMap.get(Integer.valueOf(channels[1]));
+		
+		// calculate the number of plot components that will be displayed per channel
+		int channelCompCount = 1;
+		
+		// total components is components per channel * number of channels
+		compCount = channelCompCount;
+		
+		// setting up variables to decide where to plot this component
+		int currentComp		= 1;
+		int compBoxHeight	= comp.getBoxHeight();
 			
 		switch(plotType) {
 			case VALUES:
-				plotValues(channel1, channel2, data);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+				plotValues(v3p, comp, channel1, channel2, data, currentComp, compBoxHeight);
+				if(!forExport){
+					v3p.setCombineable(true);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
+				}
 				break;
 			case COUNTS:
-				plotEvents(channel1, channel2, data);
-				v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
+				if(!forExport){
+					v3p.setCombineable(false);
+				}
 				break;
 		}
 	}
@@ -347,55 +233,31 @@ public class RatSAMPlotter extends Plotter {
 	/**
 	 * Concrete realization of abstract method. 
 	 * Generate PNG images for values or event count histograms (depends from plot type) to file with random name.
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
-		v3Plot		= v3p;
-		component	= comp;
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
+		
+		forExport	= (v3p == null);
 		channelsMap	= getChannels(vdxSource, vdxClient);
-		getInputs();
-		getData();
+		comp.setPlotter(this.getClass().getName());
+		getInputs(comp);
 		
-		plotData();
-
-		Plot plot = v3Plot.getPlot();
-		plot.setBackgroundColor(Color.white);
-		plot.writePNG(v3Plot.getLocalFilename());
-	}
-
-	/**
-	 * @return CSV string of RSAM values data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent c) throws Valve3Exception {
-		component = c;
-		getInputs();
-		getData();
-		
-		switch(plotType) {
-			case VALUES:
-				return gdm.toCSV();
-			case COUNTS:
-				rd.countEvents(threshold, ratio, maxEventLength);
-				return rd.getCountsCSV();
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
 		}
-		return null;
-	}
-
-	/**
-	 * Initialize list of channels for given vdx source
-	 * @param source	vdx source name
-	 * @param client	vdx name
-	 */
-	private static Map<Integer, Channel> getChannels(String source, String client) {
-		Map<Integer, Channel> channels;	
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		params.put("source", source);
-		params.put("action", "channels");
-		Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(client);
-		VDXClient cl			= pool.checkout();
-		List<String> chs		= cl.getTextData(params);
-		pool.checkin(cl);
-		channels				= Channel.fromStringsToMap(chs);
-		return channels;
+		
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
+		plotData(v3p, comp);
+		
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
 }

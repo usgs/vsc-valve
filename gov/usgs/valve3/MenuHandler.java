@@ -54,7 +54,12 @@ public class MenuHandler implements HttpHandler
 		List<String> ss = config.getList("section");
 		for (String sec : ss)
 		{
-			Section section = new Section(sec, "", Integer.parseInt(config.getString(sec + ".sortOrder")));
+			boolean expanded = false;
+			try {
+				expanded = config.getBoolean(sec + ".expanded");
+			} catch (Exception e) {
+			}
+			Section section = new Section(sec, "", Integer.parseInt(config.getString(sec + ".sortOrder")), expanded);
 			sections.put(sec, section);
 		}
 		
@@ -68,11 +73,32 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
+					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotComponentsSeparately"), false);
+					char lt;
+					String value = cf.getString("plotter.lineType");
+					if(value==null){
+						lt = 'l';
+					} else {
+						if(value.length() != 1)
+							lt = 'l';
+						else
+							lt = value.charAt(0);
+					}
+					char bt;
+					value = cf.getString("biastype");
+					if ( value == null )
+						bt = '0';
+					else if ( value.equals("mean") )
+						bt = '1';
+					else if ( value.equals("initial") )
+						bt = '2';
+					else
+						bt = '0';
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lt, plotSeparately, bt);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}
@@ -83,8 +109,8 @@ public class MenuHandler implements HttpHandler
 	// TODO: cache
 	// TODO: sortOrder
 	
-	
 	/**
+	 * Getter for sections
 	 * @return list of Sections associated with this menu handler
 	 */
 	public List<Section> getSections()
@@ -97,6 +123,7 @@ public class MenuHandler implements HttpHandler
 	}
 	
 	/** 
+	 * Getter for menu item from ID
 	 * @param id menu item id
 	 * @return menu item from internal list found by it's id
 	 */

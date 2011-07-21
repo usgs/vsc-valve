@@ -1,11 +1,14 @@
 package gov.usgs.valve3;
 
+import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
+import gov.usgs.valve3.plotter.RawDataPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.RawData;
+import gov.usgs.valve3.Valve3Exception;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -16,11 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
+import java.util.Date;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 import javax.servlet.http.HttpServletRequest;
+import gov.usgs.vdx.data.Rank;
 
 /**
  * Generates raw data from http request.
@@ -40,9 +47,18 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class RawDataHandler implements HttpHandler
 {
-	public static final int MAX_PLOT_WIDTH = 6000;
-	public static final int MAX_PLOT_HEIGHT = 6000;
+	
+	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
+	public static final int DEFAULT_COMPONENT_WIDTH		= 750;
+	public static final int DEFAULT_COMPONENT_HEIGHT	= 240;
+	public static final int DEFAULT_COMPONENT_TOP		= 20;
+	public static final int DEFAULT_COMPONENT_LEFT		= 75;
+	public static final int DEFAULT_COMPONENT_MAPHEIGHT	= 900;	
+	public static final int MAX_PLOT_WIDTH				= 6000;
+	public static final int MAX_PLOT_HEIGHT				= 50000;
+	
 	private DataHandler dataHandler;
+	private Logger logger;	
 	
 	/**
 	 * Constructor
@@ -50,9 +66,73 @@ public class RawDataHandler implements HttpHandler
 	 */
 	public RawDataHandler(DataHandler dh)
 	{
+		logger = Log.getLogger("gov.usgs.valve3");
 		dataHandler = dh;
 	}
 	
+	/**
+	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
+	 * @param request request to process
+	 * @return list of generated PlotComponents
+	 * @throws Valve3Exception
+	 */
+	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
+	{
+		int n = Util.stringToInt(request.getParameter("n"), 1);
+		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
+		
+		String rkNameArg	= request.getParameter( "rkName" );
+		String outputType	= Util.stringToString(request.getParameter("o"), "csv");
+		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")))
+			outputType	= "csv";
+		
+		for (int i = 0; i < n; i++)
+		{
+			PlotComponent component = createComponent(request, i);
+			if (component == null)
+				continue;			
+
+			component.put( "o", outputType );
+
+			if ( rkNameArg != null ) 
+				component.put( "rkName", rkNameArg );
+			
+			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
+			if (w <= 0 || w > MAX_PLOT_WIDTH) {
+				throw new Valve3Exception("Illegal w." + i + " parameter.  Must be between 0 and " + MAX_PLOT_WIDTH);
+			}
+			
+			int h = Util.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
+			if (h <= 0 || h > MAX_PLOT_HEIGHT) {
+				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
+			}
+			
+			int mh = Util.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
+			if (mh < 0){
+				throw new Valve3Exception("Illegal mh." + i + " parameter.  Must be greater than 0");
+			}
+			
+			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
+			if (x < 0 || x > w){
+				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
+			}
+			
+			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
+			if (y < 0 || y > h){
+				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
+			}
+
+			component.setBoxWidth(w);
+			component.setBoxHeight(h);
+			component.setBoxMapHeight(mh);
+			component.setBoxX(x);
+			component.setBoxY(y);
+
+			list.add(component);
+		}
+		return list;
+	}
+
 	/**
 	 * Process HttpServletRequest and generate one {@link PlotComponent}
 	 * @param request request to process
@@ -63,10 +143,15 @@ public class RawDataHandler implements HttpHandler
 	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
 	{
 		String source = request.getParameter("src." + i);
-		if (source == null)
-			throw new Valve3Exception("Illegal src value.");
-		
-		PlotComponent component = new PlotComponent(source);
+		if (source == null || source.length()==0)
+			throw new Valve3Exception("Illegal src." + i + " value.");
+		String tz = request.getParameter("tz");
+		if ( tz==null || tz.equals("") ) {
+			tz = Valve3.getInstance().getTimeZoneAbbr();
+			logger.info( "Illegal/missing tz parameter; using default value" );
+		}	
+		TimeZone timeZone = TimeZone.getTimeZone(tz);
+		PlotComponent component = new PlotComponent(source, timeZone);
 
 		// Not using generics because HttpServletRequest is Java 1.4
 		Map parameters = request.getParameterMap();
@@ -87,117 +172,160 @@ public class RawDataHandler implements HttpHandler
 	}
 	
 	/**
-	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
-	 * @param request request to process
-	 * @return list of generated PlotComponents
-	 * @throws Valve3Exception
-	 */
-	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
-	{
-		int n = Util.stringToInt(request.getParameter("n"), -1);
-		if (n == -1)
-			throw new Valve3Exception("Illegal n value.");
-		
-		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
-		
-		for (int i = 0; i < n; i++)
-		{
-			PlotComponent component = createComponent(request, i);
-			if (component == null)
-				continue;
-			int x = Util.stringToInt(request.getParameter("x." + i), 75);
-			int y = Util.stringToInt(request.getParameter("y." + i), 19);
-			int w = Util.stringToInt(request.getParameter("w." + i), 610);
-			int h = Util.stringToInt(request.getParameter("h." + i), 140);
-			if (x < 0)
-				throw new Valve3Exception("Illegal x value.");
-			if (y < 0)
-				throw new Valve3Exception("Illegal y value.");
-			if (w <= 0 || w > MAX_PLOT_WIDTH)
-				throw new Valve3Exception("Illegal width.");
-			if (h <= 0 || h > MAX_PLOT_HEIGHT)
-				throw new Valve3Exception("Illegal height.");
-			component.setBoxX(x);
-			component.setBoxY(y);
-			component.setBoxWidth(w);
-			component.setBoxHeight(h);
-			list.add(component);
-		}
-		return list;
-	}
-	
-	/**
 	 * Handle the given http request and generate raw data type result. 
 	 * @see HttpHandler#handle 
 	 */
-	public Object handle(HttpServletRequest request)
-	{
-		try
-		{
+	public Object handle(HttpServletRequest request) {
+		try {
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
 			
-			String fn = "";
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+			df.setTimeZone(TimeZone.getTimeZone("GMT"));
 			StringBuffer sb = new StringBuffer();
-			for (PlotComponent component : components)
-			{
-				String source = component.getSource();
-				Plotter plotter = null;
-				if (source.equals("channel_map"))
-				{
-					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					if (dsd == null)
-						throw new Valve3Exception("Unknown data source.");
-					
-					plotter = new ChannelMapPlotter();
-					plotter.setVDXClient(dsd.getVDXClientName());
-					plotter.setVDXSource(dsd.getVDXSource());
-				}
-				else
-				{
+			String fn_source = null, fn_rank = "";
+			int fn_rankID = -1;
+			String timeZone = null;
+			SimpleDateFormat dfc = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			Date now = new Date();
+			String cmtDate = "";
+			String cmtURL = "#URL=" + request.getRequestURL().toString() + "?" + request.getQueryString() + "\n";
+			String cmtTimes = "";
+			String cmtDataType = null;
+			double cmtSampleRate = 0.0;
+			Map<Integer, Rank> ranksMap = null;
+			boolean miniseed = false;
+			String fn = null, filePath = null, outFileName = null, outFilePath = null;
+
+			for (PlotComponent component : components) {
+				String source				= component.getSource();
+				Plotter plotter				= null;
+				DataSourceDescriptor dsd	= null;
+				if ( fn_source == null )
+					fn_source = source;
+				else if ( !fn_source.equals(source) )
+					throw new Valve3Exception( "Multi-source export not supported" );
+				if (source.equals("channel_map")) {
+					plotter	= new ChannelMapPlotter();
+					dsd		= dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					if (dsd != null) {
+						plotter.setVDXClient(dsd.getVDXClientName());
+						plotter.setVDXSource(dsd.getVDXSource());
+					}
+				} else {
 					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 				}
-				if (plotter != null)
-					sb.append(plotter.toCSV(component));
-				
-				SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				
-				if (fn.length() > 0)
-					fn += "-";
-				
-				if (component.get("ch") != null)
-					fn = component.get("ch").replace('$','_');
-				else
-					fn = component.get("src");
-					
-				fn += "-" + df.format(Util.j2KToDate(component.getStartTime(component.getEndTime()) ));
-				fn += "-" + df.format(Util.j2KToDate(component.getEndTime()));
+				if (plotter != null) {
+					if ( cmtDataType == null ) {
+						cmtSampleRate = plotter.getSampleRate();
+						cmtDataType = plotter.getDataType();
+					}
+				}
+				String rk = component.get( "rk" );
+				if (rk == null) 
+					try {
+						ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+						for (Map.Entry<Integer, Rank> me: ranksMap.entrySet() ) {
+							Rank r = me.getValue();
+							if ( r.getUserDefault() == 1 ) {
+								rk = "" + me.getKey();
+								component.put( "rk", rk );
+								break;
+							}
+						}
+						logger.info("Ranks acquired");
+					} catch (Exception e) {}
+				if (rk != null) {
+					int rankID = component.getInt( "rk" );
+					if ( rankID != fn_rankID )
+						if ( fn_rankID == -1 ) {
+							if ( rankID == 0 )
+								throw new Valve3Exception( "Mixed-rank export not supported" );
+							fn_rankID = rankID;
+						} else
+							throw new Valve3Exception( "Multi-rank export not supported" );
+				}
+				if ( fn_rankID != -1 && fn_rank.equals("") ) {
+					if ( dsd == null ) {
+						fn_rank = "RankNbr" + fn_rankID;
+					} else {
+						if ( ranksMap == null ) {
+							ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+						}
+						fn_rank = ranksMap.get(fn_rankID).getName();
+					}
+				}
+				timeZone = component.getTimeZone().getID();
+				dfc.setTimeZone(TimeZone.getTimeZone(timeZone));
+				cmtDate = dfc.format(now);
+				cmtDate = "#reqtime=" + String.format( "%14.3f,%s,%s\n", (now.getTime()*0.001), cmtDate, timeZone);
+				double endtime = component.getEndTime();
+				cmtTimes = String.format( "#st=%14.3f, et=%14.3f\n", component.getStartTime(endtime), endtime );
+				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
+				String outputType = component.get( "o" );
+				fn = df.format(now) + "_" 
+					+ fn_source.replaceAll( "-", "_")
+					+ (fn_rank==null ? "_NoRank" : fn_rank.replaceAll("-","_"));
+				filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
+				if ( !miniseed && outputType.equals("seed") )
+					miniseed = true;
+				if (plotter != null) {
+					if ( miniseed ) {
+						try {
+							outFilePath = filePath + ".zip";
+							outFileName = fn  + ".zip";
+							FileOutputStream zipdest = new FileOutputStream(outFilePath);
+							ZipOutputStream zipout = new ZipOutputStream(new BufferedOutputStream(zipdest));
+							ZipEntry zipentry = new ZipEntry(fn + ".msi");
+							zipout.putNextEntry(zipentry);
+							sb.append(plotter.toCSV(component, cmt.toString(), zipout));
+							zipentry = new ZipEntry(fn + ".mst");
+							zipout.putNextEntry(zipentry);
+							zipout.write(sb.toString().getBytes());
+							zipout.close();
+						}
+						catch (ZipException ez)
+						{
+							logger.info("RawDataHandler zipfile error" );
+							throw new Valve3Exception(ez.getMessage());
+						}	
+						catch (IOException eio)
+						{
+							logger.info("RawDataHandler file error" );
+							throw new Valve3Exception(eio.getMessage());
+						}
+					} else 
+						sb.append(plotter.toCSV(component, cmt.toString(), null));
+				} else
+					sb.append( cmt.toString() );
 			}
 			
-			fn += ".csv";
-			String filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
-			try
-			{
-		        FileOutputStream out = new FileOutputStream(filePath);
-		        out.write(sb.toString().getBytes());
-		        out.close();
+			if ( outFilePath == null ) {
+				try
+				{
+					outFilePath = filePath + ".csv";
+					outFileName = fn + ".csv";
+					FileOutputStream out = new FileOutputStream(outFilePath);
+					out.write(sb.toString().getBytes());
+					out.close();
+				}
+				catch (IOException e)
+				{
+					logger.info("RawDataHandler file error" );
+					throw new Valve3Exception(e.getMessage());
+				}
 			}
-			catch (IOException e)
-			{
-				throw new Valve3Exception(e.getMessage());
-			}
-
 			Pattern p = Pattern.compile(request.getContextPath());
-			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + fn;
-			RawData rd = new RawData(fileURL, filePath);
+			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + outFileName;
+			RawData rd = new RawData(fileURL, outFilePath);
 			
 			Valve3.getInstance().getResultDeleter().addResult(rd);
 			return rd;
 		}
 		catch (Valve3Exception e)
 		{
+			logger.info("RawDataHandler error " + e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}

@@ -5,9 +5,13 @@ import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
+import gov.usgs.vdx.ExportConfig;
 import gov.usgs.valve3.data.DataHandler;
 
 import java.io.File;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,15 +73,17 @@ public class Valve3 implements ServletContextListener
 	private String administrator = "Administrator";
 	private String administratorEmail = "admin@usgs.gov";
 	private String installationTitle = "Valve Installation";
-	private int timeZone = 0;
-	private String timeZoneAbbr = "GMT";
+	private String timeZoneAbbr = "UTC";
 	
 	private GeoImageSet imageSet;
 	private GeoLabelSet labelSet;
+	private ConfigFile defaults;
 	
 	private ResultDeleter resultDeleter;
 
 	private Logger logger;
+	
+	private HashMap<String,ExportConfig> exportConfigs;
 	
 	/**
 	 * Default constructor
@@ -90,6 +96,7 @@ public class Valve3 implements ServletContextListener
 		Log.getLogger("gov.usgs.net").setLevel(Level.SEVERE);
 		resultDeleter = new ResultDeleter();
 		resultDeleter.start();
+		exportConfigs = new HashMap<String,ExportConfig>();
 	}
 	
 	/**
@@ -104,22 +111,25 @@ public class Valve3 implements ServletContextListener
 		logger.config("admin.email: " + administratorEmail);
 		installationTitle = config.getString("title");
 		logger.config("title: " + installationTitle);
-		String tz = config.getString("timeZone");
-		if (tz != null) 
-			timeZone = Integer.parseInt(tz);
-		logger.config("timeZone: " + timeZone);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
+		if ( timeZoneAbbr == null )
+			timeZoneAbbr = "UTC";
 		logger.config("timeZoneAbbr: " + timeZoneAbbr);
-		
+
+		ExportConfig ec = new ExportConfig( "", config );
+		exportConfigs.put( "", ec );
+
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
 		if (ics != null)
 			imageSet.setMaxLoadedImagesSize(Integer.parseInt(ics));
 		labelSet = new GeoLabelSet(config.getString("labelIndex"));
+		defaults = config.getSubConfig("defaults");
 	}
 	
 	/**
 	 * Getter for result deleter
+	 * @return result deleter
 	 */
 	public ResultDeleter getResultDeleter()
 	{
@@ -128,6 +138,7 @@ public class Valve3 implements ServletContextListener
 	
 	/**
 	 * Implementation of Singleton pattern
+	 * @return Valve3
 	 */
 	public static Valve3 getInstance()
 	{
@@ -135,7 +146,8 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * Getter for menu handle
+	 * Getter for menu handler
+	 * @return menu handler
 	 */
 	public MenuHandler getMenuHandler()
 	{
@@ -144,9 +156,18 @@ public class Valve3 implements ServletContextListener
 		
 		return menuHandler;
 	}
+
+	/**
+	 * Getter for default values configuration
+	 * @return config file
+	 */
+	public ConfigFile getDefaults(){
+		return defaults;
+	}
 	
 	/**
 	 * Getter for data handler
+	 * @return data handler
 	 */
 	public DataHandler getDataHandler()
 	{
@@ -158,6 +179,7 @@ public class Valve3 implements ServletContextListener
 
 	/**
 	 * Getter for action handler
+	 * @return action handler
 	 */
 	public ActionHandler getActionHandler()
 	{
@@ -176,6 +198,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/** 
+	 * Getter for config path
 	 * @return full directory name for application's configuration files
 	 */
 	public String getConfigPath()
@@ -184,6 +207,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Getter for application path
 	 * @return full real path to deployed application
 	 */
 	public String getApplicationPath()
@@ -192,6 +216,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/**
+	 * Getter for administrator's name
 	 * @return application's administrator name
 	 */
 	public String getAdministrator()
@@ -200,6 +225,7 @@ public class Valve3 implements ServletContextListener
 	}
 
 	/**
+	 * Getter for admin email
 	 * @return application's administrator email
 	 */
 	public String getAdministratorEmail()
@@ -208,6 +234,7 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
+	 * Getter for installation title
 	 * @return Title of installation displayed on start page
 	 */
 	public String getInstallationTitle()
@@ -216,7 +243,8 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * @return Abbreviated name of local time zone
+	 * Getter for time zone abbreviation
+	 * @return Abbreviated name of default time zone
 	 */
 	public String getTimeZoneAbbr()
 	{
@@ -224,15 +252,18 @@ public class Valve3 implements ServletContextListener
 	}
 	
 	/**
-	 * @return local time zone offset
+	 * Yield time zone offset for date
+	 * @param date Time moment to compute offset
+	 * @return offset between current time zone and UTC in seconds, on given time moment
 	 */
-	public int getTimeZoneOffset()
-	{
-		return timeZone;
+	public double getTimeZoneOffset(Date date) {
+		TimeZone timeZone = TimeZone.getTimeZone(getTimeZoneAbbr());
+		return timeZone.getOffset(date.getTime())/1000.0;
 	}
-
+	
 	/**
 	 * Getter for geo image set
+	 * @return geo image set
 	 */
 	public GeoImageSet getGeoImageSet()
 	{
@@ -241,10 +272,30 @@ public class Valve3 implements ServletContextListener
 
 	/**
 	 * Getter for geo labels set
+	 * @return geo label set
 	 */
 	public GeoLabelSet getGeoLabelSet()
 	{
 		return labelSet;
+	}
+
+	/**
+	 * Getter for export config for data source
+	 * @param source data source name
+	 * @return export config
+	 */
+	public ExportConfig getExportConfig( String source ) 
+	{
+		return exportConfigs.get(source);
+	}
+	/**
+	 * Setter for export config
+	 * @param source data source name
+	 * @param ec export config
+	 */
+	public void putExportConfig( String source, ExportConfig ec ) 
+	{
+		exportConfigs.put(source, ec);
 	}
 
 	/**

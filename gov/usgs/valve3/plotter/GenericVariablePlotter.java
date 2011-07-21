@@ -3,12 +3,14 @@ package gov.usgs.valve3.plotter;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
+import gov.usgs.plot.PointRenderer;
 import gov.usgs.plot.ShapeRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
-import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
@@ -18,87 +20,42 @@ import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.GenericDataMatrix;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * Generate images for generic data plot to files
  * 
  * @author Tom Parker
  */
-public class GenericVariablePlotter extends Plotter
+public class GenericVariablePlotter extends RawDataPlotter
 {
-	private Valve3Plot v3Plot;
-	private PlotComponent component;
-	private double startTime;
-	private double endTime;
+
 	private GenericDataMatrix data;
-	private String channel;
 	
-	private String leftUnit;
 	private List<Column> leftColumns;
-	private String rightUnit;
 	private List<Column> rightColumns;
-	
-	public final boolean ranks	= true;
 
 	/**
 	 * Default constructor
 	 */
-	public GenericVariablePlotter()
-	{}
-
-	/**
-	 * Gets binary data from VDX server.
-	 * @throws Valve3Exception
-	 */
-	private void getData() throws Valve3Exception
-	{
-		Map<String, String> params = new LinkedHashMap<String, String>();
-		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-		VDXClient client = pool.checkout();
-		params.put("source", vdxSource);
-		params.put("action", "data");
-		params.put("cid", channel);
-		params.put("st", Double.toString(startTime));
-		params.put("et", Double.toString(endTime));
-		params.put("selectedTypes", component.get("selectedTypes"));
-
-		data = (GenericDataMatrix)client.getBinaryData(params);
-		pool.checkin(client);
-		
-		if (data == null || data.rows() == 0)
-			throw new Valve3Exception("No data.");
-		data.adjustTime(Valve3.getInstance().getTimeZoneOffset() * 60 * 60);
-		startTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
-		endTime += Valve3.getInstance().getTimeZoneOffset() * 60 * 60;
+	public GenericVariablePlotter(){
+		super();
 	}
 
 	/**
 	 * Initialize internal data from PlotComponent component
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private void getInputs() throws Valve3Exception
+	protected void getInputs(PlotComponent comp) throws Valve3Exception
 	{
-		
-		channel = component.get("ch");
-		if (channel == null || channel.length() <= 0)
-			throw new Valve3Exception("Illegal channel found in plotter.");
-		
-		endTime = component.getEndTime();
-		if (Double.isNaN(endTime))
-			throw new Valve3Exception("Illegal end time found in plotter.");
-		startTime = component.getStartTime(endTime);
-		if (Double.isNaN(startTime))
-			throw new Valve3Exception("Illegal start time found in plotter.");
-		
-		String[] types = component.get("dataTypes").split("\\$");
-		String[] selectedTypes = component.get("selectedTypes").split(":");
+		parseCommonParameters(comp);
+		//ToDo: check for one channel in ch only
+		String[] types = comp.getString("dataTypes").split("\\$");
+		String[] selectedTypes = comp.getString("selectedTypes").split(":");
 		int c = 0;
 		for (int i = 0; i<types.length; i++)
 		{
@@ -160,16 +117,83 @@ public class GenericVariablePlotter extends Plotter
 				rightColumns = tempColumns;
 			}
 		}
+		// set up the legend 
+		channelLegendsCols	= new String  [leftColumns.size() + rightColumns.size()];
+		for (int i = 0; i < leftColumns.size(); i++) {
+			channelLegendsCols[i] = String.format("%s", leftColumns.get(i).description);
+		}
+		for (int i = leftColumns.size(); i < channelLegendsCols.length; i++) {
+			channelLegendsCols[i] = String.format("%s", rightColumns.get(i-leftColumns.size()).description);
+		}
+	}
+
+	/**
+	 * Gets binary data from VDX server.
+	 * @param component PlotComponent
+	 * @throws Valve3Exception
+	 */
+	protected void getData(PlotComponent comp) throws Valve3Exception {
+		
+		// initialize variables
+		boolean gotData			= false;
+		boolean exceptionThrown	= false;
+		String exceptionMsg		= "";
+		Pool<VDXClient> pool	= null;
+		VDXClient client		= null;
+		
+		// create a map of all the input parameters
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("action", "data");
+		params.put("ch", ch);	
+		params.put("st", Double.toString(startTime));
+		params.put("et", Double.toString(endTime));
+		params.put("rk", Integer.toString(rk));
+		params.put("selectedTypes", comp.getString("selectedTypes"));
+		addDownsamplingInfo(params);
+		
+		// checkout a connection to the database
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();		
+			try {
+				data = (GenericDataMatrix)client.getBinaryData(params);
+			} catch (UtilException e) {
+				exceptionThrown	= true;
+				exceptionMsg	= e.getMessage();
+			} catch (Exception e) {
+				data = null; 
+			}
+		
+			// if data was collected
+			if (data != null || data.rows() > 0) {
+				data.adjustTime(timeOffset);
+				gotData = true;
+			}
+			
+			// check back in our connection to the database
+			pool.checkin(client);
+		}
+		
+		// if a data limit message exists, then throw exception
+		if (exceptionThrown) {
+			throw new Valve3Exception(exceptionMsg);
+
+		// if no data exists, then throw exception
+		} else if (!gotData) {
+			throw new Valve3Exception("No data for any channel.");
+		}
 	}
 
 	/**
 	 * Initialize MatrixRenderer for left plot axis
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getLeftMatrixRenderer()
+	private MatrixRenderer getLeftMatrixRenderer(PlotComponent comp) throws Valve3Exception
 	{
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
@@ -185,30 +209,40 @@ public class GenericVariablePlotter extends Plotter
 			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
-			
 		}
-		
-		mr.setExtents(startTime, endTime, min, max);		
-		mr.createDefaultAxis(8, 8, false, true);
-		mr.createDefaultLineRenderers();
-		mr.setXAxisToTime(8);
-
-		mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
-		mr.getAxis().setBottomLabelAsText("Time");
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);	
+		mr.createDefaultAxis(8,8,xTickMarks,yTickMarks, false, true, xTickValues, yTickValues);
+		if(shape==null){
+			mr.createDefaultPointRenderers(comp.getColor());
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers(comp.getColor());
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
+			}
+		}
+		mr.setXAxisToTime(8, xTickMarks, xTickValues);
+		if(yLabel){
+			mr.getAxis().setLeftLabelAsText(leftColumns.get(0).description, Color.blue);
+		}
+		if(xUnits){
+			mr.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
+		}
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}
 
 	/**
 	 * Initialize MatrixRenderer for right plot axis
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	private MatrixRenderer getRightMatrixRenderer()
+	private MatrixRenderer getRightMatrixRenderer(PlotComponent comp) throws Valve3Exception
 	{
 		if (rightUnit == null)
 			return null;
-		
 		MatrixRenderer mr = new MatrixRenderer(data.getData(), ranks);
-		mr.setLocation(component.getBoxX(), component.getBoxY(), component.getBoxWidth(), component.getBoxHeight());
+		mr.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight());
 		
 		double max = -1E300;
 		double min = 1E300;
@@ -217,7 +251,6 @@ public class GenericVariablePlotter extends Plotter
 		for (Column col : rightColumns)
 		{
 			mr.setVisible(col.idx, true);
-
 			if (col.name.equals("45"))
 				data.sum(col.idx+1);
 
@@ -225,37 +258,59 @@ public class GenericVariablePlotter extends Plotter
 			min = Math.min(min, data.min(col.idx + 1));
 			max += Math.abs(max - min) * .1;
 			min -= Math.abs(max - min) * .1;
-			
-
 		}
-
-		mr.setExtents(startTime, endTime, min, max);
+		mr.setExtents(startTime+timeOffset, endTime+timeOffset, min, max);
 		AxisRenderer ar = new AxisRenderer(mr);
-		ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		if(yTickValues){
+			ar.createRightTickLabels(SmartTick.autoTick(min, max, 8, false), null);
+		}
 		mr.setAxis(ar);
-		mr.createDefaultLineRenderers();
-		ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
-		r[1].color = Color.red;
-
-		mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
+		if(shape==null){
+			mr.createDefaultPointRenderers(comp.getColor());
+			PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
+			r[1].color = Color.red;
+		} else {
+			if (shape.equals("l")) {
+				mr.createDefaultLineRenderers(comp.getColor());
+				ShapeRenderer[] r = (ShapeRenderer[])mr.getLineRenderers();
+				r[1].color = Color.red;
+			} else {
+				mr.createDefaultPointRenderers(shape.charAt(0), comp.getColor());
+				PointRenderer[] r = (PointRenderer[])mr.getPointRenderers();
+				r[1].color = Color.red;
+			}
+		}
+		if(yLabel){
+			mr.getAxis().setRightLabelAsText(rightColumns.get(0).description, Color.red);
+		}
+		if(isDrawLegend) mr.createDefaultLegendRenderer(channelLegendsCols);
 		return mr;
 	}
 
 	/**
 	 * Initialize MatrixRenderers for left and right axis,
 	 * adds them to plot
+	 * @param v3Plot Valve3Plot
+	 * @param component PlotComponent
 	 * @throws Valve3Exception
 	 */
-	public void plotData()
-	{
-		MatrixRenderer leftMR = getLeftMatrixRenderer();
-		MatrixRenderer rightMR = getRightMatrixRenderer();
-		v3Plot.getPlot().addRenderer(leftMR);
-		if (rightMR != null)
-			v3Plot.getPlot().addRenderer(rightMR);
+	public void plotData(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
 		
-		component.setTranslation(leftMR.getDefaultTranslation(v3Plot.getPlot().getHeight()));
-		component.setTranslationType("ty");
+		MatrixRenderer leftMR = getLeftMatrixRenderer(comp);
+		MatrixRenderer rightMR = getRightMatrixRenderer(comp);
+		if (rightMR != null)
+			v3p.getPlot().addRenderer(rightMR);
+		v3p.getPlot().addRenderer(leftMR);		
+		
+		comp.setTranslation(leftMR.getDefaultTranslation(v3p.getPlot().getHeight()));
+		comp.setTranslationType("ty");
+		v3p.addComponent(comp);
+		
+		if (!forExport) {
+			addSuppData( vdxSource, vdxClient, v3p, comp );
+			v3p.setCombineable(true);
+			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
+		}
 	}
 
 	/**
@@ -263,57 +318,29 @@ public class GenericVariablePlotter extends Plotter
 	 * Initialize MatrixRenderers for left and right axis
 	 * (plot may have 2 different value axis)
 	 * Generate PNG image to file with random file name.
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
+	 * @throws Valve3Exception
 	 * @see Plotter
 	 */
-	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception
-	{
-				
-		v3Plot = v3p;
-		component = comp;
-		getInputs();
-		getData();
-
-		Plot plot = v3Plot.getPlot();
-		plot.setBackgroundColor(Color.white);
+	public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException {
 		
-		plotData();
-
-		v3Plot.addComponent(component);
-		//v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ":" + comp.get("ch"));
-		v3Plot.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + ": " + comp.get("selectedStation"));
-		v3Plot.setFilename(PlotHandler.getRandomFilename());
-		plot.writePNG(Valve3.getInstance().getApplicationPath() + File.separatorChar + v3Plot.getFilename());
-	}
-
-	/**
-	 * @return CSV dump of binary data described by given PlotComponent
-	 */
-	public String toCSV(PlotComponent comp) throws Valve3Exception
-	{
+		forExport	= (v3p == null);
+		comp.setPlotter(this.getClass().getName());
+		getInputs(comp);
 		
-//		HashMap<String, String> params = new HashMap<String, String>();
-//		Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
-//		VDXClient client = pool.checkout();
-//		
-//		params.put("source", vdxSource);
-//		params.put("action", "genericMenu");
-//		menu = new GenericMenu(client.getTextData(params));
-//		pool.checkin(client);
-		
-		component = comp;
-		getInputs();
-		getData();
-		DoubleMatrix2D d = data.getData();
-		StringBuffer sb = new StringBuffer();
-		for (int i=0; i<d.rows(); i++)
-		{
-			sb.append(Util.j2KToDateString(d.get(i, 0)) + ",");
-			for (int j=1; j<d.columns(); j++)
-				sb.append(d.get(i,j) + ",");
-			sb.append("\n");
+		// plot configuration
+		if (!forExport) {
+			v3p.setExportable(true);
 		}
-			
-		return sb.toString();
+		// this is a legitimate request so lookup the data from the database and plot it
+		getData(comp);		
+		plotData(v3p, comp);
+				
+		if (!forExport) {
+			Plot plot = v3p.getPlot();
+			plot.setBackgroundColor(Color.white);
+			plot.writePNG(v3p.getLocalFilename());
+		}
 	}
-
 }

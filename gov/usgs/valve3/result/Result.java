@@ -1,5 +1,9 @@
 package gov.usgs.valve3.result;
 
+import gov.usgs.util.Log;
+
+import java.util.logging.Logger;
+
 /**
  * Keeps URL to generated result
  * 
@@ -11,6 +15,7 @@ package gov.usgs.valve3.result;
  */
 abstract public class Result
 {
+	private final static Logger logger = Log.getLogger("gov.usgs.valve3.result.Result"); 
 	protected String url;
 	
 	/**
@@ -23,7 +28,7 @@ abstract public class Result
 	
 	/**
 	 * Setter for URL
-	 * @param url to set
+	 * @param u to set
 	 */
 	public void setURL(String u)
 	{
@@ -35,11 +40,11 @@ abstract public class Result
 	 */
 	public void delete()
 	{
-		System.out.println("Result.delete()");
+		logger.fine("Result.delete()");
 	}
 	
 	/**
-	 * 
+	 * Yield XML representation
 	 * @param type result type
 	 * @param nested String with xml representation of result's content
 	 * @return String with xml representation of generated result

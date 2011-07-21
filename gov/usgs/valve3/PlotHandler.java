@@ -1,16 +1,25 @@
 package gov.usgs.valve3;
 
+import gov.usgs.util.Log;
+import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
+import gov.usgs.util.UtilException;
 import gov.usgs.valve3.data.DataHandler;
 import gov.usgs.valve3.data.DataSourceDescriptor;
 import gov.usgs.valve3.plotter.ChannelMapPlotter;
 import gov.usgs.valve3.result.ErrorMessage;
 import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.valve3.Valve3;
+import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.ExportConfig;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,17 +47,112 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class PlotHandler implements HttpHandler
 {
-	public static final int MAX_PLOT_WIDTH = 6000;
-	public static final int MAX_PLOT_HEIGHT = 6000;
-	private DataHandler dataHandler;
 	
+	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
+	public static final int DEFAULT_COMPONENT_WIDTH		= 750;
+	public static final int DEFAULT_COMPONENT_HEIGHT	= 240;
+	public static final int DEFAULT_COMPONENT_TOP		= 20;
+	public static final int DEFAULT_COMPONENT_LEFT		= 75;
+	public static final int DEFAULT_COMPONENT_MAPHEIGHT	= 900;	
+	public static final int MAX_PLOT_WIDTH				= 6000;
+	public static final int MAX_PLOT_HEIGHT				= 50000;
+	
+	private DataHandler dataHandler;
+	private Logger logger;	
+
 	/**
 	 * Constructor
 	 * @param dh data handler for this plot handler
 	 */
 	public PlotHandler(DataHandler dh)
 	{
+		logger = Log.getLogger("gov.usgs.valve3");
 		dataHandler = dh;
+	}
+	
+	/**
+	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
+	 * @param request request to process
+	 * @return list of generated PlotComponents
+	 * @throws Valve3Exception
+	 */
+	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
+	{
+		int n = Util.stringToInt(request.getParameter("n"), 1);
+		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
+		
+		for (int i = 0; i < n; i++)
+		{
+			PlotComponent component = createComponent(request, i);
+			if (component == null)
+				continue;
+			
+			String source = request.getParameter("src." + i);
+			if ( source.equals( "channel_map" ) ) {
+				String subsrc = request.getParameter("subsrc." + i);
+				component.put( "subsrc", subsrc );
+			} else {
+				Valve3 v3 = Valve3.getInstance();
+				Map<String, String> params = new LinkedHashMap<String, String>();
+				params.put("source", source);
+				params.put("action", "exportinfo");
+				ExportConfig ec = v3.getExportConfig(source);
+				if ( ec == null ) {
+					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(source);
+					if (dsd == null)
+						throw new Valve3Exception("Missing data source for " + source);
+					ec = v3.getExportConfig("");
+					ec.parameterize( params );
+					Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(dsd.getVDXClientName());
+					VDXClient cl = pool.checkout();
+					java.util.List<String> ecs = null;
+					try {
+						ecs = cl.getTextData(params);
+					} catch (UtilException e){
+						ecs = new ArrayList<String>();
+					} finally {
+						pool.checkin(cl);
+					}
+					ec = new ExportConfig( ecs );
+					v3.putExportConfig(source, ec);
+				}
+				component.setExportable( ec.isExportable() );
+			}
+			
+			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
+			if (w <= 0 || w > MAX_PLOT_WIDTH) {
+				throw new Valve3Exception("Illegal w." + i + " parameter.  Must be between 0 and " + MAX_PLOT_WIDTH);
+			}
+			
+			int h = Util.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
+			if (h <= 0 || h > MAX_PLOT_HEIGHT) {
+				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
+			}
+			
+			int mh = Util.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
+			if (mh < 0){
+				throw new Valve3Exception("Illegal mh." + i + " parameter.  Must be greater than 0");
+			}
+			
+			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
+			if (x < 0 || x > w){
+				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
+			}
+			
+			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
+			if (y < 0 || y > h){
+				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
+			}
+
+			component.setBoxWidth(w);
+			component.setBoxHeight(h);
+			component.setBoxMapHeight(mh);
+			component.setBoxX(x);
+			component.setBoxY(y);
+			
+			list.add(component);
+		}
+		return list;
 	}
 	
 	/**
@@ -61,10 +165,15 @@ public class PlotHandler implements HttpHandler
 	protected PlotComponent createComponent(HttpServletRequest request, int i) throws Valve3Exception
 	{
 		String source = request.getParameter("src." + i);
-		if (source == null)
-			throw new Valve3Exception("Illegal src value.");
-		
-		PlotComponent component = new PlotComponent(source);
+		if (source == null || source.length()==0)
+			throw new Valve3Exception("Illegal src." + i + " value.");
+		String tz = request.getParameter("tz");
+		if ( tz==null || tz.equals("") ) {
+			tz = Valve3.getInstance().getTimeZoneAbbr();
+			logger.info( "Illegal/missing tz parameter; using default value" );
+		}	
+		TimeZone timeZone = TimeZone.getTimeZone(tz);
+		PlotComponent component = new PlotComponent(source, timeZone);
 
 		// Not using generics because HttpServletRequest is Java 1.4
 		Map parameters = request.getParameterMap();
@@ -85,89 +194,49 @@ public class PlotHandler implements HttpHandler
 	}
 	
 	/**
-	 * Process HttpServletRequest and generate list of {@link PlotComponent}s
-	 * @param request request to process
-	 * @return list of generated PlotComponents
-	 * @throws Valve3Exception
-	 */
-	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
-	{
-		int n = Util.stringToInt(request.getParameter("n"), -1);
-		if (n == -1)
-			throw new Valve3Exception("Illegal n value.");
-		
-		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
-		
-		for (int i = 0; i < n; i++)
-		{
-			PlotComponent component = createComponent(request, i);
-			if (component == null)
-				continue;
-			int x = Util.stringToInt(request.getParameter("x." + i), 75);
-			int y = Util.stringToInt(request.getParameter("y." + i), 19);
-			int w = Util.stringToInt(request.getParameter("w." + i), 610);
-			int h = Util.stringToInt(request.getParameter("h." + i), 140);
-			if (x < 0)
-				throw new Valve3Exception("Illegal x value.");
-			if (y < 0)
-				throw new Valve3Exception("Illegal y value.");
-			if (w <= 0 || w > MAX_PLOT_WIDTH)
-				throw new Valve3Exception("Illegal width.");
-			if (h <= 0 || h > MAX_PLOT_HEIGHT)
-				throw new Valve3Exception("Illegal height.");
-			component.setBoxX(x);
-			component.setBoxY(y);
-			component.setBoxWidth(w);
-			component.setBoxHeight(h);
-			list.add(component);
-		}
-		return list;
-	}
-	
-	/**
 	 * Handle the given http request and generate a plot. 
 	 * @see HttpHandler#handle 
 	 */
-	public Object handle(HttpServletRequest request)
-	{
-		try
-		{
+	public Object handle(HttpServletRequest request) {
+		try {
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
 				return null;
 			
-			Valve3Plot plot = new Valve3Plot(request);
-			for (PlotComponent component : components)
-			{
-				String source = component.getSource();
-				Plotter plotter = null;
-				if (source.equals("channel_map"))
-				{
-					plotter = new ChannelMapPlotter();
-					DataSourceDescriptor dsd = dataHandler.getDataSourceDescriptor(component.get("subsrc"));
-					if (dsd != null)
-					{
+			Valve3Plot plot = new Valve3Plot(request, components.size());
+			for (PlotComponent component : components) {
+				String source				= component.getSource();
+				Plotter plotter				= null;
+				DataSourceDescriptor dsd	= null;
+				if (component.getExportable())
+					plot.setExportable( true );
+				if (source.equals("channel_map")) {
+					plotter	= new ChannelMapPlotter();
+					dsd		= dataHandler.getDataSourceDescriptor(component.get("subsrc"));
+					if (dsd != null) {
 						plotter.setVDXClient(dsd.getVDXClientName());
 						plotter.setVDXSource(dsd.getVDXSource());
 					}
-				}
-				else
-				{
+				} else {
 					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
 				}
 				if (plotter != null)
-					plotter.plot(plot, component);
+					try {
+						plotter.plot(plot, component);
+					} catch (Exception e) {
+						throw new Valve3Exception(e.getMessage());
+					}
 			}
 			Valve3.getInstance().getResultDeleter().addResult(plot);
 			return plot;
-		}
-		catch (Valve3Exception e)
-		{
+		} catch (Valve3Exception e) {
+			logger.severe(e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}
 	
 	/**
+	 * Yield a random file name
 	 * @return random file name in the img/ directory with .png extension
 	 */
 	public static String getRandomFilename()

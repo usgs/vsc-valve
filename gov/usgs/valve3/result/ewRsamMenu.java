@@ -29,6 +29,7 @@ public class ewRsamMenu extends Result
 	}
 
 	/**
+	 * Yield XML representation
 	 * @return XML representation of this ewRsamMenu
 	 */
 	public String toXML()
