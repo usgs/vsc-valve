@@ -203,7 +203,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			
 			// get the relevant information for this channel
 			Channel channel			= channelsMap.get(cid);
-			GenericDataMatrix gdm	= channelDataMap.get(cid);			
+			GenericDataMatrix gdm	= channelDataMap.get(cid);
 			
 			// if there is no data for this channel, then resize the plot window 
 			if (gdm == null || gdm.rows() == 0) {
@@ -271,7 +271,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 					gdm.add(i + 2, -bias);
 				}
 			}
-			
+
 			if (forExport) {
 				// Add column headers to csvHdrs
 				for (int i = 0; i < columnsList.size(); i++) {
@@ -374,7 +374,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		}
 		
 		// this is a legitimate request so lookup the data from the database and plot it
-		getData(comp);		
+		getData(comp);
 		plotData(v3p, comp, rank);
 				
 		if (!forExport) {

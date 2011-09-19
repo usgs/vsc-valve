@@ -919,9 +919,22 @@ public abstract class RawDataPlotter extends Plotter {
 				if (comp.isAutoScale("ys"+axisType)) {
 					yMin	= Math.min(yMin, gdm.min(index + offset));
 					yMax	= Math.max(yMax, gdm.max(index + offset));
-					buff	= (yMax - yMin) * 0.05;
-					yMin	= yMin - buff;
-					yMax	= yMax + buff;
+					if (yMin == yMax) {
+						if (yMin == 0) {
+							yMin = -1;
+							yMax = 1;
+						} else {
+							yMin = yMin - yMin * 1.5;
+							yMax = yMax + yMax * 1.5;
+						}
+					} else if (yMin == 1E300 && yMax == -1E300) {
+						yMin = -1;
+						yMax = 1;
+					} else {
+						buff	= (yMax - yMin) * 0.05;
+						yMin	= yMin - buff;
+						yMax	= yMax + buff;
+					}
 				} else {
 					ys = comp.getYScale("ys"+axisType, yMin, yMax);
 					yMin = ys[0];
