@@ -603,8 +603,8 @@ public class GPSPlotter extends RawDataPlotter {
 								}
 							}
 						} else {
-							MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, compBoxHeight, compBoxHeight, -1, leftUnit);
-							MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, compBoxHeight, compBoxHeight, -1, leftMR.getLegendRenderer());
+							MatrixRenderer leftMR	= getLeftMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftUnit);
+							MatrixRenderer rightMR	= getRightMatrixRenderer(comp, channel, gdm, currentComp, compBoxHeight, -1, leftMR.getLegendRenderer());
 							if (rightMR != null)
 								v3p.getPlot().addRenderer(rightMR);
 							v3p.getPlot().addRenderer(leftMR);
