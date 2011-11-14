@@ -37,9 +37,6 @@ create_nwismenu = function(menu) {
 	
 	menu.presubmit = function(pr, pc) {	
 		
-		// call the presubmit function
-		Menu.prototype.presubmit.call(this);
-		
 		var f = this.getForm();
 		
 		var noChecked = 0;
@@ -67,8 +64,14 @@ create_nwismenu = function(menu) {
 		} else if (noChecked > 2) {
 			alert("You can select at most 2 components.");
 			return false;
+		}
+		
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
 		}	
-		return true;		
 	}
 	
 }

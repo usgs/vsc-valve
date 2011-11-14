@@ -37,12 +37,14 @@ create_helimenu = function(menu) {
 	
 	menu.presubmit = function(pr, pc) {	
 		
-		// call the presubmit function
-		Menu.prototype.presubmit.call(this);
-		
 		this.setSize(pr, pc);
 		
-		return true;
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}
 	}
 		
 	menu.setSize = function(pr, pc) {

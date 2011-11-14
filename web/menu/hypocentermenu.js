@@ -48,11 +48,23 @@ create_hypocentermenu = function(menu) {
 	}
 	
 	menu.presubmit = function(pr, pc) {	
+	
+		// define variables from hypocenter menu
+		var north = parseFloat(document.getElementById(menu.id + "_north").value);
+		var south = parseFloat(document.getElementById(menu.id + "_south").value);
 		
-		// call the presubmit function
-		Menu.prototype.presubmit.call(this);
-		
-		return true;
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+			
+		// check for north > south 
+		} else if (north < south) {
+			alert("North must be greater than South.");
+			return false;
+			
+		} else {		
+			return true;
+		}
 	}
 	
 	menu.filter = new Object();

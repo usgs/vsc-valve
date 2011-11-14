@@ -47,10 +47,7 @@ create_ratsammenu = function(menu) {
 			}, false);
 	}
 	
-	menu.presubmit = function(pr, pc) {	
-		
-		// call the presubmit function
-		Menu.prototype.presubmit.call(this);
+	menu.presubmit = function(pr, pc) {	;
 		
 		var form	= this.getForm();
 		var select	= form.elements["selector:ch"];
@@ -67,6 +64,11 @@ create_ratsammenu = function(menu) {
 		var sizes		= STANDARD_SIZES[sizeIndex];
 		pr.params.h	= sizes[1];
 		
-		return true;
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}
 	}
 }

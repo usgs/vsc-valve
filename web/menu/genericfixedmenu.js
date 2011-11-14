@@ -57,7 +57,11 @@ create_genericfixedmenu = function(menu) {
 	// override the default presubmit function
 	menu.presubmit = function(pr, pc) {
 		
-		// call the presubmit function		
-		return Menu.prototype.presubmit.call(this);
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}
 	}
 }

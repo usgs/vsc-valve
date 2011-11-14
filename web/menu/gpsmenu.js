@@ -85,7 +85,11 @@ create_gpsmenu = function(menu) {
 			}
 		}
 		
-		// call the presubmit function		
-		return Menu.prototype.presubmit.call(this);
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}
 	}
 }

@@ -83,7 +83,12 @@ create_tensorstrainmenu = function(menu) {
 			alert("You must enter custom rotation azimuth.");
 			return false;
 		}
-		// call the presubmit function	
-		return 	Menu.prototype.presubmit.call(this);;		
+		
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}	
 	}
 }

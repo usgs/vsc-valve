@@ -68,11 +68,13 @@ create_ewrsammenu = function(menu) {
 			}, false);
 	}
 	
-	menu.presubmit = function(pr, pc) {	
+	menu.presubmit = function(pr, pc) {
 		
-		// call the presubmit function
-		Menu.prototype.presubmit.call(this);
-		
-		return true;
+		// call the main presubmit function
+		if (!Menu.prototype.presubmit.call(this)) {
+			return false;
+		} else {		
+			return true;
+		}
 	}
 }
