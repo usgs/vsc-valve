@@ -225,11 +225,12 @@ public class HypocenterPlotter extends RawDataPlotter {
 			s=n;
 			n=t;
 		}	
-		if(w>=e){
-			double t = e;
-			e=w;
-			w=t;
-		}	
+		// w>e -> spans date line.
+//		if(w>=e){
+//			double t = e;
+//			e=w;
+//			w=t;
+//		}	
 		range		= new GeoRange(w, e, s, n);
 		
 		hypowidth	= Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
