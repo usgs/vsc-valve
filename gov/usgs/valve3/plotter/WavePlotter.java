@@ -49,8 +49,11 @@ public class WavePlotter extends RawDataPlotter {
 	private PlotType plotType;
 	private FilterType filterType;
 	private SliceWave wave;
-	private double minHz;
-	private double maxHz;
+	private int nfft;
+	private int binSize;
+	private double overlap;
+	private int minPower;
+	private int maxPower;
 	private double minFreq;
 	private double maxFreq;
 	private boolean logPower;
@@ -97,9 +100,6 @@ public class WavePlotter extends RawDataPlotter {
 			filterType = FilterType.fromString(ft);
 		}
 		
-		minHz = comp.getDouble("fminhz");
-		maxHz = comp.getDouble("fmaxhz");
-		
 		try{
 			logPower = comp.getBoolean("splp");
 		} catch (Valve3Exception ex){
@@ -114,15 +114,53 @@ public class WavePlotter extends RawDataPlotter {
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM) {
 			try {
+				nfft = comp.getInt("nfft");
+			} catch (Valve3Exception ex ) {
+				nfft = 0;
+			}
+			
+			try {
+				binSize = comp.getInt("binSize");
+			} catch (Valve3Exception ex ) {
+				binSize = 256;
+			}
+			
+			try {
+				overlap = comp.getDouble("overlap");
+			} catch (Valve3Exception ex ) {
+				overlap = 0.859375;
+			}
+			
+			if (overlap < 0.0 || overlap > 1.0)
+				throw new Valve3Exception("Illegal overlap: " + overlap + " must be between 0 and 1");
+			
+			try {
+				minPower = comp.getInt("minPower");
+			} catch (Valve3Exception ex ) {
+				minPower = 20;
+			}
+			
+			try {
+				maxPower = comp.getInt("maxPower");
+			} catch (Valve3Exception ex ) {
+				maxPower = 120;
+			}
+			
+			if (minPower >= maxPower) 
+				throw new Valve3Exception("Illegal minimum/maximum power: " + minPower + " and " + maxPower);
+			
+			try {
 				minFreq = comp.getDouble("spminf");
 			} catch (Valve3Exception ex ) {
-				minFreq = 0.0;
+				minFreq = 0.75;
 			}
+			
 			try {
 				maxFreq = comp.getDouble("spmaxf");
 			} catch (Valve3Exception ex ) {
-				maxFreq = 15.0;
+				maxFreq = 20.0;
 			}
+			
 			if (minFreq < 0 || maxFreq <= 0 || minFreq >= maxFreq)
 				throw new Valve3Exception("Illegal minimum/maximum frequencies: " + minFreq + " and " + maxFreq);
 		}
@@ -410,19 +448,23 @@ public class WavePlotter extends RawDataPlotter {
 	    sr.yTickMarks			= this.yTickMarks;
 	    sr.yTickValues			= this.yTickValues;
 		sr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
-		sr.setOverlap(0);
-		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
 		sr.setViewEndTime(endTime+timeOffset);
 		sr.setTimeZone(timeZoneID);
-		sr.setMinFreq(minFreq);
-		sr.setMaxFreq(maxFreq);
 	    if(yUnits){
 	    	sr.setYUnitText("Frequency (Hz)");
 	    }
 	    if(yLabel){
 			sr.setYLabelText(channel.getName());
 		}
+	    sr.setNfft(nfft);
+	    sr.setBinSize(binSize);
+		sr.setOverlap(overlap);
+		sr.setMaxPower(maxPower);
+		sr.setMinPower(minPower);
+		sr.setMinFreq(minFreq);
+		sr.setMaxFreq(maxFreq);
+		sr.setLogPower(logPower);
 		sr.update(0);
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
