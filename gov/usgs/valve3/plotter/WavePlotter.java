@@ -57,7 +57,7 @@ public class WavePlotter extends RawDataPlotter {
 	private double minFreq;
 	private double maxFreq;
 	private boolean logPower;
-	private boolean logFreq;
+//	private boolean logFreq;
 	private Map<Integer, SliceWave> channelDataMap;	
 	
 	private static final double MAX_DATA_REQUEST = 86400;
@@ -106,11 +106,11 @@ public class WavePlotter extends RawDataPlotter {
 			logPower = true;
 		}
 		
-		try{
-			logFreq = comp.getBoolean("splf");
-		} catch (Valve3Exception ex){
-			logFreq = false;
-		}
+//		try{
+//			logFreq = comp.getBoolean("splf");
+//		} catch (Valve3Exception ex){
+//			logFreq = false;
+//		}
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM) {
 			try {
@@ -401,7 +401,7 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setAutoScale(true);
 		sr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 		sr.setLogPower(logPower);
-		sr.setLogFreq(logFreq);
+//		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.setColor(comp.getColor());
@@ -448,9 +448,13 @@ public class WavePlotter extends RawDataPlotter {
 	    sr.yTickMarks			= this.yTickMarks;
 	    sr.yTickValues			= this.yTickValues;
 		sr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
+		sr.setOverlap(0);
+		sr.setLogPower(logPower);
 		sr.setViewStartTime(startTime+timeOffset);
 		sr.setViewEndTime(endTime+timeOffset);
 		sr.setTimeZone(timeZoneID);
+		sr.setMinFreq(minFreq);
+		sr.setMaxFreq(maxFreq);
 	    if(yUnits){
 	    	sr.setYUnitText("Frequency (Hz)");
 	    }
@@ -465,7 +469,7 @@ public class WavePlotter extends RawDataPlotter {
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.setLogPower(logPower);
-		sr.update(0);
+		sr.update();
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
 			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
