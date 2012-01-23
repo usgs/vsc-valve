@@ -57,7 +57,7 @@ public class WavePlotter extends RawDataPlotter {
 	private double minFreq;
 	private double maxFreq;
 	private boolean logPower;
-//	private boolean logFreq;
+	private boolean logFreq;
 	private Map<Integer, SliceWave> channelDataMap;	
 	
 	private static final double MAX_DATA_REQUEST = 86400;
@@ -106,11 +106,11 @@ public class WavePlotter extends RawDataPlotter {
 			logPower = true;
 		}
 		
-//		try{
-//			logFreq = comp.getBoolean("splf");
-//		} catch (Valve3Exception ex){
-//			logFreq = false;
-//		}
+		try{
+			logFreq = comp.getBoolean("splf");
+		} catch (Valve3Exception ex){
+			logFreq = false;
+		}
 		
 		if (plotType == PlotType.SPECTRA || plotType == PlotType.SPECTROGRAM) {
 			try {
@@ -152,7 +152,7 @@ public class WavePlotter extends RawDataPlotter {
 			try {
 				minFreq = comp.getDouble("spminf");
 			} catch (Valve3Exception ex ) {
-				minFreq = 0.75;
+				minFreq = 0.0;
 			}
 			
 			try {
@@ -397,11 +397,12 @@ public class WavePlotter extends RawDataPlotter {
 		}
 	    sr.yTickMarks		= this.yTickMarks;
 	    sr.yTickValues		= this.yTickValues;
+	    System.out.printf("isDrawLegend: %s, WavePlotter: logPower: %s, logFreq: %s, minFreq: %f, maxFreq: %f\n",isDrawLegend, logPower, logFreq, minFreq,maxFreq);
 		sr.setWave(wave);
 		sr.setAutoScale(true);
 		sr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
 		sr.setLogPower(logPower);
-//		sr.setLogFreq(logFreq);
+		sr.setLogFreq(logFreq);
 		sr.setMinFreq(minFreq);
 		sr.setMaxFreq(maxFreq);
 		sr.setColor(comp.getColor());
@@ -411,12 +412,14 @@ public class WavePlotter extends RawDataPlotter {
 		if(yUnits){
 			sr.setYUnitText("Power");
 		}
-		sr.update(0);
-		if(isDrawLegend){
+		sr.update();
+
+		if (isDrawLegend) {
 			channelLegendsCols	= new String  [1];
 			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
 			sr.createDefaultLegendRenderer(channelLegendsCols);
 		}
+		
 		comp.setTranslation(sr.getDefaultTranslation(v3p.getPlot().getHeight()));
 		comp.setTranslationType("xy");
 		v3p.getPlot().addRenderer(sr);
@@ -433,51 +436,52 @@ public class WavePlotter extends RawDataPlotter {
 	 * @param dh display height
 	 */
 	private void plotSpectrogram(Valve3Plot v3p, PlotComponent comp, Channel channel, SliceWave wave, int currentComp, int compBoxHeight) {
-		SpectrogramRenderer sr	= new SpectrogramRenderer(wave);
+		SpectrogramRenderer spectrogramRenderer	= new SpectrogramRenderer(wave);
 		if (currentComp == compCount) {
-			sr.xTickMarks			= this.xTickMarks;
-			sr.xTickValues			= this.xTickValues;
-			sr.xUnits				= this.xUnits;
-			sr.xLabel				= this.xLabel;
+			spectrogramRenderer.xTickMarks			= this.xTickMarks;
+			spectrogramRenderer.xTickValues			= this.xTickValues;
+			spectrogramRenderer.xUnits				= this.xUnits;
+			spectrogramRenderer.xLabel				= this.xLabel;
 		} else {
-			sr.xTickMarks			= this.xTickMarks;
-			sr.xTickValues			= false;
-			sr.xUnits				= false;
-			sr.xLabel				= false;
+			spectrogramRenderer.xTickMarks			= this.xTickMarks;
+			spectrogramRenderer.xTickValues			= false;
+			spectrogramRenderer.xUnits				= false;
+			spectrogramRenderer.xLabel				= false;
 		}
-	    sr.yTickMarks			= this.yTickMarks;
-	    sr.yTickValues			= this.yTickValues;
-		sr.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
-		sr.setOverlap(0);
-		sr.setLogPower(logPower);
-		sr.setViewStartTime(startTime+timeOffset);
-		sr.setViewEndTime(endTime+timeOffset);
-		sr.setTimeZone(timeZoneID);
-		sr.setMinFreq(minFreq);
-		sr.setMaxFreq(maxFreq);
+	    spectrogramRenderer.yTickMarks			= this.yTickMarks;
+	    spectrogramRenderer.yTickValues			= this.yTickValues;
+		spectrogramRenderer.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);
+		spectrogramRenderer.setOverlap(0);
+		spectrogramRenderer.setLogPower(logPower);
+		spectrogramRenderer.setViewStartTime(startTime+timeOffset);
+		spectrogramRenderer.setViewEndTime(endTime+timeOffset);
+		spectrogramRenderer.setTimeZone(timeZoneID);
+		spectrogramRenderer.setMinFreq(minFreq);
+		spectrogramRenderer.setMaxFreq(maxFreq);
+	    spectrogramRenderer.setNfft(nfft);
+	    spectrogramRenderer.setBinSize(binSize);
+		spectrogramRenderer.setOverlap(overlap);
+		spectrogramRenderer.setMaxPower(maxPower);
+		spectrogramRenderer.setMinPower(minPower);
+		
 	    if(yUnits){
-	    	sr.setYUnitText("Frequency (Hz)");
+	    	spectrogramRenderer.setYUnitText("Frequency (Hz)");
 	    }
 	    if(yLabel){
-			sr.setYLabelText(channel.getName());
+			spectrogramRenderer.setYLabelText(channel.getName());
 		}
-	    sr.setNfft(nfft);
-	    sr.setBinSize(binSize);
-		sr.setOverlap(overlap);
-		sr.setMaxPower(maxPower);
-		sr.setMinPower(minPower);
-		sr.setMinFreq(minFreq);
-		sr.setMaxFreq(maxFreq);
-		sr.setLogPower(logPower);
-		sr.update();
+		
 		if(isDrawLegend){
 			channelLegendsCols	= new String  [1];
 			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
-			sr.createDefaultLegendRenderer(channelLegendsCols);
+			spectrogramRenderer.createDefaultLegendRenderer(channelLegendsCols);
 		}
-		comp.setTranslation(sr.getDefaultTranslation(v3p.getPlot().getHeight()));
+		
+		spectrogramRenderer.update();
+		
+		comp.setTranslation(spectrogramRenderer.getDefaultTranslation(v3p.getPlot().getHeight()));
 		comp.setTranslationType("ty");
-		v3p.getPlot().addRenderer(sr);
+		v3p.getPlot().addRenderer(spectrogramRenderer);
 		v3p.addComponent(comp);
 	}
 	
