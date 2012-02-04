@@ -412,6 +412,7 @@ public class WavePlotter extends RawDataPlotter {
 		if(yUnits){
 			spectraRenderer.setYUnitText("Power");
 		}
+
 		spectraRenderer.update();
 
 		if (isDrawLegend) {
@@ -463,6 +464,7 @@ public class WavePlotter extends RawDataPlotter {
 		spectrogramRenderer.setOverlap(overlap);
 		spectrogramRenderer.setMaxPower(maxPower);
 		spectrogramRenderer.setMinPower(minPower);
+		
 		
 	    if(yUnits){
 	    	spectrogramRenderer.setYUnitText("Frequency (Hz)");
