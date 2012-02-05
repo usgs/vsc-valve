@@ -8,6 +8,5 @@
 	<classpathentry kind="lib" path="lib/selenium-java-client-driver-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-server-1.0.3-standalone.jar"/>
 	<classpathentry kind="lib" path="lib/testng-5.7-jdk15.jar"/>
-	<classpathentry kind="lib" path="lib/testng.policy"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
