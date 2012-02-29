@@ -242,7 +242,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		minDepth	= Util.stringToDouble(comp.get("minDepth"), Double.MAX_VALUE);
 		maxDepth	= Util.stringToDouble(comp.get("maxDepth"), -Double.MAX_VALUE);
-		if (minDepth < maxDepth)
+		if (minDepth > maxDepth)
 			throw new Valve3Exception("Illegal depth filter.");
 		
 		minNPhases	= Util.stringToInteger(comp.get("minNPhases"), Integer.MIN_VALUE);
