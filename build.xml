@@ -21,7 +21,14 @@ dist    -- creates a binary distribution
 	</target>
 	
 	<target name="deploy">
-		<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />
+		<!--<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />-->
+		<ant target="jar" inheritAll="false" antfile="../Math/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../Net/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../Pinnacle/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../Plot/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../Util/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../Valve3/build.xml" />
+		<ant target="jar" inheritAll="false" antfile="../VDX/build.xml" />
 	</target>
 	
 	<target name="dist" depends="deploy">
@@ -56,7 +63,14 @@ dist    -- creates a binary distribution
 				<include name="mlibwrapper_jai.jar" />
 			</fileset>
 			<fileset dir="../USGS/lib">
-				<include name="usgs.jar" />
+				<!--<include name="usgs.jar" />-->
+				<include name="math.jar" />
+				<include name="net.jar" />
+				<include name="pinnacle.jar" />
+				<include name="plot.jar" />
+				<include name="util.jar" />
+				<include name="valve.jar" />
+				<include name="vdx.jar" />
 			</fileset>
 		</copy>
 		
