@@ -60,6 +60,7 @@ dist    -- creates a binary distribution
 				<include name="colt.jar" />
 				<include name="jai_codec.jar" />
 				<include name="jai_core.jar" />
+				<include name="jtransforms-2.4.jar" />
 				<include name="mlibwrapper_jai.jar" />
 			</fileset>
 			<fileset dir="../USGS/lib">
