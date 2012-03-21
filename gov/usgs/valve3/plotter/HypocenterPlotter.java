@@ -4,6 +4,8 @@ import gov.usgs.plot.ArbDepthCalculator;
 import gov.usgs.plot.ArbDepthFrameRenderer;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.BasicFrameRenderer;
+import gov.usgs.plot.InvertedAxisRenderer;
+import gov.usgs.plot.InvertedFrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Renderer;
@@ -24,17 +26,17 @@ import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
-import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.HistogramExporter;
+import gov.usgs.vdx.data.HypocenterExporter;
+import gov.usgs.vdx.data.MatrixExporter;
+import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.hypo.Hypocenter;
 import gov.usgs.vdx.data.hypo.HypocenterList;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.AxesOption;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
-import gov.usgs.vdx.data.HypocenterExporter;
-import gov.usgs.vdx.data.MatrixExporter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -225,23 +227,19 @@ public class HypocenterPlotter extends RawDataPlotter {
 			s=n;
 			n=t;
 		}	
-		// w>e -> spans date line.
-//		if(w>=e){
-//			double t = e;
-//			e=w;
-//			w=t;
-//		}	
+
 		range		= new GeoRange(w, e, s, n);
 		
 		hypowidth	= Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
 		
 		minMag		= Util.stringToDouble(comp.get("minMag"), -Double.MAX_VALUE);
 		maxMag		= Util.stringToDouble(comp.get("maxMag"), Double.MAX_VALUE);
+
 		if (minMag > maxMag)
 			throw new Valve3Exception("Illegal magnitude filter.");
 		
-		minDepth	= Util.stringToDouble(comp.get("minDepth"), Double.MAX_VALUE);
-		maxDepth	= Util.stringToDouble(comp.get("maxDepth"), -Double.MAX_VALUE);
+		minDepth	= Util.stringToDouble(comp.get("minDepth"), -Double.MAX_VALUE);
+		maxDepth	= Util.stringToDouble(comp.get("maxDepth"), Double.MAX_VALUE);
 		if (minDepth > maxDepth)
 			throw new Valve3Exception("Illegal depth filter.");
 		
@@ -454,7 +452,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		double lon2;
 		int count;
 		List<Hypocenter> myhypos;	
-		BasicFrameRenderer base = new BasicFrameRenderer();
+		BasicFrameRenderer base = new InvertedFrameRenderer();
 		base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
 		v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight() + 115);
 		
@@ -469,7 +467,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			break;
 			
 		case LON_DEPTH:
-			base.setExtents(range.getWest(), range.getEast(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
+			base.setExtents(range.getWest(), range.getEast(), hypos.getMinDepth(minDepth), hypos.getMaxDepth(maxDepth));
 			base.createDefaultAxis();
 			if(xUnits) base.getAxis().setBottomLabelAsText("Longitude");
 			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
@@ -478,7 +476,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			break;
 			
 		case LAT_DEPTH:
-			base.setExtents(range.getSouth(), range.getNorth(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
+			base.setExtents(range.getSouth(), range.getNorth(), hypos.getMinDepth(minDepth), hypos.getMaxDepth(maxDepth));
 			base.createDefaultAxis();
 			if(xUnits) base.getAxis().setBottomLabelAsText("Latitude");
 			if(yUnits) base.getAxis().setLeftLabelAsText("Depth (km)");
@@ -487,7 +485,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			break;
 			
 		case TIME_DEPTH:
-			base.setExtents(startTime+timeOffset, endTime+timeOffset, hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
+			base.setExtents(startTime+timeOffset, endTime+timeOffset, hypos.getMinDepth(minDepth), hypos.getMaxDepth(maxDepth));
 			base.createDefaultAxis();
 			base.setXAxisToTime(8);
 			if(xUnits) base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util.j2KToDateString(startTime+timeOffset, dateFormatString) + " to " + Util.j2KToDateString(endTime+timeOffset, dateFormatString)+ ")");
@@ -511,7 +509,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 
 			((ArbDepthFrameRenderer)base).setArbDepthCalc(adc);
 
-			base.setExtents(0.0, adc.getMaxDist(), hypos.getMaxDepth(maxDepth), hypos.getMinDepth(minDepth));
+			base.setExtents(0.0, adc.getMaxDist(), hypos.getMinDepth(minDepth), hypos.getMaxDepth(maxDepth));
 			base.createDefaultAxis();
 			
 			if(xUnits) base.getAxis().setBottomLabelAsText("Distance (km) from (" + lat1 + "," + lon1 +") to (" + lat2 + "," + lon2 +") - width = " +hypowidth + " km");
