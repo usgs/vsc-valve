@@ -394,7 +394,7 @@ function populateGenericColumns(menu) {
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
+				var tn		= document.createTextNode(" " + col[2] + " : " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
@@ -454,7 +454,7 @@ function populateTiltColumns(menu) {
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
+				var tn		= document.createTextNode(" " + col[2] + " : " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -515,7 +515,7 @@ function populateTensorstrainColumns(menu) {
 								
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
+				var tn		= document.createTextNode(" " + col[2] + " : " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 
@@ -576,7 +576,7 @@ function populateGPSColumns(menu) {
 				
 				var el		= document.createElement('label');
 				el.setAttribute("for", menu.id + "_" + col[1]);
-				var tn		= document.createTextNode(" " + col[2] + ": " + col[3]);
+				var tn		= document.createTextNode(" " + col[2] + " : " + col[3]);
 				el.appendChild(tn);
 				p.appendChild(el);
 				
