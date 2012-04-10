@@ -53,15 +53,16 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		parseCommonParameters(comp);
 		
 		rk = comp.getInt("rk");
-		legendsCols			= new String  [columnsList.size()];
-		channelLegendsCols	= new String  [columnsList.size()];
-		bypassManipCols     = new boolean [columnsList.size()];
+		columnsCount		= columnsList.size();
+		legendsCols			= new String  [columnsCount];
+		channelLegendsCols	= new String  [columnsCount];
+		bypassCols		    = new boolean [columnsCount];
+		accumulateCols		= new boolean [columnsCount];
 		
 		leftLines		= 0;
 		axisMap			= new LinkedHashMap<Integer, String>();
 		
 		validateDataManipOpts(comp);
-		columnsCount		= columnsList.size();
 		
 		// iterate through all the active columns and place them in a map if they are displayed
 		for (int i = 0; i < columnsCount; i++) {
@@ -69,8 +70,9 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			String col_arg = comp.get(column.name);
 			if ( col_arg != null )
 				column.checked	= Util.stringToBoolean(comp.get(column.name));
-			bypassManipCols[i] = column.bypassmanipulations;
-			legendsCols[i]	= column.description;
+			bypassCols[i]		= column.bypassmanip;
+			accumulateCols[i]	= column.accumulate;
+			legendsCols[i]		= column.description;
 			if (column.checked) {
 				if(isPlotComponentsSeparately()){
 					axisMap.put(i, "L");
@@ -216,7 +218,8 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			
 			// detrend and normalize the data that the user requested to be detrended		
 			for (int i = 0; i < columnsCount; i++) {
-				if ( bypassManipCols[i] )
+				if (accumulateCols[i]) { gdm.accumulate(i + 2); }
+				if (bypassCols[i])
 					continue;
 				if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
 				if (doDetrend) { gdm.detrend(i + 2); }

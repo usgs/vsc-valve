@@ -74,10 +74,10 @@ public class TensorstrainPlotter extends RawDataPlotter {
 		if (azimuth == null) {
 			throw new Valve3Exception("Illegal azimuth: " + az);
 		}
-		columnsCount = columnsList.size();
-		legendsCols = new String[columnsCount];
-		channelLegendsCols = new String[columnsCount];
-		bypassManipCols = new boolean[columnsList.size()];
+		columnsCount		= columnsList.size();
+		legendsCols			= new String[columnsCount];
+		channelLegendsCols	= new String[columnsCount];
+		bypassCols			= new boolean[columnsCount];
 		leftLines = 0;
 		axisMap = new LinkedHashMap<Integer, String>();
 		validateDataManipOpts(comp);
@@ -268,7 +268,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				if (!col.checked) {
 					continue;
 				}
-				if (bypassManipCols[i]) {
+				if (bypassCols[i]) {
 					continue;
 				}
 				if (doDespike) {

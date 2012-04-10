@@ -137,7 +137,8 @@ public class TiltPlotter extends RawDataPlotter {
 			columnsCount		= columnsList.size();
 			legendsCols			= new String  [columnsCount];
 			channelLegendsCols	= new String  [columnsCount];
-			bypassManipCols     = new boolean [columnsList.size()];
+			bypassCols     		= new boolean [columnsCount];
+			accumulateCols		= new boolean [columnsCount];
 			
 			leftLines		= 0;
 			axisMap			= new LinkedHashMap<Integer, String>();
@@ -150,7 +151,9 @@ public class TiltPlotter extends RawDataPlotter {
 				String col_arg = comp.get(column.name);
 				if ( col_arg != null )
 					column.checked	= Util.stringToBoolean(comp.get(column.name));
-				legendsCols[i]	= column.description;
+				bypassCols[i]		= column.bypassmanip;
+				accumulateCols[i]	= column.accumulate;
+				legendsCols[i]		= column.description;
 				if (column.checked) {
 					if(forExport || isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
@@ -539,7 +542,8 @@ public class TiltPlotter extends RawDataPlotter {
 						if ( !col.checked ) {
 							continue;
 						}
-						if ( bypassManipCols[i] ) {
+						if (accumulateCols[i]) { gdm.accumulate(i + 2); }
+						if (bypassCols[i]) {
 							continue;
 						}
 						if (doDespike) { gdm.despike(i + 2, despikePeriod ); }

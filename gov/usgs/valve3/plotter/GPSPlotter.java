@@ -121,7 +121,7 @@ public class GPSPlotter extends RawDataPlotter {
 			selectedCols		= new boolean[columnsCount];
 			legendsCols			= new String[columnsCount];
 			channelLegendsCols	= new String[columnsCount];
-			bypassManipCols     = new boolean [columnsCount];
+			bypassCols			= new boolean [columnsCount];
 			compCount			= 0;
 			
 			leftLines			= 0;
@@ -132,7 +132,7 @@ public class GPSPlotter extends RawDataPlotter {
 				Column column	= columnsList.get(i);
 				selectedCols[i]	= column.checked;
 				legendsCols[i]	= column.description;
-				bypassManipCols[i] = column.bypassmanipulations;
+				bypassCols[i]	= column.bypassmanip;
 				if (column.checked) {
 					if(isPlotComponentsSeparately()){
 						axisMap.put(i, "L");
@@ -511,7 +511,7 @@ public class GPSPlotter extends RawDataPlotter {
 					// convert the GPSData object to a generic data matrix and subtract out the mean
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.toTimeSeries(baselineData));
 					for (int i = 0; i < columnsCount; i++) {
-						if ( bypassManipCols[i] )
+						if ( bypassCols[i] )
 							continue;
 						if (doDespike) { gdm.despike(i + 2, despikePeriod ); }
 						if (doDetrend) { gdm.detrend(i + 2); }

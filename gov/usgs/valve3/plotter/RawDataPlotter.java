@@ -86,7 +86,9 @@ public abstract class RawDataPlotter extends Plotter {
 	protected StringBuffer csvHdrs, csvCmts, csvText;
 	protected int csvIndex = 0;
 	
-	protected boolean bypassManipCols[];
+	protected boolean bypassCols[];
+	protected boolean accumulateCols[];
+	protected boolean doAccumulate;
 	protected boolean doDespike;
 	protected double despikePeriod;
 	protected boolean doDetrend;
