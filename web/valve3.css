@@ -286,6 +286,8 @@ input
 {
 	vertical-align: middle;
 	font-size: 100%;
+	margin: 0px;
+	padding: 1px;
 }
 
 label
@@ -428,7 +430,7 @@ div#timeShortcutPanel
 	left: 775px;
 	border:	1px solid rgb( 145, 155, 156 );
 	width: 140px;
-	height: 240px;
+	height: 260px;
 	display: none;	
 }
 

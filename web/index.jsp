@@ -106,16 +106,12 @@
 		<div id="uiPanel">
 			<!-- TODO: rework the data panel to use boxes -->
 			<div id="dataPanel" class="dataPanel">
+				<h5 id="version"></h5>
+				<div class="clear"><h5 class="help">Administrator: <a id='admin'></a></h5></div>
+				<hr>
 				<img class="fl" src="images/folders.gif"><h2>Data Sources</h2>
 				<ul class="menu">
 				</ul>
-				<div class="box" style="margin: 0px 0px 4px 0px">
-					<h1 class="filter">Geographic Filter</h1>				
-					<select id="geoFilter" class="w100p">
-						<option value="[none]">[none]</option>
-					</select>
-					<div class="center"><input type="button" value="Draw Map" id="channelMapButton"></div>
-				</div>
 			</div>
 			
 			<div id="openPanel" class="openPanel">
@@ -154,11 +150,18 @@
 					</select>
 					</p>
 				</div>
-				<p><input id="submit" type="button" value="Submit"></p>
-				<hr>
+				<div class="box">
+					<h1>Geographic Filter</h1>
+					<p>
+					<select id="geoFilter" class="w100p">
+					<option value="[none]">[none]</option>
+					</select>
+				</div>
+				<p>
+				<input type="button" value="Draw Map" id="channelMapButton">
+				<input id="submit" type="button" value="Submit">
 				<img id="throbber" class="fr" src="images/throbber_still.png">
-				<h5 id="version"></h5>
-				<div class="clear"><h5 class="help">Administrator: <a id='admin'></a></h5></div>
+				</p>
 			</div>
 			
 			<div class="box listbox" id="timeShortcutPanel">
