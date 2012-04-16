@@ -5,6 +5,7 @@ import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.util.Pool;
+import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
 import gov.usgs.valve3.Plotter;
@@ -310,16 +311,47 @@ public class WavePlotter extends RawDataPlotter {
 		
 		double yMin = 1E300;
 		double yMax = -1E300;
-		if (comp.isAutoScale("ysL")) {
-			yMin	= wave.min();
-			yMax	= wave.max();
+		boolean yMinAuto = false;
+		boolean yMaxAuto = false;
+		String mapAxisType = "L";
+		
+		String ysMin	= comp.get("ys" + mapAxisType + "Min").toLowerCase();
+		String ysMax	= comp.get("ys" + mapAxisType + "Max").toLowerCase();
+		
+		// if not defined or empty, default to auto scaling
+		if (ysMin.startsWith("a") || ysMin == null || ysMin.trim().isEmpty())
+			yMinAuto = true;
+		if (ysMax.startsWith("a") || ysMax == null || ysMax.trim().isEmpty())
+			yMaxAuto = true;		
+		
+		// calculate min auto scale
+		if (yMinAuto) {
+			yMin	= Math.min(yMin, wave.min());
+			
+		// calculate min user defined scale
 		} else {
-			double[] ys = comp.getYScale("ysL", yMin, yMax);
-			yMin 	= ys[0];
-			yMax 	= ys[1];
-			if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-				throw new Valve3Exception("Illegal axis values.");
+			yMin	= Util.stringToDouble(ysMin, Math.min(yMin, wave.min()));
 		}
+		
+		// calculate max auto scale
+		if (yMaxAuto) {
+			yMax	= Math.max(yMax, wave.max());
+			
+		// calculate max user defined scale
+		} else {
+			yMax	= Util.stringToDouble(ysMax, Math.max(yMax, wave.max()));
+		}
+		
+		if (yMin > yMin) throw new Valve3Exception("Illegal " + mapAxisType + " axis values");
+		
+		double buffer = 0.05;				
+		if (yMin == yMax && yMin != 0) {
+			buffer = Math.abs(yMin * 0.05);
+		} else {
+			buffer = (yMax - yMin) * 0.05;
+		}
+		if (!yMinAuto)	yMin	= yMin - buffer;
+		if (!yMaxAuto)	yMax	= yMax + buffer;
 
 		SliceWaveExporter wr	= new SliceWaveExporter();
 		

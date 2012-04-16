@@ -892,14 +892,12 @@ public abstract class RawDataPlotter extends Plotter {
 	class AxisParameters {
 		double yMin = 1E300;
 		double yMax = -1E300;
-		double buff;
 		boolean allowExpand = true;
-		double[] ys=null;
 		
 		public AxisParameters(String axisType, Map<Integer, String> axisMap, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception{
 			if (!(axisType.equals("L") || axisType.equals("R"))) 
 				throw new Valve3Exception("Illegal axis type: " + axisType);
-			if(index==-1){
+			if(index==-1) {
 				for (int i = 0; i < axisMap.size(); i++) {
 					setParameters(axisType, axisMap.get(i), gdm, i, comp, mr);
 				}
@@ -909,41 +907,78 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		
 		private void setParameters(String axisType, String mapAxisType, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception {
-			int offset = 2;
-			if (!ranks) offset = 1;
+			
+			int offset;
+			boolean yMinAuto = false;
+			boolean yMaxAuto = false;
+			boolean yMinMean = false;
+			boolean yMaxMean = false;
+			
+			if (!ranks) {
+				offset = 1;
+			} else {
+				offset = 2;
+			}
 			
 			if (!(mapAxisType.equals("L") || mapAxisType.equals("R") || mapAxisType.equals(""))) 
 				throw new Valve3Exception("Illegal axis type in axis map: " + mapAxisType);
+			
 			if (mapAxisType.equals(axisType) || isPlotComponentsSeparately()){
 				if (mapAxisType.equals(axisType)){
 					mr.setVisible(index, true);
 				}
-				if (comp.isAutoScale("ys"+axisType)) {
+				
+				String ysMin	= comp.get("ys" + mapAxisType + "Min").toLowerCase();
+				String ysMax	= comp.get("ys" + mapAxisType + "Max").toLowerCase();
+				
+				// if not defined or empty, default to auto scaling
+				if (ysMin.startsWith("a") || ysMin == null || ysMin.trim().isEmpty()) {
+					yMinAuto = true;
+				} else if (ysMin.startsWith("m")) {
+					yMinMean = true;
+				}
+				if (ysMax.startsWith("a") || ysMax == null || ysMax.trim().isEmpty()) {
+					yMaxAuto = true;
+				} else if (ysMax.startsWith("m")) {
+					yMaxMean = true;
+				}
+				
+				
+				// calculate min auto scale
+				if (yMinAuto || yMinMean) {
 					yMin	= Math.min(yMin, gdm.min(index + offset));
-					yMax	= Math.max(yMax, gdm.max(index + offset));
-					if (yMin == yMax) {
-						if (yMin == 0) {
-							yMin = -1;
-							yMax = 1;
-						} else {
-							yMin = yMin - yMin * 1.5;
-							yMax = yMax + yMax * 1.5;
-						}
-					} else if (yMin == 1E300 && yMax == -1E300) {
-						yMin = -1;
-						yMax = 1;
-					} else {
-						buff	= (yMax - yMin) * 0.05;
-						yMin	= yMin - buff;
-						yMax	= yMax + buff;
-					}
+					
+				// calculate min user defined scale
 				} else {
-					ys = comp.getYScale("ys"+axisType, yMin, yMax);
-					yMin = ys[0];
-					yMax = ys[1];
-					allowExpand = false;
-					if (Double.isNaN(yMin) || Double.isNaN(yMax) || yMin > yMax)
-						throw new Valve3Exception("Illegal axis values.");
+					yMin	= Util.stringToDouble(ysMin, Math.min(yMin, gdm.min(index + offset)));
+					allowExpand	= false;
+				}
+				
+				// calculate max auto scale
+				if (yMaxAuto) {
+					yMax	= Math.max(yMax, gdm.max(index + offset));
+					
+				// calculate max mean scale
+				} else if (yMaxMean) {
+					yMax	= gdm.mean(index + offset) + (2 * Math.abs(gdm.mean(index + offset)));
+					
+				// calculate max user defined scale
+				} else {
+					yMax	= Util.stringToDouble(ysMax, Math.max(yMax, gdm.max(index + offset)));
+					allowExpand	= false;
+				}
+				
+				if (yMin > yMin) throw new Valve3Exception("Illegal " + mapAxisType + " axis values");
+				
+				double buffer = 0.05;				
+				if (yMin == yMax && yMin != 0) {
+					buffer = Math.abs(yMin * 0.05);
+				} else {
+					buffer = (yMax - yMin) * 0.05;
+				}
+				if (allowExpand) {
+					yMin	= yMin - buffer;
+					yMax	= yMax + buffer;
 				}
 			}
 		}

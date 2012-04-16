@@ -165,20 +165,6 @@ public class PlotComponent
 	}
 	
 	/**
-	 * Get whether or not autoscaling is allowed
-	 * @param pre prefix to query
-	 * @return flag if auto scaling allowed for given prefix
-	 */
-	public boolean isAutoScale(String pre)
-	{
-		String ysMin = params.get(pre + "Min");
-		String ysMax = params.get(pre + "Max");
-		return ysMin == null || ysMax == null || 
-			   ysMin.trim().isEmpty() || ysMax.trim().isEmpty() || 
-			   ysMin.toLowerCase().startsWith("a") || ysMax.toLowerCase().startsWith("a");
-	}
-	
-	/**
 	 * Get whether or not vector autoscaling is allowed
 	 * @param key key to query 
 	 * @return flag if auto scaling allowed for given key
@@ -187,39 +173,6 @@ public class PlotComponent
 	{
 		String vs = params.get(key);
 		return vs == null || vs.trim().isEmpty() || vs.toLowerCase().startsWith("a");
-	}
-	
-	/**
-	 * Compute max and min values for given prefix from PlotComponent's parameters
-	 * @param pre prefix to query
-	 * @param min default min value 
-	 * @param max default max value
-	 * @return array of 2 doubles, first is initialized min value, second is initialized max value
-	 */
-	public double[] getYScale(String pre, double min, double max) {
-		String ysMin, ysMax;
-		double[] d = new double[2];
-		
-		ysMin	= params.get(pre + "Min");
-		ysMax	= params.get(pre + "Max");
-		
-		if (ysMin == null) {
-			d[0] = min;
-		} else if (ysMin.toLowerCase().equals("min") || ysMin.toLowerCase().equals("auto")) {
-			d[0] = min;
-		} else {
-			d[0] = Util.stringToDouble(ysMin, min);
-		}		
-		
-		if (ysMax == null) {
-			d[1] = max;
-		} else if (ysMax.toLowerCase().equals("max") || ysMax.toLowerCase().equals("auto")) {
-			d[1] = max;
-		} else {
-			d[1] = Util.stringToDouble(ysMax, max);
-		}
-
-		return d;
 	}
 
 	/**
