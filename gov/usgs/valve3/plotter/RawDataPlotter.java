@@ -954,6 +954,7 @@ public abstract class RawDataPlotter extends Plotter {
 					allowExpand	= false;
 				}
 				
+				
 				// calculate max auto scale
 				if (yMaxAuto) {
 					yMax	= Math.max(yMax, gdm.max(index + offset));
@@ -968,7 +969,7 @@ public abstract class RawDataPlotter extends Plotter {
 					allowExpand	= false;
 				}
 				
-				if (yMin > yMin) throw new Valve3Exception("Illegal " + mapAxisType + " axis values");
+				if (yMin > yMax) throw new Valve3Exception("Illegal " + mapAxisType + " axis values");
 				
 				double buffer = 0.05;				
 				if (yMin == yMax && yMin != 0) {
