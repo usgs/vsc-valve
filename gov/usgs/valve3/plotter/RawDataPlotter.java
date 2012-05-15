@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.Vector;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.DefaultFrameDecorator;
 import gov.usgs.plot.LegendRenderer;
@@ -83,7 +84,9 @@ public abstract class RawDataPlotter extends Plotter {
 	protected Logger logger;
 	
 	protected TreeSet<ExportData> csvData;
-	protected StringBuffer csvHdrs, csvCmts, csvText;
+	protected StringBuffer csvText;
+	protected Map<String,String> csvCmtBits;
+	protected Vector<String[]> csvHdrs;
 	protected int csvIndex = 0;
 	
 	protected boolean bypassCols[];
@@ -114,8 +117,8 @@ public abstract class RawDataPlotter extends Plotter {
 	 */
 	public RawDataPlotter() {
 		logger	= Logger.getLogger("gov.usgs.vdx");		
-		csvCmts = new StringBuffer();
-		csvHdrs = new StringBuffer();
+		csvCmtBits = new LinkedHashMap<String,String>();
+		csvHdrs = new Vector<String[]>();
 		dateFormatString	= "yyyy-MM-dd HH:mm:ss";
 	}
 	
@@ -132,7 +135,7 @@ public abstract class RawDataPlotter extends Plotter {
 		// Check for named channels, ranks
 		if ( forExport ) {
 			outputType	= comp.get( "o" );
-			inclTime	= outputType.equals( "csv" );
+			inclTime	= outputType.equals( "csv" )||outputType.equals("xml")||outputType.equals("json");
 			nameArg		= comp.get( "chNames" );
 			if ( nameArg != null ) {
 				String[] names = nameArg.split(",");
@@ -614,6 +617,132 @@ public abstract class RawDataPlotter extends Plotter {
 		csvText.append("\n");	
 	}
 	
+	/**
+	 * Format time and data using decFmt (and nullField for empty fields); 
+	 * append to csvText (in XML format)
+	 * @param data data for line
+	 * @param time time for data
+	 * @param decFmt how to format numbers
+	 * @param pos line number
+	 * @param timeZone name of time zone
+	 * @param rank Default rank
+	 */
+	private void addXMLline( Double[][] data, Double time, String decFmt, int pos, String timeZone, String rank ) {
+		boolean hasChannels = csvHdrs.get(1)[2] == null;	// Export has channel information
+		String line;										// Export line being added
+		
+		/* If first line, add header tag */
+		if ( pos == 1 ) {								
+			line = "\t<DATA>\n";
+		} else
+			line = "";
+		/* Tag for a row of data */
+		line += String.format( "\t\t<ROW pos=\"%d\">\n", pos );	
+		if ( inclTime ) {
+			line += String.format( "\t\t\t<EPOCH>%1.3f</EPOCH>\n\t\t\t<TIMESTAMP>%s</TIMESTAMP>\n", Util.j2KToEW(time), Util.j2KToDateString(time) );
+			line += "\t\t\t<TIMEZONE>" + timeZone + "</TIMEZONE>\n";
+		}
+		String channel = "";		// Channel name
+		String tab = "\t\t\t";		// Indent for contents of a row
+		int hdr_idx = 1;			// Current column of export
+		boolean hasRank = ( !rank.equals("") );		// Export has rank information
+		
+		for ( Double[] group : data )
+			for ( int i = 1; i < group.length; i++ ) {
+				Double v = group[i];		// Actual exported data value
+				hdr_idx++;
+				String[] hdr = csvHdrs.get(hdr_idx);	// Info about data value
+				String tag = hdr[3];					// Tag for data value
+				boolean showRank = false;				// Row has rank info to show
+				if ( hasChannels ) {
+					if ( !channel.equals( hdr[2] ) ) {
+						if ( i>1 )
+							line += "\t\t\t</CHANNEL>\n";
+						channel = hdr[2];
+						line += "\t\t\t<CHANNEL>\n\t\t\t\t<code>" + channel + "</code>\n";
+						tab = "\t\t\t\t";
+						showRank = true;
+					}
+				} else
+					showRank = (i==1);
+				if ( showRank ) {
+					if ( hdr[1] != null )
+						line += tab + "<rank>" + hdr[1] + "</rank>\n";
+					else if ( hasRank )
+						line += tab + "<rank>" + rank + "</rank>\n";
+				}
+				if ( v != null )
+					line += tab + "<"+tag+">"+ String.format( decFmt, v ) + "</"+tag+">\n";
+			}
+		if ( hasChannels )
+			line += "\t\t\t</CHANNEL>\n";
+		csvText.append(line);
+		csvText.append("\t\t</ROW>\n");	
+	}
+	
+	/**
+	 * Format time and data using decFmt (and nullField for empty fields); 
+	 * append to csvText (in JSON format)
+	 * @param data data for line
+	 * @param time time for data
+	 * @param decFmt how to format numbers
+	 * @param pos line number
+	 * @param timeZone name of time zone
+	 * @param rank Default rank
+	 */
+	private void addJSONline( Double[][] data, Double time, String decFmt, int pos, String timeZone, String rank  ) {
+		boolean hasChannels = csvHdrs.get(1)[2] == null;	// Export has channel information
+		String line;										// Export line being added
+		
+		/* If first line, add header tag */
+		if ( pos == 1 ) {
+			line = "\t\"data\":[\n";
+		} else
+			line = ",\n";
+		line += "\t\t{";	
+		if ( inclTime ) {
+			line += String.format( "\"EPOCH\":%1.3f,\"TIMESTAMP\":\"%s\",", Util.j2KToEW(time), Util.j2KToDateString(time) );	
+			line += "\"TIMEZONE\":\"" + timeZone + "\"" + (hasChannels ? ",\n" : "");
+		} 
+		
+		if ( hasChannels )
+			line += "\t\t\"CHANNELS\":[\n";
+		String channel = "";
+		int hdr_idx = 1;			// Current column of export
+		boolean hasRank = ( !rank.equals("") );		// Export has rank information
+		for ( Double[] group : data ) {
+			if ( hdr_idx != 1 && hasChannels )
+				line += ",\n";
+			for ( int i = 1; i < group.length; i++ ) {
+				Double v = group[i];
+				hdr_idx++;
+				String[] hdr = csvHdrs.get(hdr_idx);	// Info about data value
+				String tag = hdr[3];					// Tag for data value
+				boolean showRank = false;				// Row has rank info to show
+				if ( hasChannels ) {
+					if ( !channel.equals( hdr[2] ) ) {
+						channel = hdr[2];
+						line += "\t\t\t{\"code\":\"" + channel + "\"";
+						showRank = true;
+					}
+				} else
+					showRank = (i==1);
+				if ( showRank )
+					if ( hdr[1] != null )
+						line += ",\n\t\t\t\"rank\":\"" + hdr[1] + "\"";
+					else if ( hasRank )
+						line += ",\n\t\t\t\"rank\":\"" + rank + "\"";
+
+				if ( v != null )
+					line += String.format( ",\n\t\t\t\"%s\":"+decFmt, tag, v );
+			}
+			line += "}";
+		}
+		csvText.append(line);
+		if ( hasChannels )
+			csvText.append("\n\t\t]}");	
+	}
+	
 	private int vax_order = 0;
 	//private int enc_fmt = 1; // 16-bit ints
 	private int enc_fmt = 3; // 32-bit ints
@@ -651,40 +780,35 @@ public abstract class RawDataPlotter extends Plotter {
     /**
      * Yield contents as CSV
      * @param comp plot component
-     * @param cmt  comment line to add after configured comments
+     * @param cmtBits  comment info to add after configured comments
+     * @param seedOut stream to write seed data to
      * @return CSV dump of binary data described by given PlotComponent
      * @throws Valve3Exception
      */
-	public String toCSV(PlotComponent comp, String cmt, OutputStream seedOut) throws Valve3Exception {
+	public String toCSV(PlotComponent comp, Map<String,String> cmtBits, OutputStream seedOut) throws Valve3Exception {
 		
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);
 		outputType = comp.get( "o" );
-		inclTime = outputType.equals( "csv" );
+		boolean outToCSV = outputType.equals( "csv" );
+		boolean outToXML = outputType.equals( "xml" );
+		boolean outToJSON = outputType.equals( "json" );
+		Vector<String> cmtLines = new Vector<String>();
+		inclTime = outToCSV || outToXML || outToJSON;
 		
 		if ( !ec.isExportable() )
 			throw new Valve3Exception( "Requested export not allowed" );
 	
-		// Add opening comment line(s) to text
+		// Get opening comment line(s)
 		String[] comments = ec.getComments();
-		if ( comments != null )
-			for ( String s: comments ) {
-				csvCmts.append("#");
-				csvCmts.append(s);
-				csvCmts.append("\n");
-			}
-		
-		// Add universal comment lines to text
-		csvCmts.append( cmt );
 		
 		// Add the common column headers
 		String timeZone = comp.getTimeZone().getID();
 		if ( inclTime ) {
-			csvHdrs.append("Seconds_since_1970 (");
-			csvHdrs.append(timeZone);
-			csvHdrs.append("), Date (");
-			csvHdrs.append(timeZone);
-			csvHdrs.append(")");
+			String[] h1 = { null, null, null, "Epoch"};
+			String[] h2 = { null, null, null, "Date"};
+			csvHdrs.add( h1 );
+			csvHdrs.add( h2 );
 		}
 
 		// Fill csvData with data to be exported; also completes csvText
@@ -695,12 +819,69 @@ public abstract class RawDataPlotter extends Plotter {
 		} catch (PlotException e){
 			logger.severe(e.getMessage());
 		}
+		String rank = "";
+		String rowTimeZone = "";
+		if ( cmtBits != null ) {
+			cmtLines.add( "reqtime=" + cmtBits.get("reqtime"));
+			cmtLines.add( "URL=" + cmtBits.get("URL"));
+			cmtLines.add( "source=" + cmtBits.get("source") );
+			cmtLines.add( "st=" + cmtBits.get("st") + ", et=" + cmtBits.get("et"));
+			rank = cmtBits.get("rank");
+			rowTimeZone = cmtBits.get( "timezone" );
+		}
+		if ( csvCmtBits.containsKey("sr") )
+			cmtLines.add( "sr=" + csvCmtBits.get("sr") );
+		if ( csvCmtBits.containsKey("datatype"))
+			cmtLines.add( "datatype=" + csvCmtBits.get("datatype"));
 		csvText = new StringBuffer();
-		csvText.append( csvCmts );
-		csvCmts = new StringBuffer();
-		csvText.append( csvHdrs );
-		csvHdrs = new StringBuffer();
-		csvText.append("\n");
+		if ( outToCSV ) {
+			for ( String comment: comments )
+				csvText.append( "#" + comment + "\n");
+			for ( String comment: cmtLines )
+				csvText.append( "#" + comment + "\n" );
+			StringBuffer hdrLine = new StringBuffer();
+			boolean first = true;
+			for ( String[] s: csvHdrs ) {
+				String hdr;
+				if ( s[2] != null )
+					hdr = s[2] + "_" + s[3];
+				else
+					hdr = s[3];
+				if ( first ) {
+					hdrLine.append( hdr );
+					first = false;
+				} else 
+					hdrLine.append( "," + hdr );
+			}
+			csvText.append( hdrLine );
+			csvHdrs = new Vector<String[]>();
+			csvText.append("\n");
+		} 
+		if ( outToXML ) {
+			csvText.append( "<VALVE_XML>\n\t<COMMENTS>\n" );
+			int i = 1;
+			for ( String comment: comments ) {
+				csvText.append( "\t\t<COMMENTLINE pos=\"" + i + "\">" + comment.replaceAll("&","&amp;") + "</COMMENTLINE>\n");
+				i++;
+			}
+			for ( String comment: cmtLines ) {
+				csvText.append( "\t\t<COMMENTLINE pos=\"" + i + "\">" + comment.replaceAll("&","&amp;") + "</COMMENTLINE>\n");
+				i++;
+			}
+			csvText.append( "\t</COMMENTS>\n" );
+		} 
+		if ( outToJSON ) {
+			csvText.append("{\"valve-json\":\n\t{\"comments\":");
+			String sep  = "[\n\t\t\"";
+			for ( String comment: comments ) {
+				csvText.append( sep + comment );
+				sep = "\",\n\t\t\"";
+			}
+			for ( String comment: cmtLines )
+				csvText.append( sep + comment );
+			csvText.append( "\"],\n" );
+		}
+		csvCmtBits = new LinkedHashMap<String,String>();
 		
 		// currLine is an array of the current row of data from each source, indexed by that source's ID
 		Double[][] currLine = new Double[ csvData.size() ][];
@@ -826,10 +1007,33 @@ public abstract class RawDataPlotter extends Plotter {
 			// Since there's only 1 source, we can just loop through it
 			ExportData cd = csvData.first();
 			Double[] datum = cd.currExportDatum();
-			while ( datum != null ) {
-				currLine[0] = datum;
-				addCSVline( currLine, datum[0], decFmt, nullField );
-				datum = cd.nextExportDatum();
+			if ( outToCSV )
+				while ( datum != null ) {
+					currLine[0] = datum;
+					addCSVline( currLine, datum[0], decFmt, nullField );
+					datum = cd.nextExportDatum();
+				}
+			cd = csvData.first();
+			datum = cd.currExportDatum();
+			if ( outToXML ) {
+				int pos = 0;
+				while ( datum != null ) {
+					pos++;
+					currLine[0] = datum;
+					addXMLline( currLine, datum[0], decFmt, pos, rowTimeZone, rank );
+					datum = cd.nextExportDatum();
+				}
+			}
+			cd = csvData.first();
+			datum = cd.currExportDatum();
+			if ( outToJSON ) {
+				int pos = 0;
+				while ( datum != null ) {
+					pos++;
+					currLine[0] = datum;
+					addJSONline( currLine, datum[0], decFmt, pos, rowTimeZone, rank );
+					datum = cd.nextExportDatum();
+				}
 			}
 		} else {
 			// An array of our data sources, indexed by ID
@@ -841,6 +1045,7 @@ public abstract class RawDataPlotter extends Plotter {
 			
 			// prevTime is the time of the last row formatted into csvText
 			Double prevTime = null;
+			int pos = 0;
 			while ( true ) {
 				ExportData loED;
 				try {
@@ -858,9 +1063,14 @@ public abstract class RawDataPlotter extends Plotter {
 						cmp = prevTime.compareTo(l0);
 					}
 					if ( cmp < 0 ) {
+						pos++;
 						// Add the current line to csvText
-						addCSVline( currLine, prevTime, decFmt, nullField );
-						
+						if ( outToCSV )
+							addCSVline( currLine, prevTime, decFmt, nullField );
+						if ( outToXML )
+							addXMLline( currLine, prevTime, decFmt, pos, rowTimeZone, rank );
+						if ( outToJSON )
+							addJSONline( currLine, prevTime, decFmt, pos, rowTimeZone, rank );
 						if ( loED == null )
 							// No new data; we're done!
 							break;
@@ -884,6 +1094,10 @@ public abstract class RawDataPlotter extends Plotter {
 					csvData.add( loED );
 			}
 		}
+		if ( outToXML )
+			csvText.append( "\t</DATA>\n</VALVE_XML>\n");
+		if ( outToJSON )
+			csvText.append( "]}}\n");
 		String result = csvText.toString();
 		csvText = null;
 		return result;

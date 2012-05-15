@@ -172,8 +172,8 @@ public class RatSAMPlotter extends RawDataPlotter {
 		if (forExport) {
 			
 			// Add column header to csvHdrs
-			csvHdrs.append(",");
-			csvHdrs.append(channel1.getCode() + "_" + leftUnit);
+			String[] hdr = { null, null, channel1.getCode(), leftUnit };
+			csvHdrs.add( hdr );
 			
 			// Initialize data for export; add to set for CSV
 			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );

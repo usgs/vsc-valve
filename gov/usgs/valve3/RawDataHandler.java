@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -83,7 +84,8 @@ public class RawDataHandler implements HttpHandler
 		
 		String rkNameArg	= request.getParameter( "rkName" );
 		String outputType	= Util.stringToString(request.getParameter("o"), "csv");
-		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")))
+		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")
+				|| outputType.equals("xml")|| outputType.equals("json")))
 			outputType	= "csv";
 		
 		for (int i = 0; i < n; i++)
@@ -170,12 +172,13 @@ public class RawDataHandler implements HttpHandler
 		}
 		return component;
 	}
-	
+
 	/**
 	 * Handle the given http request and generate raw data type result. 
 	 * @see HttpHandler#handle 
 	 */
 	public Object handle(HttpServletRequest request) {
+		String ext = "";
 		try {
 			List<PlotComponent> components = parseRequest(request);
 			if (components == null || components.size() <= 0)
@@ -189,14 +192,15 @@ public class RawDataHandler implements HttpHandler
 			String timeZone = null;
 			SimpleDateFormat dfc = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 			Date now = new Date();
-			String cmtDate = "";
-			String cmtURL = "#URL=" + request.getRequestURL().toString() + "?" + request.getQueryString() + "\n";
+			Map<String,String> cmtBits = new LinkedHashMap<String,String>();
 			String cmtTimes = "";
 			String cmtDataType = null;
 			double cmtSampleRate = 0.0;
 			Map<Integer, Rank> ranksMap = null;
 			boolean miniseed = false;
 			String fn = null, filePath = null, outFileName = null, outFilePath = null;
+			
+			cmtBits.put( "URL", request.getRequestURL().toString() + "?" + request.getQueryString() );
 
 			for (PlotComponent component : components) {
 				String source				= component.getSource();
@@ -215,6 +219,7 @@ public class RawDataHandler implements HttpHandler
 					}
 				} else {
 					plotter = dataHandler.getDataSourceDescriptor(component.getSource()).getPlotter();
+					dsd		= dataHandler.getDataSourceDescriptor(component.get("src"));
 				}
 				if (plotter != null) {
 					if ( cmtDataType == null ) {
@@ -258,11 +263,14 @@ public class RawDataHandler implements HttpHandler
 				}
 				timeZone = component.getTimeZone().getID();
 				dfc.setTimeZone(TimeZone.getTimeZone(timeZone));
-				cmtDate = dfc.format(now);
-				cmtDate = "#reqtime=" + String.format( "%14.3f,%s,%s\n", (now.getTime()*0.001), cmtDate, timeZone);
+				cmtBits.put( "timezone", timeZone);
+				cmtBits.put( "rank", fn_rank );
+				cmtBits.put( "reqtime", String.format( "%14.3f,%s,%s", (now.getTime()*0.001), dfc.format(now), timeZone) );
 				double endtime = component.getEndTime();
 				cmtTimes = String.format( "#st=%14.3f, et=%14.3f\n", component.getStartTime(endtime), endtime );
-				StringBuffer cmt = new StringBuffer(cmtDate + cmtURL + "#source=" + fn_source + "\n" + cmtTimes );
+				cmtBits.put( "st", String.format( "%14.3f", component.getStartTime(endtime) ) );
+				cmtBits.put( "et", String.format( "%14.3f", endtime ) );
+				cmtBits.put( "source", fn_source );
 				String outputType = component.get( "o" );
 				fn = df.format(now) + "_" 
 					+ fn_source.replaceAll( "-", "_")
@@ -270,6 +278,8 @@ public class RawDataHandler implements HttpHandler
 				filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
 				if ( !miniseed && outputType.equals("seed") )
 					miniseed = true;
+				else
+					ext = outputType;
 				if (plotter != null) {
 					if ( miniseed ) {
 						try {
@@ -279,7 +289,7 @@ public class RawDataHandler implements HttpHandler
 							ZipOutputStream zipout = new ZipOutputStream(new BufferedOutputStream(zipdest));
 							ZipEntry zipentry = new ZipEntry(fn + ".msi");
 							zipout.putNextEntry(zipentry);
-							sb.append(plotter.toCSV(component, cmt.toString(), zipout));
+							sb.append(plotter.toCSV(component, cmtBits, zipout));
 							zipentry = new ZipEntry(fn + ".mst");
 							zipout.putNextEntry(zipentry);
 							zipout.write(sb.toString().getBytes());
@@ -296,16 +306,15 @@ public class RawDataHandler implements HttpHandler
 							throw new Valve3Exception(eio.getMessage());
 						}
 					} else 
-						sb.append(plotter.toCSV(component, cmt.toString(), null));
-				} else
-					sb.append( cmt.toString() );
+						sb.append(plotter.toCSV(component, cmtBits, null));
+				} 
 			}
 			
 			if ( outFilePath == null ) {
 				try
 				{
-					outFilePath = filePath + ".csv";
-					outFileName = fn + ".csv";
+					outFilePath = filePath + "." + ext;
+					outFileName = fn + "." + ext;
 					FileOutputStream out = new FileOutputStream(outFilePath);
 					out.write(sb.toString().getBytes());
 					out.close();

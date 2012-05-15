@@ -217,8 +217,8 @@ public class WavePlotter extends RawDataPlotter {
 							dataType = data.getDataType();
 						else
 							dataType = "i4";
-						String toadd = "#sr=" + samplingRate + "\n#datatype=" + dataType + "\n";
-						csvHdrs.insert( 0, toadd );
+						csvCmtBits.put( "sr", ""+samplingRate);
+						csvCmtBits.put("datatype", dataType);
 					}
 					data.setStartTime(data.getStartTime() + timeOffset);
 					gotData = true;
@@ -385,11 +385,9 @@ public class WavePlotter extends RawDataPlotter {
 		}
 
 		if ( forExport ) {
-			if ( inclTime )
-				csvHdrs.append(",");
-			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/'));
+			String[] hdr = { null, null, channel.getCode().replace('$', '_').replace(',', '/'), "Count" };
+			csvHdrs.add( hdr );
 			scnl = channel.getCode().split("[$]");
-			csvHdrs.append("_Count");
 			ExportData ed = new ExportData( csvIndex, wr );
 			csvIndex++;
 			csvData.add( ed );
@@ -429,7 +427,7 @@ public class WavePlotter extends RawDataPlotter {
 		}
 	    spectraRenderer.yTickMarks		= this.yTickMarks;
 	    spectraRenderer.yTickValues		= this.yTickValues;
-	    System.out.printf("isDrawLegend: %s, WavePlotter: logPower: %s, logFreq: %s, minFreq: %f, maxFreq: %f\n",isDrawLegend, logPower, logFreq, minFreq,maxFreq);
+	    //System.out.printf("isDrawLegend: %s, WavePlotter: logPower: %s, logFreq: %s, minFreq: %f, maxFreq: %f\n",isDrawLegend, logPower, logFreq, minFreq,maxFreq);
 		spectraRenderer.setWave(wave);
 		spectraRenderer.setAutoScale(true);
 		spectraRenderer.setLocation(comp.getBoxX(), comp.getBoxY() + (currentComp - 1) * compBoxHeight, comp.getBoxWidth(), compBoxHeight - 16);

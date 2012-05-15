@@ -570,10 +570,13 @@ public class GPSPlotter extends RawDataPlotter {
 					if ( forExport ) {
 						
 						// Add column headers to csvHdrs
-						for (int i = 0; i < columnsList.size(); i++) {
+						int i = 0;
+						for (Column col: columnsList) {
 							if ( !axisMap.get(i).equals("") ) {
-								csvHdrs.append(String.format( ",%s%s_%s", channel.getCode(), baselineLegend, legendsCols[i] ));
+								String[] hdr = {null, null, channel.getCode() + baselineLegend, col.name};
+								csvHdrs.add(hdr);
 							}
+							i++;
 						}
 						// Initialize data for export; add to set for CSV
 						ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );

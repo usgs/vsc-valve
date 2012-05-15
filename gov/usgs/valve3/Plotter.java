@@ -75,7 +75,7 @@ abstract public class Plotter
 	 */
 	public String toCSV(PlotComponent comp) throws Valve3Exception
 	{
-		return toCSV( comp, "", null );
+		return toCSV( comp, null, null );
 	}
 	
 	/**
@@ -85,7 +85,7 @@ abstract public class Plotter
 	 * @return string with csv data
 	 * @throws Valve3Exception
 	 */
-	public String toCSV(PlotComponent comp, String cmt, OutputStream seedOut) throws Valve3Exception
+	public String toCSV(PlotComponent comp, Map<String,String> cmt, OutputStream seedOut) throws Valve3Exception
 	{
 		throw new Valve3Exception("Data export not available for this data source.");
 	}
