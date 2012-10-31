@@ -4,7 +4,7 @@
 	<property name="dist-appdir"  value="valve3"/>
 	<property name="dist-tempdir" value="./temp"/>
 	<property name="dist-basedir" value="./dist"/>
-	<property name="classpath" location="../USGS/lib/net.jar;../USGS/lib/util.jar;../USGS/lib/plot.jar;../USGS/lib/math.jar;../USGS/contrib/colt.jar;../USGS/lib/pinnacle.jar;../USGS/contrib/seed-pdcc.jar"/>
+	<property name="classpath" location="../USGS/lib/net.jar;../USGS/lib/util.jar;../USGS/lib/plot.jar;../USGS/lib/math.jar;../USGS/contrib/colt.jar;../USGS/lib/pinnacle.jar;../USGS/contrib/JavaSeedLite.jar"/>
 	<property name="javadoc-dir"  value="doc/javadoc"/>
 	
 	<target name="help">
