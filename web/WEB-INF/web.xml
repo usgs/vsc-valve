@@ -52,13 +52,5 @@ Initial commit.
         <extension>csv</extension>
         <mime-type>application/octet-stream</mime-type>
     </mime-mapping>
-	<mime-mapping>
-        <extension>xml</extension>
-        <mime-type>application/octet-stream</mime-type>
-    </mime-mapping>
-	<mime-mapping>
-        <extension>json</extension>
-        <mime-type>application/octet-stream</mime-type>
-    </mime-mapping>
     
 </web-app>
