@@ -333,13 +333,10 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			if (forExport) {
 				
 				// Add the headers to the CSV file
-				int i = 0;
-				for ( Column col: columnsList ) {
+				for (int i = 0; i < columnsList.size(); i++) {
 					if (!axisMap.get(i).equals("")) {
-						String[] hdr = {null, null, channel.getCode(), col.name };
-						csvHdrs.add( hdr );
+						csvHdrs.append(String.format(",%s_%s", channel.getCode(), legendsCols[i]));
 					}
-					i++;
 				}
 				// Initialize data for export; add to set for CSV
 				ExportData ed = new ExportData(csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap));

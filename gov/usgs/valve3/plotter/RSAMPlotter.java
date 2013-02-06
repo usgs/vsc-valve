@@ -281,8 +281,8 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (forExport) {
 			
 			// Add column header to csvHdrs
-			String[] hdr = {null, null, channel.getCode().replace('$', '_').replace(',', '/'), "RSAM" };
-			csvHdrs.add( hdr );
+			csvHdrs.append(",");
+			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + "_RSAM");
 			
 			// Initialize data for export; add to set for CSV
 			ExportData ed = new ExportData( csvIndex, new MatrixExporter(gdm.getData(), ranks, axisMap) );
@@ -356,8 +356,8 @@ public class RSAMPlotter extends RawDataPlotter {
 		if (forExport) {
 			
 			// Add column header to csvHdrs
-			String[] hdr = {null, null, channel.getCode().replace('$', '_').replace(',', '/'), "EventsPer" + bin };
-			csvHdrs.add( hdr );
+			csvHdrs.append(",");
+			csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_EventsPer%s", bin ));
 			
 			// Initialize data for export; add to set for CSV
 			ExportData ed = new ExportData (csvIndex, hr);
@@ -406,8 +406,8 @@ public class RSAMPlotter extends RawDataPlotter {
 			if (forExport) {
 				
 				// Add column header to csvHdrs
-				String[] hdr = {null, null, channel.getCode().replace('$', '_').replace(',', '/'), "CumulativeCount" + bin };
-				csvHdrs.add( hdr );
+				csvHdrs.append(",");
+				csvHdrs.append(channel.getCode().replace('$', '_').replace(',', '/') + String.format( "_CumulativeCount", bin ));
 				
 				// Initialize data for export; add to set for CSV
 				ExportData ed = new ExportData(csvIndex, mr);
