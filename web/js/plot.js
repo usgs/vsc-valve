@@ -353,6 +353,60 @@ function handlePlot(xml)
 					}
 				});
 			}, false);
+		addListener(imgs[9], 'click',
+			function()
+			{
+				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=json");
+				
+				loadXML("rawData", url, function(req)
+				{ 
+					var doc = req.responseXML;
+					if (doc != null)
+					{
+						var result = doc.getElementsByTagName("valve3result")[0];
+						if (result != null)
+						{
+							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+							if (type == 'error')
+								alert(doc.getElementsByTagName("message")[0].firstChild.data);
+							else if (type == 'rawData')
+							{
+								var d = document.getElementById('dataFrame');
+								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							}
+						}
+					}
+				});
+			}, false);
+
+		addListener(imgs[10], 'click',
+			function()
+			{
+				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
+				
+				loadXML("rawData", url, function(req)
+				{ 
+					var doc = req.responseXML;
+					if (doc != null)
+					{
+						var result = doc.getElementsByTagName("valve3result")[0];
+						if (result != null)
+						{
+							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
+							if (type == 'error')
+								alert(doc.getElementsByTagName("message")[0].firstChild.data);
+							else if (type == 'rawData')
+							{
+								var d = document.getElementById('dataFrame');
+								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
+							}
+						}
+					}
+				});
+			}, false);
+
 		if ( waveform_type ) {
 			// csvnots
 			addListener(imgs[5], 'click',
@@ -414,6 +468,8 @@ function handlePlot(xml)
 		}
 	} 
 	else {
+		t.removeChild(imgs[10]);
+		t.removeChild(imgs[9]);
 		t.removeChild(imgs[6]);
 		t.removeChild(imgs[5]);
 		t.removeChild(imgs[4]);
