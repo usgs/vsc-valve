@@ -619,30 +619,31 @@ public class HypocenterPlotter extends RawDataPlotter {
 		}
 		if ( forExport ) {
 			// Add column headers to csvHdrs (second one incomplete)
-			csvHdrs.append(String.format( ",%s_EventsPer%s", rank.getName(), bin ));
+			String[] hdr = {null, null, null, String.format( "%s_EventsPer%s", rank.getName(), bin) };
+			csvHdrs.add( hdr );
 			csvData.add( new ExportData( csvIndex, hr ) );
 			csvIndex++;
 		}
 		DoubleMatrix2D data = null;
-		String headerFmt = "";
+		String headerName = "";
 		switch (rightAxis) {
 		case CUM_COUNTS:
 			data = hypos.getCumulativeCounts();
 			if ( forExport )
 				// Add specialized part of column header to csvText
-				headerFmt = ",%s_CumulativeCounts";
+				headerName = "CumulativeCounts";
 			break;
 		case CUM_MAGNITUDE:
 			data = hypos.getCumulativeMagnitude();
 			if ( forExport )
 				// Add specialized part of column header to csvText
-				headerFmt = ",%s_CumulativeMagnitude";
+				headerName = "CumulativeMagnitude";
 			break;
 		case CUM_MOMENT:
 			data = hypos.getCumulativeMoment();
 			if ( forExport )
 				// Add specialized part of column header to csvText
-				headerFmt = ",%s_CumulativeMoment";
+				headerName = "CumulativeMoment";
 			break;
 		}
 		if (data != null && data.rows() > 0) {
@@ -658,7 +659,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			if ( forExport ) {
 				// Add column to header; add Exporter to set for CSV
-				csvHdrs.append(String.format( headerFmt, rank.getName() ));
+				String[] hdr = {null, rank.getName(), null, headerName};
+				csvHdrs.add( hdr );
 				csvData.add( new ExportData( csvIndex, mr ) );
 				csvIndex++;
 			} else {
@@ -694,7 +696,15 @@ public class HypocenterPlotter extends RawDataPlotter {
 		case MAP:
 			if (forExport) {
 				// Add column headers to csvHdrs
-				csvHdrs.append(", Lat, Lon, Depth, PrefMag");
+				String rankName = rank.getName();
+				String[] hdr1 = {null, rankName, null, "Lat"};
+				csvHdrs.add( hdr1 );
+				String[] hdr2 = {null, rankName, null, "Lon"};
+				csvHdrs.add( hdr2 );
+				String[] hdr3 = {null, rankName, null, "Depth"};
+				csvHdrs.add( hdr3 );
+				String[] hdr4 = {null, rankName, null, "PrefMag"};
+				csvHdrs.add( hdr4 );
 				// Initialize data for export; add to set for CSV
 				ExportData ed = new ExportData(csvIndex, new HypocenterExporter(hypos));
 				csvData.add(ed);

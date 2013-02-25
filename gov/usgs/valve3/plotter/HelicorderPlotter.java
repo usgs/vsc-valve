@@ -177,7 +177,8 @@ public class HelicorderPlotter extends RawDataPlotter {
 			
 			if ( forExport ) {
 				// Add column headers to csvHdrs
-				csvHdrs.append("," + channel.getCode().replace("$","_") + "_Data");
+				String[] hdr = {null, null, channel.getCode().replace("$","_") , "Data" };
+				csvHdrs.add( hdr );
 				// Initialize data for export; add to set for CSV
 				ExportData ed = new ExportData( csvIndex, new MatrixExporter(data.getData(), true, null, timeOffset) );
 				csvIndex++;
