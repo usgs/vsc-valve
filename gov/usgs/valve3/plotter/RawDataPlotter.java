@@ -801,6 +801,8 @@ public abstract class RawDataPlotter extends Plotter {
 	
 		// Get opening comment line(s)
 		String[] comments = ec.getComments();
+		if ( comments == null )
+				comments = new String[]{};
 		
 		// Add the common column headers
 		String timeZone = comp.getTimeZone().getID();
@@ -834,10 +836,14 @@ public abstract class RawDataPlotter extends Plotter {
 		if ( csvCmtBits.containsKey("datatype"))
 			cmtLines.add( "datatype=" + csvCmtBits.get("datatype"));
 		csvText = new StringBuffer();
+		Vector<String> myCmtLines = cmtLines;
+		if ( myCmtLines == null )
+			myCmtLines = new Vector<String>();
+		
 		if ( outToCSV ) {
 			for ( String comment: comments )
 				csvText.append( "#" + comment + "\n");
-			for ( String comment: cmtLines )
+			for ( String comment: myCmtLines )
 				csvText.append( "#" + comment + "\n" );
 			StringBuffer hdrLine = new StringBuffer();
 			boolean first = true;
@@ -864,7 +870,7 @@ public abstract class RawDataPlotter extends Plotter {
 				csvText.append( "\t\t<COMMENTLINE pos=\"" + i + "\">" + comment.replaceAll("&","&amp;") + "</COMMENTLINE>\n");
 				i++;
 			}
-			for ( String comment: cmtLines ) {
+			for ( String comment: myCmtLines ) {
 				csvText.append( "\t\t<COMMENTLINE pos=\"" + i + "\">" + comment.replaceAll("&","&amp;") + "</COMMENTLINE>\n");
 				i++;
 			}
@@ -877,9 +883,14 @@ public abstract class RawDataPlotter extends Plotter {
 				csvText.append( sep + comment );
 				sep = "\",\n\t\t\"";
 			}
-			for ( String comment: cmtLines )
+			for ( String comment: myCmtLines ) {
 				csvText.append( sep + comment );
-			csvText.append( "\"],\n" );
+				sep = "\",\n\t\t\"";
+			}
+			if ( sep.charAt(0) == '[' )
+				csvText.append( "[],\n" );
+			else
+				csvText.append( "\"],\n" );
 		}
 		csvCmtBits = new LinkedHashMap<String,String>();
 		
