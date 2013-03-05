@@ -597,19 +597,19 @@ public abstract class RawDataPlotter extends Plotter {
 	 */
 	private void addCSVline( Double[][] data, Double time, String decFmt, String nullField ) {
 		String line;
-		String firstDecFmt;
+		String restDecFmt;
 		if ( inclTime ) {
 			line = String.format( "%14.3f,", Util.j2KToEW(time) ) + Util.j2KToDateString(time);	
-			firstDecFmt = decFmt;
+			restDecFmt = ","+decFmt;
 		} else {
 			line = "";
-			firstDecFmt = decFmt.substring(1);
+			restDecFmt = decFmt;
 		}
 		for ( Double[] group : data )
 			for ( int i = 1; i < group.length; i++ ) {
 				Double v = group[i];
 				if ( v != null )
-					line += String.format( i==1 ? firstDecFmt : decFmt, v );
+					line += String.format( i==1 ? decFmt : restDecFmt, v );
 				else
 					line += nullField;
 			}
@@ -896,7 +896,8 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		// currLine is an array of the current row of data from each source, indexed by that source's ID
 		Double[][] currLine = new Double[ csvData.size() ][];
-		String decFmt = ",%" + ec.getFixedWidth()[0] + "." + ec.getFixedWidth()[1] + "f";
+		String decFmt = "%" + ec.getFixedWidth()[0] + "." + ec.getFixedWidth()[1] + "f";
+		String jxDecFmt = "%1." + ec.getFixedWidth()[1] + "f";
 		String nullField = String.format( ",%" + ec.getFixedWidth()[0] + "s", "" );
 
 		if ( seedOut != null ) {
@@ -1031,7 +1032,7 @@ public abstract class RawDataPlotter extends Plotter {
 				while ( datum != null ) {
 					pos++;
 					currLine[0] = datum;
-					addXMLline( currLine, datum[0], decFmt, pos, rowTimeZone, rank );
+					addXMLline( currLine, datum[0], jxDecFmt, pos, rowTimeZone, rank );
 					datum = cd.nextExportDatum();
 				}
 			}
@@ -1042,7 +1043,7 @@ public abstract class RawDataPlotter extends Plotter {
 				while ( datum != null ) {
 					pos++;
 					currLine[0] = datum;
-					addJSONline( currLine, datum[0], decFmt, pos, rowTimeZone, rank );
+					addJSONline( currLine, datum[0], jxDecFmt, pos, rowTimeZone, rank );
 					datum = cd.nextExportDatum();
 				}
 			}
