@@ -272,6 +272,7 @@ function handlePlot(xml)
 		})(ieGetElementsByClassName( t, "suppnodl")[0]));
 
     //Combination
+    var plusOff = 0;
     if(((components.length == 1) && combineable) || combined){
     	addListener(imgs[7], 'click',
     		function()
@@ -322,6 +323,7 @@ function handlePlot(xml)
       		});
     } else {
     	t.removeChild(imgs[7]);
+    	plusOff = 1;
     }
     
 	// raw data
@@ -353,7 +355,8 @@ function handlePlot(xml)
 					}
 				});
 			}, false);
-		addListener(imgs[9], 'click',
+		//console.log(['json',imgs[10-plusOff]]);
+		addListener(imgs[10-plusOff], 'click',
 			function()
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -379,8 +382,8 @@ function handlePlot(xml)
 					}
 				});
 			}, false);
-
-		addListener(imgs[10], 'click',
+		//console.log(['xml',imgs[9-plusOff]]);
+		addListener(imgs[9-plusOff], 'click',
 			function()
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -468,8 +471,8 @@ function handlePlot(xml)
 		}
 	} 
 	else {
-		t.removeChild(imgs[10]);
-		t.removeChild(imgs[9]);
+		t.removeChild(imgs[10-plusOff]);
+		t.removeChild(imgs[9-plusOff]);
 		t.removeChild(imgs[6]);
 		t.removeChild(imgs[5]);
 		t.removeChild(imgs[4]);
