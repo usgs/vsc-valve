@@ -131,7 +131,15 @@ function handlePlot(xml)
 	var links		= t.getElementsByTagName('a');
 	var imgs		= t.getElementsByTagName('img');
 	var img			= imgs[imgs.length - 1];
-	var minImg		= imgs[1];
+	var imgMap      = {};
+	// Assumes all titlebar buttons have a name & at the least the first to come after does not
+	for ( i=0; ; i++ ) {
+		var name = imgs[i].getAttribute('name');
+		if ( name == undefined )
+			break;
+		imgMap[name] = imgs[i];
+	}
+	var minImg		= imgMap.minimize_btn;
 	img.header		= header;
 	img.container	= t;
 	img.src			= src;
@@ -140,7 +148,6 @@ function handlePlot(xml)
 	img.translation	= translation.split(",");
 	img.xml			= xml;
 	var components	= xml.getElementsByTagName('component');
-	
 	if (combined) {
 		t.getElementsByTagName('input')[0].value = 1;
 	} else {
@@ -191,7 +198,7 @@ function handlePlot(xml)
 		}, false);
 		
 	// close
-	addListener(imgs[0], 'click', 
+	addListener(imgMap.close_btn, 'click', 
 		function()
 		{
 			fixZoomMarksInside(t,0);
@@ -200,7 +207,7 @@ function handlePlot(xml)
 		}, false);
 	
 	// minimize
-	addListener(imgs[1], 'click', 
+	addListener(imgMap.minimize_btn, 'click', 
 		function()
 		{
 			if (minImg.src.indexOf("min.gif") != -1)
@@ -224,7 +231,7 @@ function handlePlot(xml)
 		}, false);
 	
 	// clock
-	addListener(imgs[2], 'click',
+	addListener(imgMap.clock_btn, 'click',
 		function()
 		{
 			var timeZoneOffset = 0;
@@ -251,7 +258,7 @@ function handlePlot(xml)
 		});
 	
 	// xml
-	addListener(imgs[3], 'click',
+	addListener(imgMap.xml_btn, 'click',
 		function()
 		{
 			var w = window.open('', 'xmlwin', 'menubar=0,toolbar=0,status=0,resizable=1,width=600,height=400,scrollbars=1');
@@ -260,7 +267,7 @@ function handlePlot(xml)
 		});
 		
 	// processing data
-	addListener(imgs[8], 'click',
+	addListener(imgMap.procdata_btn, 'click',
 		(function(t)
 		{
 			return function() {
@@ -274,7 +281,7 @@ function handlePlot(xml)
     //Combination
     var plusOff = 0;
     if(((components.length == 1) && combineable) || combined){
-    	addListener(imgs[7], 'click',
+    	addListener(imgMap.combine_btn, 'click',
     		function()
     		{
     			loadXML("combineMenu", "menu/combinemenu.html", function(req) {
@@ -322,14 +329,14 @@ function handlePlot(xml)
     			
       		});
     } else {
-    	t.removeChild(imgs[7]);
+    	t.removeChild(imgMap.combine_btn);
     	plusOff = 1;
     }
     
 	// raw data
     if ( raw_ok && !combined ) {
     	// csv
-		addListener(imgs[4], 'click',
+		addListener(imgMap.export_csv_btn, 'click',
 			function()
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -356,7 +363,7 @@ function handlePlot(xml)
 				});
 			}, false);
 		//console.log(['json',imgs[10-plusOff]]);
-		addListener(imgs[10-plusOff], 'click',
+		addListener(imgMap.export_json_btn, 'click',
 			function()
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -383,7 +390,7 @@ function handlePlot(xml)
 				});
 			}, false);
 		//console.log(['xml',imgs[9-plusOff]]);
-		addListener(imgs[9-plusOff], 'click',
+		addListener(imgMap.export_xml_btn, 'click',
 			function()
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -412,7 +419,7 @@ function handlePlot(xml)
 
 		if ( waveform_type ) {
 			// csvnots
-			addListener(imgs[5], 'click',
+			addListener(imgMap.export_csvnots_btn, 'click',
 				function()
 				{
 					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -439,7 +446,7 @@ function handlePlot(xml)
 					});
 				}, false);
 			// seed
-			addListener(imgs[6], 'click',
+			addListener(imgMap.export_data_btn, 'click',
 				function()
 				{
 					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
@@ -466,25 +473,16 @@ function handlePlot(xml)
 					});
 				}, false);
 		} else {
-			t.removeChild(imgs[6]);
-			t.removeChild(imgs[5]);
+			t.removeChild(imgMap.export_data_btn);
+			t.removeChild(imgMap.export_csvnots_btn);
 		}
 	} 
 	else {
-		t.removeChild(imgs[10-plusOff]);
-		t.removeChild(imgs[9-plusOff]);
-		t.removeChild(imgs[6]);
-		t.removeChild(imgs[5]);
-		t.removeChild(imgs[4]);
-		//var ebs = t.getElementsByClassName('button');
-		//var e;
-		//for ( e in ebs ) {
-		//	if ( ebs[e].getAttribute('name') == 'export_btn' ) {
-		//		ebs[e].setAttribute( 'src', 'images/nocsv.gif' );
-		//		ebs[e].setAttribute( 'class', 'button_off' );
-		//		break;
-		//	}
-		//}
+		t.removeChild(imgMap.export_json_btn);
+		t.removeChild(imgMap.export_xml_btn);
+		t.removeChild(imgMap.export_data_btn);
+		t.removeChild(imgMap.export_csvnots_btn);
+		t.removeChild(imgMap.export_csv_btn);
 	}
 	
     

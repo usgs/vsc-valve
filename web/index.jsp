@@ -176,17 +176,17 @@
 		<div id='popupInsertionPoint'></div>
 		<!-- Invisible elements -->		
 		<div id="contentTemplate" class="content">
-			<img class="button" src="images/x.gif">
-			<img class="button" src="images/min.gif">
-			<img class="button" src="images/clock.gif">
-			<img class="button" src="images/xml.gif">
-			<img name="export_csv_btn" class="button" src="images/csv.gif">
-			<img name="export_csvnots_btn" class="button" src="images/csvnots.gif">
-			<img name="export_data_btn" class="button" src="images/data.gif">
+			<img name="close_btn" class="button" src="images/x.gif">
+			<img name="minimize_btn" class="button" src="images/min.gif">
+			<img name="clock_btn" class="button" src="images/clock.gif">
 			<img name="combine_btn" class="button" src="images/add.gif">
 			<img name="procdata_btn" class="button" src="images/procdata.gif">
-			<img name="export_xml_btn" class="button" src="images/xml_data.gif">
+			<img name="xml_btn" class="button" src="images/xml.gif">
+			<img name="export_data_btn" class="button" src="images/data.gif">
 			<img name="export_json_btn" class="button" src="images/json.gif">
+			<img name="export_xml_btn" class="button" src="images/xml_data.gif">
+			<img name="export_csvnots_btn" class="button" src="images/csvnots.gif">
+			<img name="export_csv_btn" class="button" src="images/csv.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
 			<div class="titleBar">
 				<h1 class="help">Content Template</h1>
