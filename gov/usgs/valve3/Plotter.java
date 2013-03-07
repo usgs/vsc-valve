@@ -68,24 +68,13 @@ abstract public class Plotter
 	}
 	
 	/**
-	 * Exports PlotComponent to CSV format w/o comment
-	 * @param comp 
-	 * @return string with csv data
-	 * @throws Valve3Exception
-	 */
-	public String toCSV(PlotComponent comp) throws Valve3Exception
-	{
-		return toCSV( comp, null, null );
-	}
-	
-	/**
-	 * Exports PlotComponent to CSV format
+	 * Exports PlotComponent to export format
 	 * @param comp PlotComponent
 	 * @param cmt comment
-	 * @return string with csv data
+	 * @return string with exported data
 	 * @throws Valve3Exception
 	 */
-	public String toCSV(PlotComponent comp, Map<String,String> cmt, OutputStream seedOut) throws Valve3Exception
+	public String toExport(PlotComponent comp, Map<String,String> cmt, OutputStream seedOut) throws Valve3Exception
 	{
 		throw new Valve3Exception("Data export not available for this data source.");
 	}

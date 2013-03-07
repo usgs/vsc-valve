@@ -99,6 +99,7 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double filterMin, filterMax, filterPeriod;
 	protected int debiasPick;
 	protected double debiasValue;
+	protected boolean exportAll = false;
 	
 	protected String outputType;
 	protected boolean inclTime;
@@ -134,6 +135,9 @@ public abstract class RawDataPlotter extends Plotter {
 		
 		// Check for named channels, ranks
 		if ( forExport ) {
+			String outputAllArg = comp.get("outputAll"); // If outputAll arg provided, use it
+			if ( outputAllArg != null )
+				exportAll   = outputAllArg.equals("true");
 			outputType	= comp.get( "o" );
 			inclTime	= outputType.equals( "csv" )||outputType.equals("xml")||outputType.equals("json");
 			nameArg		= comp.get( "chNames" );
@@ -185,8 +189,11 @@ public abstract class RawDataPlotter extends Plotter {
 			boolean alreadySet[] = new boolean[columnsList.size()];
 			for ( Column c : columnsList ) {
 				String cVal = comp.get(c.name);
-				if ( cVal != null ) {
-					c.checked = comp.getBoolean(c.name);
+				if ( (forExport && exportAll) || cVal != null ) {
+					if ( forExport && exportAll )
+						c.checked = true;
+					else
+						c.checked = comp.getBoolean(c.name);
 					alreadySet[j] = true;
 					useColDefaults = false;
 				}
@@ -194,8 +201,9 @@ public abstract class RawDataPlotter extends Plotter {
 			}
 			j = 0;
 			for ( Column c : columnsList ) {
-				if ( !alreadySet[j] && !useColDefaults )
+				if ( !alreadySet[j] && !useColDefaults ) {
 					c.checked = false;
+				}
 				j++;
 			}
 		}
@@ -597,19 +605,20 @@ public abstract class RawDataPlotter extends Plotter {
 	 */
 	private void addCSVline( Double[][] data, Double time, String decFmt, String nullField ) {
 		String line;
-		String restDecFmt;
+		String firstDecFmt, nextDecFmt;
 		if ( inclTime ) {
 			line = String.format( "%14.3f,", Util.j2KToEW(time) ) + Util.j2KToDateString(time);	
-			restDecFmt = ","+decFmt;
+			firstDecFmt = ","+decFmt;
 		} else {
 			line = "";
-			restDecFmt = decFmt;
+			firstDecFmt = decFmt;
 		}
+		nextDecFmt = ","+decFmt;
 		for ( Double[] group : data )
 			for ( int i = 1; i < group.length; i++ ) {
 				Double v = group[i];
 				if ( v != null )
-					line += String.format( i==1 ? decFmt : restDecFmt, v );
+					line += String.format( i==1 ? firstDecFmt : nextDecFmt, v );
 				else
 					line += nullField;
 			}
@@ -778,14 +787,14 @@ public abstract class RawDataPlotter extends Plotter {
 	}
 
     /**
-     * Yield contents as CSV
+     * Yield contents in an export format
      * @param comp plot component
      * @param cmtBits  comment info to add after configured comments
      * @param seedOut stream to write seed data to
-     * @return CSV dump of binary data described by given PlotComponent
+     * @return export of binary data described by given PlotComponent
      * @throws Valve3Exception
      */
-	public String toCSV(PlotComponent comp, Map<String,String> cmtBits, OutputStream seedOut) throws Valve3Exception {
+	public String toExport(PlotComponent comp, Map<String,String> cmtBits, OutputStream seedOut) throws Valve3Exception {
 		
 		// Get export configuration parameters
 		ExportConfig ec = getExportConfig(vdxSource, vdxClient);

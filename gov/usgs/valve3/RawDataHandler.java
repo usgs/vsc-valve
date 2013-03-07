@@ -289,7 +289,7 @@ public class RawDataHandler implements HttpHandler
 							ZipOutputStream zipout = new ZipOutputStream(new BufferedOutputStream(zipdest));
 							ZipEntry zipentry = new ZipEntry(fn + ".msi");
 							zipout.putNextEntry(zipentry);
-							sb.append(plotter.toCSV(component, cmtBits, zipout));
+							sb.append(plotter.toExport(component, cmtBits, zipout));
 							zipentry = new ZipEntry(fn + ".mst");
 							zipout.putNextEntry(zipentry);
 							zipout.write(sb.toString().getBytes());
@@ -306,7 +306,7 @@ public class RawDataHandler implements HttpHandler
 							throw new Valve3Exception(eio.getMessage());
 						}
 					} else 
-						sb.append(plotter.toCSV(component, cmtBits, null));
+						sb.append(plotter.toExport(component, cmtBits, null));
 				} 
 			}
 			
