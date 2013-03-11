@@ -195,6 +195,10 @@ function loadFilters() {
 				if (line.length <= 1)
 					continue;
 				var opt = document.createElement('option');
+                if (line[0].charAt(0) == "*") {
+                    line[0] = line[0].substring(1);
+                    opt.selected = true;
+                }				
 				opt.value = line[1];
 				opt.appendChild(document.createTextNode(line[0]));
 				f.appendChild(opt);
