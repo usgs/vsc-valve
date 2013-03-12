@@ -133,11 +133,9 @@ public abstract class RawDataPlotter extends Plotter {
 		// declare variables
 		String nameArg = null;
 		
-		// Check for named channels, ranks
+		// Check for named channels, ranks, outputAll
 		if ( forExport ) {
-			String outputAllArg = comp.get("outputAll"); // If outputAll arg provided, use it
-			if ( outputAllArg != null )
-				exportAll   = outputAllArg.equals("true");
+			exportAll = comp.getBoolean("outputAll");
 			outputType	= comp.get( "o" );
 			inclTime	= outputType.equals( "csv" )||outputType.equals("xml")||outputType.equals("json");
 			nameArg		= comp.get( "chNames" );

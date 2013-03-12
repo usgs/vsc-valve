@@ -83,6 +83,7 @@ public class RawDataHandler implements HttpHandler
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
 		String rkNameArg	= request.getParameter( "rkName" );
+		String outputAllArg = Util.stringToString(request.getParameter("outputAll"), "f");
 		String outputType	= Util.stringToString(request.getParameter("o"), "csv");
 		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")
 				|| outputType.equals("xml")|| outputType.equals("json")))
@@ -95,6 +96,7 @@ public class RawDataHandler implements HttpHandler
 				continue;			
 
 			component.put( "o", outputType );
+			component.put( "outputAll", outputAllArg );
 
 			if ( rkNameArg != null ) 
 				component.put( "rkName", rkNameArg );

@@ -149,7 +149,9 @@ public class TiltPlotter extends RawDataPlotter {
 			for (int i = 0; i < columnsList.size(); i++) {
 				Column column	= columnsList.get(i);
 				String col_arg = comp.get(column.name);
-				if ( !(forExport && exportAll) && col_arg != null )
+				if ( forExport && exportAll )
+					column.checked = true;
+				else if ( col_arg != null )
 					column.checked	= Util.stringToBoolean(comp.get(column.name));
 				bypassCols[i]		= column.bypassmanip;
 				accumulateCols[i]	= column.accumulate;
