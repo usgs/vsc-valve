@@ -111,8 +111,7 @@ public abstract class RawDataPlotter extends Plotter {
 	protected double timeOffset;
 	protected String timeZoneID;
 	protected String dateFormatString;
-	
-	
+		
 	/**
 	 * Default constructor
 	 */
@@ -594,6 +593,14 @@ public abstract class RawDataPlotter extends Plotter {
 	abstract void getData(PlotComponent comp) throws Valve3Exception;
 	
 	/**
+	 * 
+	 * @return "column i contains single-character strings"
+	 */
+	boolean isCharColumn( int i ) {
+		return false;
+	}
+	
+	/**
 	 * Format time and data using decFmt (and nullField for empty fields); 
 	 * append to csvText 
 	 * @param data data for line
@@ -615,10 +622,15 @@ public abstract class RawDataPlotter extends Plotter {
 		for ( Double[] group : data )
 			for ( int i = 1; i < group.length; i++ ) {
 				Double v = group[i];
-				if ( v != null )
-					line += String.format( i==1 ? firstDecFmt : nextDecFmt, v );
-				else
+				if ( v == null )
 					line += nullField;
+				else if ( isCharColumn(i) )
+					if ( v==Double.NaN || v>255 )
+						line += ", ";
+					else
+						line += ","+new Character((char)(v.intValue()));
+				else
+					line += String.format( i==1 ? firstDecFmt : nextDecFmt, v );
 			}
 		csvText.append(line);
 		csvText.append("\n");	
@@ -678,8 +690,17 @@ public abstract class RawDataPlotter extends Plotter {
 					else if ( hasRank )
 						line += tab + "<rank>" + rank + "</rank>\n";
 				}
-				if ( v != null )
-					line += tab + "<"+tag+">"+ String.format( decFmt, v ) + "</"+tag+">\n";
+				if ( v != null ) {
+					line += tab + "<"+tag+">";
+					if ( isCharColumn(i) )
+						if ( v==Double.NaN || v>255 )
+							;
+						else
+							line += new Character((char)(v.intValue()));
+					else
+						line += String.format( decFmt, v );
+					line += "</"+tag+">\n";
+				}
 			}
 		if ( hasChannels )
 			line += "\t\t\t</CHANNEL>\n";
@@ -740,8 +761,16 @@ public abstract class RawDataPlotter extends Plotter {
 					else if ( hasRank )
 						line += ",\n\t\t\t\"rank\":\"" + rank + "\"";
 
-				if ( v != null )
-					line += String.format( ",\n\t\t\t\"%s\":"+decFmt, tag, v );
+				if ( v != null ) {
+					line += String.format( ",\n\t\t\t\"%s\":", tag );
+					if ( isCharColumn(i) )
+						if ( v==Double.NaN || v>255 )
+							line += "\"\"";
+						else
+							line += "\"" + new Character((char)(v.intValue())) + "\"";
+					else
+						line += String.format( decFmt, v );
+				}
 			}
 			line += "}";
 		}

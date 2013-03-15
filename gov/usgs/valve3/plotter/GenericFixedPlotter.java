@@ -186,7 +186,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		int channelCompCount = 0;
 		if(isPlotComponentsSeparately()){
 			for(Column col: columnsList){
-				if(col.checked){
+				if(col.checked || (forExport && exportAll) ){
 					channelCompCount++;
 				}
 			}
@@ -279,7 +279,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				// Add column headers to csvHdrs
 				int i = 0;
 				for (Column col: columnsList) {
-					if ( !axisMap.get(i).equals("") ) {
+					if ( (forExport && exportAll) || !axisMap.get(i).equals("") ) {
 						String[] newHdr = {null, null, channel.getCode(), col.name};
 						csvHdrs.add( newHdr );
 					}

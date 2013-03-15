@@ -302,6 +302,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			
 			break;
 		}
+		if ( comp.get("outputAll") != null )
+			exportAll = comp.getBoolean("outputAll");
+		else
+			exportAll = false;
 	}
 
 	/**
@@ -359,6 +363,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
 		params.put("rmk", (rmk));
+		params.put("outputAll", Boolean.toString(exportAll));
 
 		// checkout a connection to the database
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
@@ -705,8 +710,32 @@ public class HypocenterPlotter extends RawDataPlotter {
 				csvHdrs.add( hdr3 );
 				String[] hdr4 = {null, rankName, null, "PrefMag"};
 				csvHdrs.add( hdr4 );
+				if ( exportAll ) {
+					String[] hdr5 = {null, rankName, null, "AmpMag"};
+					csvHdrs.add( hdr5 );
+					String[] hdr6 = {null, rankName, null, "CodaMag"};
+					csvHdrs.add( hdr6 );
+					String[] hdr7 = {null, rankName, null, "NPhases"};
+					csvHdrs.add( hdr7 );
+					String[] hdr8 = {null, rankName, null, "AzGap"};
+					csvHdrs.add( hdr8 );
+					String[] hdr9 = {null, rankName, null, "DMin"};
+					csvHdrs.add( hdr9 );
+					String[] hdr10 = {null, rankName, null, "RMS"};
+					csvHdrs.add( hdr10 );
+					String[] hdr11 = {null, rankName, null, "NSTimes"};
+					csvHdrs.add( hdr11 );
+					String[] hdr12 = {null, rankName, null, "HErr"};
+					csvHdrs.add( hdr12 );
+					String[] hdr13 = {null, rankName, null, "VErr"};
+					csvHdrs.add( hdr13 );
+					String[] hdr14 = {null, rankName, null, "MagType"};
+					csvHdrs.add( hdr14 );
+					String[] hdr15 = {null, rankName, null, "RMK"};
+					csvHdrs.add( hdr15 );
+				}
 				// Initialize data for export; add to set for CSV
-				ExportData ed = new ExportData(csvIndex, new HypocenterExporter(hypos));
+				ExportData ed = new ExportData(csvIndex, new HypocenterExporter(hypos, exportAll));
 				csvData.add(ed);
 				csvIndex++;
 			} else {
@@ -804,4 +833,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 		top.append(" " + timeZoneID + " Time");
 		return top.toString();
 	}
+	
+	/**
+	 * 
+	 * @return "column i contains single-character strings"
+	 */
+	boolean isCharColumn( int i ) {
+		return (i > 13);
+	}
+
 }
