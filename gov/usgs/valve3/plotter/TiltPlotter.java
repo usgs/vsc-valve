@@ -702,6 +702,10 @@ public class TiltPlotter extends RawDataPlotter {
 			
 			// plot configuration
 			if (!forExport) {
+				v3p.setExportable(true);
+			}
+			
+			/* if (!forExport) {
 				if (rk == 0) {
 					v3p.setExportable(false);
 				} else {
@@ -713,7 +717,7 @@ public class TiltPlotter extends RawDataPlotter {
 				if (rk == 0) {
 					throw new Valve3Exception( "Data Export Not Available for Best Possible Rank");
 				}
-			}
+			} */
 			break;
 			
 		case TILT_VECTORS:

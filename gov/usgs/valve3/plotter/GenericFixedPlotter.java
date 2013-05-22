@@ -366,6 +366,10 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		
 		// plot configuration
 		if (!forExport) {
+			v3p.setExportable(true);
+		}
+		
+		/* if (!forExport) {
 			if (rk == 0) {
 				v3p.setExportable(false);
 			} else {
@@ -377,7 +381,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 			if (rk == 0) {
 				throw new Valve3Exception( "Data Export Not Available for Best Possible Rank");
 			}
-		}
+		} */
 		
 		// this is a legitimate request so lookup the data from the database and plot it
 		getData(comp);

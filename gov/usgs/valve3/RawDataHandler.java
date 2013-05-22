@@ -247,8 +247,8 @@ public class RawDataHandler implements HttpHandler
 					int rankID = component.getInt( "rk" );
 					if ( rankID != fn_rankID )
 						if ( fn_rankID == -1 ) {
-							if ( rankID == 0 )
-								throw new Valve3Exception( "Mixed-rank export not supported" );
+							// if ( rankID == 0 )
+								// throw new Valve3Exception( "Mixed-rank export not supported" );
 							fn_rankID = rankID;
 						} else
 							throw new Valve3Exception( "Multi-rank export not supported" );
@@ -257,12 +257,17 @@ public class RawDataHandler implements HttpHandler
 					if ( dsd == null ) {
 						fn_rank = "RankNbr" + fn_rankID;
 					} else {
-						if ( ranksMap == null ) {
-							ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+						if (fn_rankID == 0) {
+							fn_rank = "Best Possible Rank";
+						} else {
+							if ( ranksMap == null ) {
+								ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());
+							}
+							fn_rank = ranksMap.get(fn_rankID).getName();
 						}
-						fn_rank = ranksMap.get(fn_rankID).getName();
 					}
 				}
+				fn_rank = fn_rank.replaceAll("\\s", "");
 				timeZone = component.getTimeZone().getID();
 				dfc.setTimeZone(TimeZone.getTimeZone(timeZone));
 				cmtBits.put( "timezone", timeZone);
@@ -275,7 +280,7 @@ public class RawDataHandler implements HttpHandler
 				cmtBits.put( "source", fn_source );
 				String outputType = component.get( "o" );
 				fn = df.format(now) + "_" 
-					+ fn_source.replaceAll( "-", "_")
+					+ fn_source.replaceAll( "-", "_") + "_"
 					+ (fn_rank==null ? "_NoRank" : fn_rank.replaceAll("-","_"));
 				filePath = Valve3.getInstance().getApplicationPath() + File.separatorChar + "data" + File.separatorChar + fn;
 				if ( !miniseed && outputType.equals("seed") )
