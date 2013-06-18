@@ -1157,8 +1157,9 @@ public abstract class RawDataPlotter extends Plotter {
 		boolean allowExpand = true;
 		
 		public AxisParameters(String axisType, Map<Integer, String> axisMap, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception{
-			if (!(axisType.equals("L") || axisType.equals("R"))) 
+			if (!(axisType.equals("L") || axisType.equals("R"))) {
 				throw new Valve3Exception("Illegal axis type: " + axisType);
+			}
 			if(index==-1) {
 				for (int i = 0; i < axisMap.size(); i++) {
 					setParameters(axisType, axisMap.get(i), gdm, i, comp, mr);
@@ -1169,8 +1170,9 @@ public abstract class RawDataPlotter extends Plotter {
 		}
 		
 		private void setParameters(String axisType, String mapAxisType, GenericDataMatrix gdm, int index, PlotComponent comp, MatrixRenderer mr) throws Valve3Exception {
-			
+
 			int offset;
+			String ysMin, ysMax = "";
 			boolean yMinAuto = false;
 			boolean yMaxAuto = false;
 			boolean yMinMean = false;
@@ -1190,9 +1192,17 @@ public abstract class RawDataPlotter extends Plotter {
 					mr.setVisible(index, true);
 				}
 				
-				String ysMin	= comp.get("ys" + mapAxisType + "Min").toLowerCase();
-				String ysMax	= comp.get("ys" + mapAxisType + "Max").toLowerCase();
-				
+				try {
+					ysMin	= comp.get("ys" + mapAxisType + "Min").toLowerCase();
+				} catch (NullPointerException e) {
+					ysMin	= "";
+				}
+				try {
+					ysMax	= comp.get("ys" + mapAxisType + "Max").toLowerCase();
+				} catch (NullPointerException e) {
+					ysMin	= "";
+				}
+
 				// if not defined or empty, default to auto scaling
 				if (ysMin.startsWith("a") || ysMin == null || ysMin.trim().isEmpty()) {
 					yMinAuto = true;
@@ -1232,7 +1242,7 @@ public abstract class RawDataPlotter extends Plotter {
 				}
 				
 				if (yMin > yMax) throw new Valve3Exception("Illegal " + mapAxisType + " axis values");
-				
+
 				double buffer = 0.05;				
 				if (yMin == yMax && yMin != 0) {
 					buffer = Math.abs(yMin * 0.05);

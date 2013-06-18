@@ -97,7 +97,7 @@ public class PlotComponent
 	 * @param key parameter name
 	 * @return value of given parameter
 	 */
-	public String get(String key)
+	public String get(String key) throws NullPointerException
 	{
 		return params.get(key);
 	}
