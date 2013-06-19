@@ -50,8 +50,15 @@ create_hypocentermenu = function(menu) {
 	menu.presubmit = function(pr, pc) {	
 	
 		// define variables from hypocenter menu
-		var north = parseFloat(document.getElementById(menu.id + "_north").value);
-		var south = parseFloat(document.getElementById(menu.id + "_south").value);
+		var north	= parseFloat(document.getElementById(menu.id + "_north").value);
+		var south	= parseFloat(document.getElementById(menu.id + "_south").value);
+		var east	= parseFloat(document.getElementById(menu.id + "_east").value);
+		var west	= parseFloat(document.getElementById(menu.id + "_west").value);
+
+		if (isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west)) {
+			alert("Area of Interest must be populated with numeric values.");
+			return false;
+		}
 		
 		// call the main presubmit function
 		if (!Menu.prototype.presubmit.call(this)) {
