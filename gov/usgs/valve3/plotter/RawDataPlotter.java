@@ -132,34 +132,11 @@ public abstract class RawDataPlotter extends Plotter {
 		// declare variables
 		String nameArg = null;
 		
-		// Check for named channels, ranks, outputAll
+		// Check for named ranks, outputAll
 		if ( forExport ) {
 			exportAll = comp.getBoolean("outputAll");
 			outputType	= comp.get( "o" );
 			inclTime	= outputType.equals( "csv" )||outputType.equals("xml")||outputType.equals("json");
-			nameArg		= comp.get( "chNames" );
-			if ( nameArg != null ) {
-				String[] names = nameArg.split(",");
-				int left = names.length;
-				ch = null;
-				for ( Channel c : channelsMap.values() ) {
-					String cname = c.getCode();
-					for ( int i=0; i<left; i++ )
-						if ( cname.equals(names[i]) ) {
-							names[i] = names[left-1];
-							if ( ch==null )
-								ch = "" + c.getCID();
-							else
-								ch = ch + "," + c.getCID();
-							left--;
-							break;
-						}
-					if ( left == 0 )
-						break;
-				}
-			} else {
-				ch = comp.getString("ch");
-			}
 		
 			nameArg = comp.get( "rkName" );
 			if ( nameArg != null ) {
@@ -173,8 +150,28 @@ public abstract class RawDataPlotter extends Plotter {
 				if ( !found )
 				    throw new Valve3Exception( "Unknown rank name :" + nameArg );
 			}
-			
-		// channels are defined in the ch parameter if it is not for export
+		}
+		
+		nameArg		= comp.get( "chNames" );
+		if ( nameArg != null ) {
+			String[] names = nameArg.split(",");
+			int left = names.length;
+			ch = null;
+			for ( Channel c : channelsMap.values() ) {
+				String cname = c.getCode();
+				for ( int i=0; i<left; i++ )
+					if ( cname.equals(names[i]) ) {
+						names[i] = names[left-1];
+						if ( ch==null )
+							ch = "" + c.getCID();
+						else
+							ch = ch + "," + c.getCID();
+						left--;
+						break;
+					}
+				if ( left == 0 )
+					break;
+			}
 		} else {
 			ch = comp.getString("ch");
 		}
