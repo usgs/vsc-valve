@@ -552,7 +552,7 @@ public abstract class RawDataPlotter extends Plotter {
 		mr.setExtents(startTime+timeOffset, endTime+timeOffset, ap.yMin, ap.yMax);
 		AxisRenderer ar = new AxisRenderer(mr);
 		if(yTickValues){
-			ar.createRightTickLabels(SmartTick.autoTick(ap.yMin, ap.yMax, leftTicks, false), null);
+			ar.createRightTickLabels(SmartTick.autoTick(mr.getMinY(), mr.getMaxY(), leftTicks, false), null);
 		}
 		mr.setAxis(ar);
 		if(yUnits){
