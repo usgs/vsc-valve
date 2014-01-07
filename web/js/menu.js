@@ -132,6 +132,7 @@ function handleMenu(xml) {
 			var lineType		= items[j].getElementsByTagName("lineType")[0].firstChild.data;
 			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
 			var biasType		= items[j].getElementsByTagName("biasType")[0].firstChild.data;
+			var bestPossible	= items[j].getElementsByTagName("bestPossible")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
 			var timeShortcuts	= "";
@@ -143,6 +144,7 @@ function handleMenu(xml) {
 			m.lineType		= lineType;
 			m.plotSeparately = plotSeparately;
 			m.biasType      = biasType;
+			m.bestPossible	= bestPossible;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
 			li.id			= menuid;
@@ -715,12 +717,14 @@ function populateRanks(menu) {
 				opts[i] = opt;
 			}
 			
-			// add in the option for best possible rank
-			var opt		= document.createElement('option');
-			opt.value	= "0";
-			opt.appendChild(document.createTextNode("Best Possible Rank"));
-			select.appendChild(opt);
-			opts[i]		= opt;
+			// add in the option for best possible rank, if configured
+			if (menu.bestPossible == "true") {
+				var opt		= document.createElement('option');
+				opt.value	= "0";
+				opt.appendChild(document.createTextNode("Best Possible Rank"));
+				select.appendChild(opt);
+				opts[i]		= opt;
+			}
 		});
 }
 
