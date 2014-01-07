@@ -84,8 +84,8 @@ abstract public class Plotter
 	 * Returns flag if plotter output several components separately or as one plot
 	 * @return boolean flag
 	 */
-	public boolean isPlotComponentsSeparately(){
-		String value = plotterConfig.getString("plotComponentsSeparately");
+	public boolean isPlotSeparately(){
+		String value = plotterConfig.getString("plotSeparately");
 		if(value==null || !value.equals("true")){
 			return false;
 		} else {

@@ -90,7 +90,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				column.checked = Util.stringToBoolean(comp.get(column.name));
 			legendsCols[i] = column.description;
 			if (column.checked) {
-				if (forExport || isPlotComponentsSeparately()) {
+				if (forExport || isPlotSeparately()) {
 					axisMap.put(i, "L");
 					leftUnit = column.unit;
 					leftLines++;
@@ -199,7 +199,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 		
 		// calculate the number of plot components that will be displayed per channel
 		int channelCompCount = 0;
-		if(isPlotComponentsSeparately()){
+		if(isPlotSeparately()){
 			for(Column col: columnsList){
 				if(col.checked){
 					channelCompCount++;
@@ -348,7 +348,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 				
 			} else {
 				// create an individual matrix renderer for each component selected
-				if (isPlotComponentsSeparately()){
+				if (isPlotSeparately()){
 					for (int i = 0; i < columnsList.size(); i++) {
 						Column col = columnsList.get(i);
 						if(col.checked){

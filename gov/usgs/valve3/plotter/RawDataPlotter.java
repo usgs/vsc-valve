@@ -1184,7 +1184,7 @@ public abstract class RawDataPlotter extends Plotter {
 			if (!(mapAxisType.equals("L") || mapAxisType.equals("R") || mapAxisType.equals(""))) 
 				throw new Valve3Exception("Illegal axis type in axis map: " + mapAxisType);
 			
-			if (mapAxisType.equals(axisType) || isPlotComponentsSeparately()){
+			if (mapAxisType.equals(axisType) || isPlotSeparately()){
 				if (mapAxisType.equals(axisType)){
 					mr.setVisible(index, true);
 				}
@@ -1381,7 +1381,7 @@ public abstract class RawDataPlotter extends Plotter {
 				for (String sd: stringList) {
 					SuppDatum sdo = new SuppDatum(sd);
 					int offset;
-					if (isPlotComponentsSeparately()) {
+					if (isPlotSeparately()) {
 						offset = (Integer)chMap.get(sdo.cid) * colMap.size() + (Integer)colMap.get(sdo.colid);
 					} else {
 						offset = (Integer)chMap.get( sdo.cid );

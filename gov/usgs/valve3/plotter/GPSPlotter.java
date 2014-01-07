@@ -134,7 +134,7 @@ public class GPSPlotter extends RawDataPlotter {
 				legendsCols[i]	= column.description;
 				bypassCols[i]	= column.bypassmanip;
 				if (column.checked) {
-					if(isPlotComponentsSeparately()){
+					if(isPlotSeparately()){
 						axisMap.put(i, "L");
 						leftUnit	= column.unit;
 						leftLines++;
@@ -476,7 +476,7 @@ public class GPSPlotter extends RawDataPlotter {
 			case TIME_SERIES:
 				// calculate the number of plot components that will be displayed per channel
 				int channelCompCount = 0;
-				if(isPlotComponentsSeparately()){
+				if(isPlotSeparately()){
 					for(Column col: columnsList){
 						if(col.checked){
 							channelCompCount++;
@@ -590,7 +590,7 @@ public class GPSPlotter extends RawDataPlotter {
 						}
 
 						// create an individual matrix renderer for each component selected
-						if (isPlotComponentsSeparately()) {
+						if (isPlotSeparately()) {
 							for (int i = 0; i < columnsList.size(); i++) {
 								Column col = columnsList.get(i);
 								if(col.checked){
