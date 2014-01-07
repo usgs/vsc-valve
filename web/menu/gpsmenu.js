@@ -25,6 +25,9 @@ create_gpsmenu = function(menu) {
 		// default initialization
 		Menu.prototype.initialize.call(this);	
 		
+		// filter channels based on default channel type filter
+		Menu.prototype.filterChanged.call(this);
+		
 		// populate columns
 		populateGPSColumns(this);
 		
@@ -33,7 +36,7 @@ create_gpsmenu = function(menu) {
 		
 		// initialize the time shortcuts
 		if (menu.timeShortcuts[0] == "") {
-			menu.timeShortcuts	= new Array("-1m", "-3m", "-6m", "-1y", "-2y", "-3y");
+			menu.timeShortcuts	= new Array("-1d", "-3d", "-1w", "-2w", "-1m", "-3m", "-6m", "-1y", "-3y", "-5y", "-10y", "-20y");
 		}
 		
 		var f	= this.getForm();

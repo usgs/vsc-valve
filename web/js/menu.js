@@ -299,6 +299,7 @@ function populateChannelTypes(menu) {
 				var opt	= document.createElement('option');					
 				opt.value = ss[0];				
 				opt.appendChild(document.createTextNode(ss[1]));
+				if (ss[2] == "1") { opt.selected = true; }
 				select.appendChild(opt);
 				opts[i] = opt;
 			}
