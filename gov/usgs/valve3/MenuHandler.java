@@ -73,32 +73,33 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
-					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotComponentsSeparately"), false);
-					char lt;
+					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotSeparately"), false);
+					boolean bestPossible = Util.stringToBoolean(cf.getString("bestPossible"), true);
+					char lineType;
 					String value = cf.getString("plotter.lineType");
 					if(value==null){
-						lt = 'l';
+						lineType = 'l';
 					} else {
 						if(value.length() != 1)
-							lt = 'l';
+							lineType = 'l';
 						else
-							lt = value.charAt(0);
+							lineType = value.charAt(0);
 					}
-					char bt;
-					value = cf.getString("biastype");
+					char biasType;
+					value = cf.getString("biasType");
 					if ( value == null )
-						bt = '0';
+						biasType = '0';
 					else if ( value.equals("mean") )
-						bt = '1';
+						biasType = '1';
 					else if ( value.equals("initial") )
-						bt = '2';
+						biasType = '2';
 					else
-						bt = '0';
+						biasType = '0';
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lt, plotSeparately, bt);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lineType, plotSeparately, bestPossible, biasType);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}

@@ -16,6 +16,7 @@ public class MenuItem implements Comparable<MenuItem>
 	public String shortcuts;
 	public char lineType;
 	public boolean plotSeparately;
+	public boolean bestPossible;
 	public char biasType;
 	
 	/**
@@ -30,17 +31,18 @@ public class MenuItem implements Comparable<MenuItem>
 	 * @param plotSeparately plot items separately
 	 * @param biasType menu item type of bias removed
 	 */
-	public MenuItem(String id, String n, String i, String f, int so, String sc, char lt, boolean plotSeparately, char biasType)
+	public MenuItem(String menuId, String name, String icon, String file, int sortOrder, String shortcuts, char lineType, boolean plotSeparately, boolean bestPossible, char biasType)
 	{
-		menuId		= id;
-		name		= n;
-		icon		= i;
-		file		= f;
-		sortOrder	= so;
-		shortcuts	= sc;
-		this.lineType = lt;
+		this.menuId			= menuId;
+		this.name			= name;
+		this.icon			= icon;
+		this.file			= file;
+		this.sortOrder		= sortOrder;
+		this.shortcuts		= shortcuts;
+		this.lineType 		= lineType;
 		this.plotSeparately = plotSeparately;
-		this.biasType = biasType;
+		this.bestPossible	= bestPossible;
+		this.biasType 		= biasType;
 	}
 	
 	/**
@@ -58,6 +60,7 @@ public class MenuItem implements Comparable<MenuItem>
 			  "<timeShortcuts>" + shortcuts + "</timeShortcuts>\n" +
 			  "<lineType>" + lineType + "</lineType>\n" +
 			  "<plotSeparately>" + new Boolean(plotSeparately) + "</plotSeparately>\n" +
+			  "<bestPossible>" + new Boolean(bestPossible) + "</bestPossible>\n" +
 			  "<biasType>" + biasType + "</biasType>\n" + 
 			  "</menuitem>\n";
 		return xml;
