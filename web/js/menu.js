@@ -376,6 +376,11 @@ function populateGenericColumns(menu) {
 			colDiv.id = menu.id + 'colNames';
 			uniDiv.id = menu.id + 'colUnits';
 			
+			// Set style to make list scrollable
+			if (cols.length > 17) {
+				colDiv.style.overflowY = 'scroll';
+				colDiv.style.height = '276px';
+			}
 			/*
 			var p = document.createElement('p');
 			var l = document.createTextNode('Name: Units');

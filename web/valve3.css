@@ -30,7 +30,7 @@ div#container
 
 #uiPanel
 {
-	width: 980px;
+	width: 1024px;
 	margin: 0 auto;
 }
 
@@ -119,7 +119,7 @@ div.content h1.min
 				
 div.topBar
 {
-	width: 980px;
+	width: 1024px;
 	font-weight: bold;
 	border:	1px solid rgb( 145, 155, 156 );
 	background: url(images/bg.png) repeat-x;
@@ -151,7 +151,7 @@ div.openPanel
 	margin-bottom: 5px;
 	border:	1px solid rgb( 145, 155, 156 );
 	background: #ece9d8;
-	width: 620px;
+	width: 664px;
 	height: 300px;
 	padding: 4px;
 }
@@ -387,10 +387,13 @@ div.box p
 .w150 { width: 150px; }
 .w155 { width: 155px; }
 .w160 { width: 160px; }
+.w164 { width: 164px; }
 .w180 { width: 180px; }
+.w184 { width: 184px; }
 .w185 { width: 185px; }
 .w200 { width: 200px; }
 .w220 { width: 220px; }
+.w229 { width: 229px; }
 .w240 { width: 240px; }
 .w260 { width: 260px; }
 .w280 { width: 280px; }
