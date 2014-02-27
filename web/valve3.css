@@ -364,6 +364,13 @@ div.box p
 	font-family: Verdana;
 }
 
+div.minmax label
+{
+	display: block;
+	float: left;
+	width: 35px;
+}
+
 .columns { font-size: 10px; }
 
 .p0 { padding: 0px; }
