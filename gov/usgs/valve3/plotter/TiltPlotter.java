@@ -514,9 +514,10 @@ public class TiltPlotter extends RawDataPlotter {
 						azimuthValue = 0.0;
 						break;
 					}
-					azimuthValue 	   -= 90.0;
-					azimuthRadial		= (azimuthValue + 90.0) % 360.0;
-					azimuthTangential	= (azimuthValue + 180.0) % 360.0;
+					// azimuthValue 	   -= 90.0;
+					azimuthValue		= (azimuthValue) % 360.0;
+					azimuthRadial		= azimuthValue;
+					azimuthTangential	= (azimuthValue + 90.0) % 360.0;
 					
 					// subtract the mean from the data to get it on a zero based scale (for east and north)
 					data.add(2, -data.mean(2));
