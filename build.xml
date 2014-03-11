@@ -103,6 +103,11 @@ dist    -- creates a binary distribution
         		<include name="VDX/**/*.java"/>
         		<include name="Winston/**/*.java"/>
  	        </fileset>
+	    	<classpath>
+	    		<fileset dir="../USGS/contrib">
+					<include name="*.jar" />
+				</fileset>
+	    	</classpath>
 	    </javadoc>
 
 	    <tar destfile="${dist-basedir}/valve3-bin.tar.gz" basedir="${dist-tempdir}" compression="gzip" />
