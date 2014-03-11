@@ -22,6 +22,7 @@ import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
+import gov.usgs.util.CodeTimer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -37,6 +38,7 @@ import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
+import gov.usgs.vdx.data.gps.Estimator;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
 
@@ -50,7 +52,7 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * 
  * Generate images of coordinate time series and velocity maps from vdx source
  *
- * @author Dan Cervelli, Loren Antolik
+ * @author Dan Cervelli, Loren Antolik, Peter Cervelli
  */
 public class GPSPlotter extends RawDataPlotter {
 	
@@ -353,61 +355,68 @@ public class GPSPlotter extends RawDataPlotter {
 			
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
 			
-			DoubleMatrix2D g = null;
-			g = data.createVelocityKernel();
-			DoubleMatrix2D m = GPS.solveWeightedLeastSquares(g, data.getXYZ(), data.getCovariance());
+			DoubleMatrix2D G = null;
+			G = data.createVelocityKernel();
+			
+			CodeTimer ct = new CodeTimer("Velocity Estimation");	
+			
+			Estimator est = new Estimator(G, data.getXYZ(), data.getCovariance());
+			est.solve();
+			DoubleMatrix2D v = est.getModel().viewPart(0, 0, 3, 1);
+			DoubleMatrix2D vcov = est.getModelCovariance().viewPart(0,0,3,3);
+			
 			DoubleMatrix2D t = GPS.createENUTransform(channel.getLon(), channel.getLat());
-			DoubleMatrix2D e = GPS.getErrorParameters(g, data.getCovariance());
-			DoubleMatrix2D t2 = GPS.createFullENUTransform(channel.getLon(), channel.getLat(), 2);
-			e = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t2, e), t2.viewDice());
-			DoubleMatrix2D v = m.viewPart(0, 0, 3, 1);
-	
-			//logger.info("XYZ Velocity: " + v.getQuick(0,0) + " " + v.getQuick(1,0) + " " + v.getQuick(2,0));
-			DoubleMatrix2D vt = Algebra.DEFAULT.mult(t, v);
-			if (vt.getQuick(0, 0) == 0 && vt.getQuick(1, 0) == 0 && vt.getQuick(2, 0) == 0) {
+
+			v = Algebra.DEFAULT.mult(t, v);
+			vcov = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t, vcov), t.viewDice());
+			
+			if (se)
+				vcov.assign(cern.jet.math.Mult.mult(est.getChi2()));
+
+			if (v.getQuick(0, 0) == 0 && v.getQuick(1, 0) == 0 && v.getQuick(2, 0) == 0) {
 				continue;
 			}
-			
-			if (se) {
-				DoubleMatrix2D gm = Algebra.DEFAULT.mult(g, m);
-				DoubleMatrix2D r = data.getXYZ().copy().assign(gm, cern.jet.math.Functions.minus);
-				DoubleMatrix2D sdi = Algebra.DEFAULT.inverse(data.getCovariance());
-				DoubleMatrix2D c2 = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(r.viewDice(), sdi), r);
-				double chi2 = c2.getQuick(0, 0) / (data.getXYZ().rows() - 6);
-				e.assign(cern.jet.math.Mult.mult(chi2));
-			}
-			
-			//logger.info("Velocity: " + vt);
-			//logger.info("Error: " + e);
-			
-			DoubleMatrix2D es = e.viewPart(0, 0, 2, 2);
-			EigenvalueDecomposition ese = new EigenvalueDecomposition(es);
+
+			EigenvalueDecomposition ese = new EigenvalueDecomposition(vcov.viewPart(0, 0, 2, 2));
 			DoubleMatrix1D evals = ese.getRealEigenvalues();
 			DoubleMatrix2D evecs = ese.getV();
-			//logger.info("evals: " + evals);
-			//logger.info("evecs: " + evecs);
+
 			double phi = Math.atan2(evecs.getQuick(0, 0), evecs.getQuick(1, 0));
 			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
 			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
-			//logger.info("w: " + w + ", h: " + h);
 			
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(channel.getLonLat());
 			evr.x = ppt.x;
 			evr.y = ppt.y;
-			evr.u = vt.getQuick(0, 0);
-			evr.v = vt.getQuick(1, 0);
-			evr.z = vt.getQuick(2, 0);
+			evr.u = v.getQuick(0, 0);
+			evr.v = v.getQuick(1, 0);
+			evr.z = v.getQuick(2, 0);
 			evr.ellipseOrientation = phi;
 			evr.ellipseWidth = Math.max(w, h) * 2;
 			evr.ellipseHeight = Math.min(w, h) * 2;
 			evr.displayHoriz = hs;
 			evr.displayVert = vs;			
-			evr.sigZ =  e.getQuick(2, 2);
+			evr.sigZ =  vcov.getQuick(2, 2);
 			maxMag = Math.max(Math.max(evr.getMag(), Math.abs(evr.z)), maxMag);
 			v3p.getPlot().addRenderer(evr);
 			vrs.add(evr);
+			
+			ct.stopAndReport();
+//			System.out.println("Total execution time: " + ct.getRunTimeMillis());
+//			
+//			System.out.println("Velocity:");
+//			System.out.println(v.getQuick(0,0) + " " + v.getQuick(0,1)  + " " + v.getQuick(0,2));
+//			System.out.println("");
+//			System.out.println("Covariance:");
+//			System.out.println(vcov.getQuick(0,0) + " " + vcov.getQuick(0,1)  + " " + vcov.getQuick(0,2));
+//			System.out.println(vcov.getQuick(1,0) + " " + vcov.getQuick(1,1)  + " " + vcov.getQuick(1,2));
+//			System.out.println(vcov.getQuick(2,0) + " " + vcov.getQuick(2,1)  + " " + vcov.getQuick(2,2));
+//			System.out.println("");
+//			System.out.println("Chi2");
+//			System.out.println(est.getChi2());
+//			System.out.println("");
 		}
 		
 		if (maxMag == -1E300) {
@@ -452,6 +461,7 @@ public class GPSPlotter extends RawDataPlotter {
 		comp.setTranslation(trans);
 		comp.setTranslationType("map");
 		v3p.addComponent(comp);
+
 	}
 
 	/**
