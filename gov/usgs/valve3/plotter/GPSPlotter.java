@@ -10,16 +10,16 @@ import java.util.Map;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.MatrixRenderer;
-import gov.usgs.plot.EllipseVectorRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.plot.render.EllipseVectorRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.Renderer;
+import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.CodeTimer;
@@ -41,7 +41,6 @@ import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.Estimator;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
-
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;

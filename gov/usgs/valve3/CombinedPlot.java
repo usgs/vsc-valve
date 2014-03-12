@@ -1,19 +1,19 @@
 package gov.usgs.valve3;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.ColorCycler;
-import gov.usgs.plot.DataPointRenderer;
-import gov.usgs.plot.FrameRenderer;
-import gov.usgs.plot.LegendRenderer;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.PointRenderer;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.ShapeRenderer;
-import gov.usgs.plot.SmartTick;
-import gov.usgs.plot.TextRenderer;
-import gov.usgs.plot.LegendRenderer.LegendEntry;
+import gov.usgs.plot.color.ColorCycler;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.DataPointRenderer;
+import gov.usgs.plot.render.FrameRenderer;
+import gov.usgs.plot.render.LegendRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.PointRenderer;
+import gov.usgs.plot.render.Renderer;
+import gov.usgs.plot.render.ShapeRenderer;
+import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.plot.render.LegendRenderer.LegendEntry;
 import gov.usgs.util.Log;
 import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
 

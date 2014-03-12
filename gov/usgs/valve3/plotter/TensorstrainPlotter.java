@@ -2,9 +2,9 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;

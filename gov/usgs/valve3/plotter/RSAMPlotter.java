@@ -7,16 +7,16 @@ import java.util.Map;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.DataPointRenderer;
-import gov.usgs.plot.DefaultFrameDecorator;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.ShapeRenderer;
-import gov.usgs.plot.SmartTick;
-import gov.usgs.plot.DefaultFrameDecorator.Location;
+import gov.usgs.plot.decorate.DefaultFrameDecorator;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.DataPointRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.Renderer;
+import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -33,7 +33,6 @@ import gov.usgs.vdx.data.HistogramExporter;
 import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.rsam.RSAMData;
-
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**

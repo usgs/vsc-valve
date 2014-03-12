@@ -2,12 +2,8 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.EllipseVectorRenderer;
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Renderer;
-import gov.usgs.plot.TextRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -24,12 +20,15 @@ import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.tilt.TiltData;
-
 import gov.usgs.proj.GeoRange;
 import gov.usgs.plot.map.GeoLabel;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.plot.render.EllipseVectorRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.Renderer;
+import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.proj.TransverseMercator;
 
 import java.awt.Color;

@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import gov.usgs.plot.MatrixRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
