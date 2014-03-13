@@ -1,5 +1,30 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.math.DownsamplingType;
+import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
+import gov.usgs.plot.decorate.DefaultFrameDecorator;
+import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.LegendRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.util.Pool;
+import gov.usgs.util.Time;
+import gov.usgs.util.Util;
+import gov.usgs.valve3.PlotComponent;
+import gov.usgs.valve3.Plotter;
+import gov.usgs.valve3.Valve3;
+import gov.usgs.valve3.Valve3Exception;
+import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.vdx.ExportConfig;
+import gov.usgs.vdx.client.VDXClient;
+import gov.usgs.vdx.data.Channel;
+import gov.usgs.vdx.data.Column;
+import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.Rank;
+import gov.usgs.vdx.data.SuppDatum;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -10,33 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 import java.util.Vector;
-
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.decorate.DefaultFrameDecorator;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.LegendRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Time;
-import gov.usgs.util.Util;
-import gov.usgs.vdx.ExportConfig;
-import gov.usgs.valve3.PlotComponent;
-import gov.usgs.valve3.Plotter;
-import gov.usgs.valve3.result.Valve3Plot;
-import gov.usgs.valve3.Valve3;
-import gov.usgs.valve3.Valve3Exception;
-import gov.usgs.vdx.client.VDXClient;
-import gov.usgs.vdx.client.VDXClient.DownsamplingType;
-import gov.usgs.vdx.data.Channel;
-import gov.usgs.vdx.data.Column;
-import gov.usgs.vdx.data.Rank;
-import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.SuppDatum;
+import java.util.logging.Logger;
 
 /**
  * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
