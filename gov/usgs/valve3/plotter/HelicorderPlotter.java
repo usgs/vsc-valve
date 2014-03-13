@@ -1,7 +1,10 @@
 package gov.usgs.valve3.plotter;
 
+import gov.usgs.plot.HelicorderSettings;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.render.HelicorderRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
 import gov.usgs.valve3.PlotComponent;
@@ -12,10 +15,8 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.heli.HelicorderData;
-import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
-import gov.usgs.vdx.data.heli.plot.HelicorderSettings;
 import gov.usgs.vdx.data.MatrixExporter;
+
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;

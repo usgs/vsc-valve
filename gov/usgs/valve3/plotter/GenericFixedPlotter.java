@@ -4,6 +4,7 @@ import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
@@ -17,7 +18,6 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 

@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.Vector;
 
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.decorate.DefaultFrameDecorator;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
@@ -33,7 +34,6 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.client.VDXClient.DownsamplingType;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
-import gov.usgs.vdx.data.GenericDataMatrix;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.SuppDatum;

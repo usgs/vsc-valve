@@ -14,8 +14,8 @@ import gov.usgs.plot.render.Renderer;
 import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.plot.render.LegendRenderer.LegendEntry;
+import gov.usgs.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.util.Log;
-import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;

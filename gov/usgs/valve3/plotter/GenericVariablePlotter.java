@@ -2,6 +2,7 @@ package gov.usgs.valve3.plotter;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
@@ -17,7 +18,6 @@ import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Column;
-import gov.usgs.vdx.data.GenericDataMatrix;
 
 import java.awt.Color;
 import java.util.ArrayList;
