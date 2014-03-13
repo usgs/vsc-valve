@@ -7,6 +7,7 @@ import java.util.Map;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.GenericDataMatrix;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.UtilException;
@@ -19,7 +20,6 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.MatrixExporter;
-import gov.usgs.vdx.data.rsam.RSAMData;
 
 /**
  * Get RSAM information from vdx server and  

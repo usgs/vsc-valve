@@ -1,18 +1,15 @@
 package gov.usgs.valve3.plotter;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import gov.usgs.math.BinSize;
 import gov.usgs.math.Butterworth;
 import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.GenericDataMatrix;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.decorate.DefaultFrameDecorator;
-import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
@@ -30,9 +27,13 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.HistogramExporter;
-import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.MatrixExporter;
-import gov.usgs.vdx.data.rsam.RSAMData;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**

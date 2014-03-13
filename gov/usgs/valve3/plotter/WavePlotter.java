@@ -19,7 +19,7 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.SliceWaveExporter;
+import gov.usgs.vdx.data.seismic.SliceWaveExporter;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
