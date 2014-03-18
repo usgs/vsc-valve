@@ -558,24 +558,23 @@ public class TiltPlotter extends RawDataPlotter {
 									Double singleBand = 0.0;
 									if ( !Double.isNaN(filterMax) ) {
 										if ( filterMax <= 0 )
-											throw new Valve3Exception("Illegal max hertz value.");
+											throw new Valve3Exception("Illegal max period value.");
 									} else {
-										ft = FilterType.HIGHPASS;
+										ft = FilterType.LOWPASS;
 										singleBand = filterMin;
 									}
 									if ( !Double.isNaN(filterMin) ) {
 										if ( filterMin <= 0 )
-											throw new Valve3Exception("Illegal min hertz value.");
+											throw new Valve3Exception("Illegal min period value.");
 									} else {
-										ft = FilterType.LOWPASS;
+										ft = FilterType.HIGHPASS;
 										singleBand = filterMax;
 									}
-									/* SBH
 									if ( ft == FilterType.BANDPASS )
-										bw.set(ft, 4, gdm.getSamplingRate(), filterMin, filterMax);
+										bw.set(ft, 4, Math.pow(filterPeriod, -1), Math.pow(filterMax, -1), Math.pow(filterMin, -1));
 									else
-										bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
-									gdm.filter(bw, true); */
+										bw.set(ft, 4, Math.pow(filterPeriod, -1), Math.pow(singleBand, -1), 0);
+									gdm.filter(bw, i+2, true);
 									break;
 								case 2: // Running median
 									gdm.set2median( i+2, filterPeriod );

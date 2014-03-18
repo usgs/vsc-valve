@@ -1279,10 +1279,20 @@ public abstract class RawDataPlotter extends Plotter {
 				if ( Double.isNaN(filterPeriod) )
 					throw new Valve3Exception("Illegal/missing period for filter");
 			} else {
-				filterMax = comp.getDouble("filter_arg1");
-				filterMin = comp.getDouble("filter_arg2");
-				if ( Double.isNaN(filterMax) && Double.isNaN(filterMax) )
+				filterMin		= comp.getDouble("filter_arg1");
+				filterMax		= comp.getDouble("filter_arg2");
+				if ( Double.isNaN(filterMin) && Double.isNaN(filterMax) )
 					throw new Valve3Exception("Illegal/missing bound(s) for bandpass");
+				// if (filterMax <= filterMin)
+					// throw new Valve3Exception("Min Period must be less than Max Period");
+				try {
+					// this will throw exception for menus that don't collect the filter period (waveforms)
+					filterPeriod	= comp.getDouble("filter_arg3");
+					if ( Double.isNaN(filterPeriod))
+						throw new Valve3Exception("Missing Samp Rate for bandpass");
+				} catch (Valve3Exception e) {
+					filterPeriod	= Double.NaN;
+				}
 			}
 		}
 		try {

@@ -283,28 +283,25 @@ public class TensorstrainPlotter extends RawDataPlotter {
 						Butterworth bw = new Butterworth();
 						FilterType ft = FilterType.BANDPASS;
 						Double singleBand = 0.0;
-						if (!Double.isNaN(filterMax)) {
-							if (filterMax <= 0)
-								throw new Valve3Exception(
-										"Illegal max hertz value.");
-						} else {
-							ft = FilterType.HIGHPASS;
-							singleBand = filterMin;
-						}
-						if (!Double.isNaN(filterMin)) {
-							if (filterMin <= 0)
-								throw new Valve3Exception(
-										"Illegal min hertz value.");
+						if ( !Double.isNaN(filterMax) ) {
+							if ( filterMax <= 0 )
+								throw new Valve3Exception("Illegal max period value.");
 						} else {
 							ft = FilterType.LOWPASS;
+							singleBand = filterMin;
+						}
+						if ( !Double.isNaN(filterMin) ) {
+							if ( filterMin <= 0 )
+								throw new Valve3Exception("Illegal min period value.");
+						} else {
+							ft = FilterType.HIGHPASS;
 							singleBand = filterMax;
 						}
-						/*
-						 * SBH if ( ft == FilterType.BANDPASS ) bw.set(ft, 4,
-						 * gdm.getSamplingRate(), filterMin, filterMax); else
-						 * bw.set(ft, 4, gdm.getSamplingRate(), singleBand, 0);
-						 * gdm.filter(bw, true);
-						 */
+						if ( ft == FilterType.BANDPASS )
+							bw.set(ft, 4, Math.pow(filterPeriod, -1), Math.pow(filterMax, -1), Math.pow(filterMin, -1));
+						else
+							bw.set(ft, 4, Math.pow(filterPeriod, -1), Math.pow(singleBand, -1), 0);
+						gdm.filter(bw, i+2, true);
 						break;
 					case 2: // Running median
 						gdm.set2median(i + 2, filterPeriod);
