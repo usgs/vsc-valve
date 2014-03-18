@@ -76,9 +76,9 @@
 					<p>&nbsp;
 					</p>
 					<p> 
-						<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Max freq:</label>
+						<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Min freq:</label>
 					</p><p>
-						<label style="visibility: hidden;" id="dmo_filter_arg2_lbl" for="dmo_filter_arg2">Min freq:</label>
+						<label style="visibility: hidden;" id="dmo_filter_arg2_lbl" for="dmo_filter_arg2">Max freq:</label>
 					</p>
 					<p>
 						<label style='visibility:hidden;' id="dmo_debias_lbl" for="dmo_debias_period"">User value:</label>
@@ -120,8 +120,8 @@
 								lbl1.style.visibility='visible';
 								arg1.style.visibility='visible';
 								if (tos == 1 ) {
-									lbl1.innerHTML = 'Max freq:';
-									lbl2.innerHTML = 'Min freq:';
+									lbl1.innerHTML = 'Min freq:';
+									lbl2.innerHTML = 'Max freq:';
 									lbl2.style.visibility='visible';
 									arg2.style.visibility='visible';
 								} else {

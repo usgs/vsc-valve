@@ -93,7 +93,8 @@
 						</p>
 						<p> 
 							<input style="visibility: hidden;" type="text" id="dmo_filter_arg1" name="filter_arg1" size="8">
-						</p><p>
+						</p>
+						<p>
 							<input style="visibility: hidden;" type="text" id="dmo_filter_arg2" name="filter_arg2" size="8">
 						</p>
 						<p>
@@ -107,9 +108,10 @@
 						<p>&nbsp;
 						</p>
 						<p> 
-							<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Max freq:</label>
-						</p><p>
-							<label style="visibility: hidden;" id="dmo_filter_arg2_lbl" for="dmo_filter_arg2">Min freq:</label>
+							<label style="visibility: hidden;" for="dmo_filter_arg1" id="dmo_filter_arg1_lbl">Min period:</label>
+						</p>
+						<p>
+							<label style="visibility: hidden;" for="dmo_filter_arg2" id="dmo_filter_arg2_lbl">Max period:</label>
 						</p>
 						<p>
 							<label style='visibility:hidden;' id="dmo_debias_lbl" for="dmo_debias_period"">User value:</label>
@@ -142,23 +144,32 @@
 								var arg1 = document.getElementById(prefix+'dmo_filter_arg1');
 								var lbl2 = document.getElementById(prefix+'dmo_filter_arg2_lbl');
 								var arg2 = document.getElementById(prefix+'dmo_filter_arg2');
+								var lbl3 = document.getElementById(prefix+'dmo_filter_arg3_lbl');
+								var arg3 = document.getElementById(prefix+'dmo_filter_arg3');
 								if ( tos == 0 ) {
 									lbl1.style.visibility='hidden';
 									arg1.style.visibility='hidden';
 									lbl2.style.visibility='hidden';
 									arg2.style.visibility='hidden';
+									lbl3.style.visibility='hidden';
+									arg3.style.visibility='hidden';
 								} else {
 									lbl1.style.visibility='visible';
 									arg1.style.visibility='visible';
 									if (tos == 1 ) {
-										lbl1.innerHTML = 'Max freq:';
-										lbl2.innerHTML = 'Min freq:';
+										lbl1.innerHTML = 'Min period:';
+										lbl2.innerHTML = 'Max period:';
+										lbl3.innerHTML = 'Samp Rate, sec:';
 										lbl2.style.visibility='visible';
 										arg2.style.visibility='visible';
+										lbl3.style.visibility='visible';
+										arg3.style.visibility='visible';
 									} else {
 										lbl1.innerHTML = 'Period, sec:';
 										lbl2.style.visibility='hidden';
 										arg2.style.visibility='hidden';
+										lbl3.style.visibility='hidden';
+										arg3.style.visibility='hidden';
 									}
 								}">
 								<option selected value="0">No filter</option>
@@ -167,7 +178,9 @@
 								<option value="3">Running mean</option>
 							</select>
 						</p>
-						<p>&nbsp;
+						<p>
+							<label style="visibility: hidden;" id="dmo_filter_arg3_lbl" for="dmo_filter_arg3">Samp Rate, sec:</label>
+							<input style="visibility: hidden;" type="text" id="dmo_filter_arg3" name="filter_arg3" size="8">
 						</p>
 						<p>
 							<!-- <label for="norm_debias">Remove bias</label> -->
