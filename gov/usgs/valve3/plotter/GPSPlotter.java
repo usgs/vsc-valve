@@ -23,7 +23,6 @@ import gov.usgs.plot.render.Renderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.CodeTimer;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -41,10 +40,10 @@ import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.Estimator;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
-import cern.colt.matrix.DoubleMatrix1D;
+//import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
-import cern.colt.matrix.linalg.EigenvalueDecomposition;
+//import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 /**
  * TODO: check map sizes against client max height.
@@ -54,6 +53,8 @@ import cern.colt.matrix.linalg.EigenvalueDecomposition;
  * @author Dan Cervelli, Loren Antolik, Peter Cervelli
  */
 public class GPSPlotter extends RawDataPlotter {
+	
+	private final static double CONF95 = 5.99146454710798;
 	
 	private enum PlotType {		
 		TIME_SERIES, VELOCITY_MAP, DISPLACEMENT_MAP;		
@@ -73,7 +74,7 @@ public class GPSPlotter extends RawDataPlotter {
 	// variables acquired from the PlotComponent
 	private PlotType	plotType;
 	private String		bl;
-	private boolean		se, vs, hs;
+	private boolean		scaleErrors, showVertical, showHorizontal;
 
 	// variables used in this class
 	private GPSData baselineData;
@@ -166,19 +167,19 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		case VELOCITY_MAP:
 			try {
-				hs	= Util.stringToBoolean(comp.getString("hs"), true);
+				showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
 			} catch (Exception e) {
-				hs	= true;
+				showHorizontal = true;
 			}
 			try {
-				vs	= Util.stringToBoolean(comp.getString("vs"), false);
+				showVertical = Util.stringToBoolean(comp.getString("vs"), false);
 			} catch (Exception e) {
-				vs	= false;
+				showVertical = false;
 			}
 			try {
-				se	= Util.stringToBoolean(comp.getString("se"), true);
+				scaleErrors	= Util.stringToBoolean(comp.getString("se"), true);
 			} catch (Exception e) {
-				se	= true;
+				scaleErrors	= true;
 			}
 			break;
 		}
@@ -357,33 +358,30 @@ public class GPSPlotter extends RawDataPlotter {
 			DoubleMatrix2D G = null;
 			G = data.createVelocityKernel();
 			
-			CodeTimer ct = new CodeTimer("Velocity Estimation");	
-			
 			Estimator est = new Estimator(G, data.getXYZ(), data.getCovariance());
 			est.solve();
+			
 			DoubleMatrix2D v = est.getModel().viewPart(0, 0, 3, 1);
 			DoubleMatrix2D vcov = est.getModelCovariance().viewPart(0,0,3,3);
 			
 			DoubleMatrix2D t = GPS.createENUTransform(channel.getLon(), channel.getLat());
-
 			v = Algebra.DEFAULT.mult(t, v);
 			vcov = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t, vcov), t.viewDice());
-			
-			if (se)
+
+			if (scaleErrors)
 				vcov.assign(cern.jet.math.Mult.mult(est.getChi2()));
 
 			if (v.getQuick(0, 0) == 0 && v.getQuick(1, 0) == 0 && v.getQuick(2, 0) == 0) {
 				continue;
 			}
 
-			EigenvalueDecomposition ese = new EigenvalueDecomposition(vcov.viewPart(0, 0, 2, 2));
-			DoubleMatrix1D evals = ese.getRealEigenvalues();
-			DoubleMatrix2D evecs = ese.getV();
+			double t1 = vcov.getQuick(0,0) + vcov.getQuick(1,1);
+			double t2 = vcov.getQuick(0,0) - vcov.getQuick(1,1);
+			double t3 = Math.sqrt(4*vcov.getQuick(1,0)*vcov.getQuick(1,0) + t2*t2);
+			double w = (t1 - t3)/2 * CONF95;
+			double h = (t1 + t3)/2 * CONF95;
+			double phi = Math.atan2((t2 - t3)/(2*vcov.getQuick(1,0)),1);
 
-			double phi = Math.atan2(evecs.getQuick(0, 0), evecs.getQuick(1, 0));
-			double w = Math.sqrt(evals.getQuick(0) * 5.9915);
-			double h = Math.sqrt(evals.getQuick(1) * 5.9915);
-			
 			EllipseVectorRenderer evr = new EllipseVectorRenderer();
 			evr.frameRenderer = mr;
 			Point2D.Double ppt = proj.forward(channel.getLonLat());
@@ -395,27 +393,13 @@ public class GPSPlotter extends RawDataPlotter {
 			evr.ellipseOrientation = phi;
 			evr.ellipseWidth = Math.max(w, h) * 2;
 			evr.ellipseHeight = Math.min(w, h) * 2;
-			evr.displayHoriz = hs;
-			evr.displayVert = vs;			
+			evr.displayHoriz = showHorizontal;
+			evr.displayVert = showVertical;			
 			evr.sigZ =  vcov.getQuick(2, 2);
 			maxMag = Math.max(Math.max(evr.getMag(), Math.abs(evr.z)), maxMag);
 			v3p.getPlot().addRenderer(evr);
 			vrs.add(evr);
 			
-			ct.stopAndReport();
-//			System.out.println("Total execution time: " + ct.getRunTimeMillis());
-//			
-//			System.out.println("Velocity:");
-//			System.out.println(v.getQuick(0,0) + " " + v.getQuick(0,1)  + " " + v.getQuick(0,2));
-//			System.out.println("");
-//			System.out.println("Covariance:");
-//			System.out.println(vcov.getQuick(0,0) + " " + vcov.getQuick(0,1)  + " " + vcov.getQuick(0,2));
-//			System.out.println(vcov.getQuick(1,0) + " " + vcov.getQuick(1,1)  + " " + vcov.getQuick(1,2));
-//			System.out.println(vcov.getQuick(2,0) + " " + vcov.getQuick(2,1)  + " " + vcov.getQuick(2,2));
-//			System.out.println("");
-//			System.out.println("Chi2");
-//			System.out.println(est.getChi2());
-//			System.out.println("");
 		}
 		
 		if (maxMag == -1E300) {
@@ -460,7 +444,6 @@ public class GPSPlotter extends RawDataPlotter {
 		comp.setTranslation(trans);
 		comp.setTranslationType("map");
 		v3p.addComponent(comp);
-
 	}
 
 	/**
