@@ -75,6 +75,7 @@ public class GPSPlotter extends RawDataPlotter {
 	private PlotType	plotType;
 	private String		bl;
 	private boolean		scaleErrors, showVertical, showHorizontal;
+	private double		displacementTime;
 
 	// variables used in this class
 	private GPSData baselineData;
@@ -118,7 +119,7 @@ public class GPSPlotter extends RawDataPlotter {
 		validateDataManipOpts(comp);
 
 		switch(plotType) {		
-		case TIME_SERIES:			
+		case TIME_SERIES:
 			columnsCount		= columnsList.size();
 			selectedCols		= new boolean[columnsCount];
 			legendsCols			= new String[columnsCount];
@@ -166,6 +167,30 @@ public class GPSPlotter extends RawDataPlotter {
 			break;
 		
 		case VELOCITY_MAP:
+			try {
+				showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
+			} catch (Exception e) {
+				showHorizontal = true;
+			}
+			try {
+				showVertical = Util.stringToBoolean(comp.getString("vs"), false);
+			} catch (Exception e) {
+				showVertical = false;
+			}
+			try {
+				scaleErrors	= Util.stringToBoolean(comp.getString("se"), true);
+			} catch (Exception e) {
+				scaleErrors	= true;
+			}
+			break;
+		
+		case DISPLACEMENT_MAP:
+			try {
+				displacementTime = comp.parseTime(Util.stringToString(comp.getString("displacementTime"), "N"), 0);
+				System.out.println("displacementTime:" + displacementTime);
+			} catch (Exception e) {
+				throw new Valve3Exception("Missing displacement time");
+			}
 			try {
 				showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
 			} catch (Exception e) {
@@ -627,6 +652,14 @@ public class GPSPlotter extends RawDataPlotter {
 				}
 				plotVelocityMap(v3p, comp, rank);
 				break;
+				
+			case DISPLACEMENT_MAP:
+				if (!forExport) {
+					v3p.setCombineable(false);
+					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Displacement Field");
+				}
+				plotVelocityMap(v3p, comp, rank);
+				break;
 		}
 	}
 
@@ -690,6 +723,18 @@ public class GPSPlotter extends RawDataPlotter {
 			// export configuration
 			} else {
 				throw new Valve3Exception("Data Export Not Available for GPS Velocity Map");
+			}
+			break;
+		
+		case DISPLACEMENT_MAP:
+			
+			// plot configuration
+			if (!forExport) {
+				v3p.setExportable(false);
+				
+			// export configuration
+			} else {
+				throw new Valve3Exception("Data Export Not Available for GPS Displacement Map");
 			}
 			break;
 		}
