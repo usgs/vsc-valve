@@ -88,6 +88,16 @@ create_gpsmenu = function(menu) {
 			}
 		}
 		
+		// if displacement plot type, validate the displacement time
+		if (f.plotType[2].checked) {
+			var dt = getDisplacementTime(document.getElementById(this.id + '_displacementTime'));
+			if (dt == null) {
+				return false;
+			} else {
+				pc.displacementTime = dt;
+			}
+		}		
+		
 		// call the main presubmit function
 		if (!Menu.prototype.presubmit.call(this)) {
 			return false;
@@ -95,4 +105,24 @@ create_gpsmenu = function(menu) {
 			return true;
 		}
 	}
+}
+
+/**
+ *  grab the displacement time form field from the document.
+ *  
+ *  Confirm that it's a valid date/time, and then return it.
+ *
+ *  @return the displacement time as an integer
+ *  @type int
+ */
+function getDisplacementTime(dt)
+{
+	dt.value = dt.value.replace(/[\[\]\'\"]/g, "");
+	var errMsg = "Error on displacement time.";
+	if (!validateDate(dt, true))
+	{
+		alert(errMsg);
+		return null;
+	}
+	return dt.value;
 }

@@ -18,7 +18,7 @@
 				<div id="collapseTarget_ptOptions">
 					<p><input type="radio" name="plotType" value="ts" id="ts:paneSelector_options_0" checked="checked"> <label for="ts">Time Series</label></p>
 					<p><input type="radio" name="plotType" value="vel" id="vel:paneSelector_options_1"> <label for="vel">Velocity Field</label></p>
-					<!-- <p><input type="radio" name="ploType" value="dis" id="dis:paneSelector_options_2"> <label for="dis">Displacement Field</label></p> -->
+					<p><input type="radio" name="plotType" value="dis" id="dis:paneSelector_options_2"> <label for="dis">Displacement Field</label></p>
 				</div>
 			</div>	
 			<div class="box w140">
@@ -224,15 +224,20 @@
 				</div>
 			</div>
 		</div>
-		<!--
 		<div id="pane_options_2">
-			<div class="box w185">
+			<div class="box w229">
 				<h1>Displacement Options</h1>
 				<div class="mlr4">
+					<p>
+						<label id="displacementTime_lbl" for="displacementTime">Time:</label>
+						<input type="text" id="displacementTime" name="displacementTime" size="17">
+					</p>
+					<p><input type="checkbox" id="hs" name="hs" checked="checked"> <label for="hs">Horizontal</label></p>
+					<p><input type="checkbox" id="vs" name="vs"> <label for="vs">Vertical</label></p>
+					<p><input type="checkbox" id="se" name="se" checked="checked"> <label for="se">Scale Errors</label></p>
 				</div>
 			</div>
 		</div>
-		-->
 	</div>
 	
 	</form>
