@@ -40,10 +40,8 @@ import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.gps.Estimator;
 import gov.usgs.vdx.data.gps.GPS;
 import gov.usgs.vdx.data.gps.GPSData;
-//import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
-//import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 /**
  * TODO: check map sizes against client max height.
@@ -187,10 +185,13 @@ public class GPSPlotter extends RawDataPlotter {
 		case DISPLACEMENT_MAP:
 			try {
 				displacementTime = comp.parseTime(Util.stringToString(comp.getString("displacementTime"), "N"), 0);
-				System.out.println("displacementTime:" + displacementTime);
-			} catch (Exception e) {
-				throw new Valve3Exception("Missing displacement time");
-			}
+				} catch (Exception e) {
+					throw new Valve3Exception("Invalid displacement time.");
+				}
+
+			if (displacementTime <= startTime | displacementTime >= endTime)
+				throw new Valve3Exception("Displacement time out of range.");
+			
 			try {
 				showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
 			} catch (Exception e) {
@@ -314,7 +315,7 @@ public class GPSPlotter extends RawDataPlotter {
 	 * @param component PlotComponent
 	 * @param rank Rank
 	 */
-	private void plotVelocityMap(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
+	private void plotVectorMap(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
 		
 		List<Point2D.Double> locs = new ArrayList<Point2D.Double>();
 		
@@ -377,21 +378,49 @@ public class GPSPlotter extends RawDataPlotter {
 			if (data == null || data.observations() == 1) {
 				continue;
 			}
-			
 			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
 			
 			DoubleMatrix2D G = null;
-			G = data.createVelocityKernel();
-			
+			switch (plotType)
+			{
+				case DISPLACEMENT_MAP:
+					
+					double delta;
+					double deltaMin = 1e300;
+					double displacementEpoch = displacementTime;
+					
+					for (int i = 0; i < data.observations(); i++)
+					{
+						delta = Math.abs(data.getTimes().getQuick(i, 0) - displacementTime);
+						if (delta < deltaMin)
+						{
+							deltaMin = delta;
+							displacementEpoch = data.getTimes().getQuick(i, 0);
+							
+						}
+					}
+
+					G = data.createDisplacementKernel(displacementEpoch);
+					break;
+					
+				case VELOCITY_MAP:
+					G = data.createVelocityKernel();
+					break;
+					
+				case TIME_SERIES:
+					break;
+
+			}
 			Estimator est = new Estimator(G, data.getXYZ(), data.getCovariance());
 			est.solve();
 			
 			DoubleMatrix2D v = est.getModel().viewPart(0, 0, 3, 1);
 			DoubleMatrix2D vcov = est.getModelCovariance().viewPart(0,0,3,3);
-			
+
 			DoubleMatrix2D t = GPS.createENUTransform(channel.getLon(), channel.getLat());
 			v = Algebra.DEFAULT.mult(t, v);
 			vcov = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t, vcov), t.viewDice());
+
 
 			if (scaleErrors)
 				vcov.assign(cern.jet.math.Mult.mult(est.getChi2()));
@@ -650,7 +679,7 @@ public class GPSPlotter extends RawDataPlotter {
 					v3p.setCombineable(false);
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Velocity Field");
 				}
-				plotVelocityMap(v3p, comp, rank);
+				plotVectorMap(v3p, comp, rank);
 				break;
 				
 			case DISPLACEMENT_MAP:
@@ -658,7 +687,7 @@ public class GPSPlotter extends RawDataPlotter {
 					v3p.setCombineable(false);
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Displacement Field");
 				}
-				plotVelocityMap(v3p, comp, rank);
+				plotVectorMap(v3p, comp, rank);
 				break;
 		}
 	}
