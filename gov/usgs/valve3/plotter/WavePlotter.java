@@ -6,6 +6,7 @@ import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.SliceWave;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.plot.render.BasicFrameRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.util.Pool;
@@ -442,12 +443,12 @@ public class WavePlotter extends RawDataPlotter {
 		if(yUnits){
 			spectraRenderer.setYUnitText("Power");
 		}
-
+		
 		spectraRenderer.update();
-
+		
 		if (isDrawLegend) {
-			channelLegendsCols	= new String  [1];
-			channelLegendsCols[0] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
+			channelLegendsCols	= new String  [2];
+			channelLegendsCols[1] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
 			spectraRenderer.createDefaultLegendRenderer(channelLegendsCols);
 		}
 		
@@ -679,6 +680,5 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	public String getDataType() {
 		return dataType;
-	}
-	
+	}	
 }
