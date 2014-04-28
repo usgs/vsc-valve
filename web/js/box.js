@@ -66,6 +66,8 @@ function unifyIds(element, uid)
 function toggleCollapser(event)
 {
 	var target = getTarget(event);
+	if (target.localName == 'h1')
+		target = target.getElementsByTagName('img')[0];
 	if (target.src.indexOf(IMG_COLLAPSE) != -1)
 	{
 		target.src = IMG_EXPAND;
@@ -124,7 +126,7 @@ function activateCollapsers(element, uid)
 						ct.style.display = "block";
 					}
 					
-					addListener(img, 'click', toggleCollapser, false);
+					addListener(elt, 'click', toggleCollapser, false);
 				}
 			}
 		});

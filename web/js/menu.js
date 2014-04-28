@@ -120,7 +120,7 @@ function handleMenu(xml) {
 		var header	= t.getElementsByTagName('h1')[0];
 		header.childNodes[1].nodeValue = ' ' + name;
 		var img		= t.getElementsByTagName('img')[0];
-		addListener(img, 'click', function(e) { toggle(e); }, false);
+		addListener(header, 'click', function(e) { toggle(e); }, false);
 
 		var items	= sections[i].getElementsByTagName("menuitem");
 		var ip		= t.getElementsByTagName('ul')[0];
@@ -742,7 +742,11 @@ function populateRanks(menu) {
  */
 function toggle(event)
 {
-	var target = getTarget(event).parentNode.parentNode;
+	if (event.target.localName == 'img') {
+		var target = getTarget(event).parentNode.parentNode;
+	} else {
+		var taget = getTarget(event).parentNode;
+	}
 	var subMenu = target.getElementsByTagName("ul")[0];
 	var img = target.getElementsByTagName("img")[0];
 	if (subMenu.className == "subMenu")
@@ -898,7 +902,9 @@ function timeShortcutClick(event)
 		var sc = target.firstChild.nodeValue;
 		var re = sc.match(t);
 		document.getElementById("startTime").value = re[1];
-		document.getElementById('endTime').value = 'Now';
+		var et = document.getElementById('endTime');
+		if (et.value == '')
+			et.value = 'Now';
 		toggleTimeShortcutPanel();
 	}
 }
