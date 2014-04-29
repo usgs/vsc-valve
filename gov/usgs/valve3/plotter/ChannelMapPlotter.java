@@ -36,6 +36,7 @@ public class ChannelMapPlotter extends Plotter
 {
 	private GeoRange range;
 	private GeoLabelSet labels;
+	private String selectedChannels;
 	
 	protected boolean xTickMarks	= true;
     protected boolean xTickValues	= true;
@@ -117,6 +118,11 @@ public class ChannelMapPlotter extends Plotter
 			yLabel=false;
 		}
 		range = new GeoRange(w, e, s, n);
+		try {
+			selectedChannels = comp.getString("ch");
+		} catch (Valve3Exception ex) {
+			selectedChannels = "";
+		}
 	}
 	
 	/**
@@ -152,14 +158,21 @@ public class ChannelMapPlotter extends Plotter
 		// if data was collected, iterate through the list of channels and add a geo label
 		if (stringList != null) {
 			Set<String> used	= new HashSet<String>();
+			Set<Integer> cids	= new HashSet<Integer>();
+			for (String cid : selectedChannels.split(",")) {
+				cids.add(Integer.parseInt(cid));
+			}
 			for (String ch : stringList) {
 				Channel channel		= new Channel(ch);
-				String channelCode	= channel.getCode();
-				String channelCode0 = channelCode.split(" ")[0];
-				if (!used.contains(channelCode0)) {
-					GeoLabel gl = new GeoLabel(channelCode0, channel.getLon(), channel.getLat());
-					labels.add(gl);
-					used.add(channelCode0);
+				int cid				= channel.getCID();
+				if (cids.contains(cid)) {
+					String channelCode	= channel.getCode();
+					String channelCode0 = channelCode.split(" ")[0];
+					if (!used.contains(channelCode0)) {
+						GeoLabel gl = new GeoLabel(channelCode0, channel.getLon(), channel.getLat());
+						labels.add(gl);
+						used.add(channelCode0);
+					}
 				}
 			}
 		}
