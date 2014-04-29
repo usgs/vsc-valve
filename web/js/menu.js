@@ -745,7 +745,7 @@ function toggle(event)
 	if (event.target.localName == 'img') {
 		var target = getTarget(event).parentNode.parentNode;
 	} else {
-		var taget = getTarget(event).parentNode;
+		var target = getTarget(event).parentNode;
 	}
 	var subMenu = target.getElementsByTagName("ul")[0];
 	var img = target.getElementsByTagName("img")[0];

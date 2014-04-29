@@ -67,6 +67,7 @@
 					pc.east = wesn[1];
 					pc.south = wesn[2];
 					pc.north = wesn[3];
+          pc.getChannelsForMap(currentMenu.getForm());
 					loadXML("channel map plot", pr.getURL());
 				});
 			

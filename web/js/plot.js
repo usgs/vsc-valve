@@ -909,6 +909,36 @@ function PlotRequest(popup)
 			
 			return compSelected;
 		}
+		
+		comp.getChannelsForMap = function(form) {
+			var elt = form.elements['selector:ch'];
+			var name = 'ch';
+			var val	= getSelected(elt);
+			var vals = val.split('^');
+			
+			if (elt.name.indexOf(":ch") != -1) {
+				comp.chCnt = vals.length;
+			}
+			
+			if (comp.chCnt == 1 && vals[0] == '') {
+				// No channels selected, default to all
+				vals = new Array(1);
+				for (var k = 0; k < elt.length; k++) {
+					vals[k] = elt[k].value;
+				}
+				comp.chCnt = vals.length;
+			}
+			
+			if (!comp[name])
+				comp[name] = '';
+			
+			for (var j = 0; j < vals.length; j++) {
+				var ss = vals[j].split(':');
+				if (comp[name])
+					comp[name] += ',';
+				comp[name] += ss[0];
+			}
+		}
 		return comp;
 	}
 
