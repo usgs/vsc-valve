@@ -20,6 +20,7 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.wave.SliceWaveExporter;
 
 import java.awt.Color;
@@ -445,7 +446,7 @@ public class WavePlotter extends RawDataPlotter {
 		}
 		
 		spectraRenderer.update();
-		
+		spectraRenderer.getAxis().setTopLabelAsText(getTopLabel());
 		if (isDrawLegend) {
 			channelLegendsCols	= new String  [2];
 			channelLegendsCols[1] = channel.getName() + " " + (filterType==null?"":"("+filterType.name()+")");
@@ -680,5 +681,19 @@ public class WavePlotter extends RawDataPlotter {
 	 */
 	public String getDataType() {
 		return dataType;
-	}	
+	}
+	
+	/**
+	 * 
+	 * @return plot top label text
+	 */
+	private String getTopLabel() {
+		StringBuilder top = new StringBuilder(100);
+		top.append("Data between ");
+		top.append(Util.j2KToDateString(startTime+timeOffset, dateFormatString));
+		top.append(" and ");
+		top.append(Util.j2KToDateString(endTime+timeOffset, dateFormatString));
+		top.append(" " + timeZoneID + " Time");
+		return top.toString();
+	}
 }
