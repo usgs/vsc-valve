@@ -205,8 +205,7 @@ function getElementXY(e, targ)
 
 function getScroll()
 {
-	if (document.documentElement)
-		return new Array(document.documentElement.scrollLeft, document.documentElement.scrollTop);
-	else
-		return new Array(window.pageXOffset, window.pageYOffset);
+	var scrollX = Math.max(window.pageXOffset, document.documentElement.scrollLeft, 0);
+	var scrollY = Math.max(window.pageYOffset, document.documentElement.scrollTop, 0);
+	return new Array(scrollX, scrollY);
 }
