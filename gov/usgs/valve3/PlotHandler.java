@@ -118,6 +118,22 @@ public class PlotHandler implements HttpHandler
 					v3.putExportConfig(source, ec);
 				}
 				component.setExportable( ec.isExportable() );
+				
+				String sSt = request.getParameter("st.0");
+				double dSt = Double.parseDouble(sSt);
+				if (dSt > 0) {
+					// Not relative value, convert to j2k and compare against et
+					dSt = Time.parse(Time.INPUT_TIME_FORMAT, sSt);
+					String sEt = request.getParameter("et.0");
+					double dEt;
+					if (sEt.equalsIgnoreCase("N"))
+						dEt = Util.nowJ2K();
+					else
+						dEt = Time.parse(Time.INPUT_TIME_FORMAT, sEt);
+					
+					if (dEt < dSt)
+						throw new Valve3Exception("Start time must be prior to end time.");
+				}
 			}
 			
 			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
@@ -143,22 +159,6 @@ public class PlotHandler implements HttpHandler
 			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
 			if (y < 0 || y > h){
 				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
-			}
-			
-			String sSt = request.getParameter("st.0");
-			double dSt = Double.parseDouble(sSt);
-			if (dSt > 0) {
-				// Not relative value, convert to j2k and compare against et
-				dSt = Time.parse(Time.INPUT_TIME_FORMAT, sSt);
-				String sEt = request.getParameter("et.0");
-				double dEt;
-				if (sEt.equalsIgnoreCase("N"))
-					dEt = Util.nowJ2K();
-				else
-					dEt = Time.parse(Time.INPUT_TIME_FORMAT, sEt);
-				
-				if (dEt < dSt)
-					throw new Valve3Exception("Start time must be prior to end time.");
 			}
 
 			component.setBoxWidth(w);
