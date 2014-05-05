@@ -1399,6 +1399,7 @@ public abstract class RawDataPlotter extends Plotter {
 					}
 					sdo.frame_y = comp.getBoxY() + (offset * compBoxHeight) + 8;
 					sdo.frame_h = compBoxHeight - 16;
+					sdo.adjustTime(timeOffset);
 					v3p.addSuppDatum( sdo );
 				}
 			} catch (Exception e) {
