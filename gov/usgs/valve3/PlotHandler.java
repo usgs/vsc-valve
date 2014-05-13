@@ -15,6 +15,7 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.ExportConfig;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,16 +124,16 @@ public class PlotHandler implements HttpHandler
 				double dSt = Double.parseDouble(sSt);
 				if (dSt > 0) {
 					// Not relative value, convert to j2k and compare against et
-					dSt = Time.parse(Time.INPUT_TIME_FORMAT, sSt);
+					dSt = Time.parse("yyyyMMddHHmmssSSS", sSt);
 					String sEt = request.getParameter("et.0");
 					double dEt;
 					if (sEt.equalsIgnoreCase("N"))
 						dEt = Util.nowJ2K();
 					else
-						dEt = Time.parse(Time.INPUT_TIME_FORMAT, sEt);
+						dEt = Time.parse("yyyyMMddHHmmssSSS", sEt);
 					
 					if (dEt < dSt)
-						throw new Valve3Exception("Start time must be prior to end time.");
+						throw new Valve3Exception("Start time must be prior to end time. St: " + dSt + "; Et: " + dEt);
 				}
 			}
 			
