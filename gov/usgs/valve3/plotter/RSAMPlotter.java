@@ -275,7 +275,8 @@ public class RSAMPlotter extends RawDataPlotter {
 					break;
 			}
 			gdm.add(1, -bias);
-		}	
+		}
+		if (doArithmetic) { gdm.doArithmetic(1, arithmeticType, arithmeticValue); }
 		
 		if (forExport) {
 			
