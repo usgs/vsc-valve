@@ -101,6 +101,9 @@ public abstract class RawDataPlotter extends Plotter {
 	protected int debiasPick;
 	protected double debiasValue;
 	protected boolean exportAll = false;
+	protected boolean doArithmetic;
+	protected String arithmeticType;
+	protected double arithmeticValue;
 	
 	protected String outputType;
 	protected boolean inclTime;
@@ -1304,6 +1307,13 @@ public abstract class RawDataPlotter extends Plotter {
 			debiasValue = comp.getDouble("debias_period");
 			if ( Double.isNaN(debiasValue) )
 				throw new Valve3Exception("Illegal/missing value for bias removal");
+		}
+		doArithmetic = !comp.getString("dmo_arithmetic").equalsIgnoreCase("None");
+		if ( doArithmetic ) {
+			arithmeticType  = comp.getString("dmo_arithmetic");
+			arithmeticValue = comp.getDouble("dmo_arithmetic_value");
+			if ( Double.isNaN(arithmeticValue) )
+				throw new Valve3Exception("Illegal/missing value for arithmetic");
 		}
 	}
 	
