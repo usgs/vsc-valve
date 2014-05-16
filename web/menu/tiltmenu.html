@@ -177,6 +177,25 @@
 							<input style="visibility: hidden;" type="text" id="dmo_filter_arg3" name="filter_arg3" size="8">
 						</p>
 						<p>
+                            <select id="dmo_arithmetic_type" name="selector:dmo_arithmetic" onchange="var tos = this.options.selectedIndex;
+                                var prefix = this.id.substring( 0, this.id.length-19 );
+                                var fld = document.getElementById(prefix+'dmo_arithmetic_value');
+                                var lbl = document.getElementById(prefix+'dmo_arithmetic_lbl');             
+                                if ( tos == 0 ) {
+                                    fld.style.visibility='hidden';
+                                    lbl.style.visibility='hidden';
+                                } else {
+                                    fld.style.visibility='visible';
+                                    lbl.style.visibility='visible';
+                                }">
+                                <option selected value="None">No arithmetic</option>
+                                <option value="Multiply">*</option>
+                                <option value="Divide">/</option>
+                            </select>
+                            <label style='visibility:hidden;' id="dmo_arithmetic_lbl" for="dmo_arithmetic_value">User value:</label>
+                            <input style='visibility:hidden;' type="text" id="dmo_arithmetic_value" name="dmo_arithmetic_value" size="8">
+                        </p>
+						<p>
 							<!-- <label for="norm_debias">Remove bias</label> -->
 							<select id="dmo_debias_pick" name="selector:dmo_db" onchange="var tos = this.options.selectedIndex;
 								var prefix = this.id.substring( 0, this.id.length-15 );
@@ -197,27 +216,6 @@
 							<label style='visibility:hidden;' id="dmo_debias_lbl" for="dmo_debias_period"">User value:</label>
                             <input style='visibility:hidden;' type="text" id="dmo_debias_period" name="debias_period" size="8">
 						</p>
-						<p>
-                            <select id="dmo_arithmetic_type" name="selector:dmo_arithmetic" onchange="var tos = this.options.selectedIndex;
-                                var prefix = this.id.substring( 0, this.id.length-19 );
-                                var fld = document.getElementById(prefix+'dmo_arithmetic_value');
-                                var lbl = document.getElementById(prefix+'dmo_arithmetic_lbl');             
-                                if ( tos == 0 ) {
-                                    fld.style.visibility='hidden';
-                                    lbl.style.visibility='hidden';
-                                } else {
-                                    fld.style.visibility='visible';
-                                    lbl.style.visibility='visible';
-                                }">
-                                <option selected value="None">No arithmetic</option>
-                                <option value="Add">+</option>
-                                <option value="Subtract">-</option>
-                                <option value="Multiply">*</option>
-                                <option value="Divide">/</option>
-                            </select>
-                            <label style='visibility:hidden;' id="dmo_arithmetic_lbl" for="dmo_arithmetic_value">User value:</label>
-                            <input style='visibility:hidden;' type="text" id="dmo_arithmetic_value" name="dmo_arithmetic_value" size="8">
-                        </p>
 					</div>
 				</span>
 				</div>
