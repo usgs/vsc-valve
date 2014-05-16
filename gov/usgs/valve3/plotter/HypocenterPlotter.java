@@ -113,6 +113,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private double minHerr, maxHerr;
 	private double minVerr, maxVerr;
 	private String rmk;
+  private double minStDst;
+  private double maxStDst;
+  private double maxGap;
 	
 	private AxesOption axesOption;
 	private ColorOption colorOption;
@@ -264,6 +267,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			throw new Valve3Exception("Illegal vertical error filter.");
 		
 		rmk			= Util.stringToString(comp.get("rmk"), "");
+    
+    minStDst	= Util.stringToDouble(comp.get("minStDst"), 0.0);
+		maxStDst	= Util.stringToDouble(comp.get("maxStDst"), 1000.0);
+		maxGap		= Util.stringToDouble(comp.get("maxGap"), 360.0);
 		
 		switch (plotType) {
 		
@@ -363,6 +370,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
 		params.put("rmk", (rmk));
+    params.put("minStDst", Double.toString(minStDst));
+		params.put("maxStDst", Double.toString(maxStDst));
+		params.put("maxGap", Double.toString(maxGap));
 		params.put("outputAll", Boolean.toString(exportAll));
 
 		// checkout a connection to the database
