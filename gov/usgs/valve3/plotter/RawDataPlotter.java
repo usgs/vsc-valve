@@ -1308,7 +1308,11 @@ public abstract class RawDataPlotter extends Plotter {
 			if ( Double.isNaN(debiasValue) )
 				throw new Valve3Exception("Illegal/missing value for bias removal");
 		}
-		doArithmetic = !comp.getString("dmo_arithmetic").equalsIgnoreCase("None");
+    try {
+		  doArithmetic = !comp.getString("dmo_arithmetic").equalsIgnoreCase("None");
+    } catch (Valve3Exception e) {
+      doArithmetic = false;
+    }
 		if ( doArithmetic ) {
 			arithmeticType  = comp.getString("dmo_arithmetic");
 			arithmeticValue = comp.getDouble("dmo_arithmetic_value");
