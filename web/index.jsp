@@ -52,7 +52,7 @@
 				{
 					var menu = "";
 					if (currentMenu && currentMenu.allowChannelMap)
-						menu = currentMenu.id;					
+						menu = currentMenu.id;
 					var pr = new PlotRequest();
 					var pc = pr.createComponent(menu, 0, 1);
 					pc.src = "channel_map";
@@ -67,7 +67,8 @@
 					pc.east = wesn[1];
 					pc.south = wesn[2];
 					pc.north = wesn[3];
-          pc.getChannelsForMap(currentMenu.getForm());
+					if (currentMenu)
+						pc.getChannelsForMap(currentMenu.getForm());
 					loadXML("channel map plot", pr.getURL());
 				});
 			
