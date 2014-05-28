@@ -555,7 +555,6 @@ public class GPSPlotter extends RawDataPlotter {
 					
 					// convert the GPSData object to a generic data matrix and subtract out the mean
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.toTimeSeries(baselineData));
-					System.out.println("gdm.rows():" + gdm.rows() + "/gdm.columns():" + gdm.columns());
 					for (int i = 0; i < columnsCount; i++) {
 						if ( bypassCols[i] )
 							continue;
