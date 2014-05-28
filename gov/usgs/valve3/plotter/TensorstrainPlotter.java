@@ -128,7 +128,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -161,13 +160,14 @@ public class TensorstrainPlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch (Exception e) {
-					data = null;
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
 					data.adjustTime(timeOffset);
-					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
@@ -179,10 +179,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 

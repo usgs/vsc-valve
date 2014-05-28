@@ -255,13 +255,14 @@ public class GPSPlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch (Exception e) {
-					data = null;
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
 				if (data != null && data.observations() > 0) {
 					data.adjustTime(timeOffset);
-					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
@@ -274,14 +275,14 @@ public class GPSPlotter extends RawDataPlotter {
 				} catch (UtilException e) {
 					blexceptionThrown	= true;
 					blexceptionMsg		= e.getMessage();
-				} catch(Exception e){
-					baselineData = null; 
+				} catch (Exception e){
+					blexceptionThrown	= true;
+					blexceptionMsg		= e.getMessage();
 				}
 				
 				// if data was collected
 				if (baselineData != null && baselineData.observations() > 0) {
 					baselineData.adjustTime(timeOffset);
-					gotBaselineData = true;
 				}
 			}
 		
@@ -292,10 +293,6 @@ public class GPSPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 		
 		// if a data limit message exists, then throw exception
@@ -303,7 +300,7 @@ public class GPSPlotter extends RawDataPlotter {
 			throw new Valve3Exception(blexceptionMsg);
 		
 		// if no baseline data exists, then throw exception
-		} else if (bl != null && !gotBaselineData) {
+		} else if (bl != null && baselineData == null) {
 			throw new Valve3Exception("No data for baseline channel.");
 		}
 	}
@@ -375,10 +372,11 @@ public class GPSPlotter extends RawDataPlotter {
 			Channel channel	= channelsMap.get(cid);
 			GPSData data	= channelDataMap.get(cid);
 			
-			if (data == null || data.observations() == 1) {
+			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
+			
+			if (data == null || data.observations() <= 1) {
 				continue;
 			}
-			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
 			
 			DoubleMatrix2D G = null;
 			switch (plotType)
@@ -457,7 +455,8 @@ public class GPSPlotter extends RawDataPlotter {
 		}
 		
 		if (maxMag == -1E300) {
-			return;
+			// return;
+			maxMag = 1;
 		}
 		
 		// set the length of the legend vector to 1/5 of the width of the shortest side of the map
@@ -492,7 +491,7 @@ public class GPSPlotter extends RawDataPlotter {
 		TextRenderer tr = new TextRenderer();
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
-		tr.text = scale + " m/year";
+		tr.text = scale + " meters";
 		v3p.getPlot().addRenderer(tr);
 		
 		comp.setTranslation(trans);
@@ -556,6 +555,7 @@ public class GPSPlotter extends RawDataPlotter {
 					
 					// convert the GPSData object to a generic data matrix and subtract out the mean
 					GenericDataMatrix gdm	= new GenericDataMatrix(data.toTimeSeries(baselineData));
+					System.out.println("gdm.rows():" + gdm.rows() + "/gdm.columns():" + gdm.columns());
 					for (int i = 0; i < columnsCount; i++) {
 						if ( bypassCols[i] )
 							continue;

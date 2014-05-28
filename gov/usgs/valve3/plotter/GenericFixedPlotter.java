@@ -112,7 +112,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -145,13 +144,14 @@ public class GenericFixedPlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch(Exception e) {
-					data = null;
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
 					data.adjustTime(timeOffset);
-					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
@@ -163,10 +163,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 	
@@ -214,7 +210,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 				plot.setSize(plot.getWidth(), plot.getHeight() - channelCompCount * compBoxHeight);
 				compCount = compCount - channelCompCount;
 				continue;
-			}
+			}			
 			
 			// detrend and normalize the data that the user requested to be detrended		
 			for (int i = 0; i < columnsCount; i++) {

@@ -102,7 +102,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -128,13 +127,13 @@ public class RatSAMPlotter extends RawDataPlotter {
 				exceptionThrown	= true;
 				exceptionMsg	= e.getMessage();
 			} catch (Exception e) {
-				data = null;
+				exceptionThrown	= true;
+				exceptionMsg	= e.getMessage();
 			}
 			
 			// if data was collected
 			if (data != null && data.rows() > 0) {
 				data.adjustTime(timeOffset);
-				gotData = true;
 			}
 			
 	        // check back in our connection to the database
@@ -144,10 +143,6 @@ public class RatSAMPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (!gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 	

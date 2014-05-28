@@ -209,7 +209,6 @@ public class TiltPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -242,13 +241,14 @@ public class TiltPlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch (Exception e) {
-					data = null; 
+					exceptionThrown = true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
 					data.adjustTime(timeOffset);
-					gotData = true;
 				}
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
@@ -260,10 +260,6 @@ public class TiltPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}	
 
@@ -330,10 +326,12 @@ public class TiltPlotter extends RawDataPlotter {
 			Channel channel	= channelsMap.get(cid);
 			TiltData data	= channelDataMap.get(cid);
 			
-			if (data == null || data.rows() == 0) {
+			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
+			
+			if (data == null || data.rows() <= 1) {
 				continue;
 			}
-			labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
+			
 			DoubleMatrix2D dm = data.getAllData(0.0);
 			
 			// iterate through each matrix and get the value that is not null.  we can't calculate vectors from potentially null values
@@ -398,7 +396,8 @@ public class TiltPlotter extends RawDataPlotter {
 		}
 		
 		if (maxMag == -1E300) {
-			return;
+			// return;
+			maxMag = 1;
 		}
 		
 		// lookup the correct scaling factor

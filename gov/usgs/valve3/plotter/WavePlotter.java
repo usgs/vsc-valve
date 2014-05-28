@@ -6,7 +6,6 @@ import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.SliceWave;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.render.BasicFrameRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.util.Pool;
@@ -20,7 +19,6 @@ import gov.usgs.valve3.result.Valve3Plot;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
-import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.wave.SliceWaveExporter;
 
 import java.awt.Color;
@@ -177,7 +175,6 @@ public class WavePlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -208,7 +205,9 @@ public class WavePlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch (Exception e) {
-					data = null; 
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
@@ -223,7 +222,6 @@ public class WavePlotter extends RawDataPlotter {
 						csvCmtBits.put("datatype", dataType);
 					}
 					data.setStartTime(data.getStartTime() + timeOffset);
-					gotData = true;
 					data.handleBadData();
 					if (doDespike) { data.despike(despikePeriod); }
 					if (doDetrend) { data.detrend(); }
@@ -292,10 +290,6 @@ public class WavePlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 	

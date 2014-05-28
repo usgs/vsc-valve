@@ -31,6 +31,7 @@ import gov.usgs.vdx.data.MatrixExporter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -150,7 +151,6 @@ public class RSAMPlotter extends RawDataPlotter {
 	protected void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData			= false;
 		boolean exceptionThrown	= false;
 		String exceptionMsg		= "";
 		Pool<VDXClient> pool	= null;
@@ -183,14 +183,23 @@ public class RSAMPlotter extends RawDataPlotter {
 					exceptionMsg	= e.getMessage();
 					break;
 				} catch (Exception e) {
-					data = null; 
+					exceptionThrown	= true;
+					exceptionMsg	= e.getMessage();
+					break;
 				}
 				
 				// if data was collected
 				if (data != null && data.rows() > 0) {
 					data.adjustTime(timeOffset);
-					gotData = true;
+					
+				// if no data was in the database, spoof the data to get an empty plot
+				} else if (data == null) {
+					ArrayList<double[]> list = new ArrayList<double[]>((int) (1));
+					double[] d = new double[] { Double.NaN, Double.NaN };
+					list.add(d);
+					data = new RSAMData(list);					
 				}
+				
 				channelDataMap.put(Integer.valueOf(channel), data);
 			}
 			
@@ -201,10 +210,6 @@ public class RSAMPlotter extends RawDataPlotter {
 		// if a data limit message exists, then throw exception
 		if (exceptionThrown) {
 			throw new Valve3Exception(exceptionMsg);
-
-		// if no data exists, then throw exception
-		} else if (channelDataMap.size() == 0 || !gotData) {
-			throw new Valve3Exception("No data for any channel.");
 		}
 	}
 	
