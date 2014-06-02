@@ -34,14 +34,18 @@ Initial commit.
 	else if (result instanceof Valve3Plot)
 	{
 		Valve3Plot plot = (Valve3Plot)result;
+		response.setContentType(plot.getMimeType());
+		
 		switch(plot.getOutputType())
 		{
 			case XML:
-				response.setContentType("text/xml");
 				out.println(plot.toXML());
 				break;
+			case PS:
+				String fileName = plot.getTitle().replace(" ", "_") + ".ps";
+				response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+				/* fallthrough */
 			case PNG:
-				response.setContentType("image/png");
 				OutputStream os = response.getOutputStream();
 				InputStream is = new BufferedInputStream(new FileInputStream(plot.getLocalFilename()));
 				byte[] buf = new byte[128 * 1024];

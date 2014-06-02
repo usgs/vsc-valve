@@ -333,6 +333,18 @@ function handlePlot(xml)
     	plusOff = 1;
     }
     
+    // Postscript 
+	addListener(imgMap.export_ps_btn, 'click',
+	function()
+	{
+	
+		var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
+		var url = "valve3.jsp?" + query.replace("o=xml","o=ps");
+		var d = document.getElementById('dataFrame');
+		d.src = url;
+		
+	}, false);
+    
 	// raw data
     if ( raw_ok && !combined ) {
     	// csv

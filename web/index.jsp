@@ -189,6 +189,7 @@
 			<img name="export_xml_btn" class="button" src="images/xml_data.gif">
 			<img name="export_csvnots_btn" class="button" src="images/csvnots.gif">
 			<img name="export_csv_btn" class="button" src="images/csv.gif">
+			<img name="export_ps_btn" class="button" src="images/ps.gif">
 			<a target="plot" href=""><img class="button" src="images/bkmrk.gif"></a>
 			<div class="titleBar">
 				<h1 class="help">Content Template</h1>
