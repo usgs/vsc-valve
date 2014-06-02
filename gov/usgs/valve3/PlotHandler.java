@@ -255,10 +255,11 @@ public class PlotHandler implements HttpHandler
 	
 	/**
 	 * Yield a random file name
+	 * @param extenstion filename extension
 	 * @return random file name in the img/ directory with .png extension
 	 */
-	public static String getRandomFilename()
+	public static String getRandomFilename(String extension)
 	{
-		return "img" + File.separator + "tmp" + Math.round(Math.random() * 100000) + ".png"; 
+		return "img" + File.separator + "tmp" + Math.round(Math.random() * 100000) + "." + extension; 
 	}
 }

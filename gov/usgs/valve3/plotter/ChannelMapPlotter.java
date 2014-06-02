@@ -220,7 +220,8 @@ public class ChannelMapPlotter extends Plotter
 			mr.getAxis().setLeftLabelAsText("Latitude");
 		}
 		v3p.getPlot().addRenderer(mr);
-		v3p.getPlot().writePNG(v3p.getLocalFilename());
+//		v3p.getPlot().writePNG(v3p.getLocalFilename());
+		writeFile(v3p);
 		
 		v3p.addComponent(comp);
 		if (vdxSource != null) {

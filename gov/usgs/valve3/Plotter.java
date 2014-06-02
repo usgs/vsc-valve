@@ -1,11 +1,13 @@
 package gov.usgs.valve3;
 
+import java.awt.Color;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
+import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.vdx.ExportConfig;
@@ -176,4 +178,21 @@ abstract public class Plotter
 		return null;
 	}
 
+	protected void writeFile(Valve3Plot v3p) throws PlotException, Valve3Exception {
+		Plot plot = v3p.getPlot();
+		plot.setBackgroundColor(Color.white);
+
+		switch (v3p.getOutputType()) {
+		case XML:
+		case PNG:
+			plot.writePNG(v3p.getLocalFilename());
+			break;
+		case PS:
+			plot.writePS(v3p.getLocalFilename());
+			break;
+		default:
+			throw new Valve3Exception("Unknown output type " + v3p.getOutputType());
+		}
+
+	}
 }

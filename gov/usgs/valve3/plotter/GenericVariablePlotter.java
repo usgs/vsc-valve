@@ -332,10 +332,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		getData(comp);		
 		plotData(v3p, comp);
 				
-		if (!forExport) {
-			Plot plot = v3p.getPlot();
-			plot.setBackgroundColor(Color.white);
-			plot.writePNG(v3p.getLocalFilename());
-		}
+		if (!forExport)
+			writeFile(v3p);
 	}
 }

@@ -16,6 +16,7 @@ import gov.usgs.valve3.Plotter;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.result.Valve3Plot;
+import gov.usgs.valve3.result.Valve3Plot.OutputType;
 import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.ExportData;
@@ -654,11 +655,9 @@ public class WavePlotter extends RawDataPlotter {
 		getData(comp);		
 		plotData(v3p, comp);
 		
-		if (!forExport) {
-			Plot plot = v3p.getPlot();
-			plot.setBackgroundColor(Color.white);
-			plot.writePNG(v3p.getLocalFilename());
-		}
+		if (!forExport)
+			writeFile(v3p);
+
 	}
 	
 	/**

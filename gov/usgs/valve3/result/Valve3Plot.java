@@ -22,35 +22,39 @@ import javax.servlet.http.HttpServletRequest;
  * Result which contains plot and information how
  * (in which format, where, size) store it in the file system
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2005/09/03 21:51:07  dcervelli
- * Removed new line.
- *
- * Revision 1.2  2005/08/29 22:54:28  dcervelli
- * Refactored for enums.
- *
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
- *
+ * 
  * @author Dan Cervelli
  */
 public class Valve3Plot extends Result
 {
 	public enum OutputType 
 	{ 
-		XML, PNG, HTML;
+		XML("xml", "application/xml"), 
+		PNG("png", "image/png"), 
+		HTML("html", "text/html"), 
+		PS("ps", "application/postscript");
+		
+		public final String extension;
+		public final String mimeType;
+		
+		private OutputType(String extension, String mimeType) {
+			this.extension = extension;
+			this.mimeType = mimeType;
+		}
 		
 		public static OutputType fromString(String s)
 		{
 			if (s == null)
 				return null;
 			
-			if (s.equals("xml"))
+			if (s.equals(XML.extension))
 				return XML;
-			else if (s.equals("png"))
+			else if (s.equals(PNG.extension))
 				return PNG;
-			else if (s.equals("html"))
+			else if (s.equals(HTML.extension))
 				return HTML;
+			else if (s.equals(PS.extension))
+				return PS;
 			else
 				return null;
 		}
@@ -170,6 +174,11 @@ public class Valve3Plot extends Result
 		return outputType;
 	}
 	
+	public String getMimeType() 
+	{
+		return outputType.mimeType;
+	}
+	
 	/**
 	 * Setter for file name to generated plot image
 	 */
@@ -185,7 +194,7 @@ public class Valve3Plot extends Result
 	public String getLocalFilename()
 	{
 		if (filename == null)
-			filename = PlotHandler.getRandomFilename();
+			filename = PlotHandler.getRandomFilename(outputType.extension);
 		
 		return Valve3.getInstance().getApplicationPath() + File.separatorChar + filename;
 	}
