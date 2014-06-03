@@ -742,7 +742,7 @@ function populateRanks(menu) {
  */
 function toggle(event)
 {
-	if (event.target.localName == 'img') {
+	if ((event.target && event.target.localName == 'img') || (event.srcElement && event.srcElement.nodeName == 'IMG')) {
 		var target = getTarget(event).parentNode.parentNode;
 	} else {
 		var target = getTarget(event).parentNode;
