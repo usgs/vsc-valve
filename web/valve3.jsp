@@ -71,6 +71,25 @@ Initial commit.
 				break;
 		}
 	}
+	else if (result instanceof RawData)
+	{
+	   RawData rd = (RawData)result;
+	   String fn = rd.getLocalFilename();
+	   
+	   response.setContentType("application/octet-stream");
+	   response.setHeader("Content-disposition", "attachment;filename=" + fn.substring(fn.lastIndexOf("/") + 1));
+	   
+	   OutputStream os = response.getOutputStream();
+	   InputStream is = new BufferedInputStream(new FileInputStream(fn));
+	   byte[] buf = new byte[128 * 1024];
+	   int n;
+	   while ((n = is.read(buf)) != -1)
+	   {
+	       os.write(buf, 0, n);
+	   }
+	   os.flush();
+	   os.close();
+	}
 	else if (result instanceof Result)
 	{
 		Result res = (Result)result;
