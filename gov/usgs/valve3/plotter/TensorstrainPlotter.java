@@ -306,6 +306,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 						gdm.set2mean(i + 2, filterPeriod);
 					}
 				}
+				if (doArithmetic) { gdm.doArithmetic(i+2, arithmeticType, arithmeticValue); }
 				if (debiasPick != 0) {
 					double bias = 0.0;
 					switch (debiasPick) {
@@ -321,7 +322,6 @@ public class TensorstrainPlotter extends RawDataPlotter {
 					}
 					gdm.add(i + 2, -bias);
 				}
-				if (doArithmetic) { gdm.doArithmetic(i+2, arithmeticType, arithmeticValue); }
 			}
 
 			if (forExport) {

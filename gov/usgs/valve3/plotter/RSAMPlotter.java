@@ -266,6 +266,7 @@ public class RSAMPlotter extends RawDataPlotter {
 					gdm.set2mean(1, filterPeriod );
 			}
 		}
+		if (doArithmetic) { gdm.doArithmetic(1, arithmeticType, arithmeticValue); }
 		if (debiasPick != 0 ) {
 			double bias = 0.0;
 			switch ( debiasPick ) {
@@ -281,7 +282,6 @@ public class RSAMPlotter extends RawDataPlotter {
 			}
 			gdm.add(1, -bias);
 		}
-		if (doArithmetic) { gdm.doArithmetic(1, arithmeticType, arithmeticValue); }
 		
 		if (forExport) {
 			

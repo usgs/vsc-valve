@@ -253,6 +253,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 							break;
 					}
 				}
+				if (doArithmetic) { gdm.doArithmetic(i+2, arithmeticType, arithmeticValue); }
 				if (debiasPick != 0 ) {
 					double bias = 0.0;
 					switch ( debiasPick ) {
@@ -268,7 +269,6 @@ public class GenericFixedPlotter extends RawDataPlotter {
 					}
 					gdm.add(i + 2, -bias);
 				}
-				if (doArithmetic) { gdm.doArithmetic(i+2, arithmeticType, arithmeticValue); }
 			}
 
 			if (forExport) {
