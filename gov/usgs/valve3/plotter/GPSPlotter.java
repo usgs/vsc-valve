@@ -69,11 +69,29 @@ public class GPSPlotter extends RawDataPlotter {
 		}
 	}
 	
+	private enum ModelType {
+		VELOCITY_MODEL, MEAN_MODEL;
+		public static ModelType fromString(String s) {
+			if (s.equals("v")) {
+				return VELOCITY_MODEL;
+			} else if (s.equals("m")) {
+				return MEAN_MODEL;
+			} else {
+				return null;
+			}
+		}
+	}
+	
 	// variables acquired from the PlotComponent
 	private PlotType	plotType;
 	private String		bl;
 	private boolean		scaleErrors, showVertical, showHorizontal;
-	private double		displacementTime;
+	private double		displacementBeforeStartTime;
+	private double		displacementBeforeEndTime;
+	private double		displacementAfterStartTime;
+	private double		displacementAfterEndTime;
+	private ModelType	displacementBeforeModel;
+	private ModelType	displacementAfterModel;
 
 	// variables used in this class
 	private GPSData baselineData;
@@ -184,13 +202,62 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		case DISPLACEMENT_MAP:
 			try {
-				displacementTime = comp.parseTime(Util.stringToString(comp.getString("displacementTime"), "N"), 0);
-				} catch (Exception e) {
-					throw new Valve3Exception("Invalid displacement time.");
-				}
-
-			if (displacementTime <= startTime | displacementTime >= endTime)
-				throw new Valve3Exception("Displacement time out of range.");
+				displacementBeforeStartTime = comp.parseTime(comp.getString("displacementBeforeStartTime"), 0);
+			} catch (Exception e) {
+				throw new Valve3Exception("Invalid Before Period Start Time.");
+			}
+			try {
+				displacementBeforeEndTime = comp.parseTime(comp.getString("displacementBeforeEndTime"), 0);
+			} catch (Exception e) {
+				throw new Valve3Exception("Invalid Before Period End Time.");
+			}
+			try {
+				displacementAfterStartTime = comp.parseTime(comp.getString("displacementAfterStartTime"), 0);
+			} catch (Exception e) {
+				throw new Valve3Exception("Invalid After Period Start Time.");
+			}
+			try {
+				displacementAfterEndTime = comp.parseTime(comp.getString("displacementAfterEndTime"), 0);
+			} catch (Exception e) {
+				throw new Valve3Exception("Invalid After Period End Time.");
+			}
+			
+			if (displacementBeforeStartTime < startTime) {
+				throw new Valve3Exception("Before Period Start Time must be >= Start Time.");
+				
+			} else if (displacementBeforeEndTime <= displacementBeforeStartTime) {
+				throw new Valve3Exception("Before Period End Time must be > Before Period Start Time.");
+				
+			} else if (displacementAfterStartTime <= displacementBeforeEndTime) {
+				throw new Valve3Exception("After Period Start Time must be > Before Period End Time.");
+				
+			} else if (displacementAfterEndTime <= displacementAfterStartTime) {
+				throw new Valve3Exception("After Period End Time must be > After Period Start Time.");
+				
+			} else if (displacementAfterEndTime > endTime) {
+				throw new Valve3Exception("After Period End Time must be <= End Time.");
+			}
+			
+			String dbm	= Util.stringToString(comp.get("displacementBeforeModel"), "m");
+			displacementBeforeModel = ModelType.fromString(dbm);
+			if (displacementBeforeModel == null) {
+				throw new Valve3Exception("Illegal Before Period Model.");
+			}
+			
+			String dam	= Util.stringToString(comp.get("displacementAfterModel"), "m");
+			displacementAfterModel = ModelType.fromString(dam);
+			if (displacementAfterModel == null) {
+				throw new Valve3Exception("Illegal After Period Model.");
+			}
+			
+			System.out.println("DBST:" + displacementBeforeStartTime +
+								"/DBET:" + displacementBeforeEndTime + 
+								"/DAST:" + displacementAfterStartTime + 
+								"/DAET:" + displacementAfterEndTime);
+			if (displacementBeforeModel == ModelType.MEAN_MODEL) System.out.println("DBM:mean");
+			if (displacementBeforeModel == ModelType.VELOCITY_MODEL) System.out.println("DBM:velocity");
+			if (displacementAfterModel == ModelType.MEAN_MODEL) System.out.println("DAM:mean");
+			if (displacementAfterModel == ModelType.VELOCITY_MODEL) System.out.println("DAM:velocity");
 			
 			try {
 				showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
@@ -219,8 +286,6 @@ public class GPSPlotter extends RawDataPlotter {
 	public void getData(PlotComponent comp) throws Valve3Exception {
 		
 		// initialize variables
-		boolean gotData				= false;
-		boolean gotBaselineData		= false;
 		boolean exceptionThrown		= false;
 		String exceptionMsg			= "";
 		boolean blexceptionThrown	= false;
@@ -382,7 +447,7 @@ public class GPSPlotter extends RawDataPlotter {
 			switch (plotType)
 			{
 				case DISPLACEMENT_MAP:
-					
+					/*
 					double delta;
 					double deltaMin = 1e300;
 					double displacementEpoch = displacementTime;
@@ -399,6 +464,8 @@ public class GPSPlotter extends RawDataPlotter {
 					}
 
 					G = data.createDisplacementKernel(displacementEpoch);
+					*/
+					G = data.createVelocityKernel();
 					break;
 					
 				case VELOCITY_MAP:
