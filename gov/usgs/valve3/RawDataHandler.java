@@ -332,8 +332,7 @@ public class RawDataHandler implements HttpHandler
 					throw new Valve3Exception(e.getMessage());
 				}
 			}
-			Pattern p = Pattern.compile(request.getContextPath());
-			String fileURL = p.split(request.getRequestURL().toString())[0] + request.getContextPath() + "/data/" + outFileName;
+			String fileURL = "data/" + outFileName;
 			RawData rd = new RawData(fileURL, outFilePath);
 			
 			Valve3.getInstance().getResultDeleter().addResult(rd);
