@@ -90,12 +90,39 @@ create_gpsmenu = function(menu) {
 		
 		// if displacement plot type, validate the displacement time
 		if (f.plotType[2].checked) {
-			var dt = getDisplacementTime(document.getElementById(this.id + '_displacementTime'));
-			if (dt == null) {
+		
+			// get the displacement times
+			var bpst = getDisplacementTime(document.getElementById(this.id + '_displacementBeforeStartTime'), 'Before Period Start Time.');
+			if (bpst == null) return false;
+			
+			var bpet = getDisplacementTime(document.getElementById(this.id + '_displacementBeforeEndTime'), 'Before Period End Time.');
+			if (bpet == null) {
+				return false;			
+			} else if (bpet <= bpst) {
+				alert('Before Period End Time must be > Before Period Start Time.');
 				return false;
-			} else {
-				pc.displacementTime = dt;
 			}
+			
+			var apst = getDisplacementTime(document.getElementById(this.id + '_displacementAfterStartTime'), 'After Period Start Time.');
+			if (apst == null) {
+				return false;			
+			} else if (apst <= bpet) {
+				alert('After Period Start Time must be > Before Period End Time.');
+				return false;
+			}
+			
+			var apet = getDisplacementTime(document.getElementById(this.id + '_displacementAfterEndTime'), 'After Period End Time.');
+			if (apet == null) {
+				return false;			
+			} else if (apet <= apst) {
+				alert('After Period End Time must be > After Period Start Time.');
+				return false;
+			}
+
+			// pc.displacementBeforeStartTime	= bpst;
+			// pc.displacementBeforeEndTime	= bpet;
+			// pc.displacementAfterStartTime	= apst;
+			// pc.displacementAfterEndTime		= apet;
 		}		
 		
 		// call the main presubmit function
@@ -115,10 +142,10 @@ create_gpsmenu = function(menu) {
  *  @return the displacement time as an integer
  *  @type int
  */
-function getDisplacementTime(dt)
+function getDisplacementTime(dt, fieldname)
 {
 	dt.value = dt.value.replace(/[\[\]\'\"]/g, "");
-	var errMsg = "Error on displacement time.";
+	var errMsg = "Invalid " + fieldname + ".";
 	if (!validateDate(dt, true))
 	{
 		alert(errMsg);
