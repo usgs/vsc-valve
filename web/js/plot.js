@@ -353,26 +353,7 @@ function handlePlot(xml)
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=csv");
-				
-				loadXML("rawData", url, function(req)
-				{ 
-					var doc = req.responseXML;
-					if (doc != null)
-					{
-						var result = doc.getElementsByTagName("valve3result")[0];
-						if (result != null)
-						{
-							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-							if (type == 'error')
-								alert(doc.getElementsByTagName("message")[0].firstChild.data);
-							else if (type == 'rawData')
-							{
-								var d = document.getElementById('dataFrame');
-								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
-							}
-						}
-					}
-				});
+				document.getElementById('dataFrame').src = url;
 			}, false);
 		//console.log(['json',imgs[10-plusOff]]);
 		addListener(imgMap.export_json_btn, 'click',
@@ -380,26 +361,7 @@ function handlePlot(xml)
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=json");
-				
-				loadXML("rawData", url, function(req)
-				{ 
-					var doc = req.responseXML;
-					if (doc != null)
-					{
-						var result = doc.getElementsByTagName("valve3result")[0];
-						if (result != null)
-						{
-							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-							if (type == 'error')
-								alert(doc.getElementsByTagName("message")[0].firstChild.data);
-							else if (type == 'rawData')
-							{
-								var d = document.getElementById('dataFrame');
-								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
-							}
-						}
-					}
-				});
+				document.getElementById('dataFrame').src = url;
 			}, false);
 		//console.log(['xml',imgs[9-plusOff]]);
 		addListener(imgMap.export_xml_btn, 'click',
@@ -407,26 +369,7 @@ function handlePlot(xml)
 			{
 				var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 				var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData");
-				
-				loadXML("rawData", url, function(req)
-				{ 
-					var doc = req.responseXML;
-					if (doc != null)
-					{
-						var result = doc.getElementsByTagName("valve3result")[0];
-						if (result != null)
-						{
-							type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-							if (type == 'error')
-								alert(doc.getElementsByTagName("message")[0].firstChild.data);
-							else if (type == 'rawData')
-							{
-								var d = document.getElementById('dataFrame');
-								d.src = doc.getElementsByTagName("url")[0].firstChild.data;
-							}
-						}
-					}
-				});
+				document.getElementById('dataFrame').src = url;
 			}, false);
 
 		if ( waveform_type ) {
@@ -436,26 +379,7 @@ function handlePlot(xml)
 				{
 					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 					var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=csvnots");
-					
-					loadXML("rawData", url, function(req)
-					{ 
-						var doc = req.responseXML;
-						if (doc != null)
-						{
-							var result = doc.getElementsByTagName("valve3result")[0];
-							if (result != null)
-							{
-								type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-								if (type == 'error')
-									alert(doc.getElementsByTagName("message")[0].firstChild.data);
-								else if (type == 'rawData')
-								{
-									var d = document.getElementById('dataFrame');
-									d.src = doc.getElementsByTagName("url")[0].firstChild.data;
-								}
-							}
-						}
-					});
+					document.getElementById('dataFrame').src = url;
 				}, false);
 			// seed
 			addListener(imgMap.export_data_btn, 'click',
@@ -463,26 +387,7 @@ function handlePlot(xml)
 				{
 					var query = img.xml.getElementsByTagName("url")[0].childNodes[0].nodeValue;
 					var url = "valve3.jsp?" + query.replace("a=plot", "a=rawData").replace("o=xml","o=seed");
-					
-					loadXML("rawData", url, function(req)
-					{ 
-						var doc = req.responseXML;
-						if (doc != null)
-						{
-							var result = doc.getElementsByTagName("valve3result")[0];
-							if (result != null)
-							{
-								type = doc.getElementsByTagName("type")[0].firstChild.nodeValue;
-								if (type == 'error')
-									alert(doc.getElementsByTagName("message")[0].firstChild.data);
-								else if (type == 'rawData')
-								{
-									var d = document.getElementById('dataFrame');
-									d.src = doc.getElementsByTagName("url")[0].firstChild.data;
-								}
-							}
-						}
-					});
+					document.getElementById('dataFrame').src = url;
 				}, false);
 		} else {
 			t.removeChild(imgMap.export_data_btn);
