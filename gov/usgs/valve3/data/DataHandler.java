@@ -138,13 +138,17 @@ public class DataHandler implements HttpHandler
 			String action = request.getParameter("da");
 			if (action == null)
 				return null;  // TODO: throw Valve3Exception		
-		
 			
 			Map<String, String> params	= new HashMap<String, String>();
 			params.put("source", dsd.getVDXSource());
 			params.put("action", action);
 			
 			Pool<VDXClient> pool	= Valve3.getInstance().getDataHandler().getVDXClient(dsd.getVDXClientName());
+			
+			
+			if (pool == null)
+				throw new Valve3Exception("Unknown VDX server " + dsd.getVDXClientName() + " check .vdx line in data.config");
+
 			VDXClient client		= pool.checkout();
 			
 			if (client != null) {

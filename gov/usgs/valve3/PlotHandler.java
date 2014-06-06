@@ -106,6 +106,10 @@ public class PlotHandler implements HttpHandler
 					ec = v3.getExportConfig("");
 					ec.parameterize( params );
 					Pool<VDXClient> pool = v3.getDataHandler().getVDXClient(dsd.getVDXClientName());
+					
+					if (pool == null)
+						throw new Valve3Exception("Unknown VDX server " + dsd.getVDXClientName() + " check .vdx line in data.config");
+					
 					VDXClient cl = pool.checkout();
 					java.util.List<String> ecs = null;
 					try {
