@@ -68,6 +68,7 @@ public class Valve3Plot extends Result
 	protected String filename;
 	private String title;
 	protected OutputType outputType;
+	protected OutputType plotFormat;
 	
 	protected int width;
 	protected int height;
@@ -111,6 +112,12 @@ public class Valve3Plot extends Result
 			throw new Valve3Exception("Illegal output type.");
 		}
 
+		if (outputType == OutputType.XML || outputType == OutputType.HTML)
+			// XML and HTML are wrappers around a .png image
+			plotFormat = OutputType.PNG;
+		else
+			plotFormat = outputType;
+		
 		title		= "Valve Plot";
 		url			= request.getQueryString();
 		components	= new ArrayList<PlotComponent>(2);
@@ -194,7 +201,7 @@ public class Valve3Plot extends Result
 	public String getLocalFilename()
 	{
 		if (filename == null)
-			filename = PlotHandler.getRandomFilename(outputType.extension);
+			filename = PlotHandler.getRandomFilename(plotFormat.extension);
 		
 		return Valve3.getInstance().getApplicationPath() + File.separatorChar + filename;
 	}
