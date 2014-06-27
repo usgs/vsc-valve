@@ -214,7 +214,7 @@
 			</div>
 			<div class="suppnodl">
 				<div class="tableContainer">
-				<table class="suppnodltable" width="200px">
+				<table class="suppnodltable" width="300px">
 				<thead class="fixedHeader"><tr><th>Processing Data</th></tr></thead>
 				<tbody class="scrollContent"></tbody>
 				</table>

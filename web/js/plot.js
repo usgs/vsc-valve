@@ -491,7 +491,28 @@ function handlePlot(xml)
 			t.insertBefore(node,t.firstChild);
 		}
 	}
-	var ig = new scrollableTable(proctable, 150, 200);
+	var ig = new scrollableTable(proctable, 150, 300);
+	
+	// Gather/Add channel metadata
+	var metadata = xml.getElementsByTagName('metadatum');
+	for ( i = 0; i < metadata.length; i++ ) {
+		var md_text = metadata[i].textContent;
+		var md_bits = md_text.split( "\"" );
+		var new_tr = document.createElement("tr");
+		var new_td = document.createElement("td");
+		new_td.appendChild(document.createTextNode(md_bits[6]));
+		new_td.style.width = "20%";
+		new_tr.appendChild(new_td);
+		var new_td = document.createElement("td");
+		new_td.appendChild(document.createTextNode(md_bits[7]));
+		new_td.style.width = "20%";
+		new_tr.appendChild(new_td);
+		var new_td = document.createElement("td");
+		new_td.appendChild(document.createTextNode(md_bits[5]));
+		new_td.style.width = "60%";
+		new_tr.appendChild(new_td);
+		procdata.appendChild(new_tr);
+	}
 //	if ( node != 0 ) {
 //		var ebs = t.getElementsByClassName('suppdataviewer');
 //		ebs[0].style.display = 'visible';
