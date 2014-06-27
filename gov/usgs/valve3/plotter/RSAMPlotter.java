@@ -481,10 +481,14 @@ public class RSAMPlotter extends RawDataPlotter {
 					} else {
 						v3p.setCombineable(true);
 					}
+					if (!vdxSource.contains("winston"))
+						addMetaData(vdxSource, vdxClient, v3p, comp);
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Values");
 					break;
 				case COUNTS:
 					v3p.setCombineable(false);
+					if (!vdxSource.contains("winston"))
+						addMetaData(vdxSource, vdxClient, v3p, comp);
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Events");
 					break;
 			}

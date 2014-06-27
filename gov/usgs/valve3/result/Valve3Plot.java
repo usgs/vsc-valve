@@ -6,6 +6,7 @@ import gov.usgs.valve3.PlotHandler;
 import gov.usgs.valve3.Valve3;
 import gov.usgs.valve3.Valve3Exception;
 import gov.usgs.valve3.CombinedPlot;
+import gov.usgs.vdx.data.MetaDatum;
 import gov.usgs.vdx.data.SuppDatum;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
@@ -84,6 +85,7 @@ public class Valve3Plot extends Result
 	protected boolean isWaveform	= false;
 	
 	protected List<SuppDatum> suppdata;
+	protected List<MetaDatum> metadata;
 	
 	/**
 	 * Constructor
@@ -134,6 +136,7 @@ public class Valve3Plot extends Result
 		// exportable = false;
 		
 		suppdata = new ArrayList<SuppDatum>();
+		metadata = new ArrayList<MetaDatum>();
 	}
 
 	/***
@@ -363,6 +366,9 @@ public class Valve3Plot extends Result
 			sb.append(pc.toXML());
 		for (SuppDatum sd : suppdata)
 			sb.append(sd.toXML( true ));
+		for (MetaDatum md : metadata) {
+			sb.append(md.toXML());
+		}
 		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
 	}
@@ -374,6 +380,15 @@ public class Valve3Plot extends Result
 	public void addSuppDatum(SuppDatum sd)
 	{
 		suppdata.add(sd);
+	}
+	
+	/**
+	 * Add MetaDatum
+	 * @param md MetaDatum MetaDatum to add
+	 */
+	public void addMetaDatum(MetaDatum md)
+	{
+		metadata.add(md);
 	}
 
 }

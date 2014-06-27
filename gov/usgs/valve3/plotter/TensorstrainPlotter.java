@@ -22,7 +22,6 @@ import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.tensorstrain.TensorstrainData;
 
-import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -378,6 +377,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			}
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 			addSuppData(vdxSource, vdxClient, v3p, comp);
+			addMetaData(vdxSource, vdxClient, v3p, comp);
 		}
 	}
 

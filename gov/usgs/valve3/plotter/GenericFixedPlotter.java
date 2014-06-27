@@ -21,7 +21,6 @@ import gov.usgs.vdx.data.ExportData;
 import gov.usgs.vdx.data.MatrixExporter;
 import gov.usgs.vdx.data.Rank;
 
-import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -324,6 +323,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
 		}
 		if (!forExport) {
 			addSuppData( vdxSource, vdxClient, v3p, comp );
+			addMetaData( vdxSource, vdxClient, v3p, comp );
 			if(channelDataMap.size()!=1){
 				v3p.setCombineable(false);
 			} else {

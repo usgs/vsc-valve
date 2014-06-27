@@ -22,6 +22,7 @@ import gov.usgs.vdx.client.VDXClient;
 import gov.usgs.vdx.data.Channel;
 import gov.usgs.vdx.data.Column;
 import gov.usgs.vdx.data.ExportData;
+import gov.usgs.vdx.data.MetaDatum;
 import gov.usgs.vdx.data.Rank;
 import gov.usgs.vdx.data.SuppDatum;
 
@@ -874,8 +875,6 @@ public abstract class RawDataPlotter extends Plotter {
 			cmtLines.add( "datatype=" + csvCmtBits.get("datatype"));
 		csvText = new StringBuffer();
 		Vector<String> myCmtLines = cmtLines;
-		if ( myCmtLines == null )
-			myCmtLines = new Vector<String>();
 		
 		if ( outToCSV ) {
 			for ( String comment: comments )
@@ -1308,16 +1307,64 @@ public abstract class RawDataPlotter extends Plotter {
 			if ( Double.isNaN(debiasValue) )
 				throw new Valve3Exception("Illegal/missing value for bias removal");
 		}
-    try {
-		  doArithmetic = !comp.getString("dmo_arithmetic").equalsIgnoreCase("None");
-    } catch (Valve3Exception e) {
-      doArithmetic = false;
-    }
+	    try {
+			  doArithmetic = !comp.getString("dmo_arithmetic").equalsIgnoreCase("None");
+	    } catch (Valve3Exception e) {
+	      doArithmetic = false;
+	    }
 		if ( doArithmetic ) {
 			arithmeticType  = comp.getString("dmo_arithmetic");
 			arithmeticValue = comp.getDouble("dmo_arithmetic_value");
 			if ( Double.isNaN(arithmeticValue) )
 				throw new Valve3Exception("Illegal/missing value for arithmetic");
+		}
+	}
+	
+	protected void addMetaData(String vdxSource, String vdxClient, Valve3Plot v3p, PlotComponent comp) throws Valve3Exception {
+		// MetaData is associated with a channel, column, and rank combination.
+		List<String> stringList = null;
+		Pool<VDXClient> pool 	= null;
+		VDXClient client 		= null;
+		
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		params.put("source", vdxSource);
+		params.put("action", "metadata");
+		params.put("rk", Integer.toString(rk));
+		params.put("ch", ch);
+		params.put("byID", "true");
+		
+		// calculate the columns parameters
+		String cols = null;
+		if (columnsList == null) {
+			cols = "";
+		} else {
+			for (int i = 0; i < columnsList.size(); i++) {
+				Column column = columnsList.get(i);
+				if (column.checked) {
+					if (cols == null)
+						cols = "" + (i+1);
+					else
+						cols += "," + (i+1);
+				}
+			}
+		}
+		params.put("col", cols);
+		
+		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+		if (pool != null) {
+			client	= pool.checkout();
+			try {
+				stringList	= client.getTextData(params);
+				for (String s: stringList) {
+					System.out.println("metadatum: " + s);
+					MetaDatum md = new MetaDatum(s);
+					v3p.addMetaDatum( md );
+				}
+			} catch (Exception e) {
+				throw new Valve3Exception(e.getMessage()); 
+			} finally {
+				pool.checkin(client);
+			}
 		}
 	}
 	

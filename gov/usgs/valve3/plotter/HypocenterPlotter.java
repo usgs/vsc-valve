@@ -1,6 +1,5 @@
 package gov.usgs.valve3.plotter;
 
-import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.map.GeoImageSet;
@@ -9,7 +8,6 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.plot.render.ArbDepthFrameRenderer;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.BasicFrameRenderer;
-import gov.usgs.plot.render.InvertedAxisRenderer;
 import gov.usgs.plot.render.InvertedFrameRenderer;
 import gov.usgs.plot.render.Renderer;
 import gov.usgs.plot.render.ShapeRenderer;
@@ -113,9 +111,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private double minHerr, maxHerr;
 	private double minVerr, maxVerr;
 	private String rmk;
-  private double minStDst;
-  private double maxStDst;
-  private double maxGap;
+	private double minStDst;
+	private double maxStDst;
+	private double maxGap;
 	
 	private AxesOption axesOption;
 	private ColorOption colorOption;
@@ -268,7 +266,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		rmk			= Util.stringToString(comp.get("rmk"), "");
     
-    minStDst	= Util.stringToDouble(comp.get("minStDst"), 0.0);
+		minStDst	= Util.stringToDouble(comp.get("minStDst"), 0.0);
 		maxStDst	= Util.stringToDouble(comp.get("maxStDst"), 1000.0);
 		maxGap		= Util.stringToDouble(comp.get("maxGap"), 360.0);
 		
@@ -370,7 +368,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("minVerr", Double.toString(minVerr));
 		params.put("maxVerr", Double.toString(maxVerr));
 		params.put("rmk", (rmk));
-    params.put("minStDst", Double.toString(minStDst));
+		params.put("minStDst", Double.toString(minStDst));
 		params.put("maxStDst", Double.toString(maxStDst));
 		params.put("maxGap", Double.toString(maxGap));
 		params.put("outputAll", Boolean.toString(exportAll));
@@ -694,6 +692,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		if (!forExport) {
 			comp.setTranslation(hr.getDefaultTranslation(v3p.getPlot().getHeight()));
 			comp.setTranslationType("ty");
+			addMetaData(vdxSource, vdxClient, v3p, comp);
 			v3p.getPlot().addRenderer(hr);
 			v3p.addComponent(comp);	
 		}
@@ -751,6 +750,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			} else {
 				plotMap(v3p, comp, rank);
 				v3p.setCombineable(false);
+				addMetaData(vdxSource, vdxClient, v3p, comp);
 				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Map");
 			}
 			break;
@@ -759,6 +759,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 			plotCounts(v3p, comp, rank);
 			if (!forExport){
 				v3p.setCombineable(true);
+				addMetaData(vdxSource, vdxClient, v3p, comp);
 				v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Counts");
 			}
 			break;			

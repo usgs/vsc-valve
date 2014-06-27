@@ -654,6 +654,7 @@ public class TiltPlotter extends RawDataPlotter {
 					}
 					v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 					addSuppData( vdxSource, vdxClient, v3p, comp );
+					addMetaData( vdxSource, vdxClient, v3p, comp );
 				}
 				break;
 				

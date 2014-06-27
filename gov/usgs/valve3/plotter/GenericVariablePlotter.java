@@ -1,6 +1,5 @@
 package gov.usgs.valve3.plotter;
 
-import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.decorate.SmartTick;
@@ -303,6 +302,7 @@ public class GenericVariablePlotter extends RawDataPlotter
 		
 		if (!forExport) {
 			addSuppData( vdxSource, vdxClient, v3p, comp );
+			addMetaData( vdxSource, vdxClient, v3p, comp );
 			v3p.setCombineable(true);
 			v3p.setTitle(Valve3.getInstance().getMenuHandler().getItem(vdxSource).name + " Time Series");
 		}
