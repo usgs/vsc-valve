@@ -38,20 +38,6 @@ create_gpsmenu = function(menu) {
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1d", "-3d", "-1w", "-2w", "-1m", "-3m", "-6m", "-1y", "-3y", "-5y", "-10y", "-20y");
 		}
-		
-		var f	= this.getForm();
-		var ch	= f["selector:ch"];
-		
-		addListener(document.getElementById(this.id + '_baselineButton'), 'click', 
-			function() {
-				if (ch.selectedIndex != -1)
-					f.bl.value = ch[ch.selectedIndex].text;
-			}, false);
-			
-		addListener(document.getElementById(this.id + '_clearButton'), 'click', 
-			function() {
-				f.bl.value = "[none]";
-			}, false);
 
 		var sel = document.getElementById(this.id + '_selector:ds');		
 		addListener(sel, 'change', 
@@ -70,22 +56,24 @@ create_gpsmenu = function(menu) {
 						break;
 				}
 			}, false);
+		
+		sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 
 	menu.presubmit = function(pr, pc) {
 		
 		var f			= this.getForm();
 		var select		= this.allChannels;
-		var baseline	= f.bl;
+		var baseline	= f.elements['selector:bl'];
 		
 		// if a baseline was selected, update it's value to the cid found in the select list, element 0
 		if (baseline.value != '[none]') {
-			for (var i = 0; i < this.allChannels.length; i++) {
-				var s = this.allChannels[i].value.split(":");
-				if (s[1] == baseline.value) {
-					pc.bl = s[0];
-				}
-			}
+			var s = baseline.value.split(':');
+			pc.bl = s[0];
 		}
 		
 		// if displacement plot type, validate the displacement time

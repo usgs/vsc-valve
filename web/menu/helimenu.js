@@ -33,6 +33,12 @@ create_helimenu = function(menu) {
 		if (menu.timeShortcuts[0] == "") {
 			menu.timeShortcuts	= new Array("-1h","-6h","-12h","-1d","-3d","-1w");
 		}
+		
+		var sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

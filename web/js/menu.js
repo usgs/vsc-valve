@@ -267,6 +267,30 @@ function populateChannels(menu) {
 }
 
 /**
+ * If a menu contains a baseline selection box, fill it based on the currently
+ * filtered list of channels.
+ */
+function populateBaseline(menu) {
+	var form = document.getElementById(menu.id + "_" + menu.formName);
+	var ch   = form.elements['selector:ch'];
+	var bl   = form.elements['selector:bl'];
+	
+	if (bl) {
+		var opt   = document.createElement('option');
+		opt.value = "[none]";
+		opt.appendChild(document.createTextNode("[none]"));
+		bl.appendChild(opt);
+		
+		for (var i = 0; i < ch.options.length; i++) {
+			opt 	  = document.createElement('option');
+			opt.value = ch.options[i].value;
+			opt.appendChild(document.createTextNode(ch.options[i].text));
+			bl.appendChild(opt);
+		}
+	}
+}
+
+/**
  * Make an AJAX call via jsp to return the values for the Channel Types menu
  * The request to valve for channel types returns a 2D array. Each array element contains a
  * sub-array for each channel type.
@@ -307,7 +331,7 @@ function populateChannelTypes(menu) {
 			// save the complete list
 			menu.allChannelTypes = opts;
 			
-			addListener(form, 'change', function(e) { if (currentMenu) currentMenu.filterChanged(); }, false);
+			addListener(select, 'change', function(e) { if (currentMenu) currentMenu.filterChanged(); }, false);
 		});
 }
 
@@ -979,6 +1003,20 @@ function getChannelTypeFilter(form) {
 }
 
 /**
+ * Looks at current value of the inactive checkbox on the screen and gets the value
+ * 
+ * @return true/false
+ */
+function getInactiveFilter(form) {
+	var showinactives = false;
+	var chk = form.elements['skip:showall'];
+	if (chk) {
+		showinactives = chk.checked;
+	}
+	return showinactives;
+}
+
+/**
  *  Create an empty menu function to be filled out later
  */
 function Menu()
@@ -1216,6 +1254,9 @@ Menu.prototype.filterChanged = function() {
 		// the value of the channel type
 		var ctid	= getChannelTypeFilter(form);
 		
+		// are we showing inactive stations?
+		var inactive= getInactiveFilter(form); 
+		
 		// remove all the nodes from the select dropdown
 		while (select.hasChildNodes()) {
 			select.removeChild(select.firstChild);
@@ -1227,9 +1268,11 @@ Menu.prototype.filterChanged = function() {
 			var pt		= this.allChannels[i].value.split(":");
 			var lon		= pt[3];
 			var lat		= pt[4];
-			var ctid1	= pt[7];
+			var active  = pt[6];
+			var ctid1	= pt[8];
 			var gfCheck	= false;
 			var ctCheck	= false;
+			var iaCheck = false;
 			
 			// geographic filter check
 			if (wesn == null || ((lon != "NaN" && lat != "NaN") && (wesn[0] < lon && wesn[1] > lon && wesn[2] < lat && wesn[3] > lat))) {
@@ -1241,9 +1284,21 @@ Menu.prototype.filterChanged = function() {
 				ctCheck	= true;
 			}
 			
-			if (gfCheck && ctCheck) {
+			if (inactive == true || active == 1 || this.id.indexOf('winston') != -1) {
+				iaCheck = true;
+			}
+			
+			if (gfCheck && ctCheck && iaCheck) {
 				select.appendChild(this.allChannels[i]);
 			}
+		}
+		
+		// If there's a baseline box, filter and fill it
+		var bl = form.elements['selector:bl'];
+		if (bl) {
+			while (bl.hasChildNodes())
+				bl.removeChild(bl.firstChild);
+			populateBaseline(this);
 		}
 		
 		// if nothing matches the filter requirements then populate the dropdown appropriately

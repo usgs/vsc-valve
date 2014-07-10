@@ -33,6 +33,12 @@ create_nwismenu = function(menu) {
 						break;
 				}
 			}, false);
+		
+		sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

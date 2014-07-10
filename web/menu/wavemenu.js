@@ -36,6 +36,12 @@ create_wavemenu = function(menu) {
 
 		// populate suppdata types
 		populateSuppDataTypes(this);
+		
+		var sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 	
 	menu.presubmit = function(pr, pc) {	

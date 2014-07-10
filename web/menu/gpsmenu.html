@@ -5,6 +5,7 @@
 	<div class="w110 fl">
 	    <div class="box">
 		<h1>Channels</h1>
+		<h1><label for="showall">Show All</label> <input type="checkbox" id="showall" name="skip:showall"></h1>
 		<p><select class="w100p" multiple="multiple" size="15" name="selector:ch">
 		</select></p>
 	    </div>
@@ -56,9 +57,8 @@
 			<div class="box w140">
 				<h1 id="collapse_baselineOptions">Baseline Channel</h1>
 				<div id="collapseTarget_baselineOptions">
-					<p><input type="text" value="[none]" id="baseline" name="bl" class="w90p"></p>
-					<p><input type="button" value="Set Baseline" id="baselineButton">
-					<input type="button" value="Clear" id="clearButton"></p>
+					<p><select class="w100p" name="selector:bl">
+                    </select></p>
 				</div>
 			</div>
 			<div class="box w140">

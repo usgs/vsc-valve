@@ -48,6 +48,12 @@ create_tiltmenu = function(menu) {
 						break;
 				}
 			}, false);
+		
+		sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 	
 	// override the default presubmit function

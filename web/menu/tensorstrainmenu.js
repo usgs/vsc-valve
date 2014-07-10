@@ -55,6 +55,12 @@ create_tensorstrainmenu = function(menu) {
 				var optionValue = sel.options[sel.selectedIndex].value;
 				label.textContent = "Natural: " + optionValue.split(':')[6];
 			}, false);
+		
+		sel = document.getElementById(this.id + '_showall');
+		addListener(sel, 'change', function() {
+			if (currentMenu)
+				currentMenu.filterChanged();
+		}, false);
 	}
 	
 	
