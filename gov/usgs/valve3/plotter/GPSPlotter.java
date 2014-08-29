@@ -556,9 +556,19 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		// draw the legend vector units
 		TextRenderer tr = new TextRenderer();
+		switch (plotType) {
+			case DISPLACEMENT_MAP:
+				tr.text = scale + " meters";
+				break;				
+			case VELOCITY_MAP:
+				tr.text = scale + " meters/year";
+				break;
+			default:
+				tr.text = scale + " meters/year";
+				break;
+		}
 		tr.x = mr.getGraphX() + 10;
 		tr.y = mr.getGraphY() + mr.getGraphHeight() - 5;
-		tr.text = scale + " meters";
 		v3p.getPlot().addRenderer(tr);
 		
 		comp.setTranslation(trans);
