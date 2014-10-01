@@ -116,10 +116,23 @@ public class GPSPlotter extends RawDataPlotter {
 		
 		parseCommonParameters(comp);	
 		
-		rk = comp.getInt("rk");	
-		bl = comp.get("bl");
-		if (bl != null && bl.equals("[none]")) {
+		rk = comp.getInt("rk");
+		
+		// Check for blName first, if exists, figure out the bl number
+		// This allows the baseline channel to be passed in via name in the same
+		// way that channels can be passed in via the chNames parameter
+		String blName = comp.get("blName");
+		if (blName != null) {
 			bl = null;
+			for (Channel c : channelsMap.values()) {
+				if (c.getCode().equals(blName))
+					bl = String.valueOf(c.getCID());
+			}
+		} else {
+			bl = comp.get("bl");
+			if (bl != null && bl.equals("[none]")) {
+				bl = null;
+			}
 		}
 		
 		String pt = comp.get("plotType");
