@@ -465,7 +465,6 @@ public class CombinedPlot extends Plot {
 		for (DataPointRenderer pointRenderer : rendererDataset.pointRenderers) {
 			if (pointRenderer != null) {
 				pointRenderer.transformer = renderer;
-				//System.out.println("ShapeRenderer color: " + pointRenderer.color);
 			}
 		}
 		renderer.setPointRenderers(rendererDataset.pointRenderers);
@@ -473,18 +472,16 @@ public class CombinedPlot extends Plot {
 			renderer.setVisible(i, rendererDataset.visible[i]);
 		}
 		renderer.setLocation(graphX, graphY, graphWidth, graphHeight);
-		double extended_minY = rendererDataset.minY  - 0.02*(rendererDataset.maxY-rendererDataset.minY);
-		double extended_maxY = rendererDataset.maxY  + 0.02*(rendererDataset.maxY-rendererDataset.minY);
-		renderer.setExtents(minX, maxX,	extended_minY, extended_maxY);
+		renderer.setExtents(minX, maxX,	rendererDataset.minY, rendererDataset.maxY); 
 		if(rendererDataset.type == 'L'){
-			renderer.createDefaultAxis(8, 8, true, true, false, true, true, true);
+			renderer.createDefaultAxis(8, 8, true, true, false, false, true, true);
 			renderer.getAxis().setBackgroundColor(null);
 			renderer.setXAxisToTime(8);
 			renderer.getAxis().setLeftLabelAsText(rendererDataset.unit);
 		} else if (rendererDataset.type == 'R'){
 			AxisRenderer ar = new AxisRenderer(renderer);
 			ar.setBackgroundColor(null);
-			ar.createRightTickLabels(SmartTick.autoTick(extended_minY, extended_maxY, leftTicks, false), null);
+			ar.createRightTickLabels(SmartTick.autoTick(rendererDataset.minY, rendererDataset.maxY, leftTicks, false), null);
 			renderer.setAxis(ar);
 			renderer.getAxis().setRightLabelAsText(rendererDataset.unit);
 		}
