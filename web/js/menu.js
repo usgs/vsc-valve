@@ -267,12 +267,10 @@ function populateChannels(menu) {
 }
 
 /**
- * If a menu contains a baseline selection box, fill it based on the currently
- * filtered list of channels.
+ * If a menu contains a baseline selection box, fill it with all current channels
  */
 function populateBaseline(menu) {
 	var form = document.getElementById(menu.id + "_" + menu.formName);
-	var ch   = form.elements['selector:ch'];
 	var bl   = form.elements['selector:bl'];
 	
 	if (bl) {
@@ -281,10 +279,10 @@ function populateBaseline(menu) {
 		opt.appendChild(document.createTextNode("[none]"));
 		bl.appendChild(opt);
 		
-		for (var i = 0; i < ch.options.length; i++) {
+		for (var i = 0; i < menu.allChannels.length; i++) {
 			opt 	  = document.createElement('option');
-			opt.value = ch.options[i].value;
-			opt.appendChild(document.createTextNode(ch.options[i].text));
+			opt.value = menu.allChannels[i].value;
+			opt.appendChild(document.createTextNode(menu.allChannels[i].text));
 			bl.appendChild(opt);
 		}
 	}
