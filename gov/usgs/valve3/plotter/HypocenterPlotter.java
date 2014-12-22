@@ -8,6 +8,7 @@ import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.plot.render.ArbDepthFrameRenderer;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.BasicFrameRenderer;
+import gov.usgs.plot.render.Histogram2DRenderer;
 import gov.usgs.plot.render.InvertedFrameRenderer;
 import gov.usgs.plot.render.Renderer;
 import gov.usgs.plot.render.ShapeRenderer;
@@ -35,6 +36,7 @@ import gov.usgs.vdx.data.hypo.HypocenterList.BinSize;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.AxesOption;
 import gov.usgs.vdx.data.hypo.plot.HypocenterRenderer.ColorOption;
+import hep.aida.ref.Histogram2D;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -114,6 +116,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private double minStDst;
 	private double maxStDst;
 	private double maxGap;
+	private boolean density;
+	private String densityBinSize;
+	private boolean doLog;
 	
 	private AxesOption axesOption;
 	private ColorOption colorOption;
@@ -287,6 +292,27 @@ public class HypocenterPlotter extends RawDataPlotter {
 				colorOption	= ColorOption.fromString(c);
 			if (colorOption == null)
 				throw new Valve3Exception("Illegal color option.");
+			
+			// Density?
+			try {
+				density = comp.getBoolean("density");
+			} catch (Valve3Exception de) {
+				density = false;
+				doLog = false;
+			}
+			if (density) {
+				if (!(axesOption.equals(AxesOption.MAP_VIEW) || 
+					  axesOption.equals(AxesOption.LAT_DEPTH) || 
+					  axesOption.equals(AxesOption.LON_DEPTH)))
+					throw new Valve3Exception("Density Maps are only available for Lat-Lon, Lat-Depth, and Lon-Depth Maps");
+				
+				try{
+					doLog = comp.getBoolean("doLog");
+				} catch (Valve3Exception dle) {
+					doLog = false;
+				}
+				densityBinSize = Util.stringToString(comp.get("densityBinSize"), "S");
+			}
 			
 			break;
 		
@@ -470,7 +496,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight() + 115);
 		
 		switch (axesOption) {
-		
+			
 		case MAP_VIEW:
 			base = plotMapView(v3p, comp);
 			base.createEmptyAxis();
@@ -592,16 +618,63 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// add this plot to the valve plot
 		v3p.getPlot().addRenderer(base);
 		
-		// create the scale renderer
-		HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axesOption);
-		hr.setColorOption(colorOption);
-		if (colorOption == ColorOption.TIME)
-			hr.setColorTime(startTime+timeOffset, endTime+timeOffset);
-		if (xLabel) {
-			hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 + 150, base.getGraphY() + base.getGraphHeight() + 150);
-			hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 - 150, base.getGraphY() + base.getGraphHeight() + 150);
+		// Create density overlay if desired
+		if (density) {
+			// create the density renderer
+			double bins = 1.0;
+			if (densityBinSize.equals("L"))
+				bins = 10.0;
+			else if (densityBinSize.equals("M"))
+				bins = 5.0;
+			
+			double val1 = 0;
+			double val2 = 0;
+			
+			Histogram2D hist = new Histogram2D("", (int)Math.round(base.getGraphWidth() / bins), base.getMinX(), base.getMaxX(), 
+					(int)Math.round(base.getGraphHeight() / bins), base.getMinY(), base.getMaxY());
+
+			for (Hypocenter hyp : hypos.getHypocenters()) {
+				switch (axesOption) {
+				case MAP_VIEW:
+					val1 = hyp.lon;
+					val2 = hyp.lat;
+					break;
+				case LAT_DEPTH:
+					val1 = hyp.lat;
+					val2 = hyp.depth;
+					break;
+				case LON_DEPTH:
+					val1 = hyp.lon;
+					val2 = hyp.depth;
+					break;
+				}
+
+				hist.fill(val1, val2);
+			}
+			
+			Histogram2DRenderer hir = new Histogram2DRenderer(hist);
+			hir.setLocation(base);
+			hir.setLog(doLog);
+			hir.setExtents(base.getMinX(), base.getMaxX(), base.getMinY(), base.getMaxY());
+			hir.addRenderer(hir.getScaleRenderer(v3p.getPlot().getWidth() / 2 - 200,
+					base.getGraphY() + base.getGraphHeight() + 70));
+			
+			if (axesOption.equals(AxesOption.LAT_DEPTH) || axesOption.equals(AxesOption.LON_DEPTH))
+				hir.setInverted(true);
+			
+			v3p.getPlot().addRenderer(hir);
+		} else {
+			// create the scale renderer
+			HypocenterRenderer hr = new HypocenterRenderer(hypos, base, axesOption);
+			hr.setColorOption(colorOption);
+			if (colorOption == ColorOption.TIME)
+				hr.setColorTime(startTime+timeOffset, endTime+timeOffset);
+			if (xLabel) {
+				hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 + 150, base.getGraphY() + base.getGraphHeight() + 150);
+				hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 - 150, base.getGraphY() + base.getGraphHeight() + 150);
+			}
+			v3p.getPlot().addRenderer(hr);
 		}
-		v3p.getPlot().addRenderer(hr);
 		v3p.addComponent(comp);
 	}
 
@@ -823,7 +896,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	 */
 	private String getTopLabel(Rank rank) {
 		
-		StringBuilder top = new StringBuilder(100);		
+		StringBuilder top = new StringBuilder(100);
 		top.append(hypos.size() + " " + rank.getName());
 		
 		// data coming from the hypocenters list have already been adjusted for the time offset
@@ -843,6 +916,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 			}
 		}
 		top.append(" " + timeZoneID + " Time");
+		if (density) {
+			top.insert(0, "Density Plot (");
+			top.append(")");
+		}
 		return top.toString();
 	}
 	
