@@ -301,10 +301,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 				doLog = false;
 			}
 			if (density) {
-				if (!(axesOption.equals(AxesOption.MAP_VIEW) || 
-					  axesOption.equals(AxesOption.LAT_DEPTH) || 
-					  axesOption.equals(AxesOption.LON_DEPTH)))
-					throw new Valve3Exception("Density Maps are only available for Lat-Lon, Lat-Depth, and Lon-Depth Maps");
+				if (axesOption.equals(AxesOption.ARB_DEPTH) || axesOption.equals(AxesOption.ARB_TIME) || 
+					axesOption.equals(AxesOption.TRIPLE_VIEW))
+					throw new Valve3Exception("Density Maps are not available for Arb-Depth/Time plots.");
 				
 				try{
 					doLog = comp.getBoolean("doLog");
@@ -647,6 +646,10 @@ public class HypocenterPlotter extends RawDataPlotter {
 					val1 = hyp.lon;
 					val2 = hyp.depth;
 					break;
+				case TIME_DEPTH:
+					val1 = hyp.j2ksec;
+					val2 = hyp.depth;
+					break;
 				}
 
 				hist.fill(val1, val2);
@@ -659,7 +662,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 			hir.addRenderer(hir.getScaleRenderer(v3p.getPlot().getWidth() / 2 - 200,
 					base.getGraphY() + base.getGraphHeight() + 70));
 			
-			if (axesOption.equals(AxesOption.LAT_DEPTH) || axesOption.equals(AxesOption.LON_DEPTH))
+			if (axesOption.equals(AxesOption.LAT_DEPTH) || axesOption.equals(AxesOption.LON_DEPTH) || 
+				axesOption.equals(AxesOption.TIME_DEPTH))
 				hir.setInverted(true);
 			
 			v3p.getPlot().addRenderer(hir);
