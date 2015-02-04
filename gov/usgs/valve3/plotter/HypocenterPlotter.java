@@ -117,7 +117,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private double maxStDst;
 	private double maxGap;
 	private boolean density;
-	private String densityBinSize;
+	private double densityBinSize;
 	private boolean doLog;
 	
 	private AxesOption axesOption;
@@ -310,7 +310,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 				} catch (Valve3Exception dle) {
 					doLog = false;
 				}
-				densityBinSize = Util.stringToString(comp.get("densityBinSize"), "S");
+				densityBinSize = Util.stringToDouble(comp.get("densityBinSize"), 5.0);
 			}
 			
 			break;
@@ -619,18 +619,13 @@ public class HypocenterPlotter extends RawDataPlotter {
 		
 		// Create density overlay if desired
 		if (density) {
-			// create the density renderer
-			double bins = 1.0;
-			if (densityBinSize.equals("L"))
-				bins = 10.0;
-			else if (densityBinSize.equals("M"))
-				bins = 5.0;
-			
+			// create the density renderer			
 			double val1 = 0;
 			double val2 = 0;
 			
-			Histogram2D hist = new Histogram2D("", (int)Math.round(base.getGraphWidth() / bins), base.getMinX(), base.getMaxX(), 
-					(int)Math.round(base.getGraphHeight() / bins), base.getMinY(), base.getMaxY());
+			Histogram2D hist = new Histogram2D("", (int)Math.round(base.getGraphWidth() / densityBinSize), 
+					base.getMinX(), base.getMaxX(), (int)Math.round(base.getGraphHeight() / densityBinSize), 
+					base.getMinY(), base.getMaxY());
 
 			for (Hypocenter hyp : hypos.getHypocenters()) {
 				switch (axesOption) {
