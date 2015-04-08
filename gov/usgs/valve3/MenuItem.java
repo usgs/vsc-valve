@@ -16,7 +16,8 @@ public class MenuItem implements Comparable<MenuItem>
 	public String shortcuts;
 	public char lineType;
 	public boolean plotSeparately;
-	public boolean bestPossible;
+	public boolean bprDisplay;
+	public boolean bprDefault;
 	public char biasType;
 	
 	/**
@@ -31,7 +32,7 @@ public class MenuItem implements Comparable<MenuItem>
 	 * @param plotSeparately plot items separately
 	 * @param biasType menu item type of bias removed
 	 */
-	public MenuItem(String menuId, String name, String icon, String file, int sortOrder, String shortcuts, char lineType, boolean plotSeparately, boolean bestPossible, char biasType)
+	public MenuItem(String menuId, String name, String icon, String file, int sortOrder, String shortcuts, char lineType, boolean plotSeparately, boolean bestPossible, boolean bestPossibleDefault, char biasType)
 	{
 		this.menuId			= menuId;
 		this.name			= name;
@@ -41,7 +42,8 @@ public class MenuItem implements Comparable<MenuItem>
 		this.shortcuts		= shortcuts;
 		this.lineType 		= lineType;
 		this.plotSeparately = plotSeparately;
-		this.bestPossible	= bestPossible;
+		this.bprDisplay		= bestPossible;
+		this.bprDefault		= bestPossibleDefault;
 		this.biasType 		= biasType;
 	}
 	
@@ -60,7 +62,8 @@ public class MenuItem implements Comparable<MenuItem>
 			  "<timeShortcuts>" + shortcuts + "</timeShortcuts>\n" +
 			  "<lineType>" + lineType + "</lineType>\n" +
 			  "<plotSeparately>" + new Boolean(plotSeparately) + "</plotSeparately>\n" +
-			  "<bestPossible>" + new Boolean(bestPossible) + "</bestPossible>\n" +
+			  "<bprDisplay>" + new Boolean(bprDisplay) + "</bprDisplay>\n" +
+			  "<bprDefault>" + new Boolean(bprDefault) + "</bprDefault>\n" +
 			  "<biasType>" + biasType + "</biasType>\n" + 
 			  "</menuitem>\n";
 		return xml;
