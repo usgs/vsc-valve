@@ -254,6 +254,7 @@ function populateChannels(menu) {
 				
 				// assign the value the full colon separated string of channel information
 				opt.value = val;
+				opt.title = ss[1];
 				
 				opt.appendChild(document.createTextNode(ss[1].replace(/\$/g,' ')));
 				select.appendChild(opt);
