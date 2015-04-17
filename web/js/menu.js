@@ -277,16 +277,23 @@ function populateBaseline(menu) {
 	var bl   = form.elements['selector:bl'];
 	
 	if (bl) {
+		var sel = form.elements['selector:ct'];
+		for (var i = 0; i < sel.options.length; i++) {
+			if (sel.option[i].text.toLowerCase() == 'continuous')
+				var id = sel.options[i].value;
+		}
 		var opt   = document.createElement('option');
 		opt.value = "[none]";
 		opt.appendChild(document.createTextNode("[none]"));
 		bl.appendChild(opt);
 		
 		for (var i = 0; i < menu.allChannels.length; i++) {
-			opt 	  = document.createElement('option');
-			opt.value = menu.allChannels[i].value;
-			opt.appendChild(document.createTextNode(menu.allChannels[i].text));
-			bl.appendChild(opt);
+			if (menu.allChannels[i].value.split(':')[8] == id) {
+				opt 	  = document.createElement('option');
+				opt.value = menu.allChannels[i].value;
+				opt.appendChild(document.createTextNode(menu.allChannels[i].text));
+				bl.appendChild(opt);
+			}
 		}
 	}
 }
