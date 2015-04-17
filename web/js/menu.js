@@ -279,7 +279,7 @@ function populateBaseline(menu) {
 	if (bl) {
 		var sel = form.elements['selector:ct'];
 		for (var i = 0; i < sel.options.length; i++) {
-			if (sel.option[i].text.toLowerCase() == 'continuous')
+			if (sel.options[i].text.toLowerCase() == 'continuous')
 				var id = sel.options[i].value;
 		}
 		var opt   = document.createElement('option');
