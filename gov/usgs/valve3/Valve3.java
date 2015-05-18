@@ -74,6 +74,7 @@ public class Valve3 implements ServletContextListener
 	private String administratorEmail = "admin@usgs.gov";
 	private String installationTitle = "Valve Installation";
 	private String timeZoneAbbr = "UTC";
+	private String openDataURL = "";
 	
 	private GeoImageSet imageSet;
 	private GeoLabelSet labelSet;
@@ -118,6 +119,10 @@ public class Valve3 implements ServletContextListener
 
 		ExportConfig ec = new ExportConfig( "", config );
 		exportConfigs.put( "", ec );
+		openDataURL = config.getString("openDataURL");
+		if (openDataURL == null)
+			openDataURL = "";
+		logger.config("openDataURL: " + openDataURL);
 
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
@@ -277,6 +282,13 @@ public class Valve3 implements ServletContextListener
 	public GeoLabelSet getGeoLabelSet()
 	{
 		return labelSet;
+	}
+	
+	/**
+	 * Getter for open data server address
+	 */
+	public String getOpenDataURL() {
+		return openDataURL;
 	}
 
 	/**

@@ -834,7 +834,7 @@ public abstract class RawDataPlotter extends Plotter {
 		Vector<String> cmtLines = new Vector<String>();
 		inclTime = outToCSV || outToXML || outToJSON;
 		
-		if ( !ec.isExportable() )
+		if (!(Valve3.getInstance().getOpenDataURL().equalsIgnoreCase(comp.get("requestserver"))) && !ec.isExportable() )
 			throw new Valve3Exception( "Requested export not allowed" );
 	
 		// Get opening comment line(s)

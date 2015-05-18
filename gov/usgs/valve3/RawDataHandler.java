@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.Date;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
@@ -172,6 +171,9 @@ public class RawDataHandler implements HttpHandler
 				component.put(key, value);
 			}
 		}
+		
+		// RequestServer -- used when checking for openDataServer option
+		component.put("requestserver", request.getServerName());
 		return component;
 	}
 
