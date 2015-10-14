@@ -559,7 +559,7 @@ function combineUrl(url1, url2, size) {
 	for (i = 0; i < url1_n; i++) {
 		
 		// parse url 1 into individual parameters for this particular index
-		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-%|\\*|\\w|\\d]+", "g");
 		compParams	= url1_tmp1.match(pattern);
 		url1_tmp2	= "";
 	
@@ -600,7 +600,7 @@ function combineUrl(url1, url2, size) {
 	for (i = url2_n - 1; i >= 0; i--) {
 		
 		// parse url 2 into individual parameters for this particular index
-		pattern		= new RegExp("&\\w+\\." + i + "+=[-|\\*|\\w|\\d]+", "g");
+		pattern		= new RegExp("&\\w+\\." + i + "+=[-%|\\*|\\w|\\d]+", "g");
 		compParams	= url2_tmp1.match(pattern);
 		url2_tmp2	= "";
 		
@@ -662,7 +662,7 @@ function getIntParameter(param, url){
 }
 
 function updateParameter(param, newValue, url){
-	var regexp = new RegExp('&'+ param + '=[-|\\*|\\w|\\d]+');
+	var regexp = new RegExp('&'+ param + '=[-%|\\*|\\w|\\d]+');
 	var paramStrings = url.match(regexp);
 	if(paramStrings === null){
 		url = url + '&'+param+'='+newValue;
