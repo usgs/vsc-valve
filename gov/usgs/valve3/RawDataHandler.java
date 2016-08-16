@@ -260,7 +260,7 @@ public class RawDataHandler implements HttpHandler
 						fn_rank = "RankNbr" + fn_rankID;
 					} else {
 						if (fn_rankID == 0) {
-							fn_rank = "Best Possible Rank";
+							fn_rank = "Best Available Rank";
 						} else {
 							if ( ranksMap == null ) {
 								ranksMap = RawDataPlotter.getRanks(dsd.getVDXSource(), dsd.getVDXClientName());

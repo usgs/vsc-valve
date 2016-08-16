@@ -74,8 +74,8 @@ public class MenuHandler implements HttpHandler
 				if (section != null)
 				{
 					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotSeparately"), false);
-					boolean bprDisplay = Util.stringToBoolean(cf.getString("bprDisplay"), true);
-					boolean bprDefault = Util.stringToBoolean(cf.getString("bprDefault"), false);
+					boolean barDisplay = Util.stringToBoolean(cf.getString("barDisplay"), true);
+					boolean barDefault = Util.stringToBoolean(cf.getString("barDefault"), false);
 					char lineType;
 					String value = cf.getString("plotter.lineType");
 					if(value==null){
@@ -100,7 +100,7 @@ public class MenuHandler implements HttpHandler
 					String name 		= cf.getString("name");
 					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
-					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lineType, plotSeparately, bprDisplay, bprDefault, biasType);
+					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lineType, plotSeparately, barDisplay, barDefault, biasType);
 					section.addMenuItem(item);
 					items.put(item.menuId, item);
 				}

@@ -857,7 +857,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// get the rank object for this request
 		Rank rank	= new Rank();
 		if (rk == 0) {
-			rank	= rank.bestPossible();
+			rank	= rank.bestAvailable();
 		} else {
 			rank	= ranksMap.get(rk);
 		}
@@ -877,7 +877,7 @@ public class HypocenterPlotter extends RawDataPlotter {
 		// export configuration
 		} else {
 			if (rk == 0) {
-				throw new Valve3Exception( "Data Export Not Available for Best Possible Rank");
+				throw new Valve3Exception( "Data Export Not Available for Best Available Rank");
 			}
 		} */
 		
