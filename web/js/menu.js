@@ -132,8 +132,8 @@ function handleMenu(xml) {
 			var lineType		= items[j].getElementsByTagName("lineType")[0].firstChild.data;
 			var plotSeparately	= items[j].getElementsByTagName("plotSeparately")[0].firstChild.data;
 			var biasType		= items[j].getElementsByTagName("biasType")[0].firstChild.data;
-			var bprDisplay		= items[j].getElementsByTagName("bprDisplay")[0].firstChild.data;
-			var bprDefault		= items[j].getElementsByTagName("bprDefault")[0].firstChild.data;
+			var barDisplay		= items[j].getElementsByTagName("barDisplay")[0].firstChild.data;
+			var barDefault		= items[j].getElementsByTagName("barDefault")[0].firstChild.data;
 			// TODO: figure out why this breaks the parser !!
 			// var timeShortcuts	= items[j].getElementsByTagName("timeShortcuts")[0].firstChild.data;
 			var timeShortcuts	= "";
@@ -145,8 +145,8 @@ function handleMenu(xml) {
 			m.lineType		= lineType;
 			m.plotSeparately = plotSeparately;
 			m.biasType      = biasType;
-			m.bprDisplay	= bprDisplay;
-			m.bprDefault	= bprDefault;
+			m.barDisplay	= barDisplay;
+			m.barDefault	= barDefault;
 			menus[menuid]	= m;
 			var li			= document.createElement('li');
 			li.id			= menuid;
@@ -755,12 +755,12 @@ function populateRanks(menu) {
 				opts[i] = opt;
 			}
 			
-			// add in the option for best possible rank, if configured
-			if (menu.bprDisplay == "true") {
+			// add in the option for best available rank, if configured
+			if (menu.barDisplay == "true") {
 				var opt		= document.createElement('option');
 				opt.value	= "0";
-				opt.appendChild(document.createTextNode("Best Possible Rank"));
-				if (menu.bprDefault == "true") {opt.selected = true;}
+				opt.appendChild(document.createTextNode("Best Available Rank"));
+				if (menu.barDefault == "true") {opt.selected = true;}
 				select.appendChild(opt);
 				opts[i]		= opt;
 			}
