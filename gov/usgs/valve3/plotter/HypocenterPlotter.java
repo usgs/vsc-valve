@@ -119,6 +119,8 @@ public class HypocenterPlotter extends RawDataPlotter {
 	private boolean density;
 	private double densityBinSize;
 	private boolean doLog;
+	private double centerLat, centerLon;
+	private double radius;
 	
 	private AxesOption axesOption;
 	private ColorOption colorOption;
@@ -274,6 +276,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		minStDst	= Util.stringToDouble(comp.get("minStDst"), 0.0);
 		maxStDst	= Util.stringToDouble(comp.get("maxStDst"), 1000.0);
 		maxGap		= Util.stringToDouble(comp.get("maxGap"), 360.0);
+		centerLat   = Util.stringToDouble(comp.get("centerLat"), 0.0);
+		centerLon   = Util.stringToDouble(comp.get("centerLon"), 0.0);
+		radius      = Util.stringToDouble(comp.get("radius"), 0.0);
 		
 		switch (plotType) {
 		
@@ -397,6 +402,9 @@ public class HypocenterPlotter extends RawDataPlotter {
 		params.put("maxStDst", Double.toString(maxStDst));
 		params.put("maxGap", Double.toString(maxGap));
 		params.put("outputAll", Boolean.toString(exportAll));
+		params.put("centerLat", Double.toString(centerLat));
+		params.put("centerLon", Double.toString(centerLon));
+		params.put("radius", Double.toString(radius));
 
 		// checkout a connection to the database
 		pool	= Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
