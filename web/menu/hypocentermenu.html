@@ -4,12 +4,20 @@
 	<input type="hidden" name="lg" value="true">
 	<div class="w184 fl">
 		<div class="box">
-		<h1>Area of Interest</h1>
-		<p><input type="text" name="north" id="north" size="10"> <label for="north">North</label></p>
-		<p><input type="text" name="south" id="south" size="10"> <label for="south">South</label></p>
-		<p><input type="text" name="east" id="east" size="10"> <label for="east">East</label></p>
-		<p><input type="text" name="west" id="west" size="10"> <label for="west">West</label></p>
-		<p><input type="button" value="Set from Filter" id="useGeoFilter"></p>
+			<h1>Area of Interest</h1>
+			<p><input type="text" name="north" id="north" size="10"> <label for="north">North</label></p>
+			<p><input type="text" name="south" id="south" size="10"> <label for="south">South</label></p>
+			<p><input type="text" name="east" id="east" size="10"> <label for="east">East</label></p>
+			<p><input type="text" name="west" id="west" size="10"> <label for="west">West</label></p>
+			<p><input type="button" value="Set from Filter" id="useGeoFilter"></p>
+		</div>
+		<div class="box">
+			<h1 id="collapse_radius">Point &amp; Radius</h1>
+			<div id="collapseTarget_radius">
+				<p><input type="text" name="centerLat" id="centerLat" size="10"> <label for="centerLat">Latitude</label></p>
+				<p><input type="text" name="centerLon" id="centerLon" size="10"> <label for="centerLon">Longitude</label></p>
+				<p><input type="text" name="radius" id="radius" size="10"> <label for="radius">Radius (km)</label></p>
+			</div>
 		</div>
 	</div>
 	
