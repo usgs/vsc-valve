@@ -92,12 +92,7 @@
 	<body onload="ieWindowLoaded(event);">
 		<div id="container">
 		
-		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-		if (!navigator.javaEnabled())
-		document.write("<H1><center><big>VALVE requires Javascript to be enabled.</big></center></H1>");
-		</SCRIPT>
 		<NOSCRIPT><H1><center><big>VALVE requires JavaScript to be enabled.</big></center></H1></NOSCRIPT>
-		
 		
 		<div class="topBar">
 			<img id="deleteAll" class="fr" src="images/x.gif">
