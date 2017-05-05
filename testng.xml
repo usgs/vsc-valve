@@ -1,8 +1,0 @@
-<suite name="Selenium tests" parallel="classes" thread-count="4">
-  <!-- parallel working won't happen unless sufficient rc instances present -->
-  <parameter name="webSite" value="http://quiet:8080/" />
-  <parameter name="seleniumHost" value="quiet" />
-  <parameter name="seleniumPort" value="4444" />
-  <parameter name="browser" value="Firefox on Linux" />
-  <!-- parameter name="browser" value="Safari on OS X" / -->
-</suite>
