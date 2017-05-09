@@ -1,0 +1,3 @@
+# Valve3 Labels File. Each field is separated by ONE tab stop
+
+HVO -155.288403 19.420366

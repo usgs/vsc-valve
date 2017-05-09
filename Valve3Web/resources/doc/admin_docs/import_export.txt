@@ -1,0 +1,73 @@
+exportData.pl:
+
+	This program performs the same function as a request for CSV data from a VALVE plot: the data behind the plot is produced in a comma-separated value (CSV) file, written to standard out.  
+	
+	The following arguments are required:
+	
+	-channel CHANNEL_NAME
+	-source DATASOURCE_NAME
+	-start YYYYMMDDHHMMSS.XXX: The start date/time from which to draw data
+	
+	The following arguments are optional; if left out, appropriate defaults are used:
+	
+	-column COLUMN_NAME: This can be supplied more than once, to request multiple columns; duplicates are not allowed.
+	-datatype DATATYPE: This can be supplied more than once, to request multiple types of data; duplicates are not allowed.
+	-end YYYYMMDDHHMMSS.XXX: The end date/time until which to draw data.
+	-rank RANK_NAME
+	-timezone TIMEZONE
+
+exportMeta.pl:
+
+	This program exports metadata into a comma-separated value (CSV) file whose name is of the form meta_SRC.csv, where SRC is replaced with the name of the data source.
+	
+	The following arguments are required:
+	
+	-channel CHANNEL_NAME
+	-source DATASOURCE_NAME
+	
+	The following arguments are optional; if left out, appropriate defaults are used:
+	
+	-column COLUMN_NAME
+	-rank RANK_NAME
+
+exportSupp.pl:
+
+	This program exports supplemental data into a comma-separated value (CSV) file whose name is of the form supp_SRC_TIME.csv, where SRC is replaced with the name of the data source and TIME is the value given as the -start argument.
+	
+	The following arguments are required:
+	
+	-source DATASOURCE_NAME
+	-start YYYYMMDDHHMMSS.XXX: The start date/time from which to draw data
+	
+	The following arguments are optional; if left out, appropriate defaults are used:
+	
+	-channel CHANNEL_NAME
+	-column COLUMN_NAME
+	-column COLUMN_NAME
+	-type SUPPDATATYPE
+	-end YYYYMMDDHHMMSS.XXX: The end date/time until which to draw data.
+	-rank RANK_NAME
+	-tz TIMEZONE
+
+importMeta.pl:
+
+	This program takes one or more files containing metadata and adds them into VDX.
+	
+	The following argument is optional:
+	
+	-c CONFIG_FILE: The name of a file to use instead the standard VDX config file.
+	
+	Any remaining arguments are considered to be filenames, and must be of the same form as files produced by exportMeta.pl: meta_SRC.csv, where SRC is a datasource name.
+	
+
+importSupp.pl:
+
+	This program takes one or more files containing supplemental data and adds them into VDX.
+	
+	The following argument is optional:
+	
+	-c CONFIG_FILE: The name of a file to use instead the standard VDX config file.
+	
+	Any remaining arguments are considered to be filenames, and must be of the same form as files produced by exportMeta.pl: meta_SRC.csv, where SRC is a datasource name.
+	
+	

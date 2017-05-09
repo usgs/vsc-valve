@@ -1,0 +1,15 @@
+Cross-sections for Earthquake Hypocenters
+-----------------------------------------
+
+Two new types of Axes requests were added: Arbitrary-Depth and
+Arbitrary-Time.  These allow the user, by clicking 2 points on a map, to
+specify an arbitrary plane to be plotted from, where the first click
+identifies the left edge of the plot and the second the right.  If the
+width is greater than 0, then the rectangle by going up to width km from
+either side of that line is used to drap the hypocenters to be plotted;
+if the width is 0, then the two points are taken to be the opposite
+corners of the rectangle to be plotted from.
+
+The hypowidth.N parameter of the request URL specifies the width of plot
+component N in km. The axes.N parameter is set to A for arbitrary depth,
+and T for arbitrary time.

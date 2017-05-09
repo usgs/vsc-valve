@@ -1,0 +1,9 @@
+Minimize DB + Server Resources
+------------------------------
+
+In vdxSources.config, a maxrows parameter can be set for any datasource
+to specify the maximum number of rows that will be fetched from the
+database for that datasource.  From the web menu, downsampling can be
+requested, using either decimation or a mean filter to bring the number
+of rows extracted from the database down; the relevant interval, in
+points or seconds, respectively, must be supplied.

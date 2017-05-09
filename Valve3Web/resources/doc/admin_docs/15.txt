@@ -1,0 +1,6 @@
+Improve Plotting of Strain Data
+-------------------------------
+
+A new datasource, tensorstrain, and menu for plotting it is defined; it
+is similar to that for tilt data.  Primary difference is that the x-axis
+azimuth can be specified under the rotation options section.

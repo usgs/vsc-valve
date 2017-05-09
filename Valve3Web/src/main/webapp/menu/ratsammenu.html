@@ -1,0 +1,53 @@
+<div id="ratsamBox">
+  <form id="ratsamForm">
+    <input type="hidden" name="lg" value="true">
+    <div class="w184 fl">
+      <div class="box">
+        <h1>Channels</h1>
+        <h1><label for="showall">Show All</label> <input type="checkbox" id="showall" name="skip:showall"></h1>
+        <p>
+          <select class="w100p" multiple="multiple" size="15" name="selector:ch">
+          </select>
+        </p>
+      </div>
+      <img class="fl" src="images/help.gif" onclick="help_popup('doc/user_docs/ratsam/index.html')">
+    </div>
+
+    <div class="w155 fl">
+      <div class="box w140">
+        <h1 id="collapse_lineOptions">Line Type</h1>
+        <div id="collapseTarget_lineOptions">
+          <p>
+            <select class="w100p" name="selector:linetype" id="selector:linetype">
+              <option value="l">Line</option>
+              <option value="o">Circle</option>
+              <option value="s">Square</option>
+              <option value="*">Star</option>
+              <option value="t">Triangle</option>
+              <option value="d">Dot</option>
+            </select>
+          </p>
+        </div>
+      </div>
+      <div class="box w140">
+        <h1 id="collapse_dsOptions">Downsampling</h1>
+        <div id="collapseTarget_dsOptions">
+          <p>
+            <select class="w100p" name="selector:ds" id="selector:ds">
+              <option selected="selected">None</option>
+              <option>Decimation</option>
+              <option>Mean filter</option>
+            </select>
+          </p>
+          <p id="selector:ds_interval">Interval: <input type="text" size="4" name="dsInt" id="downSamplingInterval"></p>
+        </div>
+      </div>
+      <div class="box w140">
+        <h1 id="collapse_leftOptions">Left Axis Options</h1>
+        <div id="collapseTarget_leftOptions" class="minmax">
+          <p><label>Min:</label><input type="text" size="5" id="ysMinLeft" value="" name="ysLMin"><br/><label>Max:</label><input type="text" size="5" id="ysMaxLeft" value="" name="ysLMax"></p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

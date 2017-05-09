@@ -1,0 +1,105 @@
+Data Processing with Database: exportData.pl
+--------------------------------------------
+
+This program mimics, from a command line, what the export commands from
+the web interface (detailed in 02.txt) do; specifically, they allow for
+the downloading of a CSV file of the data behind a requested plot.
+
+Input arguments:
+
+source: name of the datasource; required
+channel: a comma (but no spaces!) separated list of channel names; required
+start: start time (expressed as YYYYMMDDHHMMSS.SSS); required
+end: end time; optional (defaults to NOW)
+timezone: abbreviation of the timezone to express times in; defaults to UTC
+datatype: name of datatype; required, and can be specified multiple times
+column: name of columns to include; required, and can be specified multiple
+	times
+rank: name of rank; optional (defaults to all ranks)
+output: either "csv" or "binary" (for Winston miniseed output)
+
+Results are detailed in 02.txt; the result is written to standard output.
+
+Example: exportData.pl -source pbo_strain -channel B004 -start
+20100901000000000 -column CH0 -rank RawData
+
+
+Data Processing with Database: exportMeta.pl
+--------------------------------------------
+
+This program extracts to a file in CSV format what is shown as
+"processing data" from the web interface.
+
+Input arguments:
+
+source: name of the datasource; required
+channel: a comma (but no spaces!) separated list of channel names; required
+column: name of column to include; optional (defaults to all columns)
+rank: name of rank; optional (defaults to all ranks)
+
+Output format (filename meta_DATASOURCENAME_YYYYMMDDHHMMSS.csv): 
+
+channel, metadata type (name), metadata (value)
+
+Example: exportMeta.pl -source pbo_strain -channel B004
+
+
+Data Processing with Database: exportSupp.pl
+---------------------------------------------
+
+This program extracts to a file in CSV format what is shown as "supplemental
+data" from the web interface.
+
+Input arguments:
+
+source: name of the datasource; required
+channel: a comma (but no spaces!) separated list of channel names; required
+column: name of column to include; optional (defaults to all columns)
+rank: name of rank; optional (defaults to all ranks)
+start: start time (expressed as YYYYMMDDHHMMSS.SSS); required
+end: end time; optional (defaults to NOW)
+tz: abbreviation of the timezone to express times in; optional (defaults to UTC)
+type: name of datatype; optional (defaults to all)
+
+Output format (filename supp_DATASOURCENAME_YYYYMMDDHHMMSS.csv): 
+
+data source, start_date, end_date, channel name (expanded from cid with
+x-ref table), column name, rank (expanded) supp data type (expanded),
+supp_data_short , supp data
+
+Example: exportSupp.pl -source pbo_strain -channel B004 -start
+20100901000000000
+
+Data Processing with Database: importMeta.pl
+--------------------------------------------
+
+This program imports the data in a CSV file, like one produced by
+exportMeta.pl, into Valve.  Note that the first column of each data line
+is the ID of that piece of data; if that value is 0, it is treated as a
+new entry, otherwise it is treated as an update to the entry with that
+ID.
+
+Input arguments:
+
+-h: Help is displayed
+-c filename: a config file to take the placed of VDX.config
+The remaining argument(s) are the names of the files to import from
+
+Example: importMeta.pl -c myVDX.config meta_pbo_strain_20100901000000.csv
+
+Data Processing with Database: importSupp.pl
+--------------------------------------------
+
+This program imports the data in a CSV file, like one produced by
+exportSupp.pl, into Valve.  Note that the first column of each data line
+is the ID of that piece of data; if that value is 0, it is treated as a
+new entry, otherwise it is treated as an update to the entry with that
+ID.
+
+Input arguments:
+
+-h: Help is displayed
+-c filename: a config file to take the placed of VDX.config
+The remaining argument(s) are the names of the files to import from
+
+Example: importSupp.pl supp_pbo_strain_20100901000000.csv 

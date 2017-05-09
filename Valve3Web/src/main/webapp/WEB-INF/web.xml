@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.1  2005/09/03 19:18:35  dcervelli
+Initial commit.
+
+-->
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+  version="2.4">
+
+  <display-name>Valve 3</display-name>
+
+  <listener>
+    <listener-class>gov.usgs.volcanoes.valve3.Valve3</listener-class>
+  </listener>
+
+  <session-config>
+    <session-timeout>
+      60
+    </session-timeout>
+  </session-config>
+
+  <welcome-file-list>
+    <welcome-file>
+      index.jsp
+    </welcome-file>
+  </welcome-file-list>
+
+	<mime-mapping>
+    <extension>csv</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+	<mime-mapping>
+    <extension>xml</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+	<mime-mapping>
+    <extension>json</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+</web-app>

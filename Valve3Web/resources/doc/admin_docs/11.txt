@@ -1,0 +1,7 @@
+Menu Display
+------------
+
+In the data.config file, you can specify the expansion state of each
+top-level menu as being either true or false (with false being the
+default).  If true, that top-level menu will be initially expanded;
+otherwise, it will be contracted.

@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>gov.usgs.volcanoes</groupId>
+  <artifactId>valve</artifactId>
+  <version>3.5.0</version>
+  <packaging>pom</packaging>
+
+  <name>valve</name>
+  <url>https://volcanoes.usgs.gov/software/vdx</url>
+  <description>Valve is the super-project that is made up of Valve3 and Valve3Web.
+  </description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version.template.file>src/main/resources/Version.java.template</version.template.file>
+    <version.file>src/main/java/gov/usgs/volcanoes/valve3/Version.java</version.file>
+  </properties>
+
+  <modules>
+    <module>Valve3</module>
+    <module>Valve3Web</module>
+  </modules>
+
+  <licenses>
+    <license>
+      <name>CC0 1.0 Universal</name>
+      <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>cervelli</id>
+      <name>Peter Cervelli</name>
+      <email>pcervelli@usgs.gov</email>
+      <organization>U.S. Geological Survey, Volcano Science Center</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>lantolik</id>
+      <name>Loren Antolik</name>
+      <email>lantolik@usgs.gov</email>
+      <organization>U.S. Geological Survey, Hawaiian Volcano Observatory</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>tparker</id>
+      <name>Tom Parker</name>
+      <email>tparker@usgs.gov</email>
+      <organization>U.S. Geological Survey, Alaska Volcano Observatory</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>wtollett</id>
+      <name>Bill Tollett</name>
+      <email>wtollettd@usgs.gov</email>
+      <organization>U.S. Geological Survey, Hawaiian Volcano Observatory</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>dcervelli</id>
+      <name>Dan Cervelli</name>
+      <properties>
+        <active>false</active>
+      </properties>
+    </developer>
+    <developer>
+      <id></id>
+      <name>Max Kokoulin</name>
+      <organization>ISTI</organization>
+      <properties>
+        <active>false</active>
+      </properties>
+    </developer>
+  </developers>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

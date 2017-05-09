@@ -1,0 +1,78 @@
+<!--
+  -- $Log: catalogdoc.html,v $
+  -- Revision 1.1  2004/01/25 20:42:19  cervelli
+  -- Initial revision.
+  --
+  -->
+
+<html>
+<head>
+<title>Valve Catalog Section User's Guide</title>
+<link type="text/css" rel="stylesheet" href="../valvedoc.css" title="main" />
+</head>
+<body>
+
+<a name="top"></a>
+<div class="header"><a href="http://www.usgs.gov"><img border="0" alt="USGS" src="../usgs.gif"></a>
+<h1>&nbsp;VALVE: Volcano Analysis and Visualization Environment<br>
+&nbsp;Catalog Section User's Guide</h1><hr></div>
+
+<div class="content">
+<h1>Catalog Section User's Guide</h1>
+<p>The main Catalog UI looks something like this (depending somewhat on your Valve installation):</p>
+<p><center><img border="1" src="catalogtab.png" alt="Tilt UI"></center></p>
+<p>The Catalog section get generate many different types of plots: map plots (including cross-sections), earthquake counts time-series, 3-D hypocenter plots, and earthquake density plots.  In order to provide this flexibility the UI is unfortunately a bit complex.</p>
+<p>First, for all plots an area has to be selected.  The Area of Interest provides the mechanism for selecting the area.  The values entered in the (W/N) and (E/S) fields, depth fields, and magnitude range are used to select the proper earthquakes for visualization.  Entering longitudes and latitudes by hand is cumbersome so the pull-down box ('[Select a region...]' above) provides a list of predetermined areas that fill in the longitude/latitude fields for you.  In fact, you should never have to enter the values by hand unless you specifically want to.</p>
+<p>After the area has been selected the output type has to be chosen.</p>
+<p><span style="font-size: 16px"><b>Hypocenter Map Plots</b></span><br>
+There are two main types of hypocenter maps: actual hypocenter plots and hypocenter density plots.  Each hypocenter is plotted individually on the standard hypocenter plot while the counts of hypocenters in a spatial cell are plotted in the density plots.</p>
+<p><b>Standard Hypocenter Map Plots</b><br>
+All of the hypocenter map plots have two things in common: at least one of their axes is spatial and the body of the plot is hypocenters.  The many options available for the hypocenter map plots make them quite versatile.  The most important option is the axes designation.  The options are:
+<ul>
+<li>Lon-Lat: longitude and latitude on the x and y axes respectively, the standard map plot.</li>
+<li>Lon-Depth: longitude on the x axis and depth on the y axis, the preferred standard cross-section plot.</li>
+<li>Lat-Depth: latitude on the x axis and depth on the y axis, another cross-section plot.</li>
+<li>Arbitrary-Depth: an arbitrary, user-defined cross-section on the x axis, depth on the y axis.</li>
+<li>Arbitrary-Time: an arbitrary, user-defined cross-section on the y axis, time on the x axis.  This is actually a time-series and with respect to the Valve UI behaves as such.</li>
+</ul>
+</p>
+<p>When using arbitrary cross-sections, the cross-section is defined by the points specified by the A and A' text fields.  The easiest way to select these points is to generate a standard map plot wholly encompassing your area of interest, select "Map clicks select: Cross-section", then click the two points that define the cross-section letting Valve enter the coordinates for you.  If you want to limit the width of the cross-section, specify the width in the appropriate text field (the width is on either side, so if you wanted a 5km total width, enter 2.5). <b>Note: the Area of Interest filter is still in effect when plotting hypocenters with arbitrary cross-sections, so if the cross-section is near the border of the original map you may not be getting hypocenters that fall within the width of the cross-section.</b></p>
+<p>Of course, the "Hypocenters" radio box needs to be checked to generate a hypocenter plot.  The last option available for hypocenter plots is whether color should represent depth or time.</p>
+<p>Examples:</p>
+<p><center><img border="1" src="eqexample1.png" alt="Catalog Example 1"><br>
+Hypocenter map plot, color denotes time, showing dike propagation.</center></p>
+<p><center><img border="1" src="eqexample2.png" alt="Catalog Example 2"><br>
+Arbitrary cross-section (y-axis) versus time plot, color denotes depth, showing temporal and spatial changes in Kaoiki fault zone behavior.</center></p>
+<p><b>Hypocenter Density Plots</b><br>
+Hypocenter density plots work similarly to hypocenter plots except that the number of hypocenters that fall within a grid cell (sized depending on the "Bin" setting) is plotted as a color map.  Arbitrary cross-sections are not allowed with hypocenter density plots.  Also, you can specify whether the color map should be based on raw counts or the common log of the raw counts.</p>
+<p>An example showing hypocenter density on the south flank of Kilauea over the last 10 years:</p>
+<p><center><img border="1" src="eqexample3.png" alt="Catalog Example 3"></center></p>
+
+<p><span style="font-size: 16px"><b>Hypocenter Count Plots</b></span><br>
+Valve can create hypocenter count time-series plots.  The Area of Interest filter is still used for these plots, so you can quickly get historical earthquake counts at a standard region over any time interval.  Additionally, a cumulative count, moment, or magnitude line (simply select the desired radio box) is overlaid on the count plot.  You can also specify the bin size for the count histogram (a large bin size will be automatically chosen if the user-specified one results in too many bins).  Cumulative moment and magnitude are calculated as:<br>
+ &nbsp;Mo = 10 ^ ( (321/20) + (3*[Magnitude]/2) )<br> 
+ &nbsp;Mag = Log(Mo) / 1.5 -  10.7<br>
+</p>
+<p>Here is a hypocenter count plot showing historical data at the summit of Mauna Loa:</p>
+<p><center><img border="1" src="eqexample4.png" alt="Catalog Example 4"></center></p>
+
+<p><span style="font-size: 16px"><b>3-D Hypocenter Plots</b></span><br>
+<p>Valve uses the <a href="http://wwwvis.informatik.uni-stuttgart.de/~kraus/LiveGraphics3D/">LiveGraphics3D</a> applet to interactively display hypocenters in 3-D.  You can specify the axes you want in the plot and whether you want the size of the hypocenter to correspond to magnitude and/or the color to correspond to the time.</p>
+<p>Here is a screenshot of hypocenters on Hawaii:</p>
+<p><center><img border="1" src="eqexample5.png" alt="Catalog Example 4"></center></p>
+</div>
+
+<div class="header">
+<hr>
+	<div class="footer">
+	<a href="http://www.doi.gov">U.S. Department of the Interior</a>,
+	<a href="http://www.usgs.gov">U.S. Geological Survey</a>, Reston, VA, USA<br>
+	URL: &lt;/valve/doc/catalogdoc.html&gt;<br>
+	Contact: <a href="mailto:dcervelli@hvomail.wr.usgs.gov">Dan Cervelli</a><br>
+	Last modification: 2003-07-06 (DPC)<br>
+	<a href="http://www.usgs.gov/privacy.html">USGS Privacy Statement</a>
+	</div>
+</div>
+
+</body>
+</html>
