@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
 
   <name>valve</name>
-  <url>https://volcanoes.usgs.gov/software/vdx</url>
+  <url>https://volcanoes.usgs.gov/software/valve</url>
   <description>Valve is the super-project that is made up of Valve3 and Valve3Web.
   </description>
   <properties>
