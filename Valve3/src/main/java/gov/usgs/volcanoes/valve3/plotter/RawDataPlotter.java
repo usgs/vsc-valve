@@ -168,9 +168,9 @@ public abstract class RawDataPlotter extends Plotter {
 					if ( cname.equals(names[i]) ) {
 						names[i] = names[left-1];
 						if ( ch==null )
-							ch = "" + c.getCID();
+							ch = "" + c.getCId();
 						else
-							ch = ch + "," + c.getCID();
+							ch = ch + "," + c.getCId();
 						left--;
 						break;
 					}
@@ -1087,8 +1087,8 @@ public abstract class RawDataPlotter extends Plotter {
 			// An array of our data sources, indexed by ID
 			ExportData[] sources = new ExportData[ csvData.size() ];
 			for ( ExportData cd: csvData ) {
-				sources[ cd.exportDataID() ] = cd;
-				currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+				sources[ cd.exportDataId() ] = cd;
+				currLine[ cd.exportDataId() ] = cd.dummyExportDatum();
 			}
 			
 			// prevTime is the time of the last row formatted into csvText
@@ -1124,7 +1124,7 @@ public abstract class RawDataPlotter extends Plotter {
 							break;
 						// "Erase" the current line
 						for ( ExportData cd: sources )
-							currLine[ cd.exportDataID() ] = cd.dummyExportDatum();
+							currLine[ cd.exportDataId() ] = cd.dummyExportDatum();
 						prevTime = loED.currExportDatum()[0];
 					}
 				} else if ( loED != null ) {
@@ -1134,7 +1134,7 @@ public abstract class RawDataPlotter extends Plotter {
 					throw new Valve3Exception( "No data to export" );
 				}
 				// Add current item to current line
-				currLine[ loED.exportDataID() ] = loED.currExportDatum();
+				currLine[ loED.exportDataId() ] = loED.currExportDatum();
 				
 				// Remove & add our ExportData back so that it gets placed based on its new data
 				csvData.remove( loED );
@@ -1458,8 +1458,8 @@ public abstract class RawDataPlotter extends Plotter {
 					} else {
 						offset = (Integer)chMap.get( sdo.cid );
 					}
-					sdo.frame_y = comp.getBoxY() + (offset * compBoxHeight) + 8;
-					sdo.frame_h = compBoxHeight - 16;
+					sdo.frameY = comp.getBoxY() + (offset * compBoxHeight) + 8;
+					sdo.frameH = compBoxHeight - 16;
 					sdo.adjustTime(timeOffset);
 					v3p.addSuppDatum( sdo );
 				}

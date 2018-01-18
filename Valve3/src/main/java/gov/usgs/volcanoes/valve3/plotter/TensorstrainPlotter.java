@@ -229,7 +229,7 @@ public class TensorstrainPlotter extends RawDataPlotter {
 			// instantiate the azimuth and tangential values based on the user selection
 			switch (azimuth) {
 			case NATURAL:
-				azimuthValue = azimuthsMap.get(channel.getCID());
+				azimuthValue = azimuthsMap.get(channel.getCId());
 				break;
 			case USERDEFINED:
 				String azval = comp.get("azval");

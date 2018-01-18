@@ -4,7 +4,7 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.1</version>
   </parent>
   <artifactId>valve3</artifactId>
   <packaging>jar</packaging>

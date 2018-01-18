@@ -164,7 +164,7 @@ public class ChannelMapPlotter extends Plotter
 			}
 			for (String ch : stringList) {
 				Channel channel		= new Channel(ch);
-				int cid				= channel.getCID();
+				int cid				= channel.getCId();
 				if (cids.contains(cid)) {
 					String channelCode	= channel.getCode();
 					String channelCode0 = channelCode.split(" ")[0];

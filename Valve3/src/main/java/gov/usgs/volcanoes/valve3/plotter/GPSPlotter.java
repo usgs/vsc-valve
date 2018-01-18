@@ -126,7 +126,7 @@ public class GPSPlotter extends RawDataPlotter {
 			bl = null;
 			for (Channel c : channelsMap.values()) {
 				if (c.getCode().equals(blName))
-					bl = String.valueOf(c.getCID());
+					bl = String.valueOf(c.getCId());
 			}
 		} else {
 			bl = comp.get("bl");
