@@ -12,8 +12,6 @@
   </description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.template.file>src/main/resources/Version.java.template</version.template.file>
-    <version.file>src/main/java/gov/usgs/volcanoes/valve3/Version.java</version.file>
   </properties>
 
   <modules>

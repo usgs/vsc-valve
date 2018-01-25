@@ -64,13 +64,46 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.0.2</version>
       </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>maven-replacer-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <file>${version.template.file}</file>
+          <outputFile>${version.file}</outputFile>
+          <replacements>
+            <replacement>
+              <token>@buildnumber@</token>
+              <value>${svn.revision}</value>
+            </replacement>
+            <replacement>
+              <token>@buildtime@</token>
+              <value>${maven.build.timestamp}</value>
+            </replacement>
+            <replacement>
+              <token>@pomversion@</token>
+              <value>${project.version}</value>
+            </replacement>
+          </replacements>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
   <repositories>
     <repository>
       <id>volcanoes</id>
-      <releases></releases>
+      <releases>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
       <url>https://volcanoes.usgs.gov/software/maven2/</url>
     </repository>
   </repositories>

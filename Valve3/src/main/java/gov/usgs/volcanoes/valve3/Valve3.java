@@ -7,6 +7,7 @@ import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
 import gov.usgs.volcanoes.vdx.ExportConfig;
 import gov.usgs.volcanoes.valve3.data.DataHandler;
+import gov.usgs.volcanoes.valve3.Version;
 
 import java.io.File;
 import java.util.Date;
@@ -59,9 +60,6 @@ import javax.servlet.ServletContextListener;
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String VERSION = "3.5.2";
-	public static final String BUILD_DATE = "2018-01-19";
-
 	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
 	private static Valve3 instance;
@@ -315,7 +313,7 @@ public class Valve3 implements ServletContextListener
 	 */
 	public void contextInitialized(ServletContextEvent sce)
 	{
-		logger.info("Valve " + VERSION + ", " + BUILD_DATE + " initialization");
+		logger.info("Valve " + Version.VERSION_STRING + " initialization");
 		applicationPath = sce.getServletContext().getRealPath("");
 		processConfigFile();
 	}
