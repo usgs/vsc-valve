@@ -17,7 +17,6 @@ import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.plot.transform.ArbDepthCalculator;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -47,6 +46,9 @@ import java.awt.image.RenderedImage;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class for making hypocenter map plots and histograms.
@@ -145,7 +147,7 @@ public class HypocenterPlotter extends RawDataPlotter {
    */
   public HypocenterPlotter() {
     super();
-    logger = Log.getLogger("gov.usgs.volcanoes.valve3");
+    logger = LoggerFactory.getLogger(HypocenterPlotter.class);
   }
 
   /**

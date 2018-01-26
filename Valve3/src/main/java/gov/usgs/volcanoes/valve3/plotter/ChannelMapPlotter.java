@@ -25,7 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generate PNG map image to local file from vdx source data.
@@ -54,7 +56,7 @@ public class ChannelMapPlotter extends Plotter {
    * Default constructor.
    */
   public ChannelMapPlotter() {
-    logger = Logger.getLogger("gov.usgs.volcanoes.vdx");
+    logger = LoggerFactory.getLogger(ChannelMapPlotter.class);
   }
 
   /**

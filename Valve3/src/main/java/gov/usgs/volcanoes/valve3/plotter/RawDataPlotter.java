@@ -36,7 +36,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
@@ -123,7 +125,7 @@ public abstract class RawDataPlotter extends Plotter {
    * Default constructor.
    */
   public RawDataPlotter() {
-    logger = Logger.getLogger("gov.usgs.volcanoes.vdx");
+    logger = LoggerFactory.getLogger(RawDataPlotter.class);
     csvCmtBits = new LinkedHashMap<String, String>();
     csvHdrs = new Vector<String[]>();
     dateFormatString = "yyyy-MM-dd HH:mm:ss";
@@ -916,7 +918,7 @@ public abstract class RawDataPlotter extends Plotter {
     try {
       plot(null, comp);
     } catch (PlotException e) {
-      logger.severe(e.getMessage());
+      logger.error("{}", e.getMessage());
     }
     String rank = "";
     String rowTimeZone = "";
