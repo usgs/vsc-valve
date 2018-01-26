@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 import gov.usgs.volcanoes.valve3.data.DataHandler;
 import gov.usgs.volcanoes.valve3.data.DataSourceDescriptor;
@@ -20,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 import java.util.Date;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
@@ -28,6 +26,9 @@ import java.util.zip.ZipException;
 
 import javax.servlet.http.HttpServletRequest;
 import gov.usgs.volcanoes.vdx.data.Rank;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates raw data from http request.
@@ -66,7 +67,7 @@ public class RawDataHandler implements HttpHandler
 	 */
 	public RawDataHandler(DataHandler dh)
 	{
-		logger = Log.getLogger("gov.usgs.volcanoes.valve3");
+		logger = LoggerFactory.getLogger(RawDataHandler.class);
 		dataHandler = dh;
 	}
 	
@@ -342,7 +343,7 @@ public class RawDataHandler implements HttpHandler
 		}
 		catch (Valve3Exception e)
 		{
-			logger.info("RawDataHandler error " + e.getMessage());
+			logger.info("RawDataHandler error: {}", e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}

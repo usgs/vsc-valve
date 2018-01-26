@@ -1,8 +1,7 @@
 package gov.usgs.volcanoes.valve3.result;
 
-import gov.usgs.util.Log;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -22,8 +21,8 @@ public class ewRsamMenu extends Result
 	 */
 	public ewRsamMenu(java.util.List<String> src)
 	{
-		logger = Log.getLogger("gov.usgs.volcanoes.vdx");
-		logger.info("ewRsamMenu() src = " + src.toString());
+		logger = LoggerFactory.getLogger(ewRsamMenu.class);
+		logger.info("ewRsamMenu() src = {}", src.toString());
 
 		dataTypes = src.toString();
 	}

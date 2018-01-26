@@ -15,15 +15,16 @@ import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.plot.render.LegendRenderer.LegendEntry;
 import gov.usgs.plot.render.wave.SliceWaveRenderer;
-import gov.usgs.util.Log;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Special kind of plot which renders set of components as one component
@@ -32,7 +33,7 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
  */
 public class CombinedPlot extends Plot {
 	public final static double fillValue = Double.NEGATIVE_INFINITY;
-	private final static Logger logger = Log.getLogger("gov.usgs.volcanoes.valve3.CombinedPlot"); 
+	private final static Logger logger = LoggerFactory.getLogger(CombinedPlot.class);
 	private int componentCount;
 	private int callCount;
 	private int leftTicks;
@@ -276,9 +277,8 @@ public class CombinedPlot extends Plot {
 		} else if (matrixToAdd == null) {
 			return matrix;
 		} else {
-			logger.info("Result size: "
-					+ (matrix.rows() + matrixToAdd.rows()) + "x"
-					+ (matrix.columns() + matrixToAdd.columns() - 2));
+			logger.info("Result size: {}x{}", (matrix.rows() + matrixToAdd.rows()),
+					(matrix.columns() + matrixToAdd.columns() - 2));
 			DoubleMatrix2D result = new DenseDoubleMatrix2D(matrix.rows()
 					+ matrixToAdd.rows(), matrix.columns()
 					+ matrixToAdd.columns() - 2);

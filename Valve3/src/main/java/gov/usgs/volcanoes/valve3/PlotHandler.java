@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Time;
 import gov.usgs.util.Util;
@@ -21,9 +20,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates valve plot from http request.
@@ -68,7 +69,7 @@ public class PlotHandler implements HttpHandler
 	 */
 	public PlotHandler(DataHandler dh)
 	{
-		logger = Log.getLogger("gov.usgs.volcanoes.valve3");
+		logger = LoggerFactory.getLogger(PlotHandler.class);
 		dataHandler = dh;
 	}
 	
@@ -252,14 +253,14 @@ public class PlotHandler implements HttpHandler
 			Valve3.getInstance().getResultDeleter().addResult(plot);
 			return plot;
 		} catch (Valve3Exception e) {
-			logger.severe(e.getMessage());
+			logger.error("{}", e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Yield a random file name
-	 * @param extenstion filename extension
+	 * @param extension filename extension
 	 * @return random file name in the img/ directory with .png extension
 	 */
 	public static String getRandomFilename(String extension)

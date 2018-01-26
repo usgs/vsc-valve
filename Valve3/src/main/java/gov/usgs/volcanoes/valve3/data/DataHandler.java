@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.valve3.data;
 
 import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Log;
 import gov.usgs.util.Pool;
 import gov.usgs.util.Util;
 import gov.usgs.util.UtilException;
@@ -18,9 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Constructs and keeps internal data representation described in the configuration file
@@ -31,7 +32,7 @@ public class DataHandler implements HttpHandler
 {
 	private static final String CONFIG_FILE = "data.config";
 	private static final int DEFAULT_VDX_CLIENT_TIMEOUT = 60000;
-	private final static Logger logger = Log.getLogger("gov.usgs.volcanoes.valve3.DataHandler"); 
+	private final static Logger logger = LoggerFactory.getLogger(DataHandler.class);
 	protected Map<String, DataSourceDescriptor> dataSources;
 	protected Map<String, Pool<VDXClient>> vdxClients;
 	protected ConfigFile config;
@@ -56,7 +57,7 @@ public class DataHandler implements HttpHandler
 		List<String> vdxs = config.getList("vdx");
 		for (String vdx : vdxs)
 		{
-			logger.severe("VDX: " + vdx);
+			logger.info("VDX: {}", vdx);
 			ConfigFile sub = config.getSubConfig(vdx);
 			int num = Util.stringToInt(sub.getString("clients"), 4);
 			Pool<VDXClient> pool = new Pool<VDXClient>();
@@ -73,7 +74,7 @@ public class DataHandler implements HttpHandler
 		List<String> sources = config.getList("source");
 		for (String source : sources)
 		{
-			logger.severe("Data source: " + source);
+			logger.info("Data source: {}", source);
 			ConfigFile sub = config.getSubConfig(source);
 			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub);
 			dataSources.put(source, dsd);
@@ -157,7 +158,7 @@ public class DataHandler implements HttpHandler
 					// Add the parameters needed for meta or supp data
 					// Also validate for required and duplicated parameters
 					String arg;
-					logger.info("Processing " + action );
+					logger.info("Processing {}", action);
 					char m_kind[] = {'?','!','?','?','x','x','x','x'};
 					char s_kind[] = {'?','?','?','?','!','?','?','?'};
 					char kind[];
@@ -172,7 +173,7 @@ public class DataHandler implements HttpHandler
 						arg = request.getParameter( args[i] );
 						if ( arg==null || arg.equals(""))
 							continue;
-						logger.info( args[i] + " = " + arg );
+						logger.info("{} = {}", args[i], arg);
 						switch ( kind[i] ) {
 							case 'x':
 								throw new Valve3Exception( "Illegal parameter: " + args[i] );
