@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract public class Result
 {
-	private final static Logger logger = LoggerFactory.getLogger(Result.class);
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected String url;
 	
 	/**

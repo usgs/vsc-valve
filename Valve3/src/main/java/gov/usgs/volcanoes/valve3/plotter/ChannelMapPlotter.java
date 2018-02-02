@@ -1,14 +1,14 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabel;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pool;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabel;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;

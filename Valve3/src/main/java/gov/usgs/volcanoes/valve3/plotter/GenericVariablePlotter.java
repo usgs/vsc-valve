@@ -1,15 +1,15 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.PointRenderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.PointRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -220,8 +220,8 @@ public class GenericVariablePlotter extends RawDataPlotter {
     }
     if (unitsX) {
       mr.getAxis().setBottomLabelAsText(
-          timeZoneID + " Time (" + Util.j2KToDateString(startTime + timeOffset, dateFormatString)
-              + " to " + Util.j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+          timeZoneID + " Time (" + J2kSec.toDateString(startTime + timeOffset)
+              + " to " + J2kSec.toDateString(endTime + timeOffset) + ")");
     }
     if (isDrawLegend) {
       mr.createDefaultLegendRenderer(channelLegendsCols);

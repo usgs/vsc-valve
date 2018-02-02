@@ -2,22 +2,23 @@ package gov.usgs.volcanoes.valve3.plotter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.BasicFrameRenderer;
-import gov.usgs.plot.render.InvertedFrameRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.plot.transform.ArbDepthCalculator;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.BasicFrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.InvertedFrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.transform.ArbDepthCalculator;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -116,7 +117,6 @@ public class LightningPlotter extends RawDataPlotter {
    */
   public LightningPlotter() {
     super();
-    logger = LoggerFactory.getLogger(LightningPlotter.class);
   }
 
   /**
@@ -224,20 +224,20 @@ public class LightningPlotter extends RawDataPlotter {
 
     range = new GeoRange(w, e, s, n);
 
-    hypowidth = Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
+    hypowidth = StringUtils.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
 
     switch (plotType) {
 
       case MAP:
 
         // axes defaults to Map View
-        axesOption = AxesOption.fromString(Util.stringToString(comp.get("axesOption"), "M"));
+        axesOption = AxesOption.fromString(StringUtils.stringToString(comp.get("axesOption"), "M"));
         if (axesOption == null) {
           throw new Valve3Exception("Illegal axes type.");
         }
 
         // color defaults to Auto
-        String c = Util.stringToString(comp.get("colorOption"), "A");
+        String c = StringUtils.stringToString(comp.get("colorOption"), "A");
         if (c.equals("A")) {
           colorOption = ColorOption.chooseAuto(axesOption);
         } else {
@@ -252,7 +252,7 @@ public class LightningPlotter extends RawDataPlotter {
       case STROKES:
 
         // bin size defalts to day
-        bin = BinSize.fromString(Util.stringToString(comp.get("cntsBin"), "day"));
+        bin = BinSize.fromString(StringUtils.stringToString(comp.get("cntsBin"), "day"));
         if (bin == null) {
           throw new Valve3Exception("Illegal bin size option.");
         }
@@ -262,7 +262,7 @@ public class LightningPlotter extends RawDataPlotter {
         }
 
         // right axis default to cumulative counts
-        rightAxis = RightAxis.fromString(Util.stringToString(comp.get("cntsAxis"), "S"));
+        rightAxis = RightAxis.fromString(StringUtils.stringToString(comp.get("cntsAxis"), "S"));
         if (rightAxis == null) {
           throw new Valve3Exception("Illegal counts axis option. (" + comp.get("cntsAxis") + ")");
         }
@@ -473,9 +473,9 @@ public class LightningPlotter extends RawDataPlotter {
     }
     if (unitsX) {
       hr.getAxis().setBottomLabelAsText(
-          timeZoneID + " Time (" + Util.j2KToDateString(startTime + timeOffset, dateFormatString)
+          timeZoneID + " Time (" + J2kSec.toDateString(startTime + timeOffset)
               + " to "
-              + Util.j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+              + J2kSec.toDateString(endTime + timeOffset) + ")");
     }
     if (labelX) {
       hr.getAxis().setTopLabelAsText(getTopLabel(rank));
@@ -656,18 +656,17 @@ public class LightningPlotter extends RawDataPlotter {
     // the time offset
     if (strokes.size() == 1) {
       top.append(" stroke on ");
-      top.append(Util.j2KToDateString(strokes.getStrokes().get(0).j2ksec, dateFormatString));
+      top.append(J2kSec.toDateString(strokes.getStrokes().get(0).j2ksec));
     } else {
       top.append(" strokes between ");
       if (strokes.size() == 0) {
-        top.append(Util.j2KToDateString(startTime + timeOffset, dateFormatString));
+        top.append(J2kSec.toDateString(startTime + timeOffset));
         top.append(" and ");
-        top.append(Util.j2KToDateString(endTime + timeOffset, dateFormatString));
+        top.append(J2kSec.toDateString(endTime + timeOffset));
       } else if (strokes.size() > 1) {
-        top.append(Util.j2KToDateString(strokes.getStrokes().get(0).j2ksec, dateFormatString));
+        top.append(J2kSec.toDateString(strokes.getStrokes().get(0).j2ksec));
         top.append(" and ");
-        top.append(Util.j2KToDateString(strokes.getStrokes().get(strokes.size() - 1).j2ksec,
-            dateFormatString));
+        top.append(J2kSec.toDateString(strokes.getStrokes().get(strokes.size() - 1).j2ksec));
       }
     }
     top.append(" " + timeZoneID + " Time");

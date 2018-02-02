@@ -1,16 +1,17 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.math.Butterworth;
-import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.SliceWave;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.render.wave.SpectraRenderer;
-import gov.usgs.plot.render.wave.SpectrogramRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.SliceWave;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectraRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectrogramRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -347,7 +348,7 @@ public class WavePlotter extends RawDataPlotter {
 
       // calculate min user defined scale
     } else {
-      minY = Util.stringToDouble(ysMin, Math.min(minY, wave.min()));
+      minY = StringUtils.stringToDouble(ysMin, Math.min(minY, wave.min()));
     }
 
     // calculate max auto scale
@@ -356,7 +357,7 @@ public class WavePlotter extends RawDataPlotter {
 
       // calculate max user defined scale
     } else {
-      maxY = Util.stringToDouble(ysMax, Math.max(maxY, wave.max()));
+      maxY = StringUtils.stringToDouble(ysMax, Math.max(maxY, wave.max()));
     }
 
     if (minY > minY) {
@@ -730,9 +731,9 @@ public class WavePlotter extends RawDataPlotter {
   private String getTopLabel() {
     StringBuilder top = new StringBuilder(100);
     top.append("Data between ");
-    top.append(Util.j2KToDateString(startTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(startTime + timeOffset));
     top.append(" and ");
-    top.append(Util.j2KToDateString(endTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(endTime + timeOffset));
     top.append(" " + timeZoneID + " Time");
     return top.toString();
   }

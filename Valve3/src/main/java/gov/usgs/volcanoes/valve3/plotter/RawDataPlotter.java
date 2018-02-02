@@ -1,17 +1,18 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.math.DownsamplingType;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.decorate.DefaultFrameDecorator;
-import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.LegendRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Time;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.math.DownsamplingType;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.LegendRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -85,8 +86,6 @@ public abstract class RawDataPlotter extends Plotter {
   protected Map<Integer, Channel> channelsMap;
   protected Map<Integer, Rank> ranksMap;
 
-  protected Logger logger;
-
   protected TreeSet<ExportData> csvData;
   protected StringBuffer csvText;
   protected Map<String, String> csvCmtBits;
@@ -125,7 +124,6 @@ public abstract class RawDataPlotter extends Plotter {
    * Default constructor.
    */
   public RawDataPlotter() {
-    logger = LoggerFactory.getLogger(RawDataPlotter.class);
     csvCmtBits = new LinkedHashMap<String, String>();
     csvHdrs = new Vector<String[]>();
     dateFormatString = "yyyy-MM-dd HH:mm:ss";
@@ -514,8 +512,8 @@ public abstract class RawDataPlotter extends Plotter {
       mr.setXAxisToTime(8, tickMarksX, tickValuesX);
       if (unitsX) {
         mr.getAxis().setBottomLabelAsText(
-            timeZoneID + " Time (" + Util.j2KToDateString(startTime + timeOffset, dateFormatString)
-                + " to " + Util.j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+            timeZoneID + " Time (" + J2kSec.toDateString(startTime + timeOffset)
+                + " to " + J2kSec.toDateString(endTime + timeOffset) + ")");
       }
 
       // don't display xTickValues for top and middle components, only for bottom component
@@ -638,7 +636,7 @@ public abstract class RawDataPlotter extends Plotter {
     String firstDecFmt;
     String nextDecFmt;
     if (inclTime) {
-      line = String.format("%14.3f,", Util.j2KToEW(time)) + Util.j2KToDateString(time);
+      line = String.format("%14.3f,", Time.j2kToEw(time)) + J2kSec.toDateString(time);
       firstDecFmt = "," + decFmt;
     } else {
       line = "";
@@ -691,7 +689,7 @@ public abstract class RawDataPlotter extends Plotter {
     line += String.format("\t\t<ROW pos=\"%d\">\n", pos);
     if (inclTime) {
       line += String.format("\t\t\t<EPOCH>%1.3f</EPOCH>\n\t\t\t<TIMESTAMP>%s</TIMESTAMP>\n",
-          Util.j2KToEW(time), Util.j2KToDateString(time));
+          Time.j2kToEw(time), J2kSec.toDateString(time));
       line += "\t\t\t<TIMEZONE>" + timeZone + "</TIMEZONE>\n";
     }
     String channel = "";    // Channel name
@@ -773,8 +771,8 @@ public abstract class RawDataPlotter extends Plotter {
     }
     line += "\t\t{";
     if (inclTime) {
-      line += String.format("\"EPOCH\":%1.3f,\"TIMESTAMP\":\"%s\",", Util.j2KToEW(time),
-          Util.j2KToDateString(time));
+      line += String.format("\"EPOCH\":%1.3f,\"TIMESTAMP\":\"%s\",", Time.j2kToEw(time),
+          J2kSec.toDateString(time));
       line += "\"TIMEZONE\":\"" + timeZone + "\"" + (hasChannels ? ",\n" : "");
     }
 
@@ -1039,7 +1037,7 @@ public abstract class RawDataPlotter extends Plotter {
 
         // These get extracted from start time
         Double[] datum = cd.currExportDatum();
-        Date jd = Util.j2KToDate(datum[0]);
+        Date jd = J2kSec.asDate(datum[0]);
         Calendar cal = new GregorianCalendar();
         cal.setTimeZone(TimeZone.getTimeZone(timeZone));
         cal.setTime(jd);
@@ -1303,7 +1301,7 @@ public abstract class RawDataPlotter extends Plotter {
 
           // calculate min user defined scale
         } else {
-          minY = Util.stringToDouble(ysMin, Math.min(minY, gdm.min(index + offset)));
+          minY = StringUtils.stringToDouble(ysMin, Math.min(minY, gdm.min(index + offset)));
           allowExpand = false;
         }
 
@@ -1317,7 +1315,7 @@ public abstract class RawDataPlotter extends Plotter {
 
           // calculate max user defined scale
         } else {
-          maxY = Util.stringToDouble(ysMax, Math.max(maxY, gdm.max(index + offset)));
+          maxY = StringUtils.stringToDouble(ysMax, Math.max(maxY, gdm.max(index + offset)));
           allowExpand = false;
         }
 
@@ -1345,14 +1343,14 @@ public abstract class RawDataPlotter extends Plotter {
    * @param comp plot component
    */
   protected void validateDataManipOpts(PlotComponent comp) throws Valve3Exception {
-    doDespike = Util.stringToBoolean(comp.get("despike"));
+    doDespike = StringUtils.stringToBoolean(comp.get("despike"));
     if (doDespike) {
       despikePeriod = comp.getDouble("despike_period");
       if (Double.isNaN(despikePeriod)) {
         throw new Valve3Exception("Illegal/missing period for despike");
       }
     }
-    doDetrend = Util.stringToBoolean(comp.get("detrend"));
+    doDetrend = StringUtils.stringToBoolean(comp.get("detrend"));
     try {
       filterPick = comp.getInt("dmo_fl");
     } catch (Valve3Exception e) {
@@ -1482,8 +1480,8 @@ public abstract class RawDataPlotter extends Plotter {
     Map<String, String> params = new LinkedHashMap<String, String>();
     params.put("source", vdxSource);
     params.put("action", "suppdata");
-    params.put("st", Time.format(Time.STANDARD_TIME_FORMAT_MS, startTime).replaceAll("\\D", ""));
-    params.put("et", Time.format(Time.STANDARD_TIME_FORMAT_MS, endTime).replaceAll("\\D", ""));
+    params.put("st", J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, startTime).replaceAll("\\D", ""));
+    params.put("et", J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, endTime).replaceAll("\\D", ""));
     params.put("rk", Integer.toString(rk));
     params.put("byID", "true");
     params.put("ch", ch);

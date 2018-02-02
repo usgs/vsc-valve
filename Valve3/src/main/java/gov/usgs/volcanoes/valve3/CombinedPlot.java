@@ -1,20 +1,20 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.color.ColorCycler;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.DataPointRenderer;
-import gov.usgs.plot.render.FrameRenderer;
-import gov.usgs.plot.render.LegendRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.PointRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.plot.render.LegendRenderer.LegendEntry;
-import gov.usgs.plot.render.wave.SliceWaveRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.color.ColorCycler;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.DataPointRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.LegendRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.PointRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.LegendRenderer.LegendEntry;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;

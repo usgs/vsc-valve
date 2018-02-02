@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.valve3.data.DataHandler;
 import gov.usgs.volcanoes.valve3.data.DataSourceDescriptor;
 import gov.usgs.volcanoes.valve3.result.Menu;
@@ -73,9 +73,9 @@ public class MenuHandler implements HttpHandler
 				Section section = sections.get(sec);
 				if (section != null)
 				{
-					boolean plotSeparately = Util.stringToBoolean(cf.getString("plotter.plotSeparately"), false);
-					boolean barDisplay = Util.stringToBoolean(cf.getString("barDisplay"), true);
-					boolean barDefault = Util.stringToBoolean(cf.getString("barDefault"), false);
+					boolean plotSeparately = StringUtils.stringToBoolean(cf.getString("plotter.plotSeparately"), false);
+					boolean barDisplay = StringUtils.stringToBoolean(cf.getString("barDisplay"), true);
+					boolean barDefault = StringUtils.stringToBoolean(cf.getString("barDefault"), false);
 					char lineType;
 					String value = cf.getString("plotter.lineType");
 					if(value==null){
@@ -98,7 +98,7 @@ public class MenuHandler implements HttpHandler
 						biasType = '0';
 					String menu 		= cf.getString("menu");
 					String name 		= cf.getString("name");
-					String shortcuts	= Util.stringToString(cf.getString("shortcuts"), "");
+					String shortcuts	= StringUtils.stringToString(cf.getString("shortcuts"), "");
 					int sortOrder 		= Integer.parseInt(cf.getString("sortOrder"));
 					MenuItem item 		= new MenuItem(dsd.getName(), name, "", menu, sortOrder, shortcuts, lineType, plotSeparately, barDisplay, barDefault, biasType);
 					section.addMenuItem(item);

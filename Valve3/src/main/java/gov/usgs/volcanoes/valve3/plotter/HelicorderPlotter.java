@@ -1,12 +1,12 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.plot.HelicorderSettings;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.render.HelicorderRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.HelicorderSettings;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;

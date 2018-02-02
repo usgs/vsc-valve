@@ -2,9 +2,6 @@ package gov.usgs.volcanoes.valve3.result;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Handles with computed raw data results, 
  * keeps raw data file name
@@ -18,7 +15,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RawData extends Result
 {
-	private final static Logger logger = LoggerFactory.getLogger(RawData.class);
 	protected String url;
 	protected String filename;
 	
