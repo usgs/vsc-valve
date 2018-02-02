@@ -90,8 +90,8 @@ public class Valve3 implements ServletContextListener
 	public Valve3()
 	{
 		instance = this;
-		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.util").setLevel(Level.DEBUG);
-		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.legacy.net").setLevel(Level.DEBUG);
+		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.util").setLevel(Level.INFO);
+		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.legacy.net").setLevel(Level.ERROR);
 		resultDeleter = new ResultDeleter();
 		resultDeleter.start();
 		exportConfigs = new HashMap<String,ExportConfig>();
