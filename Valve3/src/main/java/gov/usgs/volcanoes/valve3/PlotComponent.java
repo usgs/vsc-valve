@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.Util;
-
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -110,7 +110,7 @@ public class PlotComponent
 	 */
 	public int getInt(String key) throws Valve3Exception {
 		String value = get(key);
-		int pv = Util.stringToInt(value, Integer.MIN_VALUE);
+		int pv = StringUtils.stringToInt(value, Integer.MIN_VALUE);
 		if (pv == Integer.MIN_VALUE) {
 			throw new Valve3Exception("Illegal " + key + ":" + (value==null?"null":value));
 		}
@@ -125,7 +125,7 @@ public class PlotComponent
 	 */
 	public double getDouble(String key) throws Valve3Exception {
 		String value = get(key);
-		double pv = Util.stringToDouble(value, Double.NaN);
+		double pv = StringUtils.stringToDouble(value, Double.NaN);
 		if (pv == Double.NaN) {
 			throw new Valve3Exception("Illegal " + key + ":" + (value==null?"null":value));
 		}
@@ -160,7 +160,7 @@ public class PlotComponent
 		if ((!value.toLowerCase().equals("true") && value.toLowerCase().equals("t") && !value.toLowerCase().equals("false") && value.toLowerCase().equals("f") && !value.equals("1") && !value.equals("0"))) {
 			throw new Valve3Exception("Illegal " + key + ":" + value);
 		}
-		boolean pv = Util.stringToBoolean(value);
+		boolean pv = StringUtils.stringToBoolean(value);
 		return pv;
 	}
 	
@@ -328,19 +328,19 @@ public class PlotComponent
 			if (t.equals("N"))
 			{
 				// is refreshable
-				return Util.nowJ2K();
+				return J2kSec.now();
 			}
 			else if (t.startsWith("-"))
 			{
 				long ms = -Long.parseLong(t);
 				if (Double.isNaN(end))
-					return Util.nowJ2K() - ((double)ms/1000);
+					return J2kSec.now() - ((double)ms/1000);
 				else
 					return end - ((double)ms/1000);
 			}
 			else if (t.length() == 17){
 				Date dtIn = df.parse(t);
-				return Util.dateToJ2K(dtIn);
+				return J2kSec.fromDate(dtIn);
 			}
 			else {
 				throw new Valve3Exception("Illegal time string: " + t);
@@ -366,7 +366,7 @@ public class PlotComponent
 	 * @return offset between current time zone and UTC in seconds, on given time moment
 	 */
 	public double getOffset(double time){
-		return df.getTimeZone().getOffset(Util.j2KToDate(time).getTime())/1000.0;
+		return df.getTimeZone().getOffset(J2kSec.asDate(time).getTime())/1000.0;
 	}
 	
 	/**

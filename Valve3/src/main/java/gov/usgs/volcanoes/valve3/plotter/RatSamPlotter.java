@@ -1,11 +1,11 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;

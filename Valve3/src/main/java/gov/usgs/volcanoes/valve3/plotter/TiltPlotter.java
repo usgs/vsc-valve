@@ -2,24 +2,25 @@ package gov.usgs.volcanoes.valve3.plotter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
-import gov.usgs.math.Butterworth;
-import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabel;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.render.EllipseVectorRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabel;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.EllipseVectorRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -154,7 +155,7 @@ public class TiltPlotter extends RawDataPlotter {
           if (forExport && exportAll) {
             column.checked = true;
           } else if (colArg != null) {
-            column.checked = Util.stringToBoolean(comp.get(column.name));
+            column.checked = StringUtils.stringToBoolean(comp.get(column.name));
           }
           bypassCols[i] = column.bypassmanip;
           accumulateCols[i] = column.accumulate;
@@ -197,7 +198,7 @@ public class TiltPlotter extends RawDataPlotter {
         // if auto vector scaling is not enabled, look up to see what the user input
         isAutoVectorScale = comp.isVectorAutoScale("vs");
         if (!isAutoVectorScale) {
-          vectorScale = Util.stringToDouble(comp.get("vs"));
+          vectorScale = StringUtils.stringToDouble(comp.get("vs"), Double.MIN_VALUE);
           if (vectorScale <= 0 || Double.isNaN(vectorScale)) {
             isAutoVectorScale = true;
           }
@@ -778,9 +779,9 @@ public class TiltPlotter extends RawDataPlotter {
   private String getTopLabel(Rank rank) {
     StringBuilder top = new StringBuilder(100);
     top.append(rank.getName() + " Vectors between ");
-    top.append(Util.j2KToDateString(startTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(startTime + timeOffset));
     top.append(" and ");
-    top.append(Util.j2KToDateString(endTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(endTime + timeOffset));
     top.append(" " + timeZoneID + " Time");
     return top.toString();
   }

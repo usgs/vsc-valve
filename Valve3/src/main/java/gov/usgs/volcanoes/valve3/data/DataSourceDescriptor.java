@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.valve3.data;
 
-import gov.usgs.util.ConfigFile;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.valve3.Plotter;
 
 /**

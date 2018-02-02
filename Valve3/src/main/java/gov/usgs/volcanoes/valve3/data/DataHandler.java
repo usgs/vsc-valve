@@ -1,9 +1,9 @@
 package gov.usgs.volcanoes.valve3.data;
 
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.HttpHandler;
 import gov.usgs.volcanoes.valve3.Valve3;
 import gov.usgs.volcanoes.valve3.Valve3Exception;
@@ -32,7 +32,7 @@ public class DataHandler implements HttpHandler
 {
 	private static final String CONFIG_FILE = "data.config";
 	private static final int DEFAULT_VDX_CLIENT_TIMEOUT = 60000;
-	private final static Logger logger = LoggerFactory.getLogger(DataHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataHandler.class);
 	protected Map<String, DataSourceDescriptor> dataSources;
 	protected Map<String, Pool<VDXClient>> vdxClients;
 	protected ConfigFile config;
@@ -57,14 +57,14 @@ public class DataHandler implements HttpHandler
 		List<String> vdxs = config.getList("vdx");
 		for (String vdx : vdxs)
 		{
-			logger.info("VDX: {}", vdx);
+			LOGGER.info("VDX: {}", vdx);
 			ConfigFile sub = config.getSubConfig(vdx);
-			int num = Util.stringToInt(sub.getString("clients"), 4);
+			int num = StringUtils.stringToInt(sub.getString("clients"), 4);
 			Pool<VDXClient> pool = new Pool<VDXClient>();
 			for (int i = 0; i < num; i++)
 			{
 				VDXClient client = new VDXClient(sub.getString("host"), Integer.parseInt(sub.getString("port")));
-				int timeout = Util.stringToInt(sub.getString("timeout"), DEFAULT_VDX_CLIENT_TIMEOUT);
+				int timeout = StringUtils.stringToInt(sub.getString("timeout"), DEFAULT_VDX_CLIENT_TIMEOUT);
 				client.setTimeout(timeout);
 				pool.checkin(client);
 			}
@@ -74,7 +74,7 @@ public class DataHandler implements HttpHandler
 		List<String> sources = config.getList("source");
 		for (String source : sources)
 		{
-			logger.info("Data source: {}", source);
+			LOGGER.info("Data source: {}", source);
 			ConfigFile sub = config.getSubConfig(source);
 			DataSourceDescriptor dsd = new DataSourceDescriptor(source, sub.getString("vdx"), sub.getString("vdx.source"), sub.getString("plotter"), sub);
 			dataSources.put(source, dsd);
@@ -158,7 +158,7 @@ public class DataHandler implements HttpHandler
 					// Add the parameters needed for meta or supp data
 					// Also validate for required and duplicated parameters
 					String arg;
-					logger.info("Processing {}", action);
+					LOGGER.info("Processing {}", action);
 					char m_kind[] = {'?','!','?','?','x','x','x','x'};
 					char s_kind[] = {'?','?','?','?','!','?','?','?'};
 					char kind[];
@@ -173,7 +173,7 @@ public class DataHandler implements HttpHandler
 						arg = request.getParameter( args[i] );
 						if ( arg==null || arg.equals(""))
 							continue;
-						logger.info("{} = {}", args[i], arg);
+						LOGGER.info("{} = {}", args[i], arg);
 						switch ( kind[i] ) {
 							case 'x':
 								throw new Valve3Exception( "Illegal parameter: " + args[i] );

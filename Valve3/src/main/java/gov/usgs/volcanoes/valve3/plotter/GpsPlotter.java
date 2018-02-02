@@ -3,24 +3,25 @@ package gov.usgs.volcanoes.valve3.plotter;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 
-import gov.usgs.math.Butterworth;
-import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabel;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.render.EllipseVectorRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabel;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.EllipseVectorRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -206,17 +207,17 @@ public class GpsPlotter extends RawDataPlotter {
 
       case VELOCITY_MAP:
         try {
-          showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
+          showHorizontal = StringUtils.stringToBoolean(comp.getString("hs"), true);
         } catch (Exception e) {
           showHorizontal = true;
         }
         try {
-          showVertical = Util.stringToBoolean(comp.getString("vs"), false);
+          showVertical = StringUtils.stringToBoolean(comp.getString("vs"), false);
         } catch (Exception e) {
           showVertical = false;
         }
         try {
-          scaleErrors = Util.stringToBoolean(comp.getString("se"), true);
+          scaleErrors = StringUtils.stringToBoolean(comp.getString("se"), true);
         } catch (Exception e) {
           scaleErrors = true;
         }
@@ -263,13 +264,13 @@ public class GpsPlotter extends RawDataPlotter {
           throw new Valve3Exception("After Period End Time must be <= End Time.");
         }
 
-        String dbm = Util.stringToString(comp.get("displacementBeforeModel"), "m");
+        String dbm = StringUtils.stringToString(comp.get("displacementBeforeModel"), "m");
         displacementBeforeModel = ModelType.fromString(dbm);
         if (displacementBeforeModel == null) {
           throw new Valve3Exception("Illegal Before Period Model.");
         }
 
-        String dam = Util.stringToString(comp.get("displacementAfterModel"), "m");
+        String dam = StringUtils.stringToString(comp.get("displacementAfterModel"), "m");
         displacementAfterModel = ModelType.fromString(dam);
         if (displacementAfterModel == null) {
           throw new Valve3Exception("Illegal After Period Model.");
@@ -293,17 +294,17 @@ public class GpsPlotter extends RawDataPlotter {
         }
 
         try {
-          showHorizontal = Util.stringToBoolean(comp.getString("hs"), true);
+          showHorizontal = StringUtils.stringToBoolean(comp.getString("hs"), true);
         } catch (Exception e) {
           showHorizontal = true;
         }
         try {
-          showVertical = Util.stringToBoolean(comp.getString("vs"), false);
+          showVertical = StringUtils.stringToBoolean(comp.getString("vs"), false);
         } catch (Exception e) {
           showVertical = false;
         }
         try {
-          scaleErrors = Util.stringToBoolean(comp.getString("se"), true);
+          scaleErrors = StringUtils.stringToBoolean(comp.getString("se"), true);
         } catch (Exception e) {
           scaleErrors = true;
         }
@@ -909,9 +910,9 @@ public class GpsPlotter extends RawDataPlotter {
   private String getTopLabel(Rank rank) {
     StringBuilder top = new StringBuilder(100);
     top.append(rank.getName() + " Vectors between ");
-    top.append(Util.j2KToDateString(startTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(startTime + timeOffset));
     top.append(" and ");
-    top.append(Util.j2KToDateString(endTime + timeOffset, dateFormatString));
+    top.append(J2kSec.toDateString(endTime + timeOffset));
     top.append(" " + timeZoneID + " Time");
     return top.toString();
   }

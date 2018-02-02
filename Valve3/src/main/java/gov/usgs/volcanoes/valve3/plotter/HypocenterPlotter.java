@@ -2,24 +2,25 @@ package gov.usgs.volcanoes.valve3.plotter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.render.ArbDepthFrameRenderer;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.BasicFrameRenderer;
-import gov.usgs.plot.render.Histogram2DRenderer;
-import gov.usgs.plot.render.InvertedFrameRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.plot.transform.ArbDepthCalculator;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ArbDepthFrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.BasicFrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Histogram2DRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.InvertedFrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.transform.ArbDepthCalculator;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -147,7 +148,6 @@ public class HypocenterPlotter extends RawDataPlotter {
    */
   public HypocenterPlotter() {
     super();
-    logger = LoggerFactory.getLogger(HypocenterPlotter.class);
   }
 
   /**
@@ -255,66 +255,66 @@ public class HypocenterPlotter extends RawDataPlotter {
 
     range = new GeoRange(w, e, s, n);
 
-    hypowidth = Util.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
+    hypowidth = StringUtils.stringToDouble(comp.get("hypowidth"), DEFAULT_WIDTH);
 
-    minMag = Util.stringToDouble(comp.get("minMag"), -Double.MAX_VALUE);
-    maxMag = Util.stringToDouble(comp.get("maxMag"), Double.MAX_VALUE);
+    minMag = StringUtils.stringToDouble(comp.get("minMag"), -Double.MAX_VALUE);
+    maxMag = StringUtils.stringToDouble(comp.get("maxMag"), Double.MAX_VALUE);
 
     if (minMag > maxMag) {
       throw new Valve3Exception("Illegal magnitude filter.");
     }
 
-    minDepth = Util.stringToDouble(comp.get("minDepth"), -Double.MAX_VALUE);
-    maxDepth = Util.stringToDouble(comp.get("maxDepth"), Double.MAX_VALUE);
+    minDepth = StringUtils.stringToDouble(comp.get("minDepth"), -Double.MAX_VALUE);
+    maxDepth = StringUtils.stringToDouble(comp.get("maxDepth"), Double.MAX_VALUE);
     if (minDepth > maxDepth) {
       throw new Valve3Exception("Illegal depth filter.");
     }
 
-    minNPhases = Util.stringToInteger(comp.get("minNPhases"), Integer.MIN_VALUE);
-    maxNPhases = Util.stringToInteger(comp.get("maxNPhases"), Integer.MAX_VALUE);
+    minNPhases = StringUtils.stringToInt(comp.get("minNPhases"), Integer.MIN_VALUE);
+    maxNPhases = StringUtils.stringToInt(comp.get("maxNPhases"), Integer.MAX_VALUE);
     if (minNPhases > maxNPhases) {
       throw new Valve3Exception("Illegal nphases filter.");
     }
 
-    minRms = Util.stringToDouble(comp.get("minRMS"), -Double.MAX_VALUE);
-    maxRms = Util.stringToDouble(comp.get("maxRMS"), Double.MAX_VALUE);
+    minRms = StringUtils.stringToDouble(comp.get("minRMS"), -Double.MAX_VALUE);
+    maxRms = StringUtils.stringToDouble(comp.get("maxRMS"), Double.MAX_VALUE);
     if (minRms > maxRms) {
       throw new Valve3Exception("Illegal RMS filter.");
     }
 
-    minHerr = Util.stringToDouble(comp.get("minHerr"), -Double.MAX_VALUE);
-    maxHerr = Util.stringToDouble(comp.get("maxHerr"), Double.MAX_VALUE);
+    minHerr = StringUtils.stringToDouble(comp.get("minHerr"), -Double.MAX_VALUE);
+    maxHerr = StringUtils.stringToDouble(comp.get("maxHerr"), Double.MAX_VALUE);
     if (minHerr > maxHerr) {
       throw new Valve3Exception("Illegal horizontal error filter.");
     }
 
-    minVerr = Util.stringToDouble(comp.get("minVerr"), -Double.MAX_VALUE);
-    maxVerr = Util.stringToDouble(comp.get("maxVerr"), Double.MAX_VALUE);
+    minVerr = StringUtils.stringToDouble(comp.get("minVerr"), -Double.MAX_VALUE);
+    maxVerr = StringUtils.stringToDouble(comp.get("maxVerr"), Double.MAX_VALUE);
     if (minVerr > maxVerr) {
       throw new Valve3Exception("Illegal vertical error filter.");
     }
 
-    rmk = Util.stringToString(comp.get("rmk"), "");
+    rmk = StringUtils.stringToString(comp.get("rmk"), "");
 
-    minStDst = Util.stringToDouble(comp.get("minStDst"), 0.0);
-    maxStDst = Util.stringToDouble(comp.get("maxStDst"), 1000.0);
-    maxGap = Util.stringToDouble(comp.get("maxGap"), 360.0);
-    centerLat = Util.stringToDouble(comp.get("centerLat"), 0.0);
-    centerLon = Util.stringToDouble(comp.get("centerLon"), 0.0);
-    radius = Util.stringToDouble(comp.get("radius"), 0.0);
+    minStDst = StringUtils.stringToDouble(comp.get("minStDst"), 0.0);
+    maxStDst = StringUtils.stringToDouble(comp.get("maxStDst"), 1000.0);
+    maxGap = StringUtils.stringToDouble(comp.get("maxGap"), 360.0);
+    centerLat = StringUtils.stringToDouble(comp.get("centerLat"), 0.0);
+    centerLon = StringUtils.stringToDouble(comp.get("centerLon"), 0.0);
+    radius = StringUtils.stringToDouble(comp.get("radius"), 0.0);
 
     switch (plotType) {
 
       case MAP:
 
         // axes defaults to Map View
-        axesOption = AxesOption.fromString(Util.stringToString(comp.get("axesOption"), "M"));
+        axesOption = AxesOption.fromString(StringUtils.stringToString(comp.get("axesOption"), "M"));
         if (axesOption == null) {
           throw new Valve3Exception("Illegal axes type.");
         }
 
         // color defaults to Auto
-        String c = Util.stringToString(comp.get("colorOption"), "A");
+        String c = StringUtils.stringToString(comp.get("colorOption"), "A");
         if (c.equals("A")) {
           colorOption = ColorOption.chooseAuto(axesOption);
         } else {
@@ -342,7 +342,7 @@ public class HypocenterPlotter extends RawDataPlotter {
           } catch (Valve3Exception dle) {
             doLog = false;
           }
-          densityBinSize = Util.stringToDouble(comp.get("densityBinSize"), 5.0);
+          densityBinSize = StringUtils.stringToDouble(comp.get("densityBinSize"), 5.0);
         }
 
         break;
@@ -350,7 +350,7 @@ public class HypocenterPlotter extends RawDataPlotter {
       case COUNTS:
 
         // bin size defalts to day
-        bin = BinSize.fromString(Util.stringToString(comp.get("cntsBin"), "day"));
+        bin = BinSize.fromString(StringUtils.stringToString(comp.get("cntsBin"), "day"));
         if (bin == null) {
           throw new Valve3Exception("Illegal bin size option.");
         }
@@ -360,7 +360,7 @@ public class HypocenterPlotter extends RawDataPlotter {
         }
 
         // right axis default to cumulative counts
-        rightAxis = RightAxis.fromString(Util.stringToString(comp.get("cntsAxis"), "C"));
+        rightAxis = RightAxis.fromString(StringUtils.stringToString(comp.get("cntsAxis"), "C"));
         if (rightAxis == null) {
           throw new Valve3Exception("Illegal counts axis option.");
         }
@@ -585,9 +585,9 @@ public class HypocenterPlotter extends RawDataPlotter {
         base.createDefaultAxis();
         base.setXAxisToTime(8);
         if (unitsX) {
-          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util
-              .j2KToDateString(startTime + timeOffset, dateFormatString) + " to " + Util
-              .j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" +
+              J2kSec.toDateString(startTime + timeOffset) + " to " +
+              J2kSec.toDateString(endTime + timeOffset) + ")");
         }
         if (unitsY) {
           base.getAxis().setLeftLabelAsText("Depth (km)");
@@ -662,9 +662,9 @@ public class HypocenterPlotter extends RawDataPlotter {
         base.setXAxisToTime(8);
 
         if (unitsX) {
-          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" + Util
-              .j2KToDateString(startTime + timeOffset, dateFormatString) + " to " + Util
-              .j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" +
+              J2kSec.toDateString(startTime + timeOffset) + " to " +
+              J2kSec.toDateString(endTime + timeOffset) + ")");
         }
         if (unitsY) {
           base.getAxis().setLeftLabelAsText(
@@ -789,8 +789,8 @@ public class HypocenterPlotter extends RawDataPlotter {
     }
     if (unitsX) {
       hr.getAxis().setBottomLabelAsText(
-          timeZoneID + " Time (" + Util.j2KToDateString(startTime + timeOffset, dateFormatString)
-              + " to " + Util.j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+          timeZoneID + " Time (" + J2kSec.toDateString(startTime + timeOffset)
+              + " to " + J2kSec.toDateString(endTime + timeOffset) + ")");
     }
     if (labelX) {
       hr.getAxis().setTopLabelAsText(getTopLabel(rank));
@@ -998,18 +998,17 @@ public class HypocenterPlotter extends RawDataPlotter {
     // data coming from the hypocenters list have already been adjusted for the time offset
     if (hypos.size() == 1) {
       top.append(" earthquake on ");
-      top.append(Util.j2KToDateString(hypos.getHypocenters().get(0).j2ksec, dateFormatString));
+      top.append(J2kSec.toDateString(hypos.getHypocenters().get(0).j2ksec));
     } else {
       top.append(" earthquakes between ");
       if (hypos.size() == 0) {
-        top.append(Util.j2KToDateString(startTime + timeOffset, dateFormatString));
+        top.append(J2kSec.toDateString(startTime + timeOffset));
         top.append(" and ");
-        top.append(Util.j2KToDateString(endTime + timeOffset, dateFormatString));
+        top.append(J2kSec.toDateString(endTime + timeOffset));
       } else if (hypos.size() > 1) {
-        top.append(Util.j2KToDateString(hypos.getHypocenters().get(0).j2ksec, dateFormatString));
+        top.append(J2kSec.toDateString(hypos.getHypocenters().get(0).j2ksec));
         top.append(" and ");
-        top.append(Util.j2KToDateString(hypos.getHypocenters().get(hypos.size() - 1).j2ksec,
-            dateFormatString));
+        top.append(J2kSec.toDateString(hypos.getHypocenters().get(hypos.size() - 1).j2ksec));
       }
     }
     top.append(" " + timeZoneID + " Time");

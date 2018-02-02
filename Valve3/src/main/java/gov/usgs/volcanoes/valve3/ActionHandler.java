@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.Util;
-
+import gov.usgs.volcanoes.core.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ActionHandler implements HttpHandler
 {
-	private final static Logger logger = LoggerFactory.getLogger(ActionHandler.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(ActionHandler.class);
 	protected Map<String, HttpHandler> handlers;
 	protected String key;
 	
@@ -51,10 +50,10 @@ public class ActionHandler implements HttpHandler
 	public Object handle(HttpServletRequest request) throws Valve3Exception {
 		
 		// log the request to the log file
-		logger.info("{}", request.getQueryString());
+		LOGGER.info("{}", request.getQueryString());
 		
 		// get the parameter, default to "plot" if not specified
-		String action = Util.stringToString(request.getParameter(key), "plot");
+		String action = StringUtils.stringToString(request.getParameter(key), "plot");
 		
 		// lookup the handler from the map
 		HttpHandler handler = handlers.get(action);

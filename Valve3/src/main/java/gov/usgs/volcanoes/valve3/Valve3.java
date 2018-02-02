@@ -1,9 +1,8 @@
-
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.util.ConfigFile;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
 import gov.usgs.volcanoes.vdx.ExportConfig;
 import gov.usgs.volcanoes.valve3.data.DataHandler;
 import gov.usgs.volcanoes.valve3.Version;
@@ -58,10 +57,12 @@ import org.slf4j.LoggerFactory;
  * Initial avosouth commit.
  *
  * @author Dan Cervelli
+ * @author Bill Tollett
  */
 public class Valve3 implements ServletContextListener
 {
-	public static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Valve3.class);
+	private static final String CONFIG_PATH = File.separator + "WEB-INF" + File.separator + "config" + File.separator;
 	private static final String CONFIG_FILE = "valve3.config";
 	private static Valve3 instance;
 
@@ -81,8 +82,6 @@ public class Valve3 implements ServletContextListener
 
 	private ResultDeleter resultDeleter;
 
-	private Logger logger;
-
 	private HashMap<String,ExportConfig> exportConfigs;
 
 	/**
@@ -91,9 +90,8 @@ public class Valve3 implements ServletContextListener
 	public Valve3()
 	{
 		instance = this;
-		logger = LoggerFactory.getLogger(Valve3.class);
-		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.util").setLevel(Level.INFO);
-		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.legacy.net").setLevel(Level.ERROR);
+		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.util").setLevel(Level.DEBUG);
+		org.apache.log4j.Logger.getLogger("gov.usgs.volcanoes.core.legacy.net").setLevel(Level.DEBUG);
 		resultDeleter = new ResultDeleter();
 		resultDeleter.start();
 		exportConfigs = new HashMap<String,ExportConfig>();
@@ -106,22 +104,22 @@ public class Valve3 implements ServletContextListener
 	{
 		ConfigFile config = new ConfigFile(applicationPath + File.separator + CONFIG_PATH + File.separator + CONFIG_FILE);
 		administrator = config.getString("admin.name");
-		logger.info("admin.name: {}", administrator);
+		LOGGER.info("admin.name: {}", administrator);
 		administratorEmail = config.getString("admin.email");
-		logger.info("admin.email: {}", administratorEmail);
+		LOGGER.info("admin.email: {}", administratorEmail);
 		installationTitle = config.getString("title");
-		logger.info("title: {}", installationTitle);
+		LOGGER.info("title: {}", installationTitle);
 		timeZoneAbbr = config.getString("timeZoneAbbr");
 		if ( timeZoneAbbr == null )
 			timeZoneAbbr = "UTC";
-		logger.info("timeZoneAbbr: {}", timeZoneAbbr);
+		LOGGER.info("timeZoneAbbr: {}", timeZoneAbbr);
 
 		ExportConfig ec = new ExportConfig( "", config );
 		exportConfigs.put( "", ec );
 		openDataURL = config.getString("openDataURL");
 		if (openDataURL == null)
 			openDataURL = "";
-		logger.info("openDataURL: {}", openDataURL);
+		LOGGER.info("openDataURL: {}", openDataURL);
 
 		imageSet = new GeoImageSet(config.getString("imageIndex"));
 		String ics = config.getString("imageCacheSize");
@@ -314,7 +312,7 @@ public class Valve3 implements ServletContextListener
 	 */
 	public void contextInitialized(ServletContextEvent sce)
 	{
-		logger.info("Valve {} initialization", Version.VERSION_STRING);
+		LOGGER.info("Valve {} initialization", Version.VERSION_STRING);
 		applicationPath = sce.getServletContext().getRealPath("");
 		processConfigFile();
 	}

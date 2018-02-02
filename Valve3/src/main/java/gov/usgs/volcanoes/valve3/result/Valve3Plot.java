@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.valve3.result;
 
-import gov.usgs.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.PlotHandler;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -8,7 +9,6 @@ import gov.usgs.volcanoes.valve3.Valve3Exception;
 import gov.usgs.volcanoes.valve3.CombinedPlot;
 import gov.usgs.volcanoes.vdx.data.MetaDatum;
 import gov.usgs.volcanoes.vdx.data.SuppDatum;
-import gov.usgs.util.Util;
 
 import java.awt.Color;
 import java.io.File;
@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Result which contains plot and information how
@@ -78,8 +75,7 @@ public class Valve3Plot extends Result
 	protected String url;
 	
 	protected List<PlotComponent> components;
-	private Logger logger;	
-	
+
 	protected boolean isExportable	= false;
 	protected boolean isCombineable	= false;
 	private boolean isCombined		= false;
@@ -96,21 +92,19 @@ public class Valve3Plot extends Result
 	 */
 	public Valve3Plot(HttpServletRequest request, int componentCount) throws Valve3Exception
 	{
-		logger = LoggerFactory.getLogger(Valve3Plot.class);
-		
-		width = Util.stringToInt(request.getParameter("w"), DEFAULT_PLOT_WIDTH);
+		width = StringUtils.stringToInt(request.getParameter("w"), DEFAULT_PLOT_WIDTH);
 		if (width <= 0 || width > PlotHandler.MAX_PLOT_WIDTH) {
 			width = DEFAULT_PLOT_WIDTH;
 			logger.info("Illegal w parameter.  Was set to default value of {}", DEFAULT_PLOT_WIDTH);
 		}
 		
-		height = Util.stringToInt(request.getParameter("h"), DEFAULT_PLOT_HEIGHT);
+		height = StringUtils.stringToInt(request.getParameter("h"), DEFAULT_PLOT_HEIGHT);
 		if (height <= 0 || height > PlotHandler.MAX_PLOT_HEIGHT) {
 			height = DEFAULT_PLOT_HEIGHT;
 			logger.info("Illegal h parameter.  Was set to default value of {}", DEFAULT_PLOT_HEIGHT);
 		}
 
-		outputType = OutputType.fromString(Util.stringToString(request.getParameter("o"), "png"));
+		outputType = OutputType.fromString(StringUtils.stringToString(request.getParameter("o"), "png"));
 		if (outputType == null) {
 			throw new Valve3Exception("Illegal output type.");
 		}
@@ -125,7 +119,7 @@ public class Valve3Plot extends Result
 		url			= request.getQueryString();
 		components	= new ArrayList<PlotComponent>(2);
 		
-		isCombined	= Util.stringToBoolean(request.getParameter("combine"), false);
+		isCombined	= StringUtils.stringToBoolean(request.getParameter("combine"), false);
 		if(isCombined){
 			plot = new CombinedPlot(width, height, componentCount);
 			setCombineable(true);

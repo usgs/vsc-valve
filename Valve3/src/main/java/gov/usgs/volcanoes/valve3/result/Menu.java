@@ -2,8 +2,8 @@ package gov.usgs.volcanoes.valve3.result;
 
 import gov.usgs.volcanoes.valve3.Section;
 import gov.usgs.volcanoes.valve3.Valve3;
-
 import gov.usgs.volcanoes.valve3.Version;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

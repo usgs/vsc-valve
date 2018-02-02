@@ -2,24 +2,25 @@ package gov.usgs.volcanoes.valve3.plotter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
-import gov.usgs.math.BinSize;
-import gov.usgs.math.Butterworth;
-import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.decorate.DefaultFrameDecorator;
-import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.DataPointRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.Renderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.util.Pool;
-import gov.usgs.util.Util;
-import gov.usgs.util.UtilException;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.DataPointRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -139,7 +140,7 @@ public class RsamPlotter extends RawDataPlotter {
           maxEventLength = 300;
         }
 
-        String bs = Util.stringToString(comp.get("cntsBin"), "hour");
+        String bs = StringUtils.stringToString(comp.get("cntsBin"), "hour");
         bin = BinSize.fromString(bs);
         if (bin == null) {
           throw new Valve3Exception("Illegal bin size option.");
@@ -366,8 +367,8 @@ public class RsamPlotter extends RawDataPlotter {
       hr.setXAxisToTime(8, tickMarksX, tickValuesX);
       if (unitsX) {
         hr.getAxis().setBottomLabelAsText(
-            timeZoneID + " Time (" + Util.j2KToDateString(startTime + timeOffset, dateFormatString)
-                + " to " + Util.j2KToDateString(endTime + timeOffset, dateFormatString) + ")");
+            timeZoneID + " Time (" + J2kSec.toDateString(startTime + timeOffset)
+                + " to " + J2kSec.toDateString(endTime + timeOffset) + ")");
       }
     } else {
       hr.createDefaultAxis(8, 8, tickMarksX, tickMarksY, false, true, false, tickValuesY);

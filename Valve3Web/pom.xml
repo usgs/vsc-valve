@@ -5,7 +5,7 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.5.2</version>
+    <version>3.6.0</version>
   </parent>
   <artifactId>valve3web</artifactId>
   <packaging>war</packaging>
@@ -58,12 +58,8 @@
     <dependency>
       <groupId>gov.usgs.volcanoes</groupId>
       <artifactId>valve3</artifactId>
-      <version>3.5.2</version>
+      <version>3.6.0</version>
       <exclusions>
-        <exclusion>
-          <groupId>gov.usgs.volcanoes</groupId>
-          <artifactId>usgs</artifactId>
-        </exclusion>
         <exclusion>
           <groupId>gov.usgs.volcanoes</groupId>
           <artifactId>vdx</artifactId>
