@@ -34,8 +34,8 @@ import gov.usgs.volcanoes.vdx.data.ExportData;
 import gov.usgs.volcanoes.vdx.data.MatrixExporter;
 import gov.usgs.volcanoes.vdx.data.Rank;
 import gov.usgs.volcanoes.vdx.data.gps.Estimator;
-import gov.usgs.volcanoes.vdx.data.gps.GPS;
-import gov.usgs.volcanoes.vdx.data.gps.GPSData;
+import gov.usgs.volcanoes.vdx.data.gps.Gps;
+import gov.usgs.volcanoes.vdx.data.gps.GpsData;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -103,8 +103,8 @@ public class GpsPlotter extends RawDataPlotter {
   private ModelType displacementAfterModel;
 
   // variables used in this class
-  private GPSData baselineData;
-  private Map<Integer, GPSData> channelDataMap;
+  private GpsData baselineData;
+  private Map<Integer, GpsData> channelDataMap;
 
   private boolean[] selectedCols;
   private String[] legendsCols;
@@ -328,7 +328,7 @@ public class GpsPlotter extends RawDataPlotter {
     boolean blexceptionThrown = false;
     String blexceptionMsg     = "";
     VDXClient client          = null;
-    channelDataMap            = new LinkedHashMap<Integer, GPSData>();
+    channelDataMap            = new LinkedHashMap<Integer, GpsData>();
     String[] channels         = ch.split(",");
 
     // create a map of all the input parameters
@@ -349,9 +349,9 @@ public class GpsPlotter extends RawDataPlotter {
       // iterate through each of the selected channels and place the data in the map
       for (String channel : channels) {
         params.put("ch", channel);
-        GPSData data = null;
+        GpsData data = null;
         try {
-          data = (GPSData) client.getBinaryData(params);
+          data = (GpsData) client.getBinaryData(params);
         } catch (UtilException e) {
           exceptionThrown = true;
           exceptionMsg = e.getMessage();
@@ -373,7 +373,7 @@ public class GpsPlotter extends RawDataPlotter {
       if (bl != null) {
         params.put("ch", bl);
         try {
-          baselineData = (GPSData) client.getBinaryData(params);
+          baselineData = (GpsData) client.getBinaryData(params);
         } catch (UtilException e) {
           blexceptionThrown = true;
           blexceptionMsg = e.getMessage();
@@ -421,7 +421,7 @@ public class GpsPlotter extends RawDataPlotter {
 
     // add a location for each channel that is being plotted
     for (int cid : channelDataMap.keySet()) {
-      GPSData data = channelDataMap.get(cid);
+      GpsData data = channelDataMap.get(cid);
       if (data != null) {
         if (baselineData != null) {
           data.applyBaseline(baselineData);
@@ -474,7 +474,7 @@ public class GpsPlotter extends RawDataPlotter {
 
     for (int cid : channelDataMap.keySet()) {
       Channel channel = channelsMap.get(cid);
-      GPSData data    = channelDataMap.get(cid);
+      GpsData data    = channelDataMap.get(cid);
 
       labels.add(new GeoLabel(channel.getCode(), channel.getLon(), channel.getLat()));
 
@@ -499,13 +499,13 @@ public class GpsPlotter extends RawDataPlotter {
           break;
 
       }
-      Estimator est = new Estimator(velocityKernel, data.getXYZ(), data.getCovariance());
+      Estimator est = new Estimator(velocityKernel, data.getXyz(), data.getCovariance());
       est.solve();
 
       DoubleMatrix2D v    = est.getModel().viewPart(0, 0, 3, 1);
       DoubleMatrix2D vcov = est.getModelCovariance().viewPart(0, 0, 3, 3);
 
-      DoubleMatrix2D t = GPS.createENUTransform(channel.getLon(), channel.getLat());
+      DoubleMatrix2D t = Gps.createEnuTransform(channel.getLon(), channel.getLat());
       v = Algebra.DEFAULT.mult(t, v);
       vcov = Algebra.DEFAULT.mult(Algebra.DEFAULT.mult(t, vcov), t.viewDice());
 
@@ -650,7 +650,7 @@ public class GpsPlotter extends RawDataPlotter {
 
           // get the relevant information for this channel
           Channel channel = channelsMap.get(cid);
-          GPSData data    = channelDataMap.get(cid);
+          GpsData data    = channelDataMap.get(cid);
 
           // verify their is something to plot
           if (data == null || data.observations() == 0) {
@@ -661,7 +661,7 @@ public class GpsPlotter extends RawDataPlotter {
             continue;
           }
 
-          // convert the GPSData object to a generic data matrix and subtract out the mean
+          // convert the GpsData object to a generic data matrix and subtract out the mean
           GenericDataMatrix gdm = new GenericDataMatrix(data.toTimeSeries(baselineData));
           for (int i = 0; i < columnsCount; i++) {
             if (bypassCols[i]) {

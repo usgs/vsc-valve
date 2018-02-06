@@ -360,9 +360,9 @@ public class Valve3Plot extends Result
 		for (PlotComponent pc : components)
 			sb.append(pc.toXML());
 		for (SuppDatum sd : suppdata)
-			sb.append(sd.toXML( true ));
+			sb.append(sd.toXml( true ));
 		for (MetaDatum md : metadata) {
-			sb.append(md.toXML());
+			sb.append(md.toXml());
 		}
 		sb.append("\t</plot>");
 		return toXML("plot", sb.toString());
