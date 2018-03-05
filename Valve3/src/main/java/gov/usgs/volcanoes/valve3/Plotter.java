@@ -7,15 +7,18 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.util.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.vdx.ExportConfig;
-import gov.usgs.util.Pool;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.valve3.result.Valve3Plot;
 import gov.usgs.volcanoes.valve3.Valve3;
 import gov.usgs.volcanoes.valve3.Valve3Exception;
 import gov.usgs.volcanoes.vdx.client.VDXClient;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for plotter, all concrete plotters
@@ -35,6 +38,8 @@ import gov.usgs.volcanoes.vdx.client.VDXClient;
  */
 abstract public class Plotter
 {
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
 	protected String vdxClient;
 	protected String vdxSource;
 	
@@ -113,16 +118,16 @@ abstract public class Plotter
 
 	/**
 	 * renders PlotComponent in given plot
-	 * @param plot Valve3Plot
-	 * @param component PlotComponent
+	 * @param v3p Valve3Plot
+	 * @param comp PlotComponent
 	 * @throws Valve3Exception
 	 */
 	abstract public void plot(Valve3Plot v3p, PlotComponent comp) throws Valve3Exception, PlotException;
 	
 	/**
 	 * Yield export configuration for specified source & client
-	 * @param source	vdx source name
-	 * @param client	vdx name
+	 * @param vdxSource	vdx source name
+	 * @param vdxClient	vdx name
 	 * @return export config
 	 */
 	public ExportConfig getExportConfig(String vdxSource, String vdxClient) {

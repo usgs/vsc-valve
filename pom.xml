@@ -3,7 +3,7 @@
 
   <groupId>gov.usgs.volcanoes</groupId>
   <artifactId>valve</artifactId>
-  <version>3.5.0</version>
+  <version>3.6.0</version>
   <packaging>pom</packaging>
 
   <name>valve</name>
@@ -12,8 +12,6 @@
   </description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.template.file>src/main/resources/Version.java.template</version.template.file>
-    <version.file>src/main/java/gov/usgs/volcanoes/valve3/Version.java</version.file>
   </properties>
 
   <modules>

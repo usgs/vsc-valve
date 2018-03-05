@@ -1,9 +1,5 @@
 package gov.usgs.volcanoes.valve3.result;
 
-import gov.usgs.util.Log;
-
-import java.util.logging.Logger;
-
 /**
  * 
  * Determine if both events and counts tables are present and inform the GUI
@@ -13,7 +9,6 @@ import java.util.logging.Logger;
 public class ewRsamMenu extends Result
 {
 	public String title = "EWRsam Data";
-	private Logger logger;
 	String dataTypes;
 	
 	/**
@@ -22,8 +17,7 @@ public class ewRsamMenu extends Result
 	 */
 	public ewRsamMenu(java.util.List<String> src)
 	{
-		logger = Log.getLogger("gov.usgs.volcanoes.vdx");
-		logger.info("ewRsamMenu() src = " + src.toString());
+		logger.info("ewRsamMenu() src = {}", src.toString());
 
 		dataTypes = src.toString();
 	}

@@ -7,5 +7,9 @@ dependency-reduced-pom.xml
 .classpath
 .project
 
+# IntelliJ
+.idea/
+*.iml
+
 # Other
 .DS_Store

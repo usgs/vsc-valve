@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.valve3.result;
 
 import gov.usgs.volcanoes.valve3.Section;
 import gov.usgs.volcanoes.valve3.Valve3;
+import gov.usgs.volcanoes.valve3.Version;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -46,7 +47,7 @@ public class Menu extends Result
 		sb.append("\t\t<administrator><![CDATA[" + Valve3.getInstance().getAdministrator() + "]]></administrator>\n");
 		sb.append("\t\t<administrator-email><![CDATA[" + Valve3.getInstance().getAdministratorEmail() + "]]></administrator-email>\n");
 		sb.append("\t\t<timeZoneAbbr>" + Valve3.getInstance().getTimeZoneAbbr() + "</timeZoneAbbr>\n");
-		sb.append("\t\t<version>" + Valve3.VERSION + ", " + Valve3.BUILD_DATE + "</version>\n");
+		sb.append("\t\t<version>" + Version.POM_VERSION + "</version>\n");
 		sb.append("\t\t<sections>\n");
 		
 		Collections.sort(sections);

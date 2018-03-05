@@ -1,0 +1,18 @@
+package gov.usgs.volcanoes.valve3;
+
+/**
+ * Class built by maven to hold version tags.
+ *
+ * @author Bill Tollett
+ */
+public interface Version {
+
+  /** my build time. */
+  public static final String BUILD_TIME = "@buildtime@";
+
+  /** version taken from the POM. */
+  public static final String POM_VERSION = "@pomversion@";
+
+  /** my version string. */
+  public static final String VERSION_STRING = "Version: " + POM_VERSION + " Built: " + BUILD_TIME;
+}

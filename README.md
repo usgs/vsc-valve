@@ -13,7 +13,7 @@ Valve is a web interface to the databases created and maintained via the [vsc-vd
 1. Copy the generated WAR file from the Valve3Web/target directory to your Apache Tomcat server location. If you have Tomcat set to automatically expand WAR files, restart the service and move on to the next step. Otherwise, run:
     ```
     $ mkdir valve3
-    $ cd valve3 && cp Valve3.war
+    $ cd valve3 && cp /path/to/Valve3.war .
     $ unzip Valve3.war
     ```
 2. Your Tomcat server.xml file will need an entry that looks something like the following:

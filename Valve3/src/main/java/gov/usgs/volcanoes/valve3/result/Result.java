@@ -1,8 +1,7 @@
 package gov.usgs.volcanoes.valve3.result;
 
-import gov.usgs.util.Log;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Keeps URL to generated result
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
  */
 abstract public class Result
 {
-	private final static Logger logger = Log.getLogger("gov.usgs.volcanoes.valve3.result.Result"); 
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected String url;
 	
 	/**
@@ -40,7 +39,7 @@ abstract public class Result
 	 */
 	public void delete()
 	{
-		logger.fine("Result.delete()");
+		logger.debug("Result.delete()");
 	}
 	
 	/**

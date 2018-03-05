@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.valve3;
 
-import gov.usgs.util.Log;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.valve3.data.DataHandler;
 import gov.usgs.volcanoes.valve3.data.DataSourceDescriptor;
 import gov.usgs.volcanoes.valve3.plotter.ChannelMapPlotter;
@@ -20,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 import java.util.Date;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
@@ -28,6 +26,9 @@ import java.util.zip.ZipException;
 
 import javax.servlet.http.HttpServletRequest;
 import gov.usgs.volcanoes.vdx.data.Rank;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates raw data from http request.
@@ -47,6 +48,7 @@ import gov.usgs.volcanoes.vdx.data.Rank;
  */
 public class RawDataHandler implements HttpHandler
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RawDataHandler.class);
 	
 	// Medium.  please refer to STANDARD_SIZES as defined in plot.js
 	public static final int DEFAULT_COMPONENT_WIDTH		= 750;
@@ -58,15 +60,13 @@ public class RawDataHandler implements HttpHandler
 	public static final int MAX_PLOT_HEIGHT				= 50000;
 	
 	private DataHandler dataHandler;
-	private Logger logger;	
-	
+
 	/**
 	 * Constructor
 	 * @param dh data handler for this raw data handler
 	 */
 	public RawDataHandler(DataHandler dh)
 	{
-		logger = Log.getLogger("gov.usgs.volcanoes.valve3");
 		dataHandler = dh;
 	}
 	
@@ -78,12 +78,12 @@ public class RawDataHandler implements HttpHandler
 	 */
 	protected List<PlotComponent> parseRequest(HttpServletRequest request) throws Valve3Exception
 	{
-		int n = Util.stringToInt(request.getParameter("n"), 1);
+		int n = StringUtils.stringToInt(request.getParameter("n"), 1);
 		ArrayList<PlotComponent> list = new ArrayList<PlotComponent>(n);
 		
 		String rkNameArg	= request.getParameter( "rkName" );
-		String outputAllArg = Util.stringToString(request.getParameter("outputAll"), "f");
-		String outputType	= Util.stringToString(request.getParameter("o"), "csv");
+		String outputAllArg = StringUtils.stringToString(request.getParameter("outputAll"), "f");
+		String outputType	= StringUtils.stringToString(request.getParameter("o"), "csv");
 		if (!(outputType.equals("csv") || outputType.equals("csvnots") || outputType.equals("seed")
 				|| outputType.equals("xml")|| outputType.equals("json")))
 			outputType	= "csv";
@@ -100,27 +100,27 @@ public class RawDataHandler implements HttpHandler
 			if ( rkNameArg != null ) 
 				component.put( "rkName", rkNameArg );
 			
-			int w = Util.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
+			int w = StringUtils.stringToInt(request.getParameter("w." + i), DEFAULT_COMPONENT_WIDTH);
 			if (w <= 0 || w > MAX_PLOT_WIDTH) {
 				throw new Valve3Exception("Illegal w." + i + " parameter.  Must be between 0 and " + MAX_PLOT_WIDTH);
 			}
 			
-			int h = Util.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
+			int h = StringUtils.stringToInt(request.getParameter("h." + i), DEFAULT_COMPONENT_HEIGHT);
 			if (h <= 0 || h > MAX_PLOT_HEIGHT) {
 				throw new Valve3Exception("Illegal h." + i + " parameter.  Must be between 0 and " + MAX_PLOT_HEIGHT);
 			}
 			
-			int mh = Util.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
+			int mh = StringUtils.stringToInt(request.getParameter("mh." + i), DEFAULT_COMPONENT_MAPHEIGHT);
 			if (mh < 0){
 				throw new Valve3Exception("Illegal mh." + i + " parameter.  Must be greater than 0");
 			}
 			
-			int x = Util.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
+			int x = StringUtils.stringToInt(request.getParameter("x." + i), DEFAULT_COMPONENT_LEFT);
 			if (x < 0 || x > w){
 				throw new Valve3Exception("Illegal x." + i + " parameter.  Must be between 0 and " + w);
 			}
 			
-			int y = Util.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
+			int y = StringUtils.stringToInt(request.getParameter("y." + i), DEFAULT_COMPONENT_TOP);
 			if (y < 0 || y > h){
 				throw new Valve3Exception("Illegal y." + i + " parameter.  Must be between 0 and " + h);
 			}
@@ -151,7 +151,7 @@ public class RawDataHandler implements HttpHandler
 		String tz = request.getParameter("tz");
 		if ( tz==null || tz.equals("") ) {
 			tz = Valve3.getInstance().getTimeZoneAbbr();
-			logger.info( "Illegal/missing tz parameter; using default value" );
+			LOGGER.info( "Illegal/missing tz parameter; using default value" );
 		}	
 		TimeZone timeZone = TimeZone.getTimeZone(tz);
 		PlotComponent component = new PlotComponent(source, timeZone);
@@ -243,7 +243,7 @@ public class RawDataHandler implements HttpHandler
 								break;
 							}
 						}
-						logger.info("Ranks acquired");
+						LOGGER.info("Ranks acquired");
 					} catch (Exception e) {}
 				if (rk != null) {
 					int rankID = component.getInt( "rk" );
@@ -306,12 +306,12 @@ public class RawDataHandler implements HttpHandler
 						}
 						catch (ZipException ez)
 						{
-							logger.info("RawDataHandler zipfile error" );
+							LOGGER.info("RawDataHandler zipfile error" );
 							throw new Valve3Exception(ez.getMessage());
 						}	
 						catch (IOException eio)
 						{
-							logger.info("RawDataHandler file error" );
+							LOGGER.info("RawDataHandler file error" );
 							throw new Valve3Exception(eio.getMessage());
 						}
 					} else 
@@ -330,7 +330,7 @@ public class RawDataHandler implements HttpHandler
 				}
 				catch (IOException e)
 				{
-					logger.info("RawDataHandler file error" );
+					LOGGER.info("RawDataHandler file error" );
 					throw new Valve3Exception(e.getMessage());
 				}
 			}
@@ -342,7 +342,7 @@ public class RawDataHandler implements HttpHandler
 		}
 		catch (Valve3Exception e)
 		{
-			logger.info("RawDataHandler error " + e.getMessage());
+			LOGGER.info("RawDataHandler error: {}", e.getMessage());
 			return new ErrorMessage(e.getMessage());
 		}
 	}
