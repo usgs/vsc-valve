@@ -4,7 +4,7 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.6.0</version>
+    <version>3.6.1</version>
   </parent>
   <artifactId>valve3</artifactId>
   <packaging>jar</packaging>
@@ -53,6 +53,7 @@
               <artifactSet>
                 <includes>
                   <include>gov.usgs.volcanoes:vdx</include>
+                  <include>net.sourceforge.jtransforms:jtransforms</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -116,7 +117,7 @@
     <dependency>
       <groupId>gov.usgs.volcanoes</groupId>
       <artifactId>vdx</artifactId>
-      <version>3.6.0</version>
+      <version>3.6.1</version>
     </dependency>
     <dependency>
       <groupId>colt</groupId>
@@ -128,6 +129,12 @@
       <artifactId>javax.servlet-api</artifactId>
       <version>3.1.0</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.jtransforms</groupId>
+      <artifactId>jtransforms</artifactId>
+      <version>2.4.0</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>
