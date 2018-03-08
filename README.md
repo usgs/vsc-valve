@@ -16,9 +16,13 @@ Valve is a web interface to the databases created and maintained via the [vsc-vd
     $ cd valve3 && cp /path/to/Valve3.war .
     $ unzip Valve3.war
     ```
-2. Your Tomcat server.xml file will need an entry that looks something like the following:
+2. Your Tomcat server.xml file will need an entry that looks something like the following (within the host tags):
     ```
+    <Host name="localhost"  appBase="webapps" unpackWARs="true" autoDeploy="true">
+    ...
     <Context path="/valve3" docBase="/path/to/webapps/valve3" privileged="false" reloadable="true" crossContext="false"></Context>
+    ...
+    </Host>
     ```
 3. Make sure that the Tomcat user owns the data/ and img/ directories. If not, run:
     ```
