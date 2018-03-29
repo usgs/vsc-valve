@@ -4,7 +4,7 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.6.0</version>
+    <version>3.6.1</version>
   </parent>
   <artifactId>valve3</artifactId>
   <packaging>jar</packaging>
@@ -53,6 +53,7 @@
               <artifactSet>
                 <includes>
                   <include>gov.usgs.volcanoes:vdx</include>
+                  <include>net.sourceforge.jtransforms:jtransforms</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -96,6 +97,37 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <!-- Make m2e happy -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>maven-replacer-plugin</artifactId>
+                    <versionRange>1.4.0</versionRange>
+                    <goals>
+                      <goal>replace</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
   </build>
 
   <repositories>
@@ -116,7 +148,7 @@
     <dependency>
       <groupId>gov.usgs.volcanoes</groupId>
       <artifactId>vdx</artifactId>
-      <version>3.6.0</version>
+      <version>3.6.1</version>
     </dependency>
     <dependency>
       <groupId>colt</groupId>
@@ -128,6 +160,12 @@
       <artifactId>javax.servlet-api</artifactId>
       <version>3.1.0</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.jtransforms</groupId>
+      <artifactId>jtransforms</artifactId>
+      <version>2.4.0</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>
