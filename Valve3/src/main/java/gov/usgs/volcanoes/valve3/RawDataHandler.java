@@ -280,6 +280,7 @@ public class RawDataHandler implements HttpHandler
 				cmtBits.put( "st", String.format( "%14.3f", component.getStartTime(endtime) ) );
 				cmtBits.put( "et", String.format( "%14.3f", endtime ) );
 				cmtBits.put( "source", fn_source );
+				cmtBits.put( "chCnt", StringUtils.stringToString(request.getParameter("chCnt.0"), "None"));
 				String outputType = component.get( "o" );
 				fn = df.format(now) + "_" 
 					+ fn_source.replaceAll( "-", "_") + "_"
