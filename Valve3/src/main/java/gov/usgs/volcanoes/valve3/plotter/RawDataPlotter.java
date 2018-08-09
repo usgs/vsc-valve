@@ -924,7 +924,8 @@ public abstract class RawDataPlotter extends Plotter {
       cmtLines.add("reqtime=" + cmtBits.get("reqtime"));
       cmtLines.add("URL=" + cmtBits.get("URL"));
       cmtLines.add("source=" + cmtBits.get("source"));
-      cmtLines.add("st=" + cmtBits.get("st") + ", et=" + cmtBits.get("et"));
+      cmtLines.add("st=" + cmtBits.get("st") + ", et="
+                   + cmtBits.get("et") + ", chCnt=" + cmtBits.get("chCnt"));
       rank = cmtBits.get("rank");
       rowTimeZone = cmtBits.get("timezone");
     }
