@@ -61,12 +61,20 @@
       <version>3.6.2</version>
       <exclusions>
         <exclusion>
+          <groupId>colt</groupId>
+          <artifactId>colt</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>gov.usgs.volcanoes</groupId>
           <artifactId>vdx</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>colt</groupId>
-          <artifactId>colt</artifactId>
+          <groupId>gov.usgs.volcanoes</groupId>
+          <artifactId>volcano-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sourceforge.jtransforms</groupId>
+          <artifactId>jtransforms</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
