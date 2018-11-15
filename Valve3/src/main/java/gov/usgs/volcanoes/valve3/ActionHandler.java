@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.valve3;
 
 import gov.usgs.volcanoes.core.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,55 +12,55 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Keeps map of pairs action name-http handler, apply action with given name to http requests.
- * 
- * $Log: not supported by cvs2svn $
+ *
  * @author Dan Cervelli
  */
-public class ActionHandler implements HttpHandler
-{
-	private final static Logger LOGGER = LoggerFactory.getLogger(ActionHandler.class);
-	protected Map<String, HttpHandler> handlers;
-	protected String key;
-	
-	/**
-	 * Constructor
-	 * @param k name of action to apply 
-	 */
-	public ActionHandler(String k)
-	{
-		key = k;
-		handlers = new HashMap<String, HttpHandler>();
-	}
+public class ActionHandler implements HttpHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ActionHandler.class);
+  protected Map<String, HttpHandler> handlers;
+  protected String key;
 
-	/**
-	 * Yield map of action names to http handlers
-	 * @return map of pairs action name-http handler
-	 */
-	public Map<String, HttpHandler> getHandlers()
-	{
-		return handlers;
-	}
-	
-	/**
-	 * apply action with name containing in the 'key' field to http requests.
-	 * See {@link HttpHandler}
-	 * @param request - got http request
-	 * @throws Valve3Exception
-	 * @return result of handling request
-	 */
-	public Object handle(HttpServletRequest request) throws Valve3Exception {
-		
-		// log the request to the log file
-		LOGGER.info("{}", request.getQueryString());
-		
-		// get the parameter, default to "plot" if not specified
-		String action = StringUtils.stringToString(request.getParameter(key), "plot");
-		
-		// lookup the handler from the map
-		HttpHandler handler = handlers.get(action);
-		if (handler == null)
-			return null;
+  /**
+   * Constructor.
+   *
+   * @param k name of action to apply
+   */
+  public ActionHandler(String k) {
+    key = k;
+    handlers = new HashMap<String, HttpHandler>();
+  }
 
-		return handler.handle(request);
-	}
+  /**
+   * Yield map of action names to http handlers.
+   *
+   * @return map of pairs action name-http handler
+   */
+  public Map<String, HttpHandler> getHandlers() {
+    return handlers;
+  }
+
+  /**
+   * apply action with name containing in the 'key' field to http requests.
+   * See {@link HttpHandler}
+   *
+   * @param request - got http request
+   * @return result of handling request
+   * @throws Valve3Exception exception
+   */
+  public Object handle(HttpServletRequest request) throws Valve3Exception {
+
+    // log the request to the log file
+    LOGGER.info("{}", request.getQueryString());
+
+    // get the parameter, default to "plot" if not specified
+    String action = StringUtils.stringToString(request.getParameter(key), "plot");
+
+    // lookup the handler from the map
+    HttpHandler handler = handlers.get(action);
+    if (handler == null) {
+      return null;
+    }
+
+    return handler.handle(request);
+  }
 }

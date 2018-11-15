@@ -1,14 +1,14 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.math.Butterworth;
-import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.SliceWave;
 import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectraRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.core.util.UtilException;

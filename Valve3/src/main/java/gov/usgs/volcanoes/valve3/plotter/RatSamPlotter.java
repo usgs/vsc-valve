@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.util.UtilException;

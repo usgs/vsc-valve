@@ -1,8 +1,7 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.math.DownsamplingType;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator.Location;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
@@ -10,6 +9,7 @@ import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.LegendRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.DownsamplingType;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.core.util.StringUtils;
@@ -37,9 +37,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.Vector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
@@ -890,7 +887,7 @@ public abstract class RawDataPlotter extends Plotter {
     Vector<String> cmtLines = new Vector<String>();
     inclTime = outToCsv || outToXml || outToJson;
 
-    if (!(Valve3.getInstance().getOpenDataURL().equalsIgnoreCase(comp.get("requestserver"))) && !ec
+    if (!(Valve3.getInstance().getOpenDataUrl().equalsIgnoreCase(comp.get("requestserver"))) && !ec
         .isExportable()) {
       throw new Valve3Exception("Requested export not allowed");
     }
