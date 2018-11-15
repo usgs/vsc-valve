@@ -15,9 +15,9 @@ import gov.usgs.volcanoes.core.legacy.plot.render.InvertedFrameRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.transform.ArbDepthCalculator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.math.proj.GeoRange;
 import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
-import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.core.util.UtilException;
@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A class for making hypocenter map plots and histograms.
- *
  * TODO: implement triple view.
  *
  * @author Dan Cervelli
@@ -585,9 +584,9 @@ public class HypocenterPlotter extends RawDataPlotter {
         base.createDefaultAxis();
         base.setXAxisToTime(8);
         if (unitsX) {
-          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" +
-              J2kSec.toDateString(startTime + timeOffset) + " to " +
-              J2kSec.toDateString(endTime + timeOffset) + ")");
+          base.getAxis().setBottomLabelAsText(timeZoneID + " Time ("
+              + J2kSec.toDateString(startTime + timeOffset) + " to "
+              + J2kSec.toDateString(endTime + timeOffset) + ")");
         }
         if (unitsY) {
           base.getAxis().setLeftLabelAsText("Depth (km)");
@@ -662,9 +661,9 @@ public class HypocenterPlotter extends RawDataPlotter {
         base.setXAxisToTime(8);
 
         if (unitsX) {
-          base.getAxis().setBottomLabelAsText(timeZoneID + " Time (" +
-              J2kSec.toDateString(startTime + timeOffset) + " to " +
-              J2kSec.toDateString(endTime + timeOffset) + ")");
+          base.getAxis().setBottomLabelAsText(timeZoneID + " Time ("
+              + J2kSec.toDateString(startTime + timeOffset) + " to "
+              + J2kSec.toDateString(endTime + timeOffset) + ")");
         }
         if (unitsY) {
           base.getAxis().setLeftLabelAsText(

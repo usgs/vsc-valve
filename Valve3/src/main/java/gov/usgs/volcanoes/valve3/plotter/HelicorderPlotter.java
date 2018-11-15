@@ -1,9 +1,9 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
+import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.legacy.plot.HelicorderSettings;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.util.UtilException;

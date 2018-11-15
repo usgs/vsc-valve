@@ -2,13 +2,10 @@ package gov.usgs.volcanoes.valve3.plotter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
-import gov.usgs.volcanoes.core.math.BinSize;
-import gov.usgs.volcanoes.core.math.Butterworth;
-import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator.Location;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
@@ -18,6 +15,9 @@ import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.core.util.UtilException;

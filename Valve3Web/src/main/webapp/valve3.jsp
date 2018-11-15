@@ -39,7 +39,7 @@ Initial commit.
 		switch(plot.getOutputType())
 		{
 			case XML:
-				out.println(plot.toXML());
+				out.println(plot.toXml());
 				break;
 			case PS:
 				String fileName = plot.getTitle().replace(" ", "_") + ".ps";
@@ -94,7 +94,7 @@ Initial commit.
 	{
 		Result res = (Result)result;
 		response.setContentType("text/xml");
-		out.println(res.toXML());
+		out.println(res.toXml());
 	}
 	else if (result instanceof String)
 	{

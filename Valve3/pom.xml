@@ -4,14 +4,15 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.6.2</version>
+    <version>3.6.3</version>
   </parent>
   <artifactId>valve3</artifactId>
   <packaging>jar</packaging>
 
   <name>Valve3</name>
   <url>https://volcanoes.usgs.gov/software/Valve3</url>
-  <description>Valve3 is...
+  <description>Valve3 is an application developed to plot data collected within the Volcano Science Center. The codebase
+    is generic enough that it could be used to plot pretty much any timeseries data.
   </description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
