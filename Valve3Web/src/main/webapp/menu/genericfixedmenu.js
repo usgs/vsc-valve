@@ -58,6 +58,12 @@ create_genericfixedmenu = function(menu) {
       if (currentMenu)
         currentMenu.filterChanged();
     }, false);
+
+    sel = document.getElementById(this.id + '_shownames');
+    addListener(sel, 'change', function() {
+      if (currentMenu)
+        currentMenu.showNames();
+    }, false);
   }
 
   // override the default presubmit function
