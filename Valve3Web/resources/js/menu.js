@@ -971,6 +971,18 @@ function toggleTimeShortcutPanel(event)
 }
 
 /**
+ *  Looks at current value of the Show Names checkbox
+ */
+function getShowNamesChkbox(form) {
+  var showNames = false;
+  var chk = form.elements[this.currentMenu.id + '_shownames'];
+  if (chk) {
+    showNames = chk.checked;
+  }
+  return showNames;
+}
+
+/**
  *  Check the current geographic filter interface element to find out the active geo filter.
  *  For example "Alaska": return appropriate latitude and longitude to define the area. This
  *  is parsed out of the text array 'value' stored in the popup menu,
@@ -1242,6 +1254,22 @@ Menu.prototype.submit = function() {
   // run the presubmit, and if it passes, submit the request
   if (this.presubmit(pr, pc)) {
     loadXML(this.id + " plot", pr.getURL());
+  }
+}
+
+/**
+ *  Swap between channel code and channel name display
+ */
+Menu.prototype.showNames = function() {
+  var form = this.getForm();
+  var select = form.elements["selector:ch"];
+  shownames = getShowNamesChkbox(form);
+  for (var i = 0; i < this.allChannels.length; i++) {
+    if (shownames) {
+      this.allChannels[i].text = this.allChannels[i].value.split(":")[2].replace(/\$/g,' ');
+    } else {
+      this.allChannels[i].text = this.allChannels[i].value.split(":")[1].replace(/\$/g,' ');
+    }
   }
 }
 
