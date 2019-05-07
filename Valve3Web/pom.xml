@@ -5,14 +5,14 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.6.2</version>
+    <version>3.7.0</version>
   </parent>
   <artifactId>valve3web</artifactId>
   <packaging>war</packaging>
 
   <name>Valve3Web</name>
   <url>https://volcanoes.usgs.gov/software/Valve3</url>
-  <description>Valve3Web is...
+  <description>Valve3Web is the web component of the Valve3 application.
   </description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -58,15 +58,23 @@
     <dependency>
       <groupId>gov.usgs.volcanoes</groupId>
       <artifactId>valve3</artifactId>
-      <version>3.6.2</version>
+      <version>3.7.0</version>
       <exclusions>
+        <exclusion>
+          <groupId>colt</groupId>
+          <artifactId>colt</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>gov.usgs.volcanoes</groupId>
           <artifactId>vdx</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>colt</groupId>
-          <artifactId>colt</artifactId>
+          <groupId>gov.usgs.volcanoes</groupId>
+          <artifactId>volcano-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sourceforge.jtransforms</groupId>
+          <artifactId>jtransforms</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

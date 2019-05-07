@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
 import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;

@@ -1,8 +1,7 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.math.DownsamplingType;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.DefaultFrameDecorator.Location;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
@@ -10,6 +9,7 @@ import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.LegendRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.DownsamplingType;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.core.util.StringUtils;
@@ -26,8 +26,10 @@ import gov.usgs.volcanoes.vdx.data.ExportData;
 import gov.usgs.volcanoes.vdx.data.MetaDatum;
 import gov.usgs.volcanoes.vdx.data.Rank;
 import gov.usgs.volcanoes.vdx.data.SuppDatum;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,9 +39,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.Vector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class which keeps general functionality for all plotters based on MatrixRenderer.
@@ -54,6 +53,7 @@ public abstract class RawDataPlotter extends Plotter {
   protected double endTime;
   protected String ch;
   protected boolean isDrawLegend;
+  protected boolean useChNames;
   protected int rk;
   public boolean ranks = true;
   protected boolean tickMarksX = true;
@@ -87,14 +87,13 @@ public abstract class RawDataPlotter extends Plotter {
   protected Map<Integer, Rank> ranksMap;
 
   protected TreeSet<ExportData> csvData;
-  protected StringBuffer csvText;
+  protected StringBuilder csvText;
   protected Map<String, String> csvCmtBits;
   protected Vector<String[]> csvHdrs;
   protected int csvIndex = 0;
 
   protected boolean[] bypassCols;
   protected boolean[] accumulateCols;
-  protected boolean doAccumulate;
   protected boolean doDespike;
   protected double despikePeriod;
   protected boolean doDetrend;
@@ -111,14 +110,12 @@ public abstract class RawDataPlotter extends Plotter {
 
   protected String outputType;
   protected boolean inclTime;
-  protected SuppDatum[] sdData;
   protected String[] scnl;
   protected double samplingRate = 0.0;
   protected String dataType = null;
 
   protected double timeOffset;
   protected String timeZoneID;
-  protected String dateFormatString;
 
   /**
    * Default constructor.
@@ -126,7 +123,6 @@ public abstract class RawDataPlotter extends Plotter {
   public RawDataPlotter() {
     csvCmtBits = new LinkedHashMap<String, String>();
     csvHdrs = new Vector<String[]>();
-    dateFormatString = "yyyy-MM-dd HH:mm:ss";
   }
 
   /**
@@ -248,6 +244,11 @@ public abstract class RawDataPlotter extends Plotter {
         isDrawLegend = comp.getBoolean("lg");
       } catch (Valve3Exception e) {
         isDrawLegend = true;
+      }
+      try {
+        useChNames = comp.getBoolean("shownames");
+      } catch (Valve3Exception e) {
+        useChNames = true;
       }
       try {
         shape = comp.getString("linetype");
@@ -632,14 +633,15 @@ public abstract class RawDataPlotter extends Plotter {
    * @param nullField what to use for missing fields
    */
   private void addCSVline(Double[][] data, Double time, String decFmt, String nullField) {
-    String line;
+    StringBuilder line;
     String firstDecFmt;
     String nextDecFmt;
     if (inclTime) {
-      line = String.format("%14.3f,", Time.j2kToEw(time)) + J2kSec.toDateString(time);
+      line = new StringBuilder(String.format("%14.3f,",
+                                            Time.j2kToEw(time)) + J2kSec.toDateString(time));
       firstDecFmt = "," + decFmt;
     } else {
-      line = "";
+      line = new StringBuilder("");
       firstDecFmt = decFmt;
     }
     nextDecFmt = "," + decFmt;
@@ -647,15 +649,15 @@ public abstract class RawDataPlotter extends Plotter {
       for (int i = 1; i < group.length; i++) {
         Double v = group[i];
         if (v == null) {
-          line += nullField;
+          line.append(nullField);
         } else if (isCharColumn(i)) {
-          if (v == Double.NaN || v > 255) {
-            line += ", ";
+          if (Double.isNaN(v) || v > 255) {
+            line.append(", ");
           } else {
-            line += "," + new Character((char) (v.intValue()));
+            line.append(",").append(new Character((char) (v.intValue())));
           }
         } else {
-          line += String.format(i == 1 ? firstDecFmt : nextDecFmt, v);
+          line.append(String.format(i == 1 ? firstDecFmt : nextDecFmt, v));
         }
       }
     }
@@ -677,20 +679,20 @@ public abstract class RawDataPlotter extends Plotter {
   private void addXMLline(Double[][] data, Double time, String decFmt, int pos, String timeZone,
       String rank) {
     boolean hasChannels = (csvHdrs.get(1)[2] != null);  // Export has channel information
-    String line;                    // Export line being added
+    StringBuilder line;                    // Export line being added
 
     /* If first line, add header tag */
     if (pos == 1) {
-      line = "\t<DATA>\n";
+      line = new StringBuilder("\t<DATA>\n");
     } else {
-      line = "";
+      line = new StringBuilder("");
     }
     /* Tag for a row of data */
-    line += String.format("\t\t<ROW pos=\"%d\">\n", pos);
+    line.append(String.format("\t\t<ROW pos=\"%d\">%n", pos));
     if (inclTime) {
-      line += String.format("\t\t\t<EPOCH>%1.3f</EPOCH>\n\t\t\t<TIMESTAMP>%s</TIMESTAMP>\n",
-          Time.j2kToEw(time), J2kSec.toDateString(time));
-      line += "\t\t\t<TIMEZONE>" + timeZone + "</TIMEZONE>\n";
+      line.append(String.format("\t\t\t<EPOCH>%1.3f</EPOCH>%n\t\t\t<TIMESTAMP>%s</TIMESTAMP>%n",
+                                Time.j2kToEw(time), J2kSec.toDateString(time)));
+      line.append("\t\t\t<TIMEZONE>").append(timeZone).append("</TIMEZONE>\n");
     }
     String channel = "";    // Channel name
     String tab = "\t\t\t";    // Indent for contents of a row
@@ -706,10 +708,10 @@ public abstract class RawDataPlotter extends Plotter {
         if (hasChannels) {
           if (!channel.equals(hdr[2])) {
             if (i > 1) {
-              line += "\t\t\t</CHANNEL>\n";
+              line.append("\t\t\t</CHANNEL>\n");
             }
             channel = hdr[2];
-            line += "\t\t\t<CHANNEL>\n\t\t\t\t<code>" + channel + "</code>\n";
+            line.append("\t\t\t<CHANNEL>\n\t\t\t\t<code>").append(channel).append("</code>\n");
             tab = "\t\t\t\t";
             showRank = true;
           }
@@ -718,30 +720,30 @@ public abstract class RawDataPlotter extends Plotter {
         }
         if (showRank) {
           if (hdr[1] != null) {
-            line += tab + "<rank>" + hdr[1] + "</rank>\n";
+            line.append(tab).append("<rank>").append(hdr[1]).append("</rank>\n");
           } else if (hasRank) {
-            line += tab + "<rank>" + rank + "</rank>\n";
+            line.append(tab).append("<rank>").append(rank).append("</rank>\n");
           }
         }
 
         Double v = group[i];    // Actual exported data value
         if (v != null) {
-          line += tab + "<" + tag + ">";
+          line.append(tab).append("<").append(tag).append(">");
           if (isCharColumn(i)) {
-            if (v == Double.NaN || v > 255) {
+            if (Double.isNaN(v) || v > 255) {
               ;
             } else {
-              line += new Character((char) (v.intValue()));
+              line.append(new Character((char) (v.intValue())));
             }
           } else {
-            line += String.format(decFmt, v);
+            line.append(String.format(decFmt, v));
           }
-          line += "</" + tag + ">\n";
+          line.append("</").append(tag).append(">\n");
         }
       }
     }
     if (hasChannels) {
-      line += "\t\t\t</CHANNEL>\n";
+      line.append("\t\t\t</CHANNEL>\n");
     }
     csvText.append(line);
     csvText.append("\t\t</ROW>\n");
@@ -761,30 +763,31 @@ public abstract class RawDataPlotter extends Plotter {
   private void addJsonLine(Double[][] data, Double time, String decFmt, int pos, String timeZone,
       String rank) {
     boolean hasChannels = (csvHdrs.get(1)[2] != null);  // Export has channel information
-    String line;                    // Export line being added
+    StringBuilder line;                    // Export line being added
 
     /* If first line, add header tag */
     if (pos == 1) {
-      line = "\t\"data\":[\n";
+      line = new StringBuilder("\t\"data\":[\n");
     } else {
-      line = ",\n";
+      line = new StringBuilder(",\n");
     }
-    line += "\t\t{";
+    line.append("\t\t{");
     if (inclTime) {
-      line += String.format("\"EPOCH\":%1.3f,\"TIMESTAMP\":\"%s\",", Time.j2kToEw(time),
-          J2kSec.toDateString(time));
-      line += "\"TIMEZONE\":\"" + timeZone + "\"" + (hasChannels ? ",\n" : "");
+      line.append(String.format("\"EPOCH\":%1.3f,\"TIMESTAMP\":\"%s\",", Time.j2kToEw(time),
+                                J2kSec.toDateString(time)));
+      line.append("\"TIMEZONE\":\"").append(timeZone).append("\"")
+                                                     .append((hasChannels ? ",\n" : ""));
     }
 
     if (hasChannels) {
-      line += "\t\t\"CHANNELS\":[\n";
+      line.append("\t\t\"CHANNELS\":[\n");
     }
     String channel = "";
     int hdrIdx = 1;      // Current column of export
     boolean hasRank = (!rank.equals(""));    // Export has rank information
     for (Double[] group : data) {
       if (hdrIdx != 1 && hasChannels) {
-        line += ",\n";
+        line.append(",\n");
       }
       for (int i = 1; i < group.length; i++) {
         hdrIdx++;
@@ -794,7 +797,7 @@ public abstract class RawDataPlotter extends Plotter {
         if (hasChannels) {
           if (!channel.equals(hdr[2])) {
             channel = hdr[2];
-            line += "\t\t\t{\"code\":\"" + channel + "\"";
+            line.append("\t\t\t{\"code\":\"").append(channel).append("\"");
             showRank = true;
           }
         } else {
@@ -802,27 +805,27 @@ public abstract class RawDataPlotter extends Plotter {
         }
         if (showRank) {
           if (hdr[1] != null) {
-            line += ",\n\t\t\t\"rank\":\"" + hdr[1] + "\"";
+            line.append(",\n\t\t\t\"rank\":\"").append(hdr[1]).append("\"");
           } else if (hasRank) {
-            line += ",\n\t\t\t\"rank\":\"" + rank + "\"";
+            line.append(",\n\t\t\t\"rank\":\"").append(rank).append("\"");
           }
         }
 
         Double v = group[i];
         if (v != null) {
-          line += String.format(",\n\t\t\t\"%s\":", tag);
+          line.append(String.format(",%n\t\t\t\"%s\":", tag));
           if (isCharColumn(i)) {
-            if (v == Double.NaN || v > 255) {
-              line += "\"\"";
+            if (Double.isNaN(v) || v > 255) {
+              line.append("\"\"");
             } else {
-              line += "\"" + new Character((char) (v.intValue())) + "\"";
+              line.append("\"").append(new Character((char) (v.intValue()))).append("\"");
             }
           } else {
-            line += String.format(decFmt, v);
+            line.append(String.format(decFmt, v));
           }
         }
       }
-      line += "}";
+      line.append("}");
     }
     csvText.append(line);
     if (hasChannels) {
@@ -890,7 +893,7 @@ public abstract class RawDataPlotter extends Plotter {
     Vector<String> cmtLines = new Vector<String>();
     inclTime = outToCsv || outToXml || outToJson;
 
-    if (!(Valve3.getInstance().getOpenDataURL().equalsIgnoreCase(comp.get("requestserver"))) && !ec
+    if (!(Valve3.getInstance().getOpenDataUrl().equalsIgnoreCase(comp.get("requestserver"))) && !ec
         .isExportable()) {
       throw new Valve3Exception("Requested export not allowed");
     }
@@ -935,17 +938,16 @@ public abstract class RawDataPlotter extends Plotter {
     if (csvCmtBits.containsKey("datatype")) {
       cmtLines.add("datatype=" + csvCmtBits.get("datatype"));
     }
-    csvText = new StringBuffer();
-    Vector<String> myCmtLines = cmtLines;
+    csvText = new StringBuilder();
 
     if (outToCsv) {
       for (String comment : comments) {
-        csvText.append("#" + comment + "\n");
+        csvText.append("#").append(comment).append("\n");
       }
-      for (String comment : myCmtLines) {
-        csvText.append("#" + comment + "\n");
+      for (String comment : cmtLines) {
+        csvText.append("#").append(comment).append("\n");
       }
-      StringBuffer hdrLine = new StringBuffer();
+      StringBuilder hdrLine = new StringBuilder();
       boolean first = true;
       for (String[] s : csvHdrs) {
         String hdr;
@@ -973,7 +975,7 @@ public abstract class RawDataPlotter extends Plotter {
             + "</COMMENTLINE>\n");
         i++;
       }
-      for (String comment : myCmtLines) {
+      for (String comment : cmtLines) {
         csvText.append("\t\t<COMMENTLINE pos=\"" + i + "\">" + comment.replaceAll("&", "&amp;")
             + "</COMMENTLINE>\n");
         i++;
@@ -987,7 +989,7 @@ public abstract class RawDataPlotter extends Plotter {
         csvText.append(sep + comment);
         sep = "\",\n\t\t\"";
       }
-      for (String comment : myCmtLines) {
+      for (String comment : cmtLines) {
         csvText.append(sep + comment);
         sep = "\",\n\t\t\"";
       }

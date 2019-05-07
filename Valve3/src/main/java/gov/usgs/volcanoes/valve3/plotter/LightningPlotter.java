@@ -13,9 +13,9 @@ import gov.usgs.volcanoes.core.legacy.plot.render.InvertedFrameRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.transform.ArbDepthCalculator;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.math.proj.GeoRange;
 import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
-import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.core.util.UtilException;
@@ -49,9 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A class for making lightning map plots and histograms.
- *
- * Modeled after HypocenterPlotter.
+ * A class for making lightning map plots and histograms. Modeled after HypocenterPlotter.
  *
  * @author Tom Parker
  */

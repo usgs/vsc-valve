@@ -4,60 +4,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Keeps URL to generated result
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2005/08/26 20:41:31  dcervelli
- * Initial avosouth commit.
+ * Keeps URL to generated result.
  *
  * @author Dan Cervelli
  */
-abstract public class Result
-{
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	protected String url;
-	
-	/**
-	 * @return URL to generated result
-	 */
-	public String getURL()
-	{
-		return url;
-	}
-	
-	/**
-	 * Setter for URL
-	 * @param u to set
-	 */
-	public void setURL(String u)
-	{
-		url = u;
-	}
-	
-	/**
-	 * Deletes generated result
-	 */
-	public void delete()
-	{
-		logger.debug("Result.delete()");
-	}
-	
-	/**
-	 * Yield XML representation
-	 * @param type result type
-	 * @param nested String with xml representation of result's content
-	 * @return String with xml representation of generated result
-	 */
-	public String toXML(String type, String nested)
-	{
-		StringBuffer sb = new StringBuffer();
-		sb.append("<valve3result>\n");
-		sb.append("\t<type>" + type + "</type>\n");
-		//sb.append("\t<url>" + url + "</url>\n");
-		sb.append(nested + "\n");
-		sb.append("</valve3result>\n");
-		return sb.toString();
-	}
-	
-	abstract public String toXML();
+public abstract class Result {
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected String url;
+
+  /**
+   * Get URL.
+   * @return URL to generated result.
+   */
+  public String getUrl() {
+    return url;
+  }
+
+  /**
+   * Setter for URL.
+   *
+   * @param u to set
+   */
+  public void setUrl(String u) {
+    url = u;
+  }
+
+  /**
+   * Deletes generated result.
+   */
+  public void delete() {
+    logger.debug("Result.delete()");
+  }
+
+  /**
+   * Yield XML representation.
+   *
+   * @param type   result type
+   * @param nested String with xml representation of result's content
+   * @return String with xml representation of generated result
+   */
+  public String toXml(String type, String nested) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<valve3result>\n");
+    sb.append("\t<type>" + type + "</type>\n");
+    //sb.append("\t<url>" + url + "</url>\n");
+    sb.append(nested + "\n");
+    sb.append("</valve3result>\n");
+    return sb.toString();
+  }
+
+  public abstract String toXml();
 }

@@ -3,11 +3,9 @@ package gov.usgs.volcanoes.valve3.plotter;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 
-import gov.usgs.volcanoes.core.math.Butterworth;
-import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
 import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabel;
 import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
@@ -16,9 +14,11 @@ import gov.usgs.volcanoes.core.legacy.plot.render.EllipseVectorRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.Renderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.core.math.proj.GeoRange;
 import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
-import gov.usgs.volcanoes.core.legacy.util.Pool;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.core.util.UtilException;
@@ -46,9 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO: check map sizes against client max height.
- *
  * Generate images of coordinate time series and velocity maps from vdx source
+ * TODO: check map sizes against client max height.
  *
  * @author Dan Cervelli
  * @author Loren Antolik

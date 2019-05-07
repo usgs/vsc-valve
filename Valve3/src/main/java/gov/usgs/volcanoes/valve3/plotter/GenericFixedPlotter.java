@@ -1,14 +1,13 @@
 package gov.usgs.volcanoes.valve3.plotter;
 
-import gov.usgs.volcanoes.core.math.Butterworth;
-import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.data.GenericDataMatrix;
 import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.util.Pool;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.valve3.PlotComponent;
 import gov.usgs.volcanoes.valve3.Plotter;
 import gov.usgs.volcanoes.valve3.Valve3;
@@ -23,6 +22,7 @@ import gov.usgs.volcanoes.vdx.data.Rank;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Generate images for generic data plot to files.
@@ -61,7 +61,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
     accumulateCols = new boolean[columnsCount];
 
     leftLines = 0;
-    axisMap = new LinkedHashMap<Integer, String>();
+    axisMap = new LinkedHashMap<>();
 
     validateDataManipOpts(comp);
 
@@ -117,12 +117,11 @@ public class GenericFixedPlotter extends RawDataPlotter {
     // initialize variables
     boolean exceptionThrown = false;
     String exceptionMsg = "";
-    VDXClient client = null;
-    channelDataMap = new LinkedHashMap<Integer, GenericDataMatrix>();
+    channelDataMap = new LinkedHashMap<>();
     String[] channels = ch.split(",");
 
     // create a map of all the input parameters
-    Map<String, String> params = new LinkedHashMap<String, String>();
+    Map<String, String> params = new LinkedHashMap<>();
     params.put("source", vdxSource);
     params.put("action", "data");
     params.put("st", Double.toString(startTime));
@@ -131,22 +130,16 @@ public class GenericFixedPlotter extends RawDataPlotter {
     addDownsamplingInfo(params);
 
     // checkout a connection to the database
-    Pool<VDXClient> pool = null;
-    pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
+    Pool<VDXClient> pool = Valve3.getInstance().getDataHandler().getVDXClient(vdxClient);
     if (pool != null) {
-      client = pool.checkout();
+      VDXClient client = pool.checkout();
 
       // iterate through each of the selected channels and place the data in the map
       for (String channel : channels) {
         params.put("ch", channel);
-        GenericDataMatrix data = null;
+        GenericDataMatrix data;
         try {
           data = (GenericDataMatrix) client.getBinaryData(params);
-        } catch (UtilException e) {
-          exceptionThrown = true;
-          exceptionMsg = e.getMessage();
-          logger.debug(exceptionMsg);
-          break;
         } catch (Exception e) {
           exceptionThrown = true;
           exceptionMsg = e.getMessage();
@@ -181,7 +174,7 @@ public class GenericFixedPlotter extends RawDataPlotter {
    * @param v3p Valve3Plot
    * @param comp PlotComponent
    */
-  public void plotData(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
+  private void plotData(Valve3Plot v3p, PlotComponent comp, Rank rank) throws Valve3Exception {
 
     // setup the legend for the rank
     String rankLegend = rank.getName();
@@ -205,11 +198,11 @@ public class GenericFixedPlotter extends RawDataPlotter {
     int currentComp = 1;
     int compBoxHeight = comp.getBoxHeight();
 
-    for (int cid : channelDataMap.keySet()) {
+    for (Entry<Integer, GenericDataMatrix> entry : channelDataMap.entrySet()) {
 
       // get the relevant information for this channel
-      Channel channel = channelsMap.get(cid);
-      GenericDataMatrix gdm = channelDataMap.get(cid);
+      Channel channel = channelsMap.get(entry.getKey());
+      GenericDataMatrix gdm = entry.getValue();
 
       // if there is no data for this channel, then resize the plot window
       if (gdm == null || gdm.rows() == 0) {
@@ -313,8 +306,17 @@ public class GenericFixedPlotter extends RawDataPlotter {
       } else {
         // set up the legend
         for (int i = 0; i < legendsCols.length; i++) {
-          channelLegendsCols[i] = String
-              .format("%s %s %s", channel.getCode(), rankLegend, legendsCols[i]);
+          if (useChNames) {
+            channelLegendsCols[i] = String.format("%s %s %s",
+                                                  channel.getName(),
+                                                  rankLegend,
+                                                  legendsCols[i]);
+          } else {
+            channelLegendsCols[i] = String.format("%s %s %s",
+                                                  channel.getCode(),
+                                                  rankLegend,
+                                                  legendsCols[i]);
+          }
         }
 
         // create an individual matrix renderer for each component selected

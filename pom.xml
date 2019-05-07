@@ -3,7 +3,7 @@
 
   <groupId>gov.usgs.volcanoes</groupId>
   <artifactId>valve</artifactId>
-  <version>3.6.2</version>
+  <version>3.7.0</version>
   <packaging>pom</packaging>
 
   <name>valve</name>
