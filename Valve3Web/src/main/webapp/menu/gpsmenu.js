@@ -107,10 +107,10 @@ create_gpsmenu = function(menu) {
         return false;
       }
 
-      // pc.displacementBeforeStartTime  = bpst;
-      // pc.displacementBeforeEndTime  = bpet;
-      // pc.displacementAfterStartTime  = apst;
-      // pc.displacementAfterEndTime    = apet;
+      pc.displacementBeforeStartTime = bpst;
+      pc.displacementBeforeEndTime = bpet;
+      pc.displacementAfterStartTime = apst;
+      pc.displacementAfterEndTime = apet;
     }
 
     // call the main presubmit function
