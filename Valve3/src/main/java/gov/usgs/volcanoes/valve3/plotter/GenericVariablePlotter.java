@@ -165,7 +165,7 @@ public class GenericVariablePlotter extends RawDataPlotter {
       }
 
       // if data was collected
-      if (data != null || data.rows() > 0) {
+      if (data != null && data.rows() > 0) {
         data.adjustTime(timeOffset);
       }
 
