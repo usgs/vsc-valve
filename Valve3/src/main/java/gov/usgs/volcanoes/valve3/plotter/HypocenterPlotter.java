@@ -269,14 +269,14 @@ public class HypocenterPlotter extends RawDataPlotter {
       throw new Valve3Exception("Illegal depth filter.");
     }
 
-    minNPhases = StringUtils.stringToInt(comp.get("minNPhases"), Integer.MIN_VALUE);
-    maxNPhases = StringUtils.stringToInt(comp.get("maxNPhases"), Integer.MAX_VALUE);
+    minNPhases = StringUtils.stringToInt(comp.get("minNPhases"), 4);
+    maxNPhases = StringUtils.stringToInt(comp.get("maxNPhases"), 500);
     if (minNPhases > maxNPhases) {
       throw new Valve3Exception("Illegal nphases filter.");
     }
 
     minRms = StringUtils.stringToDouble(comp.get("minRMS"), -Double.MAX_VALUE);
-    maxRms = StringUtils.stringToDouble(comp.get("maxRMS"), Double.MAX_VALUE);
+    maxRms = StringUtils.stringToDouble(comp.get("maxRMS"), 2.0);
     if (minRms > maxRms) {
       throw new Valve3Exception("Illegal RMS filter.");
     }
