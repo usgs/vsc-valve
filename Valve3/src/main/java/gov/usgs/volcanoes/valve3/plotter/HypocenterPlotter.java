@@ -490,7 +490,11 @@ public class HypocenterPlotter extends RawDataPlotter {
     MapRenderer mr = new MapRenderer(range, proj);
     mr.setLocationByMaxBounds(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(),
         comp.getBoxMapHeight());
-    v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 190);
+    if (isDrawLegend) {
+      v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 190);
+    } else {
+      v3p.getPlot().setSize(v3p.getPlot().getWidth(), mr.getGraphHeight() + 60);
+    }
 
     GeoLabelSet labels = Valve3.getInstance().getGeoLabelSet();
     labels = labels.getSubset(range);
@@ -534,7 +538,11 @@ public class HypocenterPlotter extends RawDataPlotter {
     List<Hypocenter> myhypos;
     BasicFrameRenderer base = new InvertedFrameRenderer();
     base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxHeight() - 16);
-    v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight() + 115);
+    if (isDrawLegend) {
+      v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight() + 115);
+    } else {
+      v3p.getPlot().setSize(v3p.getPlot().getWidth(), v3p.getPlot().getHeight());
+    }
 
     switch (axesOption) {
 
@@ -645,7 +653,11 @@ public class HypocenterPlotter extends RawDataPlotter {
         // need to set the extents for along the line. km offset?
         base = new ArbDepthFrameRenderer();
         base.setLocation(comp.getBoxX(), comp.getBoxY(), comp.getBoxWidth(), comp.getBoxWidth());
-        v3p.getPlot().setSize(v3p.getPlot().getWidth(), base.getGraphHeight() + 190);
+        if (isDrawLegend) {
+          v3p.getPlot().setSize(v3p.getPlot().getWidth(), base.getGraphHeight() + 190);
+        } else {
+          v3p.getPlot().setSize(v3p.getPlot().getWidth(), base.getGraphHeight() + 60);
+        }
 
         lat1 = startLoc.getY();
         lon1 = startLoc.getX();
@@ -754,7 +766,7 @@ public class HypocenterPlotter extends RawDataPlotter {
       if (colorOption == ColorOption.TIME) {
         hr.setColorTime(startTime + timeOffset, endTime + timeOffset);
       }
-      if (labelX) {
+      if (isDrawLegend) {
         hr.createColorScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 + 150,
             base.getGraphY() + base.getGraphHeight() + 150);
         hr.createMagnitudeScaleRenderer(base.getGraphX() + base.getGraphWidth() / 2 - 150,
@@ -1000,15 +1012,9 @@ public class HypocenterPlotter extends RawDataPlotter {
       top.append(J2kSec.toDateString(hypos.getHypocenters().get(0).j2ksec));
     } else {
       top.append(" earthquakes between ");
-      if (hypos.size() == 0) {
-        top.append(J2kSec.toDateString(startTime + timeOffset));
-        top.append(" and ");
-        top.append(J2kSec.toDateString(endTime + timeOffset));
-      } else if (hypos.size() > 1) {
-        top.append(J2kSec.toDateString(hypos.getHypocenters().get(0).j2ksec));
-        top.append(" and ");
-        top.append(J2kSec.toDateString(hypos.getHypocenters().get(hypos.size() - 1).j2ksec));
-      }
+      top.append(J2kSec.toDateString(startTime + timeOffset));
+      top.append(" and ");
+      top.append(J2kSec.toDateString(endTime + timeOffset));
     }
     top.append(" " + timeZoneID + " Time");
     if (density) {

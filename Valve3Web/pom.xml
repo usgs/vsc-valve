@@ -5,7 +5,7 @@
   <parent>
     <groupId>gov.usgs.volcanoes</groupId>
     <artifactId>valve</artifactId>
-    <version>3.7.2</version>
+    <version>3.7.3</version>
   </parent>
   <artifactId>valve3web</artifactId>
   <packaging>war</packaging>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>gov.usgs.volcanoes</groupId>
       <artifactId>valve3</artifactId>
-      <version>3.7.2</version>
+      <version>3.7.3</version>
       <exclusions>
         <exclusion>
           <groupId>colt</groupId>
