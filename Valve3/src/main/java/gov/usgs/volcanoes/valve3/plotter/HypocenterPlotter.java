@@ -636,7 +636,7 @@ public class HypocenterPlotter extends RawDataPlotter {
             count++;
           }
         }
-        subCount = new String(count + " of ");
+        subCount = String.format("%d of ", count);
 
         break;
 
@@ -683,7 +683,7 @@ public class HypocenterPlotter extends RawDataPlotter {
             count++;
           }
         }
-        subCount = new String(count + " of ");
+        subCount = String.format("%d of ", count);
 
         break;
       default:
@@ -992,7 +992,7 @@ public class HypocenterPlotter extends RawDataPlotter {
   private String getTopLabel(Rank rank) {
 
     StringBuilder top = new StringBuilder(100);
-    top.append(hypos.size() + " " + rank.getName());
+    top.append(hypos.size()).append(" ").append(rank.getName());
 
     // data coming from the hypocenters list have already been adjusted for the time offset
     if (hypos.size() == 1) {
